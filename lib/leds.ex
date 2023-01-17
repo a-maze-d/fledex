@@ -1,9 +1,53 @@
 defmodule Leds do
-  defstruct count: 0, leds: %{}
 
+  @enforce_keys [:count, :leds, :opts]
+  defstruct count: 0, leds: %{}, opts: nil, meta: %{index: 1} #, fill: :none
+  # @doc """
+  #   Implementing the Enumerable protocol, so that we can keep a very compact
+  #   version of the led definition and still iterate over all leds as if they
+  #   were defined. We simply define them on the fly
+  # """
+  # defimpl Enumerable, for: Leds do
+  #   def reduce(_enumerable, {:halt, acc}, _fun), do: {:halted, acc} end
+  #   def reduce(enumerable, {:suspend, acc}, fun), do: {:suspended, acc, &reduce(enumerable, &1, fun)} end
+  #   def reduce(%Leds{count: count, leds: %{}}, {:cont, acc}, _fun), do: {:done, acc} end
+  #   def reduce(enumerable, {:cont, acc}, _fun), do: reduce({}, {:done, acc} end
+
+  #   defp reduce(%Leds{count: count, leds: leds}, index, {:cont, acc}, fun) do
+  #     reduce(leds, index+1, {:cont, acc}, fun.(elem, acc), fun)
+  #   end
+  #   def count(%Leds{count: count}), do: {:ok, count} end
+  #   def member?(enumerable, element), do: {:error, __MODULE__} end
+  #   def slice(enumerable), do: {:error, __MODULE__} end
+  # end
+
+  def new() do
+    new(0)
+  end
+  def new(count) do
+    new(count, nil)
+  end
+  def new(count, opts) do
+    new(count, %{}, opts)
+  end
+  def new(count, leds, opts) do
+    new(count, leds, opts, %{index: 1})
+  end
+  def new(count, leds, opts, meta) do
+    %Leds{count: count, leds: leds, opts: opts, meta: meta}
+  end
+  def light(leds, rgb) do
+    do_update(leds, rgb)
+  end
+  def light(leds, led, offset) do
+    do_update(leds, led, offset)
+  end
   @doc """
   :offset is 1 indexed. Offset needs to be >0 if it's bigger than the :count then the led will be istored, but gnored
   """
+  def update(leds, led) do
+    do_update(leds, led)
+  end
   def update(leds, led, offset) when offset > 0 do
     do_update(leds,led,offset)
   end
@@ -12,19 +56,36 @@ defmodule Leds do
   end
   # iex(61)> Enum.slide(vals, 0..rem(o-1 + Enum.count(vals),Enum.count(vals)), Enum.count(vals))
   # [1, 2, 3, 4, 5, 6, 7, 8, 9]
-  defp do_update(%Leds{count: count, leds: leds}, rgb, offset) when is_integer(rgb) do
-    %Leds{count: count, leds: Map.put(leds, offset, rgb)}
+  defp do_update(%Leds{meta: meta} = leds, rgb) when is_integer(rgb) do
+    index = meta[:index]  || 1
+    do_update(leds, rgb, index)
   end
-  defp do_update(%Leds{count: count, leds: leds}, %Leds{leds: new_leds}, offset) do
+  defp do_update(%Leds{count: count, leds: leds, opts: opts, meta: meta}, rgb, offset) when is_integer(rgb) do
+    Leds.new(count, Map.put(leds, offset, rgb), opts, %{meta | index: offset+1})
+  end
+  defp do_update(%Leds{count: count1, leds: leds1, opts: opts1, meta: meta1}, %Leds{count: count2, leds: leds2}, offset) do
     # remap the indicies (1 indexed)
-    remapped_new_leds = Map.new(Enum.map(new_leds, fn {key, value} ->
+    remapped_new_leds = Map.new(Enum.map(leds2, fn {key, value} ->
       index = offset + key - 1
       {index, value}
     end))
-    leds = Map.merge(leds, remapped_new_leds)
-    %Leds{count: count, leds: leds}
+    leds = Map.merge(leds1, remapped_new_leds)
+    Leds.new(count1, leds, opts1, %{meta1 | index: offset+count2})
   end
-  defp do_update(_leds, _led, _offset) do
-    raise ArgumentError, message: "unknown data "
+  defp do_update(leds, led, offset) do
+    raise ArgumentError, message: "unknown data #{inspect leds}, #{inspect led}, #{inspect offset}"
   end
+
+  def to_binary(%Leds{count: count, leds: leds, opts: _opts, meta: _meta}) do
+    Enum.reduce(1..count, <<>>, fn index, acc ->
+      acc <> get_light(leds, index)
+    end)
+  end
+  defp get_light(leds, index) do
+    case Map.fetch(leds, index) do
+      {:ok, value} -> <<value>>
+      _ -> <<0>>
+    end
+  end
+
 end
