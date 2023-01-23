@@ -86,10 +86,18 @@ defmodule LedsDriver do
   end
 
   def transfer_data(state) do
-    state.namespaces
-      |> merge_namespaces()
-      |> to_binary()
-      |> send_to_strip(state)
+    # state = :telemetry.span(
+    #   [:transfer_data],
+    #   %{timer_counter: state.timer.counter},
+    #   fn ->
+        state = state.namespaces
+          |> merge_namespaces()
+          |> to_binary()
+          |> send_to_strip(state)
+    #       {state, %{metadata: "done"}}
+    #   end
+    # )
+    state
   end
 
   defp avg_and_combine({r,g,b}, count) do
@@ -99,21 +107,40 @@ defmodule LedsDriver do
     (r<<<16) + (g<<<8) + b
   end
 
-  defp merge_namespaces([]), do: []
-  defp merge_namespaces(namespaces) do
+  def merge_namespaces(namespaces) do
     namespaces
-      |> Enum.reduce([], fn {_key, value}, acc -> acc ++ value end)
-      |> Enum.zip_with(fn elems ->
-        count = length(elems)
-        Enum.map(elems, fn elem ->
-          r = elem &&& 0xFF0000 >>> 16
-          g = elem &&& 0x00FF00 >>> 8
-          b = elem &&& 0x0000FF
-          {r, g, b}
-        end)
-        |> Enum.reduce({0,0,0}, fn {r,g,b}, {accr, accg, accb} -> {r+accr, g+accg, b+accb} end)
-        |> avg_and_combine(count)
-      end)
+      |> get_leds()
+      |> merge_leds()
+  end
+
+  def get_leds(namespaces) do
+    Enum.reduce(namespaces, [], fn {_key, value}, acc ->
+      acc ++ [value]
+    end)
+  end
+  def merge_leds(leds) do
+    Enum.zip_with(leds, fn elems ->
+        merge_pixels(elems)
+    end)
+  end
+
+  def merge_pixels(elems) do
+    count = length(elems)
+    Enum.map(elems, fn elem -> split_into_subpixels(elem) end)
+    |> combine_subpixels()
+    |> avg_and_combine(count)
+  end
+  def split_into_subpixels(elem) do
+      r = elem |> Bitwise.&&&(0xFF0000) |> Bitwise.>>>(16)
+      g = elem |> Bitwise.&&&(0x00FF00) |> Bitwise.>>>(8)
+      b = elem |> Bitwise.&&&(0x0000FF)
+      {r, g, b}
+  end
+
+  def combine_subpixels(elems) do
+    Enum.reduce(elems, {0,0,0}, fn {r,g,b}, {accr, accg, accb} ->
+      {r+accr, g+accg, b+accb}
+    end)
   end
 
   defp to_binary(leds) do
