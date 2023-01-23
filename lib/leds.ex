@@ -76,15 +76,15 @@ defmodule Leds do
     raise ArgumentError, message: "unknown data #{inspect leds}, #{inspect led}, #{inspect offset}"
   end
 
-  def to_binary(%Leds{count: count, leds: leds, opts: _opts, meta: _meta}) do
+  def to_binary(%Leds{count: count, leds: _leds, opts: _opts, meta: _meta}=leds) do
     Enum.reduce(1..count, <<>>, fn index, acc ->
-      acc <> get_light(leds, index)
+      acc <> <<get_light(leds, index)>>
     end)
   end
-  defp get_light(leds, index) do
+  def get_light(%Leds{leds: leds} = _leds, index) do
     case Map.fetch(leds, index) do
-      {:ok, value} -> <<value>>
-      _ -> <<0>>
+      {:ok, value} -> value
+      _ -> 0
     end
   end
 

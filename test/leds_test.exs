@@ -24,9 +24,9 @@ defmodule LedsTest do
       |> Leds.light(0x00FF00)
       |> Leds.light(0x0000FF)
 
-    assert Map.fetch(leds.leds, 1) == {:ok, 0xFF0000}
-    assert Map.fetch(leds.leds, 2) == {:ok, 0x00FF00}
-    assert Map.fetch(leds.leds, 3) == {:ok, 0x0000FF}
+    assert Leds.get_light(leds, 1) == 0xFF0000
+    assert Leds.get_light(leds, 2) == 0x00FF00
+    assert Leds.get_light(leds, 3) == 0x0000FF
   end
 
   test "setting leds in non-sequence" do
@@ -35,8 +35,8 @@ defmodule LedsTest do
       |> Leds.light(0xFF0000, offset)
       |> Leds.light(0x00FF00)
 
-    assert Map.fetch(leds.leds, offset) == {:ok, 0xFF0000}
-    assert Map.fetch(leds.leds, offset+1) == {:ok, 0x00FF00}
+    assert Leds.get_light(leds, offset)   == 0xFF0000
+    assert Leds.get_light(leds, offset+1) == 0x00FF00
   end
 
   test "setting several leds and updating first one" do
@@ -46,8 +46,8 @@ defmodule LedsTest do
       |> Leds.light(0x00FF00)
       |> Leds.light(0x0000FF, offset)
 
-    assert Map.fetch(leds.leds, offset) == {:ok, 0x0000FF}
-    assert Map.fetch(leds.leds, offset+1) == {:ok, 0x00FF00}
+    assert Leds.get_light(leds, offset)   == 0x0000FF
+    assert Leds.get_light(leds, offset+1) == 0x00FF00
     assert map_size(leds.leds) == 2
   end
 
@@ -67,10 +67,10 @@ defmodule LedsTest do
     leds_all = Leds.new(100)
       |> Leds.light(leds_some, offset)
 
-    assert Map.fetch(leds_all.leds, offset) == {:ok, 0x00FF00}
-    assert Map.fetch(leds_all.leds, offset+1) == {:ok, 0x0000FF}
-    assert Map.fetch(leds_all.leds, offset+10) == {:ok, 0x00FF00}
-    assert Map.fetch(leds_all.leds, offset+11) == {:ok, 0x0000FF}
+    assert Leds.get_light(leds_all, offset)    == 0x00FF00
+    assert Leds.get_light(leds_all, offset+1)  == 0x0000FF
+    assert Leds.get_light(leds_all, offset+10) == 0x00FF00
+    assert Leds.get_light(leds_all, offset+11) == 0x0000FF
   end
 
   test "embedding leds with overlap" do
@@ -89,10 +89,11 @@ defmodule LedsTest do
       |> Leds.light(0xFF0000, offset+1) # this led will be overwritten with 0x0000FF
       |> Leds.light(leds_some, offset)
 
-    assert Map.fetch(leds_all.leds, offset) == {:ok, 0x00FF00}
-    assert Map.fetch(leds_all.leds, offset+1) == {:ok, 0x0000FF}
-    assert Map.fetch(leds_all.leds, offset+10) == {:ok, 0x00FF00}
-    assert Map.fetch(leds_all.leds, offset+11) == {:ok, 0x0000FF}
+
+    assert Leds.get_light(leds_all, offset)    == 0x00FF00
+    assert Leds.get_light(leds_all, offset+1)  == 0x0000FF
+    assert Leds.get_light(leds_all, offset+10) == 0x00FF00
+    assert Leds.get_light(leds_all, offset+11) == 0x0000FF
   end
 
   test "get binary with led values" do
@@ -109,4 +110,12 @@ defmodule LedsTest do
 
     assert Leds.to_binary(leds) == <<0x00F00, 0x0000FF, 0, 0x00FF00, 0x0000FF>>
   end
+
+
+# loop
+#   Leds.new(10)
+#     |> Leds.light 0xFF0000
+#     |> Leds.light 0x00FF00
+#     |> send()
+
 end
