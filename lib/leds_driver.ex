@@ -12,6 +12,9 @@ defmodule LedsDriver do
   def define_leds(leds_name, server_name \\ :default) do
     GenServer.call(server_name, {:define_leds, leds_name})
   end
+  def set_leds(leds_name, leds, server_name \\ :default) do
+    GenServer.call(server_name, {:set_leds, leds, leds_name})
+  end
 
   # server code
   @impl true
@@ -100,7 +103,7 @@ defmodule LedsDriver do
     state
   end
 
-  defp avg_and_combine({r,g,b}, count) do
+  def avg_and_combine({r,g,b}, count) do
     r = Kernel.trunc(r/count)
     g = Kernel.trunc(g/count)
     b = Kernel.trunc(b/count)
@@ -126,10 +129,12 @@ defmodule LedsDriver do
 
   def merge_pixels(elems) do
     count = length(elems)
-    Enum.map(elems, fn elem -> split_into_subpixels(elem) end)
-    |> combine_subpixels()
+    elems
+    |> Enum.map(fn elem -> split_into_subpixels(elem) end)
+    |> add_subpixels()
     |> avg_and_combine(count)
   end
+
   def split_into_subpixels(elem) do
       r = elem |> Bitwise.&&&(0xFF0000) |> Bitwise.>>>(16)
       g = elem |> Bitwise.&&&(0x00FF00) |> Bitwise.>>>(8)
@@ -137,7 +142,7 @@ defmodule LedsDriver do
       {r, g, b}
   end
 
-  def combine_subpixels(elems) do
+  def add_subpixels(elems) do
     Enum.reduce(elems, {0,0,0}, fn {r,g,b}, {accr, accg, accb} ->
       {r+accr, g+accg, b+accb}
     end)
@@ -157,6 +162,6 @@ defmodule LedsDriver do
   end
 
   defp set_leds_in_namespace(namespaces, name, leds) do
-    Map.put(namespaces, name, [leds])
+    Map.put(namespaces, name, leds)
   end
 end
