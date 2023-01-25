@@ -31,8 +31,9 @@ if Mix.env == :prod do
       ref
     end
     @impl true
-    def transfer(binary, state) do
+    def transfer(leds, state) do
       ref = state.led_strip.ref
+      binary = Enum.reduce(leds, <<>>, fn led, acc -> acc <> <<led>> end)
       {:ok, _} = Circuits.SPI.transfer(ref, binary)
       state
     end

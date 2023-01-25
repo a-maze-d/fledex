@@ -1,5 +1,7 @@
 defmodule LedStripDrivers.LoggerDriver do
   @behaviour LedStripDriver
+  @divisor 255/5
+  @block <<"\u2588">>
 
   @moduledoc """
     This is a dummy implementation of the LedStripDriver that dumps
@@ -21,9 +23,17 @@ require Logger
   end
 
   @impl true
-  def transfer(binary, state) do
-    Logger.debug(binary)
+  def transfer(leds, state) do
+    output = Enum.reduce(leds, <<>>, fn value, acc ->
+      acc <> to_ansi_color(value) <> @block
+    end)
+    IO.puts(output <> "\r")
     state
+  end
+
+  defp to_ansi_color(value) do
+    {r,g,b} = LedsDriver.split_into_subpixels(value)
+    IO.ANSI.color(trunc(r/@divisor), trunc(g/@divisor), trunc(b/@divisor))
   end
 
   @impl true

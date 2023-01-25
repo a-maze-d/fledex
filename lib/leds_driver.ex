@@ -1,6 +1,7 @@
 defmodule LedsDriver do
   @behaviour GenServer
   import Bitwise
+  require Logger
 
   @default_update_timeout 50
 
@@ -12,8 +13,11 @@ defmodule LedsDriver do
   def define_leds(leds_name, server_name \\ :default) do
     GenServer.call(server_name, {:define_leds, leds_name})
   end
+  def drop_leds(leds_name, server_name \\ :default) do
+    GenServer.call(server_name, {:drop_leds, leds_name})
+  end
   def set_leds(leds_name, leds, server_name \\ :default) do
-    GenServer.call(server_name, {:set_leds, leds, leds_name})
+    GenServer.call(server_name, {:set_leds, leds_name, leds})
   end
 
   # server code
@@ -36,7 +40,8 @@ defmodule LedsDriver do
       },
       led_strip: %{
         driver_module: init_args[:led_strip][:driver_module] || LedStripDrivers.LoggerDriver
-      }
+      },
+      namespaces: %{}
     }
     init_led_strip_driver(init_args, state)
   end
@@ -53,7 +58,7 @@ defmodule LedsDriver do
 
   defp start_timer(state) do
     update_timeout = state[:timer][:update_timeout]
-    update_func = state[:timer][:func]
+    update_func = state[:timer][:update_func]
 
     ref = Process.send_after(self(), {:update_timeout, update_func}, update_timeout)
     state = update_in(state, [:timer, :ref], fn (_current_ref) -> ref end )
@@ -70,9 +75,14 @@ defmodule LedsDriver do
   end
 
   @impl true
-  def handle_call({:set_leds, leds, name}, _from, %{namespaces: namespaces} = state) do
+  def handle_call({:drop_leds, name}, _from, %{namespaces: namespaces} = state) do
+    {:reply, :ok, %{state | namespaces: Map.drop(namespaces, [name])}}
+  end
+
+  @impl true
+  def handle_call({:set_leds, name, leds}, _from, %{namespaces: namespaces} = state) do
     case Map.has_key?(namespaces, name) do
-      true ->  {:reply, :ok, %{state | namespace: set_leds_in_namespace(namespaces, name, leds)}}
+      true ->  {:reply, :ok, %{state | namespaces: set_leds_in_namespace(namespaces, name, leds)}}
       false -> {:reply, {:error, "no such namespace, you need to define one first with :define_leds"}, state}
     end
   end
@@ -83,6 +93,7 @@ defmodule LedsDriver do
     state = update_in(state, [:timer, :counter], &(&1+1))
     state = start_timer(state)
 
+    # Logger.info "calling #{inspect func}"
     func.(state)
 
     {:noreply, state}
@@ -95,7 +106,6 @@ defmodule LedsDriver do
     #   fn ->
         state = state.namespaces
           |> merge_namespaces()
-          |> to_binary()
           |> send_to_strip(state)
     #       {state, %{metadata: "done"}}
     #   end
@@ -148,13 +158,9 @@ defmodule LedsDriver do
     end)
   end
 
-  defp to_binary(leds) do
-    Enum.reduce(leds, <<>>, fn led, acc -> acc <> <<led>> end)
-  end
-
-  defp send_to_strip(binary, state) do
+  defp send_to_strip(leds, state) do
     module = state.led_strip.driver_module
-    module.transfer(binary, state)
+    module.transfer(leds, state)
   end
 
   defp add_namespace(namespaces, name) do

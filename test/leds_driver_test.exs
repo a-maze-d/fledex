@@ -28,7 +28,7 @@ defmodule LedDriverTest do
     end
 
     test "start server" do
-      assert {:ok, _} = LedsDriver.start_link(%{timer: %{disable: true}})
+      assert match?({:ok, _}, LedsDriver.start_link(%{timer: %{disable: true}}))
     end
   end
 
@@ -120,18 +120,50 @@ defmodule LedDriverTest do
       }
       state = LedsDriver.init_led_strip_driver(%{}, state)
 
-      {result, log} = with_log(fn -> LedsDriver.transfer_data(state) end)
-
-      assert result == state
-      assert log =~ <<0x7F7F00, 0x007F7F, 0x7F007F, 0x007F7F, 0x7F7F00, 0x7F007F>>
+      assert LedsDriver.transfer_data(state) == state
     end
   end
   describe "test client API" do
-    test "define_leds" do
+    test "define leds first set" do
+      {:ok, state} = LedsDriver.init(%{})
+      name = :john
+      response = LedsDriver.handle_call({:define_leds, name}, self(), state)
+      assert match?({:reply, {:ok, name},_}, response)
+      {_, _, state} = response
+      assert map_size(state.namespaces) == 1
+      assert Map.keys(state.namespaces) == [:john]
+    end
+    test "define_leds second name" do
+      {:ok, state} = LedsDriver.init(%{})
+      name = :john
+      {_, _, state} = LedsDriver.handle_call({:define_leds, name}, self(), state)
+      name2 = :jane
+      response2 = LedsDriver.handle_call({:define_leds, name2}, self(), state)
+      assert match?({:reply, {:ok, name}, _}, response2)
+      {_, _, state2} = response2
+      assert map_size(state2.namespaces) == 2
+      assert Map.keys(state2.namespaces) |> Enum.sort() == [:john, :jane] |> Enum.sort()
+    end
+    test "test drop_leds" do
+      {:ok, state} = LedsDriver.init(%{})
+      name = :john
+      {_, _, state} = LedsDriver.handle_call({:define_leds, name}, self(), state)
+      name2 = :jane
+      {_, _, state} = LedsDriver.handle_call({:define_leds, name2}, self(), state)
 
+      {_, _, state} = LedsDriver.handle_call({:drop_leds, name}, self(), state)
+      assert Map.keys(state.namespaces) == [:jane]
     end
     test "test set_leds" do
+      {:ok, state} = LedsDriver.init(%{})
+      name = :john
+      leds = [0xFF0000, 0x00FF00, 0x0000FF, 0x00FF00, 0xFF0000, 0x0000FF]
+      {_, _, state} = LedsDriver.handle_call({:define_leds, name}, self(), state)
 
+      {_, _, state} = LedsDriver.handle_call({:set_leds, name, leds}, self(), state)
+      assert state.namespaces == %{
+        john: [0xFF0000, 0x00FF00, 0x0000FF, 0x00FF00, 0xFF0000, 0x0000FF]
+      }
     end
   end
 end
