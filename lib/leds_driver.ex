@@ -6,17 +6,17 @@ defmodule LedsDriver do
   @default_update_timeout 50
 
   #client code
-  def start_link(init_arg, server_name \\ :default) do
+  def start_link(init_arg, server_name \\ __MODULE__) do
     GenServer.start_link(__MODULE__, init_arg, name: server_name)
   end
 
-  def define_leds(leds_name, server_name \\ :default) do
+  def define_leds(leds_name, server_name \\ __MODULE__) do
     GenServer.call(server_name, {:define_leds, leds_name})
   end
-  def drop_leds(leds_name, server_name \\ :default) do
+  def drop_leds(leds_name, server_name \\ __MODULE__) do
     GenServer.call(server_name, {:drop_leds, leds_name})
   end
-  def set_leds(leds_name, leds, server_name \\ :default) do
+  def set_leds(leds_name, leds, server_name \\ __MODULE__) do
     GenServer.call(server_name, {:set_leds, leds_name, leds})
   end
 
@@ -30,12 +30,19 @@ defmodule LedsDriver do
   end
 
   def init_state(init_args) do
+    only_dirty_update = if init_args[:timer][:only_dirty_update] == nil do
+      false
+    else
+       init_args[:timer][:only_dirty_update]
+    end
     state = %{
       timer: %{
         disabled: init_args[:timer][:disabled] || false,
         counter: init_args[:timer][:counter] || 0,
         update_timeout: init_args[:timer][:update_timeout] || @default_update_timeout,
         update_func: init_args[:timer][:update_func] || &transfer_data/1,
+        only_dirty_update: only_dirty_update,
+        is_dirty: false,
         ref: nil
       },
       led_strip: %{
@@ -51,7 +58,8 @@ defmodule LedsDriver do
     module.init(init_args, state)
   end
 
-  def termination(reason, state) do
+  @impl true
+  def terminate(reason, state) do
     module = state.led_strip.driver_module
     module.terminate(reason, state)
   end
@@ -68,6 +76,7 @@ defmodule LedsDriver do
 
   @impl true
   def handle_call({:define_leds, name}, _from, %{namespaces: namespaces} = state) do
+    state = put_in(state, [:timer, :is_dirty], true)
     case Map.has_key?(namespaces, name) do
       false ->  {:reply, {:ok, name}, %{state | namespaces: add_namespace(namespaces, name)}}
       true -> {:reply, {:error, "namespace already exists"}, state}
@@ -76,11 +85,13 @@ defmodule LedsDriver do
 
   @impl true
   def handle_call({:drop_leds, name}, _from, %{namespaces: namespaces} = state) do
+    state = put_in(state, [:timer, :is_dirty], true)
     {:reply, :ok, %{state | namespaces: Map.drop(namespaces, [name])}}
   end
 
   @impl true
   def handle_call({:set_leds, name, leds}, _from, %{namespaces: namespaces} = state) do
+    state = put_in(state, [:timer, :is_dirty], true)
     case Map.has_key?(namespaces, name) do
       true ->  {:reply, :ok, %{state | namespaces: set_leds_in_namespace(namespaces, name, leds)}}
       false -> {:reply, {:error, "no such namespace, you need to define one first with :define_leds"}, state}
@@ -94,11 +105,15 @@ defmodule LedsDriver do
     state = start_timer(state)
 
     # Logger.info "calling #{inspect func}"
-    func.(state)
+    state = func.(state)
 
     {:noreply, state}
   end
 
+  def transfer_data(%{timer: %{is_dirty: is_dirty, only_dirty_updates: only_dirty_updates}} = state) when only_dirty_updates == true and is_dirty == false do
+    # we shortcut if there is nothing to update and if we are allowed to shortcut
+    state
+  end
   def transfer_data(state) do
     # state = :telemetry.span(
     #   [:transfer_data],
@@ -107,6 +122,7 @@ defmodule LedsDriver do
         state = state.namespaces
           |> merge_namespaces()
           |> send_to_strip(state)
+          |> put_in([:timer,:is_dirty], false)
     #       {state, %{metadata: "done"}}
     #   end
     # )
@@ -132,11 +148,23 @@ defmodule LedsDriver do
     end)
   end
   def merge_leds(leds) do
+    leds = match_length(leds)
     Enum.zip_with(leds, fn elems ->
         merge_pixels(elems)
     end)
   end
 
+  def match_length(leds) when leds == nil, do: leds
+  def match_length(leds) when length(leds) == 0, do: leds
+  def match_length(leds) do
+    max_length = Enum.reduce(leds, 0, fn(sequence, acc) -> max(acc, length(sequence)) end)
+    Enum.map(leds, fn(sequence) -> extend(sequence, max_length - length(sequence)) end)
+  end
+  def extend(sequence, 0), do: sequence
+  def extend(sequence, extra) do
+    extra_length = Enum.reduce(1..extra, [], fn(_index, acc) -> acc ++ [0x000000] end)
+    sequence ++ extra_length
+  end
   def merge_pixels(elems) do
     count = length(elems)
     elems

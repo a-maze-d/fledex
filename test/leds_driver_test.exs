@@ -1,27 +1,34 @@
 defmodule LedDriverTest do
   use ExUnit.Case
-  import ExUnit.CaptureLog
 
   doctest Leds
 
   describe "test init/1" do
-
     test "init_args are correctly set (disable timer)" do
       {:ok, state} = LedsDriver.init(%{timer: %{disabled: true}})
       assert state.timer.disabled == true
       assert state.timer.counter == 0
       assert state.timer.update_timeout == 50
       assert state.timer.update_func != nil
+      assert state.timer.only_dirty_update == true
+      assert state.timer.is_dirty == false
       assert state.timer.ref == nil
     end
 
     test "init_args are correctly set (with active timer)" do
       update_func = &(&1)
-      {:ok, state} = LedsDriver.init(%{timer: %{update_func: update_func}})
+      {:ok, state} = LedsDriver.init(%{
+        timer: %{
+          update_func: update_func,
+          only_dirty_update: false
+        }
+      })
       assert state.timer.disabled == false
       assert state.timer.counter == 0
       assert state.timer.update_timeout == 50
       assert state.timer.update_func == update_func
+      assert state.timer.only_dirty_update == false
+      assert state.timer.is_dirty == false
       assert state.timer.ref != nil
 
       assert_receive {:update_timeout, _update_func}
@@ -38,8 +45,43 @@ defmodule LedDriverTest do
       LedsDriver.handle_info({:update_timeout, update_func}, LedsDriver.init_state(%{timer: %{counter: 1, update_func: update_func}}))
       assert_receive {:update_timeout, _update_func}
     end
+    test "ensure the state can be updated in the update function" do
+      update_func = fn(state) ->
+        {_old_update_counter, state} = get_and_update_in(state, [:led_strip, :update_counter], &{&1, &1 + 1})
+        state
+      end
+      init_args = %{
+        timer: %{
+          counter: 1,
+          update_func: update_func
+        },
+      }
+      state = LedsDriver.init_state(init_args)
+      state = %{state | led_strip: %{
+        update_counter: 0
+      }}
+      orig_counter = state.led_strip.update_counter
+      {:noreply, state} = LedsDriver.handle_info({:update_timeout, update_func}, state)
+      assert state.led_strip.update_counter > orig_counter
+    end
   end
 
+  describe "test update shortcutting" do
+    test "state is dirty after client calls" do
+      {:ok, state} = LedsDriver.init(%{timer: %{disabled: true}})
+      assert state.timer.is_dirty == false
+      {:reply, _, state} = LedsDriver.handle_call({:define_leds, "name"}, self(), state)
+      assert state.timer.is_dirty == true
+      state = put_in(state, [:timer, :is_dirty], false)
+      assert state.timer.is_dirty == false
+      {:reply, _, state} = LedsDriver.handle_call({:set_leds, "name", [0xFF0000]}, self(), state)
+      assert state.timer.is_dirty == true
+      state = put_in(state, [:timer, :is_dirty], false)
+      assert state.timer.is_dirty == false
+      {:reply, _, state} = LedsDriver.handle_call({:drop_leds, "name"}, self(), state)
+      assert state.timer.is_dirty == true
+    end
+  end
   describe "test transfer_data aspects" do
     test "merging empty namespaces" do
       namespaces = %{}
@@ -47,7 +89,7 @@ defmodule LedDriverTest do
     end
     test "average and combine" do
       led = {0x33, 0x12C, 0x258}
-      LedsDriver.avg_and_combine(led, 3) == 0x1164C8
+      assert LedsDriver.avg_and_combine(led, 3) == 0x1164C8
     end
     test "split into subpixels" do
       pixel = 0xFF7722
@@ -64,6 +106,14 @@ defmodule LedDriverTest do
     test "merge leds" do
       leds = [
         [0xFF0000, 0x00FF00, 0x0000FF, 0x000000, 0x000000, 0x000000],
+        [0x000000, 0x000000, 0x000000, 0x0000FF, 0x00FF00, 0xFF0000]
+      ]
+      assert LedsDriver.merge_leds(leds) ==
+        [0x7F0000, 0x007F00, 0x00007F, 0x00007F, 0x007F00, 0x7F0000]
+    end
+    test "merge leds of different length" do
+      leds = [
+        [0xFF0000, 0x00FF00, 0x0000FF, 0x000000, 0x000000],
         [0x000000, 0x000000, 0x000000, 0x0000FF, 0x00FF00, 0xFF0000]
       ]
       assert LedsDriver.merge_leds(leds) ==
@@ -110,8 +160,10 @@ defmodule LedDriverTest do
   describe "e2e tests" do
     test "e2e flow" do
       state = %{
+        timer: %{counter: 0, is_dirty: true},
         led_strip: %{
-          driver_module: LedStripDrivers.LoggerDriver
+          driver_module: LedStripDrivers.LoggerDriver,
+          config: %{update_freq: 1, log_color_code: true}
         },
         namespaces: %{
           john: [0xFF0000, 0x00FF00, 0x0000FF, 0x00FF00, 0xFF0000, 0x0000FF],
@@ -120,7 +172,8 @@ defmodule LedDriverTest do
       }
       state = LedsDriver.init_led_strip_driver(%{}, state)
 
-      assert LedsDriver.transfer_data(state) == state
+      response = LedsDriver.transfer_data(state)
+      assert response.timer.is_dirty == false
     end
   end
   describe "test client API" do
@@ -128,7 +181,7 @@ defmodule LedDriverTest do
       {:ok, state} = LedsDriver.init(%{})
       name = :john
       response = LedsDriver.handle_call({:define_leds, name}, self(), state)
-      assert match?({:reply, {:ok, name},_}, response)
+      assert match?({:reply, {:ok, _},_}, response)
       {_, _, state} = response
       assert map_size(state.namespaces) == 1
       assert Map.keys(state.namespaces) == [:john]
@@ -139,7 +192,7 @@ defmodule LedDriverTest do
       {_, _, state} = LedsDriver.handle_call({:define_leds, name}, self(), state)
       name2 = :jane
       response2 = LedsDriver.handle_call({:define_leds, name2}, self(), state)
-      assert match?({:reply, {:ok, name}, _}, response2)
+      assert match?({:reply, {:ok, _}, _}, response2)
       {_, _, state2} = response2
       assert map_size(state2.namespaces) == 2
       assert Map.keys(state2.namespaces) |> Enum.sort() == [:john, :jane] |> Enum.sort()

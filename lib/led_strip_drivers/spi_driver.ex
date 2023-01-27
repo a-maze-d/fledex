@@ -1,4 +1,4 @@
-if Mix.env == :prod do
+if Mix.target == :rpi do
   defmodule LedStripDrivers.SpiDriver do
     @behaviour LedStripDriver
     import Circuits.SPI
