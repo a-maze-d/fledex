@@ -1,5 +1,5 @@
-defmodule LedStripDrivers.LoggerDriver do
-  @behaviour LedStripDriver
+defmodule LedStripDriver.LoggerDriver do
+  @behaviour LedStripDriver.Driver
   @default_update_freq 10
   @divisor 255/5
   @block <<"\u2588">>

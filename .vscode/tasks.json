@@ -1,0 +1,15 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "mix",
+			"task": "Build",
+			"problemMatcher": [
+				"$mixCompileError",
+				"$mixCompileWarning"
+			],
+			"group": "build",
+			"label": "mix: Build"
+		}
+	]
+}

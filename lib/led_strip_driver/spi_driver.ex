@@ -1,6 +1,6 @@
 if Mix.target == :rpi do
-  defmodule LedStripDrivers.SpiDriver do
-    @behaviour LedStripDriver
+  defmodule LedStripDriver.SpiDriver do
+    @behaviour LedStripDriver.Driver
     import Circuits.SPI
 
     @impl true

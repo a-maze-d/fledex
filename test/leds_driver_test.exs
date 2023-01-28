@@ -1,5 +1,6 @@
 defmodule LedDriverTest do
   use ExUnit.Case
+  import ExUnit.CaptureIO
 
   doctest Leds
 
@@ -10,7 +11,7 @@ defmodule LedDriverTest do
       assert state.timer.counter == 0
       assert state.timer.update_timeout == 50
       assert state.timer.update_func != nil
-      assert state.timer.only_dirty_update == true
+      assert state.timer.only_dirty_update == false
       assert state.timer.is_dirty == false
       assert state.timer.ref == nil
     end
@@ -162,7 +163,7 @@ defmodule LedDriverTest do
       state = %{
         timer: %{counter: 0, is_dirty: true},
         led_strip: %{
-          driver_module: LedStripDrivers.LoggerDriver,
+          driver_module: LedStripDriver.LoggerDriver,
           config: %{update_freq: 1, log_color_code: true}
         },
         namespaces: %{
@@ -172,8 +173,11 @@ defmodule LedDriverTest do
       }
       state = LedsDriver.init_led_strip_driver(%{}, state)
 
-      response = LedsDriver.transfer_data(state)
-      assert response.timer.is_dirty == false
+      assert capture_io( fn ->
+        response = LedsDriver.transfer_data(state)
+        assert response.timer.is_dirty == false
+      end) == "\e[38;5;100m█\e[38;5;30m█\e[38;5;90m█\e[38;5;30m█\e[38;5;100m█\e[38;5;90m█\r\n"
+
     end
   end
   describe "test client API" do

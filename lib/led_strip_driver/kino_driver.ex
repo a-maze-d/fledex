@@ -1,6 +1,6 @@
-defmodule LedStripDrivers.KinoDriver do
-  @behaviour LedStripDriver
-  @default_update_freq 10
+defmodule LedStripDriver.KinoDriver do
+  @behaviour LedStripDriver.Driver
+  @default_update_freq 50
   @base16 16
   @block <<"\u2588">>
 

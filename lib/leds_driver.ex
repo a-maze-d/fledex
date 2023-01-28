@@ -46,7 +46,7 @@ defmodule LedsDriver do
         ref: nil
       },
       led_strip: %{
-        driver_module: init_args[:led_strip][:driver_module] || LedStripDrivers.LoggerDriver
+        driver_module: init_args[:led_strip][:driver_module] || LedStripDriver.LoggerDriver
       },
       namespaces: %{}
     }
