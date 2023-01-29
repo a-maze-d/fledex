@@ -18,6 +18,29 @@ defmodule Fledex.Functions do
     end
   end
 
+  def create_rainbow_circular_rgb(num_leds, initialHue \\ 0, reversed \\ false) do
+    create_rainbow_circular_hsv(num_leds, initialHue, reversed)
+    |> hsv2rgb()
+  end
+  def create_gradient_rgb(num_leds, {sr, sg, sb} = _start_color, {er, eg, eb} = _end_color) when num_leds > 0 do
+    rdist87 = (er-sr) <<< 7
+    gdist87 = (eg-sg) <<< 7
+    bdist87 = (eb-sb) <<< 7
+
+    steps = num_leds+1
+    rdelta = (trunc(rdist87 / steps))*2
+    gdelta = (trunc(gdist87 / steps))*2
+    bdelta = (trunc(bdist87 / steps))*2
+
+    r88 = sr <<< 8
+    g88 = sg <<< 8
+    b88 = sb <<< 8
+
+    for n <- 1..steps-1 do
+      {(r88 + rdelta*n) >>> 8, (g88 + gdelta*n) >>> 8, (b88 + bdelta*n) >>> 8}
+    end
+
+  end
   def hsv2rgb(leds,
               conversion_function \\ &Fledex.Color.Conversion.Rainbow.hsv2rgb/2,
               color_correction \\ &Fledex.Color.Correction.color_correction_none/1
