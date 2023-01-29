@@ -1,5 +1,6 @@
 defmodule Fledex.Color.Correction do
   import Bitwise
+  alias Fledex.Utils
 
   defmodule Color do
     def typicalSMD5050(),     do: 0xFFB0F0 # 255, 176, 240
@@ -55,8 +56,8 @@ defmodule Fledex.Color.Correction do
   end
 
   def define_correction(scale, color_correction, temperature_correction) when scale > 0 do
-      {ccr, ccg, ccb} = split_colors(color_correction)
-      {tcr, tcg, tcb} = split_colors(temperature_correction)
+      {ccr, ccg, ccb} = Utils.split_into_subpixels(color_correction)
+      {tcr, tcg, tcb} = Utils.split_into_subpixels(temperature_correction)
 
       r = calculate_color_correction(scale, ccr, tcr)
       g = calculate_color_correction(scale, ccg, tcg)
@@ -68,12 +69,13 @@ defmodule Fledex.Color.Correction do
     {0, 0, 0}
   end
 
-  defp split_colors(rgb) do
-    r = (rgb &&& 0xFF0000) >>> 16
-    g = (rgb &&& 0x00FF00) >>> 8
-    b = rgb &&& 0x0000FF
-
-    {r, g, b}
+  def apply_rgb_correction(leds, {sr, sg, sb} = _scale) do
+    Enum.map(leds, fn ({r, g, b}) -> {
+          Utils.scale8(r, sr),
+          Utils.scale8(g, sg),
+          Utils.scale8(b, sb)
+        }
+    end)
   end
   defp calculate_color_correction(scale, cc, ct) do
     if cc > 0 && ct > 0 do

@@ -1,17 +1,20 @@
 defmodule Fledex.Functions do
   import Bitwise
-  alias Fledex.Color.Utils
 
-  def default_operator(hue) do
-    hue
-  end
+  # The operator is there to distinguish between two modes
+  #         if (reversed) hueOffset -= hueChange; <-- this is the defaeult operator
+  #         else hueOffset += hueChange;
 
-  def create_rainbow_circular_hsv(num_leds, initialHue \\ 0, op \\ &default_operator/1)
+  defp step(false, hue), do: hue
+  defp step(true, hue), do: -hue
+
+
+  def create_rainbow_circular_hsv(num_leds, initialHue \\ 0, reversed \\ false)
   def create_rainbow_circular_hsv(0, _, _), do: []
-  def create_rainbow_circular_hsv(num_leds, initialHue, op) do
+  def create_rainbow_circular_hsv(num_leds, initialHue, reversed) do
     hueChange = Kernel.trunc(65535 / num_leds)
     for n <- 0..(num_leds-1) do
-      {(initialHue + op.(n*hueChange>>>8)) &&& 0xFF, 240, 255}
+      {(initialHue + step(reversed, n*hueChange>>>8)) &&& 0xFF, 240, 255}
     end
   end
 
@@ -21,15 +24,6 @@ defmodule Fledex.Functions do
               ) do
     Enum.map(leds, fn (hsv) ->
       conversion_function.(hsv, color_correction)
-    end)
-  end
-
-  def apply_rgb_correction(leds, {sr, sg, sb} = _scale) do
-    Enum.map(leds, fn ({r, g, b}) -> {
-          Utils.scale8(r, sr),
-          Utils.scale8(g, sg),
-          Utils.scale8(b, sb)
-        }
     end)
   end
 end

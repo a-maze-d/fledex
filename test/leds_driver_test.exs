@@ -3,6 +3,7 @@ defmodule Fledex.LedDriverTest do
   import ExUnit.CaptureIO
   alias Fledex.LedsDriver
   alias Fledex.LedStripDriver.LoggerDriver
+  alias Fledex.Utils
 
   doctest LedsDriver
 
@@ -92,15 +93,15 @@ defmodule Fledex.LedDriverTest do
     end
     test "average and combine" do
       led = {0x33, 0x12C, 0x258}
-      assert LedsDriver.avg_and_combine(led, 3) == 0x1164C8
+      assert Utils.avg_and_combine(led, 3) == 0x1164C8
     end
     test "split into subpixels" do
       pixel = 0xFF7722
-      assert LedsDriver.split_into_subpixels(pixel) == {0xFF, 0x77, 0x22}
+      assert Utils.split_into_subpixels(pixel) == {0xFF, 0x77, 0x22}
     end
     test "add_subpixels" do
       pixels = [{20, 40, 60}, {20,40,60}, {20,40,60}]
-      assert LedsDriver.add_subpixels(pixels) == {60, 120, 180}
+      assert Utils.add_subpixels(pixels) == {60, 120, 180}
     end
     test "merge pixels" do
       pixels = [0,0xFF]

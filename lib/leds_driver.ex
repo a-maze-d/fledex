@@ -1,9 +1,9 @@
 defmodule Fledex.LedsDriver do
   @behaviour GenServer
-  import Bitwise
   require Logger
 
   alias Fledex.LedStripDriver.LoggerDriver
+  alias Fledex.Utils
 
   @default_update_timeout 50
   @default_driver_module LoggerDriver
@@ -131,13 +131,6 @@ defmodule Fledex.LedsDriver do
     state
   end
 
-  def avg_and_combine({r,g,b}, count) do
-    r = Kernel.trunc(r/count)
-    g = Kernel.trunc(g/count)
-    b = Kernel.trunc(b/count)
-    (r<<<16) + (g<<<8) + b
-  end
-
   def merge_namespaces(namespaces) do
     namespaces
       |> get_leds()
@@ -170,22 +163,9 @@ defmodule Fledex.LedsDriver do
   def merge_pixels(elems) do
     count = length(elems)
     elems
-    |> Enum.map(fn elem -> split_into_subpixels(elem) end)
-    |> add_subpixels()
-    |> avg_and_combine(count)
-  end
-
-  def split_into_subpixels(elem) do
-      r = elem |> Bitwise.&&&(0xFF0000) |> Bitwise.>>>(16)
-      g = elem |> Bitwise.&&&(0x00FF00) |> Bitwise.>>>(8)
-      b = elem |> Bitwise.&&&(0x0000FF)
-      {r, g, b}
-  end
-
-  def add_subpixels(elems) do
-    Enum.reduce(elems, {0,0,0}, fn {r,g,b}, {accr, accg, accb} ->
-      {r+accr, g+accg, b+accb}
-    end)
+    |> Enum.map(fn elem -> Utils.split_into_subpixels(elem) end)
+    |> Utils.add_subpixels()
+    |> Utils.avg_and_combine(count)
   end
 
   defp send_to_strip(leds, state) do
