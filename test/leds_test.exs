@@ -108,7 +108,22 @@ defmodule LedsTest do
       nil
     )
 
-    assert Leds.to_binary(leds) == <<0x00F00, 0x0000FF, 0, 0x00FF00, 0x0000FF>>
+    assert Leds.to_binary(leds) == <<0x00FF00, 0x0000FF, 0, 0x00FF00, 0x0000FF>>
+  end
+
+  test "get list with led values" do
+    leds = Leds.new(
+      5,
+      %{
+        1 => 0x00FF00,
+        2 => 0x0000FF,
+        4 => 0x00FF00,
+        5 => 0x0000FF
+      },
+      nil
+    )
+
+    assert Leds.to_list(leds) == [0x00FF00, 0x0000FF, 0, 0x00FF00, 0x0000FF]
   end
 
 
