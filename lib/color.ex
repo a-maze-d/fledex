@@ -48,18 +48,6 @@ defmodule Fledex.Color do
   end
 
   def define_correction(scale, color_correction, temperature_correction) when scale > 0 do
-    # /// Calculates the combined color adjustment to the LEDs at a given scale, color correction, and color temperature
-    # /// @param scale the scale value for the RGB data (i.e. brightness)
-    # /// @param colorCorrection color correction to apply
-    # /// @param colorTemperature color temperature to apply
-    # /// @returns a CRGB object representing the adjustment, including color correction and color temperature
-    # static CRGB computeAdjustment(uint8_t scale, const CRGB & colorCorrection, const CRGB & colorTemperature) {
-    #   #if defined(NO_CORRECTION) && (NO_CORRECTION==1)
-    #           return CRGB(scale,scale,scale);
-    #   #else
-    #           CRGB adj(0,0,0);
-    #           if(scale > 0) {
-    #               for(uint8_t i = 0; i < 3; ++i) {
       {ccr, ccg, ccb} = split_colors(color_correction)
       {tcr, tcg, tcb} = split_colors(temperature_correction)
 
@@ -68,12 +56,6 @@ defmodule Fledex.Color do
       b = calculate_color_correction(scale, ccb, tcb)
 
       {r, g, b}
-    #               }
-    #           }
-
-    #           return adj;
-    #   #endif
-    # }
   end
   def define_correction(_, _ , _) do
     {0, 0, 0}
@@ -87,13 +69,6 @@ defmodule Fledex.Color do
     {r, g, b}
   end
   defp calculate_color_correction(scale, cc, ct) do
-    #                   uint8_t cc = colorCorrection.raw[i];
-    #                   uint8_t ct = colorTemperature.raw[i];
-    #                   if(cc > 0 && ct > 0) {
-    #                       uint32_t work = (((uint32_t)cc)+1) * (((uint32_t)ct)+1) * scale;
-    #                       work /= 0x10000L;
-    #                       adj.raw[i] = work & 0xFF;
-    #                   }
     if cc > 0 && ct > 0 do
       work = (cc+1) * (ct+1) * scale
       work = work / 0x10000
