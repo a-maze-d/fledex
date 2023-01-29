@@ -1,4 +1,4 @@
-defmodule Fledex.Conversion.Rainbow do
+defmodule Fledex.Color.Conversion.Rainbow do
   import Bitwise
 
   alias Fledex.Color.Utils

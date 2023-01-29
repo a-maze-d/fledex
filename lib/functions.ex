@@ -16,7 +16,7 @@ defmodule Fledex.Functions do
   end
 
   def hsv2rgb(leds,
-              conversion_function \\ &Fledex.Conversion.Rainbow.hsv2rgb/2,
+              conversion_function \\ &Fledex.Color.Conversion.Rainbow.hsv2rgb/2,
               color_correction \\ &Fledex.Color.Correction.color_correction_none/1
               ) do
     Enum.map(leds, fn (hsv) ->
