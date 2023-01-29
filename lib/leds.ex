@@ -2,25 +2,6 @@ defmodule Leds do
 
   @enforce_keys [:count, :leds, :opts]
   defstruct count: 0, leds: %{}, opts: nil, meta: %{index: 1} #, fill: :none
-  # @doc """
-  #   Implementing the Enumerable protocol, so that we can keep a very compact
-  #   version of the led definition and still iterate over all leds as if they
-  #   were defined. We simply define them on the fly
-  # """
-  # defimpl Enumerable, for: Leds do
-  #   def reduce(_enumerable, {:halt, acc}, _fun), do: {:halted, acc} end
-  #   def reduce(enumerable, {:suspend, acc}, fun), do: {:suspended, acc, &reduce(enumerable, &1, fun)} end
-  #   def reduce(%Leds{count: count, leds: %{}}, {:cont, acc}, _fun), do: {:done, acc} end
-  #   def reduce(enumerable, {:cont, acc}, _fun), do: reduce({}, {:done, acc} end
-
-  #   defp reduce(%Leds{count: count, leds: leds}, index, {:cont, acc}, fun) do
-  #     reduce(leds, index+1, {:cont, acc}, fun.(elem, acc), fun)
-  #   end
-  #   def count(%Leds{count: count}), do: {:ok, count} end
-  #   def member?(enumerable, element), do: {:error, __MODULE__} end
-  #   def slice(enumerable), do: {:error, __MODULE__} end
-  # end
-
   def new() do
     new(0)
   end
@@ -43,7 +24,8 @@ defmodule Leds do
     do_update(leds, led, offset)
   end
   @doc """
-  :offset is 1 indexed. Offset needs to be >0 if it's bigger than the :count then the led will be istored, but gnored
+  :offset is 1 indexed. Offset needs to be >0 if it's bigger than the :count
+  then the led will be stored, but ignored
   """
   def update(leds, led) do
     do_update(leds, led)
@@ -81,6 +63,13 @@ defmodule Leds do
       acc <> <<get_light(leds, index)>>
     end)
   end
+
+  def to_list(%Leds{count: count, leds: _leds, opts: _opts, meta: _meta} = leds) do
+    Enum.reduce(1..count, [], fn index, acc ->
+      acc ++ [get_light(leds, index)]
+    end)
+  end
+
   def get_light(%Leds{leds: leds} = _leds, index) do
     case Map.fetch(leds, index) do
       {:ok, value} -> value
