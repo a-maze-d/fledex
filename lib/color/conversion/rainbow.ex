@@ -11,7 +11,7 @@ defmodule Fledex.Color.Conversion.Rainbow do
     determine_rgb(h)
       |> extra_color_correction.()
       |> desaturate(s)
-      |> scale_luminance(v)
+      |> scale_brightness(v)
   end
 
   defp determine_rgb(h) do
@@ -53,26 +53,19 @@ defmodule Fledex.Color.Conversion.Rainbow do
   defp desaturate(_, 0), do: {255, 255, 255}
   defp desaturate({r,g,b}, s) do
     desat = 255 - s
-    desat = Utils.scale8(desat, desat) + 1
+    desat = Utils.scale8(desat, desat, true)
     satscale = 255 - desat
-    r = if r != 0, do: Utils.scale8(r, satscale) + 1, else: r
-    g = if g != 0, do: Utils.scale8(g, satscale) + 1, else: g
-    b = if b != 0, do: Utils.scale8(b, satscale) + 1, else: b
+    {r,g,b} = Utils.nscale8({r,g,b}, satscale, true)
 
-    r = r + desat
-    g = g + desat
-    b = b + desat
-    {r, g, b}
+    {r+desat, g+desat, b+desat}
   end
 
-  defp scale_luminance(rgb, 255), do: rgb
-  defp scale_luminance(_, v) when ((v*v) >>> 8) == 0, do: {0, 0, 0}
-  defp scale_luminance({r,g,b}, v) do
-    val = Utils.scale8(v, v) + 1
-    r = if  r != 0, do: Utils.scale8(r, val) + 1, else: r
-    g = if  g != 0, do: Utils.scale8(g, val) + 1, else: g
-    b = if  b != 0, do: Utils.scale8(b, val) + 1, else: b
-    {r, g, b}
+  # scales the brightness (the v part of HSV, aka HSB)
+  defp scale_brightness(rgb, 255), do: rgb
+  defp scale_brightness(_, v) when ((v*v) >>> 8) == 0, do: {0, 0, 0}
+  defp scale_brightness({r,g,b}, v) do
+    val = Utils.scale8(v, v, true)
+    Utils.nscale8({r,g,b}, val, true)
   end
 
 end

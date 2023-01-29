@@ -69,12 +69,9 @@ defmodule Fledex.Color.Correction do
     {0, 0, 0}
   end
 
-  def apply_rgb_correction(leds, {sr, sg, sb} = _scale) do
-    Enum.map(leds, fn ({r, g, b}) -> {
-          Utils.scale8(r, sr),
-          Utils.scale8(g, sg),
-          Utils.scale8(b, sb)
-        }
+  def apply_rgb_correction(leds, scale) do
+    Enum.map(leds, fn ({r, g, b}) ->
+      Utils.nscale8({r,g,b}, scale, false)
     end)
   end
   defp calculate_color_correction(scale, cc, ct) do

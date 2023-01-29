@@ -1,17 +1,24 @@
 defmodule Fledex.Utils do
   import Bitwise
 
-  def scale8(value, scale) do
-    (value * scale) >>> 8
+  defp scale8_video_addition(false, _value, _scale), do: 0
+  defp scale8_video_addition(true, value, scale) when value != 0 and scale != 0, do: 1
+  defp scale8_video_addition(_, _, _), do: 0
+
+  def scale8(value, scale, video \\ false)
+  def scale8(0, _scale, _video), do: 0
+  def scale8(value, scale, video) do
+    addition = scale8_video_addition(video, value, scale)
+    ((value * scale) >>> 8) + addition
   end
-  # We needed this function very rarely and could replace it with a version
-  # where the +0/1 was always 1. Therefore removed it
-  # def scale8_video(value, scale) do
-  #   # TODO: I think we have a bug here. Therefore the tests are now failing
-  #   # Before it was: ((value*scale) >>> 8) + if (value != 0 && scale != 0),
-  #   # do: 1, else: 0
-  #   ((value*scale) >>> 8) + if (value != 0 && scale != 0), do: 1, else: 0
-  # end
+
+  def nscale8(rgb, scale, video \\ true)
+  def nscale8({r,g,b}, scale, video) when is_integer(scale) do
+    nscale8({r,g,b}, {scale, scale, scale}, video)
+  end
+  def nscale8({r,g,b}, {sr,sg,sb}, video) do
+    {scale8(r, sr, video), scale8(g, sg, video), scale8(b, sb, video)}
+  end
 
   @doc """
   Splits the rgb-integer value into it's subpixels and returns an
