@@ -1,4 +1,4 @@
-defmodule LedStripDriver.Driver do
+defmodule Fledex.LedStripDriver.Driver do
   @callback init(init_args :: map(), state :: map()) :: map()
   @callback transfer(leds :: list(integer), state :: map()) :: map()
   @callback terminate(reason, state :: map()) :: :ok

@@ -1,5 +1,5 @@
-defmodule LedStripDriver.KinoDriver do
-  @behaviour LedStripDriver.Driver
+defmodule Fledex.LedStripDriver.KinoDriver do
+  @behaviour Fledex.LedStripDriver.Driver
   @default_update_freq 50
   @base16 16
   @block <<"\u2588">>

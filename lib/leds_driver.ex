@@ -1,10 +1,12 @@
-defmodule LedsDriver do
+defmodule Fledex.LedsDriver do
   @behaviour GenServer
   import Bitwise
   require Logger
 
-  @default_update_timeout 50
+  alias Fledex.LedStripDriver.LoggerDriver
 
+  @default_update_timeout 50
+  @default_driver_module LoggerDriver
   #client code
   def start_link(init_arg, server_name \\ __MODULE__) do
     GenServer.start_link(__MODULE__, init_arg, name: server_name)
@@ -46,7 +48,7 @@ defmodule LedsDriver do
         ref: nil
       },
       led_strip: %{
-        driver_module: init_args[:led_strip][:driver_module] || LedStripDriver.LoggerDriver
+        driver_module: init_args[:led_strip][:driver_module] || @default_driver_module
       },
       namespaces: %{}
     }

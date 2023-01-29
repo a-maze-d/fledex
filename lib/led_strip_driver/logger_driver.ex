@@ -1,5 +1,7 @@
-defmodule LedStripDriver.LoggerDriver do
-  @behaviour LedStripDriver.Driver
+defmodule Fledex.LedStripDriver.LoggerDriver do
+  @behaviour Fledex.LedStripDriver.Driver
+  alias Fledex.LedsDriver
+
   @default_update_freq 10
   @divisor 255/5
   @block <<"\u2588">>

@@ -1,8 +1,10 @@
-defmodule LedDriverTest do
+defmodule Fledex.LedDriverTest do
   use ExUnit.Case
   import ExUnit.CaptureIO
+  alias Fledex.LedsDriver
+  alias Fledex.LedStripDriver.LoggerDriver
 
-  doctest Leds
+  doctest LedsDriver
 
   describe "test init/1" do
     test "init_args are correctly set (disable timer)" do
@@ -163,7 +165,7 @@ defmodule LedDriverTest do
       state = %{
         timer: %{counter: 0, is_dirty: true},
         led_strip: %{
-          driver_module: LedStripDriver.LoggerDriver,
+          driver_module: LoggerDriver,
           config: %{update_freq: 1, log_color_code: true}
         },
         namespaces: %{

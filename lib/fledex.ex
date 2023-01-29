@@ -8,10 +8,10 @@ def default_operator(hue) do
   hue
 end
 
-  def create_rainbow_circular(numLeds, initialHue \\ 0, op \\ &default_operator/1)
+  def create_rainbow_circular(num_leds, initialHue \\ 0, op \\ &default_operator/1)
   def create_rainbow_circular(0, _, _), do: []
-  def create_rainbow_circular(numLeds, initialHue, op) do
-    hueChange = Kernel.trunc(65535 / numLeds)
+  def create_rainbow_circular(num_leds, initialHue, op) do
+    hueChange = Kernel.trunc(65535 / num_leds)
     # hueOffset = 0
   #   void fill_rainbow_circular(struct CHSV* targetArray, int numToFill, uint8_t initialhue, bool reversed)
   # {
@@ -26,7 +26,7 @@ end
   #     uint16_t hueOffset = 0;  // offset for hue value, with precision (*256)
 
 
-    for n <- 0..(numLeds-1) do
+    for n <- 0..(num_leds-1) do
       %Hsv{h: (initialHue + op.(n*hueChange>>>8)) &&& 0xFF, s: 240, v: 255}
     end
   #     for (int i = 0; i < numToFill; ++i) {

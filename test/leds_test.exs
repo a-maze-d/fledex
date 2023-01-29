@@ -1,5 +1,7 @@
-defmodule LedsTest do
+defmodule Fledex.LedsTest do
   use ExUnit.Case
+  alias Fledex.Leds
+
   doctest Leds
 
   test "struct definition" do
