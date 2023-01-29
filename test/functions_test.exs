@@ -1,9 +1,8 @@
 defmodule Fledex.FunctionsTest do
   require Logger
-  import Fledex.Color.ColorCorrection
-  import Fledex.Color.TemperatureCorrection
-  alias Fledex.Pixeltypes.Hsv
-  alias Fledex.Color
+  import Fledex.Color.Correction.Color
+  import Fledex.Color.Correction.Temperature
+  alias Fledex.Color.Correction
 
   use ExUnit.Case
   alias Fledex.Functions
@@ -11,39 +10,39 @@ defmodule Fledex.FunctionsTest do
   doctest Functions
 
   test "create 10 pixels with rainbow colors" do
-    assert Functions.create_rainbow_circular(10) ==
+    assert Functions.create_rainbow_circular_hsv(10) ==
     [
-      %Hsv{h: 0, s: 240, v: 255},
-      %Hsv{h: 25, s: 240, v: 255},
-      %Hsv{h: 51, s: 240, v: 255},
-      %Hsv{h: 76, s: 240, v: 255},
-      %Hsv{h: 102, s: 240, v: 255},
-      %Hsv{h: 127, s: 240, v: 255},
-      %Hsv{h: 153, s: 240, v: 255},
-      %Hsv{h: 179, s: 240, v: 255},
-      %Hsv{h: 204, s: 240, v: 255},
-      %Hsv{h: 230, s: 240, v: 255}
+      {  0, 240, 255},
+      { 25, 240, 255},
+      { 51, 240, 255},
+      { 76, 240, 255},
+      {102, 240, 255},
+      {127, 240, 255},
+      {153, 240, 255},
+      {179, 240, 255},
+      {204, 240, 255},
+      {230, 240, 255}
     ]
   end
 
   test "create 10 pixels with rainbow colors and offset 50" do
-    assert Functions.create_rainbow_circular(10, 50) ==
+    assert Functions.create_rainbow_circular_hsv(10, 50) ==
     [
-      %Hsv{h:  50, s: 240, v: 255},
-      %Hsv{h:  75, s: 240, v: 255},
-      %Hsv{h: 101, s: 240, v: 255},
-      %Hsv{h: 126, s: 240, v: 255},
-      %Hsv{h: 152, s: 240, v: 255},
-      %Hsv{h: 177, s: 240, v: 255},
-      %Hsv{h: 203, s: 240, v: 255},
-      %Hsv{h: 229, s: 240, v: 255},
-      %Hsv{h: 254, s: 240, v: 255},
-      %Hsv{h:  24, s: 240, v: 255}
+      { 50, 240, 255},
+      { 75, 240, 255},
+      {101, 240, 255},
+      {126, 240, 255},
+      {152, 240, 255},
+      {177, 240, 255},
+      {203, 240, 255},
+      {229, 240, 255},
+      {254, 240, 255},
+      { 24, 240, 255}
     ]
   end
 
   test "rgb correction" do
-    leds = Functions.create_rainbow_circular(10)
+    leds = Functions.create_rainbow_circular_hsv(10)
       |> Functions.hsv2rgb()
 
       assert leds == [
@@ -61,11 +60,11 @@ defmodule Fledex.FunctionsTest do
   end
 
   test "check no correction" do
-    correction = Color.define_correction(255, uncorrectedColor(), uncorrectedTemperature())
+    correction = Correction.define_correction(255, uncorrectedColor(), uncorrectedTemperature())
 
-    leds = Functions.create_rainbow_circular(10)
+    leds = Functions.create_rainbow_circular_hsv(10)
       |> Functions.hsv2rgb()
-      |> Functions.apply_correction(correction)
+      |> Functions.apply_rgb_correction(correction)
 
       assert leds == [
         {254,   0,   0},
@@ -82,11 +81,11 @@ defmodule Fledex.FunctionsTest do
   end
 
   test "check scale correction" do
-    correction = Color.define_correction(200, uncorrectedColor(), uncorrectedTemperature())
+    correction = Correction.define_correction(200, uncorrectedColor(), uncorrectedTemperature())
 
-    leds = Functions.create_rainbow_circular(10)
+    leds = Functions.create_rainbow_circular_hsv(10)
       |> Functions.hsv2rgb()
-      |> Functions.apply_correction(correction)
+      |> Functions.apply_rgb_correction(correction)
 
       assert leds == [
         {199,   0,   0},
@@ -103,11 +102,11 @@ defmodule Fledex.FunctionsTest do
   end
 
   test "check color correction" do
-    correction = Color.define_correction(255, typicalSMD5050(), uncorrectedTemperature())
+    correction = Correction.define_correction(255, typicalSMD5050(), uncorrectedTemperature())
 
-    leds = Functions.create_rainbow_circular(10)
+    leds = Functions.create_rainbow_circular_hsv(10)
       |> Functions.hsv2rgb()
-      |> Functions.apply_correction(correction)
+      |> Functions.apply_rgb_correction(correction)
 
       assert leds == [
         {254,   0,   0},
@@ -124,11 +123,11 @@ defmodule Fledex.FunctionsTest do
   end
 
   test "check temperature correction" do
-    correction = Color.define_correction(255, uncorrectedColor(), candle())
+    correction = Correction.define_correction(255, uncorrectedColor(), candle())
 
-    leds = Functions.create_rainbow_circular(10)
+    leds = Functions.create_rainbow_circular_hsv(10)
       |> Functions.hsv2rgb()
-      |> Functions.apply_correction(correction)
+      |> Functions.apply_rgb_correction(correction)
 
       assert leds == [
         {254,   0,  0},

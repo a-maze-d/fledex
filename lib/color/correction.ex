@@ -1,7 +1,7 @@
-defmodule Fledex.Color do
+defmodule Fledex.Color.Correction do
   import Bitwise
 
-  defmodule ColorCorrection do
+  defmodule Color do
     def typicalSMD5050(),     do: 0xFFB0F0 # 255, 176, 240
     def typicalLEDStrip(),    do: 0xFFB0F0 # 255, 176, 240
     def typical8mmPixel(),    do: 0xFFE08C # 255, 224, 140
@@ -9,7 +9,7 @@ defmodule Fledex.Color do
     def uncorrectedColor(),   do: 0xFFFFFF # 255, 255, 255
   end
 
-  defmodule TemperatureCorrection do
+  defmodule Temperature do
       # Black Body Radiators
       def candle(),         do: 0xFF9329 # 1900 K, 255, 147, 41 */,
       def tungsten40W(),    do: 0xFFC58F # 2600 K, 255, 197, 143 */,
@@ -45,6 +45,13 @@ defmodule Fledex.Color do
 
       # Uncorrected temperature (0xFFFFFF)
       def uncorrectedTemperature(),   do: 0xFFFFFF # 255, 255, 255 */
+  end
+
+  def color_correction_g2({r, g, b}) do
+    {r, g >>> 2, b}
+  end
+  def color_correction_none({r,g,b}) do
+      {r, g, b}
   end
 
   def define_correction(scale, color_correction, temperature_correction) when scale > 0 do
