@@ -1,5 +1,6 @@
 defmodule Fledex.Color.Conversion.Rainbow do
   import Bitwise
+  use Fledex.Color.Types
   alias Fledex.Utils
 
   @k255 255
@@ -7,6 +8,7 @@ defmodule Fledex.Color.Conversion.Rainbow do
   @k170 170
   @k85   85
 
+  @spec hsv2rgb(hsv, (rgb -> rgb)) :: rgb
   def hsv2rgb({h,s,v}, extra_color_correction) do
     determine_rgb(h)
       |> extra_color_correction.()
@@ -14,6 +16,7 @@ defmodule Fledex.Color.Conversion.Rainbow do
       |> scale_brightness(v)
   end
 
+  @spec determine_rgb(byte) :: rgb
   defp determine_rgb(h) do
     main = {(h &&& 0x80) > 0, (h &&& 0x40) > 0, (h &&& 0x20) > 0}
     offset = h &&& 0x1F
@@ -21,34 +24,36 @@ defmodule Fledex.Color.Conversion.Rainbow do
 
     third = Utils.scale8(offset8, Kernel.trunc(256/3))
     twothird = Utils.scale8(offset8, Kernel.trunc((256*2) / 3))
-    determine_rgb(main, third, twothird)
+    build_rgb(main, third, twothird)
   end
 
-  defp determine_rgb({:false,:false,:false}, third, _twothird) do
+  @spec build_rgb({boolean, boolean, boolean}, byte, byte) :: rgb
+  defp build_rgb({:false,:false,:false}, third, _twothird) do
     {@k255 - third, third, 0}
   end
-  defp determine_rgb({:false, :false, :true}, third, _twothird) do
+  defp build_rgb({:false, :false, :true}, third, _twothird) do
     {@k171, @k85 + third, 0}
   end
-  defp determine_rgb({:false, :true, :false}, third, twothird) do
+  defp build_rgb({:false, :true, :false}, third, twothird) do
     {@k171 - twothird, @k170 + third, 0}
   end
-  defp determine_rgb({:false, :true, :true}, third, _twothird) do
+  defp build_rgb({:false, :true, :true}, third, _twothird) do
     {0, @k255 - third, third}
   end
-  defp determine_rgb({:true, :false, :false}, _third, twothird) do
+  defp build_rgb({:true, :false, :false}, _third, twothird) do
     {0, @k171 - twothird, @k85 + twothird}
   end
-  defp determine_rgb({:true, :false, :true}, third, _twothird) do
+  defp build_rgb({:true, :false, :true}, third, _twothird) do
     {third, 0, @k255 - third}
   end
-  defp determine_rgb({:true, :true, :false}, third, _twothird) do
+  defp build_rgb({:true, :true, :false}, third, _twothird) do
     {@k85 + third, 0, @k171 - third}
   end
-  defp determine_rgb({:true, :true, :true}, third, _twothird) do
+  defp build_rgb({:true, :true, :true}, third, _twothird) do
     {@k170 + third, 0, @k85 - third}
   end
 
+  @spec desaturate(rgb, byte) :: rgb
   defp desaturate({r, g, b}, 255), do: {r, g, b}
   defp desaturate(_, 0), do: {255, 255, 255}
   defp desaturate({r,g,b}, s) do
@@ -61,11 +66,11 @@ defmodule Fledex.Color.Conversion.Rainbow do
   end
 
   # scales the brightness (the v part of HSV, aka HSB)
+  @spec scale_brightness(rgb, byte) :: rgb
   defp scale_brightness(rgb, 255), do: rgb
   defp scale_brightness(_, v) when ((v*v) >>> 8) == 0, do: {0, 0, 0}
   defp scale_brightness({r,g,b}, v) do
     val = Utils.scale8(v, v, true)
     Utils.nscale8({r,g,b}, val, true)
   end
-
 end

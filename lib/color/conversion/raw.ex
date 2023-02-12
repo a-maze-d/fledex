@@ -1,9 +1,12 @@
 defmodule Fledex.Color.Conversion.Raw do
+  use Fledex.Color.Types
+
   @hsv_section_3 0x40
 
-  def hsv2rgb({h,s,v}, _color_correction) do
+  @spec hsv2rgb(hsv, any) :: rgb
+  def hsv2rgb({h,s,v}, _extra_color_correction) do
     invsat = 255 - s
-    brightness_floor = Kernel.trunc((v*invsat) / 256)
+    brightness_floor = trunc((v*invsat) / 256)
 
     color_amplitude = v - brightness_floor
 
@@ -13,8 +16,8 @@ defmodule Fledex.Color.Conversion.Raw do
     rampup = offset
     rampdown = (@hsv_section_3 - 1) - offset
 
-    rampup_amp_adj = (rampup * color_amplitude) / (256/4)
-    rampdown_amp_adj = (rampdown * color_amplitude) / (256/4)
+    rampup_amp_adj = trunc((rampup * color_amplitude) / (256/4))
+    rampdown_amp_adj = trunc((rampdown * color_amplitude) / (256/4))
 
     rampup_adj_with_floor = rampup_amp_adj + brightness_floor
     rampdown_adj_with_floor = rampdown_amp_adj + brightness_floor
@@ -22,6 +25,7 @@ defmodule Fledex.Color.Conversion.Raw do
     set_colors(section, brightness_floor, rampup_adj_with_floor, rampdown_adj_with_floor)
   end
 
+  @spec set_colors(byte, byte, byte, byte) :: rgb
   def set_colors(section, brightness_floor, rampup_adj_with_floor, rampdown_adj_with_floor)
   def set_colors(0, brightness_floor, rampup_adj_with_floor, rampdown_adj_with_floor) do
     {rampdown_adj_with_floor, rampup_adj_with_floor, brightness_floor}

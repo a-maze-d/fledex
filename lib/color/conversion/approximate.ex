@@ -1,4 +1,5 @@
 defmodule Fledex.Color.Conversion.Approximate do
+  use Fledex.Color.Types
 
   @hue_red 0
   @hue_orange 32
@@ -11,6 +12,7 @@ defmodule Fledex.Color.Conversion.Approximate do
 
   alias Fledex.Utils
 
+  @spec rgb2hsv(rgb) :: hsv
   def rgb2hsv({r,g,b}) do
     desat = find_desaturation({r,g,b})
     {r,g,b} = {r-desat, g-desat, b-desat}
@@ -59,8 +61,9 @@ defmodule Fledex.Color.Conversion.Approximate do
 
   defp fixfrac8(n,d) do
     trunc((n*256)/(d))
-
   end
+
+  @spec scale_to_compensate(rgb, byte) :: rgb
   defp scale_to_compensate({r,g,b}, s) when s < 255 do
     s = if s == 0, do: 1, else: s
     scaleup = 655535 / (s)
@@ -71,6 +74,7 @@ defmodule Fledex.Color.Conversion.Approximate do
   end
   defp scale_to_compensate({r,g,b}, _s), do: {r,g,b}
 
+  @spec find_desaturation(rgb) :: byte
   defp find_desaturation({r,g,b}) do
     #     // find desaturation
     #     uint8_t desat = 255;
@@ -82,14 +86,19 @@ defmodule Fledex.Color.Conversion.Approximate do
       |> adj_desat(g)
       |> adj_desat(b)
   end
+
+  @spec adj_desat(byte, byte) :: byte
   defp adj_desat(desat, value)
   defp adj_desat(desat, value) when value < desat, do: value
   defp adj_desat(desat, _value), do: desat
 
+  @spec qadd8(byte, byte) :: byte
   defp qadd8(i,j) when i+j>255, do: 255
   defp qadd8(i, j) do
     i + j
   end
+
+  @spec qsub8(byte, byte) :: byte
   defp qsub8(i,j) when i-j<0, do: 0
   defp qsub8(i,j) do
     i - j

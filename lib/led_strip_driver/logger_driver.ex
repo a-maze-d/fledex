@@ -1,5 +1,7 @@
 defmodule Fledex.LedStripDriver.LoggerDriver do
   @behaviour Fledex.LedStripDriver.Driver
+  use Fledex.Color.Types
+
   alias Fledex.Utils
 
   @default_update_freq 10
@@ -18,6 +20,7 @@ defmodule Fledex.LedStripDriver.LoggerDriver do
     all the time. Cleanup should happen in the terminate function
   """
   @impl true
+  @spec init(map, Fledex.LedDriver.t) :: Fledex.LedDriver.t
   def init(init_args, state) do
     config = %{
       update_freq: init_args[:led_strip][:config][:update_freq] || @default_update_freq,
@@ -28,6 +31,7 @@ defmodule Fledex.LedStripDriver.LoggerDriver do
   end
 
   @impl true
+  @spec transfer(list(colorint), Fledex.LedDriver.t) :: Fledex.LedDriver.t
   def transfer(leds, state) do
     counter = state.timer.counter
     update_freq = state.led_strip.config.update_freq
@@ -46,12 +50,14 @@ defmodule Fledex.LedStripDriver.LoggerDriver do
     state
   end
 
+  @spec to_ansi_color(colorint) :: String.t
   defp to_ansi_color(value) do
     {r,g,b} = Utils.split_into_subpixels(value)
     IO.ANSI.color(trunc(r/@divisor), trunc(g/@divisor), trunc(b/@divisor))
   end
 
   @impl true
+  @spec terminate(reason, Fledex.LedDriver.t) :: :ok when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(_reason, _state) do
     # nothing needs to be done here
     :ok

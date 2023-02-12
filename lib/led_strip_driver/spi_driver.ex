@@ -1,9 +1,12 @@
 if Mix.target == :rpi do
   defmodule Fledex.LedStripDriver.SpiDriver do
     @behaviour Fledex.LedStripDriver.Driver
+    use Fledex.Color.Types
+
     import Circuits.SPI
 
     @impl true
+    @spec init(map, Fledex.LedDriver.t) :: Fledex.LedDriver.t
     def init(init_args, state) do
       config = %{
         dev: init_args[:led_strip][:config][:dev] || "spidev0.0",
@@ -19,6 +22,7 @@ if Mix.target == :rpi do
         |> put_in([:led_strip, :ref], open_spi(config))
     end
 
+    @spec open_spi(map) :: reference
     def open_spi(config) do
       {:ok, ref} =
         Circuits.SPI.open(config.dev,
@@ -30,7 +34,9 @@ if Mix.target == :rpi do
         )
       ref
     end
+
     @impl true
+    @spect transfer(list(colorint), Fledex.LedDriver.t) :: Fledex.LedDriver.t
     def transfer(leds, state) do
       ref = state.led_strip.ref
       binary = Enum.reduce(leds, <<>>, fn led, acc -> acc <> <<led>> end)
@@ -39,6 +45,7 @@ if Mix.target == :rpi do
     end
 
     @impl true
+    @spec terminate(reason, Fledex.LedDriver.t) :: :ok when reason: :normal | :shutdown | {:shutdown, term()} | term()
     def terminate(_reason, state) do
       Circuits.SPI.close(state.led_strip.ref)
     end

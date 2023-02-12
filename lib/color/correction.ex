@@ -1,5 +1,7 @@
 defmodule Fledex.Color.Correction do
   import Bitwise
+  use Fledex.Color.Types
+
   alias Fledex.Utils
 
   defmodule Color do
@@ -48,13 +50,16 @@ defmodule Fledex.Color.Correction do
       def uncorrectedTemperature(),   do: 0xFFFFFF # 255, 255, 255 */
   end
 
+  @spec color_correction_g2(rgb) :: rgb
   def color_correction_g2({r, g, b}) do
     {r, g >>> 2, b}
   end
+  @spec color_correction_none(rgb) :: rgb
   def color_correction_none({r,g,b}) do
       {r, g, b}
   end
 
+  @spec define_correction(byte, colorint, colorint) :: rgb
   def define_correction(scale, color_correction, temperature_correction) when scale > 0 do
       {ccr, ccg, ccb} = Utils.split_into_subpixels(color_correction)
       {tcr, tcg, tcb} = Utils.split_into_subpixels(temperature_correction)
@@ -69,18 +74,18 @@ defmodule Fledex.Color.Correction do
     {0, 0, 0}
   end
 
+  @spec apply_rgb_correction(list(rgb), byte) :: list(rgb)
   def apply_rgb_correction(leds, scale) do
     Enum.map(leds, fn ({r, g, b}) ->
       Utils.nscale8({r,g,b}, scale, false)
     end)
   end
-  defp calculate_color_correction(scale, cc, ct) do
-    if cc > 0 && ct > 0 do
-      work = (cc+1) * (ct+1) * scale
-      work = work / 0x10000
-      Kernel.trunc(work) &&& 0xFF
-    else
-      0
-    end
+
+  @spec calculate_color_correction(byte, byte, byte) :: byte
+  defp calculate_color_correction(scale, cc, ct) when cc> 0 and ct>0 do
+    work = (cc+1) * (ct+1) * scale
+    work = work / 0x10000
+    Kernel.trunc(work) &&& 0xFF
   end
+  defp calculate_color_correction(_, _, _), do: 0
 end

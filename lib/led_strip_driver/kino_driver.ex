@@ -1,10 +1,14 @@
 defmodule Fledex.LedStripDriver.KinoDriver do
   @behaviour Fledex.LedStripDriver.Driver
+
+  use Fledex.Color.Types
+
   @default_update_freq 50
   @base16 16
   @block <<"\u2588">>
 
   @impl true
+  @spec init(map, Fledex.LedDriver.t) :: Fledex.LedDriver.t
   def init(init_args, state) do
     config = %{
       update_freq: init_args[:led_strip][:config][:update_freq] || @default_update_freq,
@@ -16,6 +20,7 @@ defmodule Fledex.LedStripDriver.KinoDriver do
   end
 
   @impl true
+  @spec transfer(list(colorint), Fledex.LedDriver.t) :: Fledex.LedDriver.t
   def transfer(leds, state) do
     counter = state.timer.counter
     update_freq = state.led_strip.config.update_freq
@@ -32,6 +37,7 @@ defmodule Fledex.LedStripDriver.KinoDriver do
   end
 
   @impl true
+  @spec terminate(reason, Fledex.LedDriver.t) :: :ok when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(_reason, _state) do
     # nothing needs to be done here
     :ok
