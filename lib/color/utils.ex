@@ -1,4 +1,4 @@
-defmodule Fledex.Utils do
+defmodule Fledex.Color.Utils do
   use Fledex.Color.Types
   import Bitwise
 

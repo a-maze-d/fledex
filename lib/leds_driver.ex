@@ -4,7 +4,7 @@ defmodule Fledex.LedsDriver do
 
   require Logger
   alias Fledex.LedStripDriver.LoggerDriver
-  alias Fledex.Utils
+  alias Fledex.Color.Utils
 
   @type t :: %{
     timer: %{

@@ -2,7 +2,7 @@ defmodule Fledex.LedStripDriver.LoggerDriver do
   @behaviour Fledex.LedStripDriver.Driver
   use Fledex.Color.Types
 
-  alias Fledex.Utils
+  alias Fledex.Color.Utils
 
   @default_update_freq 10
   @divisor 255/5

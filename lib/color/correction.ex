@@ -2,7 +2,7 @@ defmodule Fledex.Color.Correction do
   import Bitwise
   use Fledex.Color.Types
 
-  alias Fledex.Utils
+  alias Fledex.Color.Utils
 
   defmodule Color do
     def typicalSMD5050(),     do: 0xFFB0F0 # 255, 176, 240

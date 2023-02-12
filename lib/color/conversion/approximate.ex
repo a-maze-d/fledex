@@ -10,7 +10,7 @@ defmodule Fledex.Color.Conversion.Approximate do
   @hue_purple 192
   @hue_pink 224
 
-  alias Fledex.Utils
+  alias Fledex.Color.Utils
 
   @spec rgb2hsv(rgb) :: hsv
   def rgb2hsv({r,g,b}) do

@@ -1,7 +1,7 @@
 defmodule Fledex.Color.Conversion.Spectrum do
   use Fledex.Color.Types
 
-  alias Fledex.Utils
+  alias Fledex.Color.Utils
   alias Fledex.Color.Conversion.Raw
 
   @spec hsv2rgb(hsv, (rgb -> rgb)) :: rgb

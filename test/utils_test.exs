@@ -1,7 +1,7 @@
 defmodule Fledex.UtilsTest do
   use ExUnit.Case
 
-  alias Fledex.Utils
+  alias Fledex.Color.Utils
 
   test "average" do
     led = {0x33, 0x12C, 0x258}

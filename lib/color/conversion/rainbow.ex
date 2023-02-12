@@ -1,7 +1,7 @@
 defmodule Fledex.Color.Conversion.Rainbow do
   import Bitwise
   use Fledex.Color.Types
-  alias Fledex.Utils
+  alias Fledex.Color.Utils
 
   @k255 255
   @k171 171
