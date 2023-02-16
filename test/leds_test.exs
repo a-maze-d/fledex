@@ -187,6 +187,21 @@ defmodule Fledex.LedsTest do
       |> Leds.func(:rainbow, config)
       |> Leds.to_list()
 
+      # TODO: validate the colors
+      assert length(list) == 20
+    end
+
+    test "gradient" do
+      config = %{
+        start_color: 0xFF0000,
+        end_color: 0x0000FF
+      }
+
+      list = Leds.new(20)
+      |> Leds.func(:gradient, config)
+      |> Leds.to_list()
+
+      # TODO; validate the colors
       assert length(list) == 20
     end
   end

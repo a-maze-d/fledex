@@ -1,5 +1,6 @@
 defmodule Fledex.Color.Utils do
   use Fledex.Color.Types
+  use Fledex.Color.Names
   import Bitwise
 
   @spec scale8_video_addition(boolean, 0..255, 0..255) :: 0|1
@@ -78,5 +79,14 @@ defmodule Fledex.Color.Utils do
   @spec combine_subpixels(rgb) :: colorint
   def combine_subpixels({r,g,b}) do
     (r<<<16) + (g<<<8) + b
+  end
+
+  @spec convert_to_subpixels((colorint | atom | rgb)) :: rgb
+  def convert_to_subpixels(rgb) do
+    case rgb do
+      x when is_atom(x) -> get_color_int(x) |> split_into_subpixels()
+      x when is_integer(x) -> split_into_subpixels(x)
+      x -> x
+    end
   end
 end

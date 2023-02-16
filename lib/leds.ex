@@ -8,6 +8,7 @@ defmodule Fledex.Leds do
 
   alias Fledex.Functions
   alias Fledex.LedsDriver
+  alias Fledex.Color.Utils
 
   @enforce_keys [:count, :leds, :opts]
   defstruct count: 0, leds: %{}, opts: %{}, meta: %{index: 1} #, fill: :none
@@ -60,9 +61,21 @@ defmodule Fledex.Leds do
     end) |>  Map.new
   end
 
-  def gradient(leds, _config) do
-    leds
-    # Functions.create_gradient_rgb
+  @spec gradient(t, map) :: t
+  def gradient(leds, %{start_color: start_color, end_color: end_color} = config) do
+    num_leds = config[:num_leds] || leds.count
+    offset = config[:offset] || 0
+
+    start_color = Utils.convert_to_subpixels(start_color)
+    end_color = Utils.convert_to_subpixels(end_color)
+
+    led_values = Functions.create_gradient_rgb(num_leds, start_color, end_color)
+      |> convert_to_leds_structure(offset)
+
+    put_in(leds.leds, Map.merge(leds.leds, led_values))
+  end
+  def gradient(_leds, _config) do
+    raise "You need to specify at least a start_color and end_color"
   end
 
   @spec light(t, (colorint | t | atom)) :: t
