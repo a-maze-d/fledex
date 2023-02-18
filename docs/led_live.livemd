@@ -1,0 +1,102 @@
+# Some simple tests
+
+```elixir
+Mix.install([
+  {:fledex, path: "/code/fledex", env: :dev},
+  {:kino, "~>0.8"}
+])
+
+alias Fledex.Leds
+alias Fledex.LedsDriver
+alias Fledex.LedStripDriver.KinoDriver
+:ok
+
+# :ok = GenServer.stop(pid, :normal)
+```
+
+## Section
+
+```elixir
+# frame = Kino.Frame.new() |> Kino.render()
+
+{:ok, pid} =
+  LedsDriver.start_link(%{
+    timer: %{only_dirty_update: false},
+    led_strip: %{
+      driver_module: KinoDriver,
+      config: %{update_freq: 1}
+    }
+  })
+```
+
+```elixir
+defmodule Helpers do
+  def red_john() do
+    Enum.each(1..10, fn _index ->
+      LedsDriver.set_leds(:john, [0xFF0000, 0x000000, 0x000000, 0x000000, 0x00000])
+      Process.sleep(600)
+      LedsDriver.set_leds(:john, [0x000000, 0xFF0000, 0x000000, 0x000000, 0x00000])
+      Process.sleep(600)
+      LedsDriver.set_leds(:john, [0x000000, 0x000000, 0xFF0000, 0x000000, 0x00000])
+      Process.sleep(600)
+      LedsDriver.set_leds(:john, [0x000000, 0x000000, 0x000000, 0xFF0000, 0x00000])
+      Process.sleep(600)
+      LedsDriver.set_leds(:john, [0x000000, 0x000000, 0x000000, 0x000000, 0xFF0000])
+      Process.sleep(600)
+    end)
+  end
+
+  def blue_jane() do
+    Enum.each(1..10, fn _index ->
+      LedsDriver.set_leds(:jane, [0x000000, 0x000000, 0x000000, 0x000000, 0x0000FF, 0x00FF00])
+      Process.sleep(600)
+      LedsDriver.set_leds(:jane, [0x000000, 0x000000, 0x000000, 0x0000FF, 0x000000, 0x00FF00])
+      Process.sleep(600)
+      LedsDriver.set_leds(:jane, [0x000000, 0x000000, 0x0000FF, 0x000000, 0x000000, 0x00FF00])
+      Process.sleep(600)
+      LedsDriver.set_leds(:jane, [0x000000, 0x0000FF, 0x000000, 0x000000, 0x000000, 0x00FF00])
+      Process.sleep(600)
+      LedsDriver.set_leds(:jane, [0x0000FF, 0x000000, 0x000000, 0x000000, 0x000000, 0x00FF00])
+      Process.sleep(600)
+    end)
+  end
+
+  def rainbow() do
+    Enum.each(0..10000, fn index ->
+      config = %{
+        num_leds: 20,
+        initial_hue: 255 - rem(index, 255),
+        reversed: true
+      }
+
+      Leds.new(20)
+      |> Leds.func(:rainbow, config)
+      |> Leds.send()
+
+      Process.sleep(20)
+    end)
+  end
+end
+```
+
+```elixir
+LedsDriver.define_namespace(:john)
+LedsDriver.define_namespace(:jane)
+
+spawn(fn -> Helpers.blue_jane() end)
+spawn(fn -> Helpers.red_john() end)
+```
+
+```elixir
+LedsDriver.drop_namespace(:john)
+LedsDriver.drop_namespace(:jane)
+```
+
+```elixir
+LedsDriver.define_namespace(:default)
+spawn(fn -> Helpers.rainbow() end)
+```
+
+```elixir
+GenServer.stop(pid)
+```
