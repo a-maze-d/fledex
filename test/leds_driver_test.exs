@@ -48,7 +48,7 @@ defmodule Fledex.LedDriverTest do
       LedsDriver.handle_info({:update_timeout, update_func}, LedsDriver.init_state(%{timer: %{counter: 1, update_func: update_func}}))
       assert_receive {:update_timeout, _update_func}
     end
-    test "ensure the state can be updated in the update function" do
+    test "ensure the config can be updated in the update function" do
       update_func = fn(state) ->
         {_old_update_counter, state} = get_and_update_in(state, [:led_strip, :update_counter], &{&1, &1 + 1})
         state
@@ -153,7 +153,7 @@ defmodule Fledex.LedDriverTest do
       init_args = %{
         timer: %{counter: 0, is_dirty: true},
         led_strip: %{
-          driver_module: LoggerDriver,
+          driver_modules: [LoggerDriver],
           config: %{update_freq: 1, log_color_code: false}
         },
         namespaces: %{

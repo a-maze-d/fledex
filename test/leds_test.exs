@@ -187,8 +187,29 @@ defmodule Fledex.LedsTest do
       |> Leds.func(:rainbow, config)
       |> Leds.to_list()
 
-      # TODO: validate the colors
       assert length(list) == 20
+      assert list == [
+        0xFF0101,
+        0xDF0121,
+        0xBC0144,
+        0x9A0167,
+        0x780189,
+        0x5801A9,
+        0x3601CA,
+        0x1301ED,
+        0x0122DF,
+        0x01679A,
+        0x01A65B,
+        0x01CA36,
+        0x01ED13,
+        0x22EF01,
+        0x67CC01,
+        0xA6AC01,
+        0xAB8A01,
+        0xAB6801,
+        0xBA4601,
+        0xDD2301
+      ]
     end
 
     test "gradient" do
@@ -201,8 +222,29 @@ defmodule Fledex.LedsTest do
       |> Leds.func(:gradient, config)
       |> Leds.to_list()
 
-      # TODO; validate the colors
       assert length(list) == 20
+      assert list == [
+        0xF2000C,
+        0xE60018,
+        0xDA0024,
+        0xCE0030,
+        0xC2003C,
+        0xB60048,
+        0xAA0054,
+        0x9D0061,
+        0x91006D,
+        0x850079,
+        0x790085,
+        0x6D0091,
+        0x61009D,
+        0x5500A9,
+        0x4800B6,
+        0x3C00C2,
+        0x3000CE,
+        0x2400DA,
+        0x1800E6,
+        0x0C00F2
+      ]
     end
   end
 

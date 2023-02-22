@@ -1,0 +1,12 @@
+# Toolshed
+
+```elixir
+Mix.install([{:toolshed, "~>0.2.26"}])
+use Toolshed
+```
+
+## Section
+
+```elixir
+Toolshed.HTTP.weather()
+```

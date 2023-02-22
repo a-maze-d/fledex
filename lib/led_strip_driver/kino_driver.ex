@@ -8,32 +8,26 @@ defmodule Fledex.LedStripDriver.KinoDriver do
   @block <<"\u2588">>
 
   @impl true
-  @spec init(map, Fledex.LedDriver.t) :: Fledex.LedDriver.t
-  def init(init_args, state) do
-    config = %{
-      update_freq: init_args[:led_strip][:config][:update_freq] || @default_update_freq,
-      log_color_code: init_args[:led_strip][:config][:log_color_code] || false,
-      frame: init_args[:led_strip][:config][:frame] || Kino.Frame.new() |> Kino.render()
+  @spec init(map) :: map
+  def init(init_args) do
+    %{
+      update_freq: init_args[:update_freq] || @default_update_freq,
+      log_color_code: init_args[:log_color_code] || false,
+      frame: init_args[:frame] || Kino.Frame.new() |> Kino.render()
     }
-    state
-    |> put_in([Access.key(:led_strip, %{}), Access.key(:config, %{})], config)
   end
 
   @impl true
-  @spec transfer(list(colorint), Fledex.LedDriver.t) :: Fledex.LedDriver.t
-  def transfer(leds, state) do
-    counter = state.timer.counter
-    update_freq = state.led_strip.config.update_freq
-
-    if (rem(counter, update_freq) == 0 and length(leds) > 0) do
-      frame = state.led_strip.config.frame
+  @spec transfer(list(colorint), pos_integer, map) :: map
+  def transfer(leds, counter, config) do
+    if (rem(counter, config.update_freq) == 0 and length(leds) > 0) do
       output = Enum.reduce(leds, <<>>, fn value, acc ->
         hex = value |> Integer.to_string(@base16) |> String.pad_leading(6, "0")
         acc <> "<span style=\"color: ##{hex}\">" <> @block <> "</span>"
       end)
-      Kino.Frame.render(frame, Kino.Markdown.new(output))
+      Kino.Frame.render(config.frame, Kino.Markdown.new(output))
     end
-    state
+    config
   end
 
   @impl true

@@ -6,20 +6,17 @@ if Mix.target == :rpi do
     import Circuits.SPI
 
     @impl true
-    @spec init(map, Fledex.LedDriver.t) :: Fledex.LedDriver.t
-    def init(init_args, state) do
+    @spec init(map) :: map
+    def init(init_module_args) do
       config = %{
-        dev: init_args[:led_strip][:config][:dev] || "spidev0.0",
-        mode: init_args[:led_strip][:config][:mode] || 0,
-        bits_per_word: init_args[:led_strip][:config][:bits_per_word] || 8,
-        speed_hz: init_args[:led_strip][:config][:speed_hz] || 1_000_000,
-        delay_us: init_args[:led_strip][:config][:delay_us] || 10,
-        lsb_first: init_args[:led_strip][:config][:lsb_first] || false,
+        dev: init_module_args[:dev] || "spidev0.0",
+        mode: init_module_args[:mode] || 0,
+        bits_per_word: init_module_args[:bits_per_word] || 8,
+        speed_hz: init_module_args[:speed_hz] || 1_000_000,
+        delay_us: init_module_args[:delay_us] || 10,
+        lsb_first: init_module_args[:lsb_first] || false,
       }
-
-      state
-        |> put_in([:led_strip, :config], config)
-        |> put_in([:led_strip, :ref], open_spi(config))
+      put_in(config.ref, open_spi(config))
     end
 
     @spec open_spi(map) :: reference
@@ -36,18 +33,18 @@ if Mix.target == :rpi do
     end
 
     @impl true
-    @spect transfer(list(colorint), Fledex.LedDriver.t) :: Fledex.LedDriver.t
-    def transfer(leds, state) do
-      ref = state.led_strip.ref
+    @spect transfer(list(colorint), map) :: map
+    def transfer(leds, config) do
+      ref = config.ref
       binary = Enum.reduce(leds, <<>>, fn led, acc -> acc <> <<led>> end)
       {:ok, _} = Circuits.SPI.transfer(ref, binary)
-      state
+      config
     end
 
     @impl true
-    @spec terminate(reason, Fledex.LedDriver.t) :: :ok when reason: :normal | :shutdown | {:shutdown, term()} | term()
-    def terminate(_reason, state) do
-      Circuits.SPI.close(state.led_strip.ref)
+    @spec terminate(reason, map) :: :ok when reason: :normal | :shutdown | {:shutdown, term()} | term()
+    def terminate(_reason, config) do
+      Circuits.SPI.close(config.ref)
     end
   end
 end

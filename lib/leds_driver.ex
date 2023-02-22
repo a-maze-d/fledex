@@ -3,6 +3,7 @@ defmodule Fledex.LedsDriver do
   use Fledex.Color.Types
 
   require Logger
+  alias Fledex.LedStripDriver.Driver
   alias Fledex.LedStripDriver.LoggerDriver
   alias Fledex.Color.Utils
 
@@ -18,14 +19,14 @@ defmodule Fledex.LedsDriver do
     },
     led_strip: %{
       merge_strategy: atom,
-      driver_module: module,
+      driver_modules: module,
       config: map
     },
     namespaces: map
   }
 
   @default_update_timeout 50
-  @default_driver_module LoggerDriver
+  @default_driver_modules [LoggerDriver]
 
   #client code
   @spec start_link(map, atom | {:global, any} | {:via, atom, any}) ::
@@ -88,21 +89,19 @@ defmodule Fledex.LedsDriver do
       },
       led_strip: %{
         merge_strategy: init_args[:led_strip][:merge_strategy] || :avg,
-        driver_module: init_args[:led_strip][:driver_module] || @default_driver_module,
+        driver_modules: init_args[:led_strip][:driver_modules] || @default_driver_modules,
         config: init_args[:led_strip][:config] || %{}
       },
       namespaces: init_args[:namespaces] || %{}
     }
-    module = state.led_strip.driver_module
-    module.init(init_args, state)
+    Driver.init(init_args, state)
   end
 
   @impl true
   @spec terminate(reason, state :: Fledex.LedDriver.t) :: :ok
   when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(reason, state) do
-    module = state.led_strip.driver_module
-    module.terminate(reason, state)
+    Driver.terminate(reason, state)
   end
 
   @spec start_timer(t) :: t
@@ -179,7 +178,7 @@ defmodule Fledex.LedsDriver do
     #   fn ->
         state = state.namespaces
           |> merge_namespaces(state.led_strip.merge_strategy)
-          |> send_to_strip(state)
+          |> Driver.transfer(state)
           |> put_in([:timer,:is_dirty], false)
     #       {state, %{metadata: "done"}}
     #   end
@@ -237,10 +236,5 @@ defmodule Fledex.LedsDriver do
       :cap -> Utils.cap(rgb)
       _ -> raise "Unknown merge strategy"
     end
-  end
-  @spec send_to_strip(list(colorint), t) :: t
-  defp send_to_strip(leds, state) do
-    module = state.led_strip.driver_module
-    module.transfer(leds, state)
   end
 end

@@ -2,9 +2,13 @@ defmodule Fledex.Color.Names do
   @moduledoc """
   This module provides a mapping from color names to color integers
   """
-  # TODO: load this json list and convert it to functions?
-  # https://www.ditig.com/256-colors-cheat-sheet
-  # https://www.ditig.com/downloads/256-colors.json
+  @doc """
+    Load this json list and convert it to a compiled structure with functions to access it
+
+    The JSON file is from here:
+    * https://www.ditig.com/256-colors-cheat-sheet
+    * https://www.ditig.com/downloads/256-colors.json
+  """
   defmacro __using__(_opts) do
     root_dir = Path.dirname(__DIR__)
     file = "#{root_dir}/color/256-colors.json"

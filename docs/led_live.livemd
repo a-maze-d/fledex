@@ -2,7 +2,7 @@
 
 ```elixir
 Mix.install([
-  {:fledex, path: "/code/fledex", env: :dev},
+  {:fledex, path: "~/Documents/code/fledex", env: :dev},
   {:kino, "~>0.8"}
 ])
 
@@ -23,6 +23,7 @@ alias Fledex.LedStripDriver.KinoDriver
   LedsDriver.start_link(%{
     timer: %{only_dirty_update: false},
     led_strip: %{
+      merge_strategy: :cap,
       driver_module: KinoDriver,
       config: %{update_freq: 1}
     }
@@ -31,70 +32,94 @@ alias Fledex.LedStripDriver.KinoDriver
 
 ```elixir
 defmodule Helpers do
-  def red_john() do
+  def red_john(namespace) do
     Enum.each(1..10, fn _index ->
-      LedsDriver.set_leds(:john, [0xFF0000, 0x000000, 0x000000, 0x000000, 0x00000])
+      LedsDriver.set_leds(namespace, [0xFF0000, 0x000000, 0x000000, 0x000000, 0x00000])
       Process.sleep(600)
-      LedsDriver.set_leds(:john, [0x000000, 0xFF0000, 0x000000, 0x000000, 0x00000])
+      LedsDriver.set_leds(namespace, [0x000000, 0xFF0000, 0x000000, 0x000000, 0x00000])
       Process.sleep(600)
-      LedsDriver.set_leds(:john, [0x000000, 0x000000, 0xFF0000, 0x000000, 0x00000])
+      LedsDriver.set_leds(namespace, [0x000000, 0x000000, 0xFF0000, 0x000000, 0x00000])
       Process.sleep(600)
-      LedsDriver.set_leds(:john, [0x000000, 0x000000, 0x000000, 0xFF0000, 0x00000])
+      LedsDriver.set_leds(namespace, [0x000000, 0x000000, 0x000000, 0xFF0000, 0x00000])
       Process.sleep(600)
-      LedsDriver.set_leds(:john, [0x000000, 0x000000, 0x000000, 0x000000, 0xFF0000])
+      LedsDriver.set_leds(namespace, [0x000000, 0x000000, 0x000000, 0x000000, 0xFF0000])
       Process.sleep(600)
     end)
   end
 
-  def blue_jane() do
+  def blue_jane(namespace) do
     Enum.each(1..10, fn _index ->
-      LedsDriver.set_leds(:jane, [0x000000, 0x000000, 0x000000, 0x000000, 0x0000FF, 0x00FF00])
+      LedsDriver.set_leds(namespace, [0x000000, 0x000000, 0x000000, 0x000000, 0x0000FF, 0x00FF00])
       Process.sleep(600)
-      LedsDriver.set_leds(:jane, [0x000000, 0x000000, 0x000000, 0x0000FF, 0x000000, 0x00FF00])
+      LedsDriver.set_leds(namespace, [0x000000, 0x000000, 0x000000, 0x0000FF, 0x000000, 0x00FF00])
       Process.sleep(600)
-      LedsDriver.set_leds(:jane, [0x000000, 0x000000, 0x0000FF, 0x000000, 0x000000, 0x00FF00])
+      LedsDriver.set_leds(namespace, [0x000000, 0x000000, 0x0000FF, 0x000000, 0x000000, 0x00FF00])
       Process.sleep(600)
-      LedsDriver.set_leds(:jane, [0x000000, 0x0000FF, 0x000000, 0x000000, 0x000000, 0x00FF00])
+      LedsDriver.set_leds(namespace, [0x000000, 0x0000FF, 0x000000, 0x000000, 0x000000, 0x00FF00])
       Process.sleep(600)
-      LedsDriver.set_leds(:jane, [0x0000FF, 0x000000, 0x000000, 0x000000, 0x000000, 0x00FF00])
+      LedsDriver.set_leds(namespace, [0x0000FF, 0x000000, 0x000000, 0x000000, 0x000000, 0x00FF00])
       Process.sleep(600)
     end)
   end
 
-  def rainbow() do
+  def rainbow(namespace) do
     Enum.each(0..10000, fn index ->
       config = %{
-        num_leds: 20,
-        initial_hue: 255 - rem(index, 255),
+        num_leds: 50,
         reversed: true
       }
 
-      Leds.new(20)
+      Leds.new(50)
       |> Leds.func(:rainbow, config)
-      |> Leds.send()
+      |> Leds.send(%{leds_name: namespace, offset: index})
 
-      Process.sleep(20)
+      Process.sleep(100)
+    end)
+  end
+
+  def gradient(namespace) do
+    Enum.each(0..10000, fn index ->
+      config = %{
+        num_leds: 20,
+        start_color: 0xFF0000,
+        end_color: 0x0000FF
+      }
+
+      Leds.new(20)
+      |> Leds.func(:gradient, config)
+      |> Leds.send(%{leds_name: namespace, offset: index, rotate_left: true})
+
+      Process.sleep(100)
     end)
   end
 end
 ```
 
 ```elixir
-LedsDriver.define_namespace(:john)
-LedsDriver.define_namespace(:jane)
+LedsDriver.define_namespace(:default)
+spawn(fn -> Helpers.rainbow(:default) end)
+```
 
-spawn(fn -> Helpers.blue_jane() end)
-spawn(fn -> Helpers.red_john() end)
+```elixir
+LedsDriver.define_namespace(:gradient)
+spawn(fn -> Helpers.gradient(:gradient) end)
 ```
 
 ```elixir
 LedsDriver.drop_namespace(:john)
 LedsDriver.drop_namespace(:jane)
+LedsDriver.drop_namespace(:default)
+LedsDriver.drop_namespace(:gradient)
 ```
 
 ```elixir
+LedsDriver.define_namespace(:john)
+LedsDriver.define_namespace(:jane)
 LedsDriver.define_namespace(:default)
-spawn(fn -> Helpers.rainbow() end)
+
+spawn(fn -> Helpers.blue(:jane) end)
+spawn(fn -> Helpers.red(:john) end)
+spawn(fn -> Helpers.rainbow(:default) end)
 ```
 
 ```elixir

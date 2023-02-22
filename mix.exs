@@ -7,7 +7,11 @@ defmodule Fledex.MixProject do
       version: "0.1.0",
       elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      description: description(),
+      package: package(),
+      deps: deps(),
+      name: "fledex",
+      source_url: "https://github.com/a-maze-d/fledex"
     ]
   end
 
@@ -15,6 +19,17 @@ defmodule Fledex.MixProject do
   def application do
     [
       extra_applications: [:logger]
+    ]
+  end
+
+  defp description() do
+    "A small library to easily control an LED strip with nerves (or nerves-livebook)"
+  end
+  defp package() do
+    [
+      name: "fledex",
+      licenses: ["Apache-2.0"],
+      links: %{"GitHub" => "https://github.com/a-maze-d/fledex"}
     ]
   end
 

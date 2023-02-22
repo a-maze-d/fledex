@@ -1,0 +1,28 @@
+# Camera
+
+```elixir
+Mix.install([
+  {:picam, "~>0.4.1"}
+])
+
+Picam.Camera.start_link()
+Picam.set_size(0, 720)
+Picam.set_rotation(90)
+Picam.set_sensor_mode(7)
+```
+
+## Section
+
+```elixir
+frame = Kino.Frame.new()
+```
+
+```elixir
+for _i <- 1..1000 do
+  Kino.Frame.render(frame, Kino.Image.new(Picam.next_frame(), "image/jpeg"))
+end
+```
+
+```elixir
+Picam.next_frame()
+```

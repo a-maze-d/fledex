@@ -1,0 +1,30 @@
+# Untitled notebook
+
+## Section
+
+```elixir
+# Zahlen
+a = -5
+a = 5
+a = 5.12345
+# 16 x 5 + 1x 0 = 80 + 0 = 80
+a = 0x50
+
+# Boolean
+# FALSE
+a = TRUE
+
+# Atom/Symbol
+a = :hallo
+
+# Text
+a = "Samu"
+
+# Containers
+# list
+a = [5, "Samu", 6, "hallo"]
+# map
+a = %{a: 5, b: "Samu"}
+# tuple
+{c, d}
+```

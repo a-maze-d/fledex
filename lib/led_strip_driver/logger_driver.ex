@@ -20,24 +20,19 @@ defmodule Fledex.LedStripDriver.LoggerDriver do
     all the time. Cleanup should happen in the terminate function
   """
   @impl true
-  @spec init(map, Fledex.LedDriver.t) :: Fledex.LedDriver.t
-  def init(init_args, state) do
-    config = %{
-      update_freq: init_args[:led_strip][:config][:update_freq] || @default_update_freq,
-      log_color_code: init_args[:led_strip][:config][:log_color_code] || false
+  @spec init(map) :: map
+  def init(init_module_args) do
+    %{
+      update_freq: init_module_args[:update_freq] || @default_update_freq,
+      log_color_code: init_module_args[:log_color_code] || false
     }
-    state
-    |> put_in([Access.key(:led_strip, %{}), Access.key(:config, %{})], config)
   end
 
   @impl true
-  @spec transfer(list(colorint), Fledex.LedDriver.t) :: Fledex.LedDriver.t
-  def transfer(leds, state) do
-    counter = state.timer.counter
-    update_freq = state.led_strip.config.update_freq
-
-    if (rem(counter, update_freq) == 0 and length(leds) > 0) do
-      log_color_code = state.led_strip.config.log_color_code
+  @spec transfer(list(colorint), pos_integer, map) :: map
+  def transfer(leds, counter, config) do
+    if (rem(counter, config.update_freq) == 0 and length(leds) > 0) do
+      log_color_code = config.log_color_code
       output = Enum.reduce(leds, <<>>, fn value, acc ->
         if log_color_code do
           acc <> <<value>>
@@ -47,7 +42,7 @@ defmodule Fledex.LedStripDriver.LoggerDriver do
       end)
       IO.puts(output <> "\r")
     end
-    state
+    config
   end
 
   @spec to_ansi_color(colorint) :: String.t
@@ -57,7 +52,7 @@ defmodule Fledex.LedStripDriver.LoggerDriver do
   end
 
   @impl true
-  @spec terminate(reason, Fledex.LedDriver.t) :: :ok when reason: :normal | :shutdown | {:shutdown, term()} | term()
+  @spec terminate(reason, map) :: :ok when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(_reason, _state) do
     # nothing needs to be done here
     :ok

@@ -109,8 +109,6 @@ defmodule Fledex.Leds do
     raise ArgumentError, message: "the offset needs to be > 0 (found: #{offset})"
   end
 
-  # iex(61)> Enum.slide(vals, 0..rem(o-1 + Enum.count(vals),Enum.count(vals)), Enum.count(vals))
-  # [1, 2, 3, 4, 5, 6, 7, 8, 9]
   @spec do_update(t, (colorint | rgb | atom)) :: t
   defp do_update(%__MODULE__{meta: meta} = leds, rgb) do
     index = meta[:index]  || 1
@@ -153,8 +151,13 @@ defmodule Fledex.Leds do
     end)
   end
 
-  @spec send(t, atom, atom) :: any
-  def send(leds, leds_name \\ :default, server_name \\ Fledex.LedsDriver) when is_atom(leds_name) and is_atom(server_name) do
+  @spec send(t, map) :: any
+  def send(leds, opts \\ %{}) do
+    leds_name = opts[:leds_name] || :default
+    server_name = opts[:server_name] || Fledex.LedsDriver
+    offset = opts[:offset] || 0
+    rotate_left = if opts[:rotate_left] != nil, do: opts[:rotate_left], else: true
+
     # we probably want to do some validation here and probably
     # want to optimise it a bit
     # a) is the server running?
@@ -168,7 +171,8 @@ defmodule Fledex.Leds do
       Logger.warn("The namespace hasn't been defined. This should be done before calling this function")
       LedsDriver.define_namespace(leds_name, server_name)
     end
-    LedsDriver.set_leds(leds_name, to_list(leds), server_name)
+    vals = rotate(to_list(leds), offset, rotate_left)
+    LedsDriver.set_leds(leds_name, vals, server_name)
   end
 
   @spec get_light(t, pos_integer) :: colorint
@@ -177,5 +181,15 @@ defmodule Fledex.Leds do
       {:ok, value} -> value
       _ -> 0
     end
+  end
+
+  @spec rotate(list(colorint), pos_integer, boolean) :: list(colorint)
+  def rotate(vals, offset, rotate_left \\ true)
+  def rotate(vals, 0, _rotate_left), do: vals
+  def rotate(vals, offset, rotate_left) do
+    count = Enum.count(vals)
+    offset = rem(offset, count)
+    offset = if rotate_left, do: offset, else: count-offset
+    Enum.slide(vals, 0..rem(offset-1 + count, count), count)
   end
 end
