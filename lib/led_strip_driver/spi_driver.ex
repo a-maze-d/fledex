@@ -1,5 +1,7 @@
 if Mix.target == :rpi do
   defmodule Fledex.LedStripDriver.SpiDriver do
+    alias Fledex.Color.Correction
+
     @behaviour Fledex.LedStripDriver.Driver
     use Fledex.Color.Types
 
@@ -15,6 +17,7 @@ if Mix.target == :rpi do
         speed_hz: init_module_args[:speed_hz] || 1_000_000,
         delay_us: init_module_args[:delay_us] || 10,
         lsb_first: init_module_args[:lsb_first] || false,
+        color_correction: init_module_args[:color_correction] || Correction.no_color_correction()
       }
       put_in(config.ref, open_spi(config))
     end
@@ -35,9 +38,11 @@ if Mix.target == :rpi do
     @impl true
     @spect transfer(list(colorint), map) :: map
     def transfer(leds, config) do
-      ref = config.ref
-      binary = Enum.reduce(leds, <<>>, fn led, acc -> acc <> <<led>> end)
-      {:ok, _} = Circuits.SPI.transfer(ref, binary)
+      binary = leds
+        |> Correction.apply_rgb_correction(led, config.color_correction)
+        |> Enum.reduce(leds, <<>>, fn led, acc -> acc <> <<led>> end)
+
+      {:ok, _} = Circuits.SPI.transfer(config.ref, binary)
       config
     end
 

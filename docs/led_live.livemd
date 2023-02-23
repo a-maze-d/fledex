@@ -9,6 +9,7 @@ Mix.install([
 alias Fledex.Leds
 alias Fledex.LedsDriver
 alias Fledex.LedStripDriver.KinoDriver
+alias Fledex.Color.Correction
 :ok
 
 # :ok = GenServer.stop(pid, :normal)
@@ -24,15 +25,21 @@ alias Fledex.LedStripDriver.KinoDriver
     timer: %{only_dirty_update: false},
     led_strip: %{
       merge_strategy: :cap,
-      driver_module: KinoDriver,
-      config: %{update_freq: 1}
+      driver_modules: [KinoDriver],
+      config: %{
+        KinoDriver => %{
+          update_freq: 1,
+          color_correction: Fledex.Color.Correction.no_color_correction()
+          # frame: frame
+        }
+      }
     }
   })
 ```
 
 ```elixir
 defmodule Helpers do
-  def red_john(namespace) do
+  def red(namespace) do
     Enum.each(1..10, fn _index ->
       LedsDriver.set_leds(namespace, [0xFF0000, 0x000000, 0x000000, 0x000000, 0x00000])
       Process.sleep(600)
@@ -47,7 +54,7 @@ defmodule Helpers do
     end)
   end
 
-  def blue_jane(namespace) do
+  def blue(namespace) do
     Enum.each(1..10, fn _index ->
       LedsDriver.set_leds(namespace, [0x000000, 0x000000, 0x000000, 0x000000, 0x0000FF, 0x00FF00])
       Process.sleep(600)
@@ -71,7 +78,7 @@ defmodule Helpers do
 
       Leds.new(50)
       |> Leds.func(:rainbow, config)
-      |> Leds.send(%{leds_name: namespace, offset: index})
+      |> Leds.send(%{namespace: namespace, offset: index})
 
       Process.sleep(100)
     end)
@@ -80,14 +87,14 @@ defmodule Helpers do
   def gradient(namespace) do
     Enum.each(0..10000, fn index ->
       config = %{
-        num_leds: 20,
+        num_leds: 50,
         start_color: 0xFF0000,
         end_color: 0x0000FF
       }
 
-      Leds.new(20)
+      Leds.new(50)
       |> Leds.func(:gradient, config)
-      |> Leds.send(%{leds_name: namespace, offset: index, rotate_left: true})
+      |> Leds.send(%{namespace: namespace, offset: index, rotate_left: true})
 
       Process.sleep(100)
     end)

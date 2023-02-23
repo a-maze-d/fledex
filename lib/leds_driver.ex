@@ -36,20 +36,20 @@ defmodule Fledex.LedsDriver do
   end
 
   @spec define_namespace(atom, atom) :: ({:ok, atom} | {:error, String.t})
-  def define_namespace(leds_name, server_name \\ __MODULE__) do
-    GenServer.call(server_name, {:define_namespace, leds_name})
+  def define_namespace(namespace, server_name \\ __MODULE__) do
+    GenServer.call(server_name, {:define_namespace, namespace})
   end
   @spec drop_namespace(atom, atom) :: :ok
-  def drop_namespace(leds_name, server_name \\ __MODULE__) do
-    GenServer.call(server_name, {:drop_namespace, leds_name})
+  def drop_namespace(namespace, server_name \\ __MODULE__) do
+    GenServer.call(server_name, {:drop_namespace, namespace})
   end
   @spec exist_namespace(atom, atom) :: boolean
-  def exist_namespace(leds_name, server_name \\ __MODULE__) do
-    GenServer.call(server_name, {:exist_namespace, leds_name})
+  def exist_namespace(namespace, server_name \\ __MODULE__) do
+    GenServer.call(server_name, {:exist_namespace, namespace})
   end
   @spec set_leds(atom, list(pos_integer), atom) :: (:ok | {:error, String.t})
-  def set_leds(leds_name, leds, server_name \\ __MODULE__) do
-    GenServer.call(server_name, {:set_leds, leds_name, leds})
+  def set_leds(namespace, leds, server_name \\ __MODULE__) do
+    GenServer.call(server_name, {:set_leds, namespace, leds})
   end
 
   # server code
@@ -67,6 +67,13 @@ defmodule Fledex.LedsDriver do
 
   @spec init_state(map) :: t
   def init_state(init_args) when is_map(init_args) do
+    driver_modules = case init_args[:led_strip][:driver_modules] do
+      nil -> Logger.warn("No driver_modules defined/ #{@default_driver_modules} will be used")
+            @default_driver_modules
+      driver_modules when not is_list(driver_modules) -> Logger.warn("driver_modules is not a list")
+            [driver_modules]
+      driver_modules -> driver_modules
+    end
     only_dirty_update = if init_args[:timer][:only_dirty_update] == nil do
       false
     else
@@ -89,7 +96,7 @@ defmodule Fledex.LedsDriver do
       },
       led_strip: %{
         merge_strategy: init_args[:led_strip][:merge_strategy] || :avg,
-        driver_modules: init_args[:led_strip][:driver_modules] || @default_driver_modules,
+        driver_modules: driver_modules,
         config: init_args[:led_strip][:config] || %{}
       },
       namespaces: init_args[:namespaces] || %{}

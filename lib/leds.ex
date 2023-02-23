@@ -153,7 +153,7 @@ defmodule Fledex.Leds do
 
   @spec send(t, map) :: any
   def send(leds, opts \\ %{}) do
-    leds_name = opts[:leds_name] || :default
+    namespace = opts[:namespace] || :default
     server_name = opts[:server_name] || Fledex.LedsDriver
     offset = opts[:offset] || 0
     rotate_left = if opts[:rotate_left] != nil, do: opts[:rotate_left], else: true
@@ -166,13 +166,13 @@ defmodule Fledex.Leds do
       {:ok, _pid} = LedsDriver.start_link(%{}, server_name)
     end
     # b) Is a namespace defined?
-    exists = LedsDriver.exist_namespace(leds_name, server_name)
+    exists = LedsDriver.exist_namespace(namespace, server_name)
     if not exists do
       Logger.warn("The namespace hasn't been defined. This should be done before calling this function")
-      LedsDriver.define_namespace(leds_name, server_name)
+      LedsDriver.define_namespace(namespace, server_name)
     end
     vals = rotate(to_list(leds), offset, rotate_left)
-    LedsDriver.set_leds(leds_name, vals, server_name)
+    LedsDriver.set_leds(namespace, vals, server_name)
   end
 
   @spec get_light(t, pos_integer) :: colorint

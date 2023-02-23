@@ -25,6 +25,12 @@ defmodule Fledex.Color.Utils do
   def nscale8({r,g,b}, {sr,sg,sb}, video) do
     {scale8(r, sr, video), scale8(g, sg, video), scale8(b, sb, video)}
   end
+  @spec nscale8(colorint, rgb, boolean) :: colorint
+  def nscale8(color, rgb, video) do
+    split_into_subpixels(color)
+      |> nscale8(rgb, video)
+      |> combine_subpixels()
+  end
 
   @doc """
   Splits the rgb-integer value into it's subpixels and returns an
