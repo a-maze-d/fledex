@@ -9,16 +9,24 @@ and being ready for publication
 - [x] Allow setting color correction to the LedStripDriver (I think every strip driver should get a different one)
   - [x] Kino
   - [x] SPI
-- [ ] Enable Telemetry (?)
 - [ ] Add copyright notice
   - [ ] contribution policy file
   - [x] CLA, https://contributoragreements.org/ca-cla-chooser/
   - [ ] CLA form https://github.com/cla-assistant/cla-assistant or https://github.com/contributor-assistant/github-action
-- [ ] Add proper Readme including examples
+- [x] Add a CREDITs file
+- [x] Write a decently good README file
+- [x] Replace 256 colors file with an alternative due to licensing reasons
+- [x] Add proper Readme including examples
 - [ ] Add installation instructions
 - [ ] Provide several notebook examples (test env, prod)
 - [ ] Perform an extra round of testing (also on hardware)
 - [ ] Create a new TODO list which is ready for publication
+  - [ ] Enable Telemetry
+  - [ ] Push the client code so that live updates would be possible (after every loop an update could be sent)
+  - [ ] Get the library into nerves-livebook
+  - [ ] Add proper API/module documentation
+  - [ ] Add documentation on how to connect the LED strip to a RaspberryPi Zero (with and without level shifter)
+  - [ ] Replace the nimble_csv with an own implementation to reduce the dependencies
 - [ ] Cleanup files
 - [x] Check use of fledex as a project name
 - [x] Resolve all code TODOs

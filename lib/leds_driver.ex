@@ -68,11 +68,14 @@ defmodule Fledex.LedsDriver do
   @spec init_state(map) :: t
   def init_state(init_args) when is_map(init_args) do
     driver_modules = case init_args[:led_strip][:driver_modules] do
-      nil -> Logger.warn("No driver_modules defined/ #{@default_driver_modules} will be used")
-            @default_driver_modules
-      driver_modules when not is_list(driver_modules) -> Logger.warn("driver_modules is not a list")
-            [driver_modules]
-      driver_modules -> driver_modules
+      nil ->
+        #Logger.warn("No driver_modules defined/ #{inspect @default_driver_modules} will be used")
+        @default_driver_modules
+      driver_modules when not is_list(driver_modules) ->
+        Logger.warn("driver_modules is not a list")
+        [driver_modules]
+      driver_modules ->
+        driver_modules
     end
     only_dirty_update = if init_args[:timer][:only_dirty_update] == nil do
       false

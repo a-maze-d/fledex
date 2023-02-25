@@ -1,38 +1,62 @@
 defmodule Fledex.Color.Names do
-  @moduledoc """
-  This module provides a mapping from color names to color integers
-  """
-  @doc """
-    Load this json list and convert it to a compiled structure with functions to access it
-
-    The JSON file is from here:
-    * https://www.ditig.com/256-colors-cheat-sheet
-    * https://www.ditig.com/downloads/256-colors.json
-  """
+  alias NimbleCSV.RFC4180, as: CSV
   defmacro __using__(_opts) do
+    # Name ,Hex (RGB) ,Red (RGB) ,Green (RGB) ,Blue (RGB) ,Hue (HSL/HSV) ,Satur. (HSL) ,Light (HSL) ,Satur.(HSV) ,Value (HSV),Source
+
     root_dir = Path.dirname(__DIR__)
-    file = "#{root_dir}/color/256-colors.json"
-    json = File.read!(file)
-    {:ok, colors} = Jason.decode(json, keys: :atoms)
-    names_and_rgb = Enum.map(colors, fn %{hexString: hex_string, name: name} ->
-      hex_string = String.replace(hex_string, "#", "")
-      {hex_int,_} = Integer.parse(hex_string, 16)
-      atom_name = String.to_atom(String.downcase(name,:ascii))
-      {atom_name, hex_int}
-    end) |> Map.new
-    # names = Enum.map(names_and_rgb, fn {name, _} -> String.to_atom(name) end)
+
+    colors = "#{root_dir}/color/names.csv"
+      |> File.stream!()
+      |> CSV.parse_stream()
+      |> Stream.map(fn [name, hex, r, g, b, h, s1, l1, s2, v2, _source] ->
+        %{
+          name: convert_to_atom(name),
+          hex: clean_and_convert(hex),
+          rgb: {to_byte(r), to_byte(g), to_byte(b)},
+          hsl: {to_byte(h), to_byte(s1), to_byte(l1)},
+          hsv: {to_byte(h), to_byte(s2), to_byte(v2)}
+        }
+      end)
+      |> Enum.to_list()
+
     quote do
       @colors unquote(Macro.escape(colors))
-      @names_and_rgb unquote(Macro.escape(names_and_rgb))
-      def json() do
+      def colors() do
         @colors
       end
       def names() do
-        Map.keys(@names_and_rgb)
+        Enum.map(@colors, fn %{name: name} = _colorinfo -> name end)
       end
       def get_color_int(name) do
-        Map.fetch!(@names_and_rgb, name)
+        colorinfo = Enum.find(@colors, fn colorinfo -> colorinfo.name == name end)
+        colorinfo.hex
       end
+    end
+  end
+
+  def convert_to_atom(name) do
+    name
+      |> String.trim()
+      |> String.normalize(:nfd)
+      |> String.replace(~r/[^a-zA-Z0-9_]/, "_")
+      |> String.replace(~r/__+/, "_")
+      |> String.downcase(:ascii)
+      |> String.to_atom()
+
+  end
+  def clean_and_convert(hex_string) do
+    hex_string = String.replace(hex_string, "#", "")
+    {hex_int,_} = Integer.parse(hex_string, 16)
+    hex_int
+  end
+  def to_byte(value) do
+    value = String.trim(value)
+      |> String.replace("—", "0")
+
+    case Float.parse(value) do
+      {value, "%"} -> trunc((value/100) * 255)
+      {value, "°"} -> trunc((value/360) * 255)
+      _ -> raise "Error in converting to byte value (#{value})"
     end
   end
 end

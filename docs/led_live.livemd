@@ -2,6 +2,7 @@
 
 ```elixir
 Mix.install([
+  # note: a relative path works on a computer, but does not work on nerves-livebook
   {:fledex, path: "~/Documents/code/fledex", env: :dev},
   {:kino, "~>0.8"}
 ])

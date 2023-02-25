@@ -132,15 +132,15 @@ defmodule Fledex.LedsTest do
     end
     test "setting leds by name" do
       leds = Leds.new(10)
-        |> Leds.light(:lightsalmon3)
+        |> Leds.light(:light_salmon)
         |> Leds.light(:red)
         |> Leds.light(:green)
-        |> Leds.light(:lime)
+        |> Leds.light(:lime_web_x11_green_)
         |> Leds.light(:blue)
 
-        assert Leds.get_light(leds, 1) == 0xD7875F
+        assert Leds.get_light(leds, 1) == 0xFFA07A
         assert Leds.get_light(leds, 2) == 0xFF0000
-        assert Leds.get_light(leds, 3) == 0x008000
+        assert Leds.get_light(leds, 3) == 0x00FF00
         assert Leds.get_light(leds, 4) == 0x00FF00
         assert Leds.get_light(leds, 5) == 0x0000FF
     end
