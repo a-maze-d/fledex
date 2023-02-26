@@ -39,7 +39,6 @@ defmodule Fledex.MixProject do
       {:circuits_spi, "~> 1.4", env: :prod, targets: :rpi},
       {:telemetry, "~> 1.2"},
       {:kino, "~>0.8"},
-      {:nimble_csv, "~> 1.1", runtime: false}
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]
