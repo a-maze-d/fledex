@@ -1,3 +1,8 @@
+# Introduction
+This is the initial project plan developed with my son. Since I speak German
+with him, it's written in German.
+
+# Project plan
 * Was moechtest do machen: Blau blinken
 * Was bedeutet das genau:
     1. alle Lampen sind blau

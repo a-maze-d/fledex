@@ -3,13 +3,14 @@
 ```elixir
 Mix.install([
   # note: a relative path works on a computer, but does not work on nerves-livebook
-  {:fledex, path: "~/Documents/code/fledex", env: :dev},
+  {:fledex, git: "http://maze:8GUXTAGJymEiJxh@diskmaze2:8418/maze/Fledex.git", tag: "0.1"},
   {:kino, "~>0.8"}
 ])
 
 alias Fledex.Leds
 alias Fledex.LedsDriver
 alias Fledex.LedStripDriver.KinoDriver
+alias Fledex.LedStripDriver.SpiDriver
 alias Fledex.Color.Correction
 :ok
 
@@ -26,12 +27,19 @@ alias Fledex.Color.Correction
     timer: %{only_dirty_update: false},
     led_strip: %{
       merge_strategy: :cap,
-      driver_modules: [KinoDriver],
+      driver_modules: [KinoDriver, SpiDriver],
       config: %{
         KinoDriver => %{
           update_freq: 1,
           color_correction: Fledex.Color.Correction.no_color_correction()
           # frame: frame
+        },
+        SpiDriver => %{
+          color_correction:
+            Correction.define_correction(
+              Correction.Color.typicalSMD5050(),
+              Correction.Temperature.uncorrectedTemperature()
+            )
         }
       }
     }
