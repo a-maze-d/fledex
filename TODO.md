@@ -32,8 +32,8 @@ and being ready for publication
 - [ ] Cleanup files
 - [x] Check use of fledex as a project name
 - [x] Resolve all code TODOs
-- [ ] Tag git repository
-- [ ] Push to github
+- [x] Tag git repository
+- [x] Push to github
   - [x] create a github project
 - [ ] Publish to hex
   - [x] Create a hex account
