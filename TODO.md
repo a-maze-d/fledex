@@ -12,5 +12,5 @@ as really done. Here the outstanding tasks that I can think of.
 - [ ] Add proper API/module documentation
 - [ ] Add documentation on how to connect the LED strip to a RaspberryPi Zero (with and without level shifter)
 - [ ] Cleanup files
-- [ ] Publish to hex
+- [x] Publish to hex
 

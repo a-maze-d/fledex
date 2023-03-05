@@ -39,6 +39,7 @@ defmodule Fledex.MixProject do
       {:circuits_spi, "~> 1.4"},
       {:telemetry, "~> 1.2"},
       {:kino, "~>0.8"},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
     ]
   end
 end
