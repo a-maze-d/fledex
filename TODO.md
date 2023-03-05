@@ -9,11 +9,13 @@ and being ready for publication
 - [x] Allow setting color correction to the LedStripDriver (I think every strip driver should get a different one)
   - [x] Kino
   - [x] SPI
-- [ ] Copyright & License stuff
+- [x] Copyright & License stuff
   - [x] Add copyright notice in every file (decided to not do this)
   - [x] contribution policy file
   - [x] CLA, https://contributoragreements.org/ca-cla-chooser/
-  - [ ] CLA form https://github.com/cla-assistant/cla-assistant or https://github.com/contributor-assistant/github-action
+  - [x] Enable sign-off feature in github
+  - [x] Add apache license
+github-action
 - [x] Add a CREDITs file
 - [x] Write a decently good README file
 - [x] Replace 256 colors file with an alternative due to licensing reasons

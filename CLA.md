@@ -8,7 +8,7 @@ based on the
 
 Thank you for your interest in contributing to a-maze-d's Fledex ("We" or "Us").
 
-The purpose of this contributor agreement ("Agreement") is to clarify and document the rights granted by contributors to Us. To make this document effective, please follow the instructions at https://github.com/a-maze-d/fledex/CONTRIBUTIONS.md.
+The purpose of this contributor agreement ("Agreement") is to clarify and document the rights granted by contributors to Us. To make this document effective, please follow the instructions at [CONTRIBUTIONS.md](CONTRIBUTIONS.md).
 
 ### 0\. Preamble
 
