@@ -1,0 +1,1 @@
+Pin information: https://pinout.xyz/pinout/spi# 
