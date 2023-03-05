@@ -23,7 +23,7 @@ and being ready for publication
 - [ ] Provide several notebook examples (test env, prod)
 - [ ] Perform an extra round of testing (also on hardware)
 - [ ] Create a new TODO list which is ready for publication
-  - [ ] Change most configs to lists instead of maps?
+  - [ ] Change most configs to keyword lists instead of maps?
   - [ ] Enable Telemetry
   - [ ] Push the client code so that live updates would be possible (after every loop an update could be sent)
   - [ ] Get the library into nerves-livebook
