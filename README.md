@@ -12,7 +12,7 @@ Quite a lot of inspiration came from the [FastLED project](http://fastled.io/) a
 
 ** TODO: ensure the links to hex & hexdocs are correct **
 
-The library is [available in Hex](https://hex.pm/docs/publish), the package can be installed
+The library is [available in Hex](https://hex.pm/packages/fledex), the package can be installed
 by adding `fledex` to your list of dependencies in `mix.exs`:
 
 ```elixir

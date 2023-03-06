@@ -1,0 +1,90 @@
+```elixir
+Mix.install([
+  {:circuits_spi, "~> 1.3"}
+])
+```
+
+Search and open the SPI bus
+===========================
+
+First of all we try to figure out what kind of SPI buses exist on the device
+```elixir
+_ = Circuits.SPI.bus_names()
+```
+
+As a next step we open the first SPI bus and close it again. Let's make sure this works without any error
+```elixir
+{:ok, ref} =
+  Circuits.SPI.open("spidev0.0",
+    mode: 0,
+    bits_per_word: 8,
+    speed_hz: 1_000_000,
+    delay_us: 10,
+    lsb_first: false
+  )
+
+:ok = Circuits.SPI.close(ref)
+```
+
+Define a data structure
+=======================
+
+Mext we define a data structure as required by the LED strip. The documentation states that we simply
+have to send the bytes for the different LEDs in a row. If it's too short only a couple of LEDs will be 
+addressed and the rest will not get any info. If the data structure is longer all LEDs will receive their
+update and the rest of the data will be ignored.
+
+To start with we define 3 LEDs with the color red
+```elixir
+range = Enum.to_list(1..3)
+
+data =
+  Enum.reduce(range, <<>>, fn _index, leds ->
+    leds <> <<0xFF, 0x00, 0x00>>
+  end)
+```
+
+Send the data to the LED strip
+==============================
+For this we need to combine the above steps, i.e.
+1. We open the SPI bus
+2. We define a datastructure with only zeros (to delete the strip, make it completely black)
+3. We send the binary to the SPI bus
+4. We define our data structure with some colors (see above)
+5. We send the binary to the SPI bus
+6. We close teh SPI bus
+
+Let's see what the result will be
+
+```elixir
+# 1
+{:ok, ref} =
+  Circuits.SPI.open("spidev0.0",
+    mode: 0,
+    bits_per_word: 8,
+    speed_hz: 1_000_000,
+    delay_us: 10,
+    lsb_first: false
+  )
+
+# 2 (we got a 3m strup with 96 LEDs, 3x 32 LEDs)
+data_black =
+  Enum.reduce(Enum.to_list(1..96), <<>>, fn lindex, leds ->
+    leds <> <<0, 0, 0>>
+  end)
+
+# 3
+{:ok, _} = Circuits.SPI.transfer(ref, data_black)
+
+# 4
+data_3red =
+  Enum.reduce(Enum.to_list(1..3), <<>>, fn _index, leds ->
+    leds <> <<0xFF, 0x00, 0x00>>
+  end)
+
+# 5
+{:ok, _} = Circuits.SPI.transfer(ref, data_3red)
+
+# 6
+:ok = Circuits.SPI.close(ref)
+```
