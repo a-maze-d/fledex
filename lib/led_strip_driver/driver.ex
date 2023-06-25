@@ -1,5 +1,6 @@
 defmodule Fledex.LedStripDriver.Driver do
   use Fledex.Color.Types
+  require Logger
 
   @callback init(module_init_args :: map) :: map
   @callback transfer(leds :: list(colorint), counter :: pos_integer, config :: map) :: map
@@ -9,6 +10,7 @@ defmodule Fledex.LedStripDriver.Driver do
     @spec init(map, Fledex.LedDriver.t) :: Fledex.LedDriver.t
     def init(init_args, state) do
       configs = for module <- state.led_strip.driver_modules do
+        Logger.info("Creating driver: #{inspect module}")
         module_init_args = init_args[:led_strip][:config][module] || %{}
         config = module.init(module_init_args)
         {module, config}

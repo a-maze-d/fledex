@@ -1,8 +1,17 @@
 defmodule Fledex.LedsDriver do
+  @moduledoc """
+  This module defines a GenServer that manages the LED strip (be it a real one with the
+  SpiDriver or a virtual one with e.g. the KinoDriver). Usually you only want to start
+  one server, even though it is possible to start several.
+  The LedsDriver will take several Leds definitions and merge them together to be displayed
+  on a single LED strip
+  The role the LedsDriver plays is similar to the one a window server  plays on a normal computer
+  """
   @behaviour GenServer
   use Fledex.Color.Types
 
   require Logger
+
   alias Fledex.LedStripDriver.Driver
   alias Fledex.LedStripDriver.LoggerDriver
   alias Fledex.Color.Utils
