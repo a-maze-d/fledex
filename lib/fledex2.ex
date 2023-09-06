@@ -12,18 +12,16 @@ defmodule Fledex2 do
   end
 
   defmacro live_loop(loop_name, loop_options \\ [], do: block) do
-# func = build_func(Macro.escape(block, unquote: true))
-        # _ -> raise "data needs to be a map"
-    func = quote do
-      &(unquote(block))
-    end |> tap(& IO.puts Code.format_string! Macro.to_string &1)
+    func_ast = {:fn, [], block}
     quote do
+      loop_options = unquote(loop_options)
       Module.put_attribute(__MODULE__, :loops, {
         Module.get_attribute(__MODULE__, :strip_name, :default),
         Module.get_attribute(__MODULE__, :strip_options, []),
         unquote(loop_name),
-        unquote(loop_options),
-        unquote(func)
+        loop_options,
+        unquote(func_ast),
+        Keyword.get(loop_options, :registration_handler, &register/5)        
        })
     end # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
@@ -33,14 +31,14 @@ defmodule Fledex2 do
       Module.put_attribute(__MODULE__, :strip_name, unquote(strip_name))
       Module.put_attribute(__MODULE__, :strip_options, unquote(strip_options))
       unquote(block)
-    end |> tap(& IO.puts Code.format_string! Macro.to_string &1)
+    end # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
   def register(loops\\[]) do
     # IO.puts("register: #{inspect loops}")
     loops = Enum.reverse(loops) # bring to orig order
-    for {strip_name, strip_options, loop_name, loop_options, func} <- loops do
+    for {strip_name, strip_options, loop_name, loop_options, func, registration_handler} <- loops do
       # IO.puts("\tregister: #{inspect loop}")
-      register(strip_name, strip_options, loop_name, loop_options, func)
+      registration_handler.(strip_name, strip_options, loop_name, loop_options, func)
     end
   end
   def register(strip_name, strip_options, loop_name, loop_options, func) do
@@ -70,19 +68,19 @@ defmodule F2 do
     use Fledex2
     led_strip "chain1" do
       live_loop :john, test: 10, tset: "string1" do
-        &1.something
+        data -> data.something
         # _e = data.something
         # with_opts test:  10
         # with_opts tset: "string1"
         # IO.puts "server_name: #{inspect @server_name}"
       end
       live_loop :detti, test: 20, tset: "string2" do
-        &1.something + 10
+        data -> data.something + 10
       end
     end
     led_strip "chain2" do
       live_loop :john, test: 5, tset: "1string" do
-       (&1.something) - 10
+        data -> data.something - 10
       end
     end
   # end
