@@ -23,17 +23,17 @@ defmodule Fledex.LedsTest do
 
     test "converting from list to map" do
       list = [
-        {0,0,0},
-        {25,25,25},
-        {50,50,50},
-        {75,75,75},
-        {100,100,100},
-        {125,125,125},
-        {150,150,150},
-        {175,175,175},
-        {200,200,200},
-        {225,225,225},
-        {250,250,250}
+        {0,     0,   0},
+        {25,   25,  25},
+        {50,   50,  50},
+        {75,   75,  75},
+        {100, 100, 100},
+        {125, 125, 125},
+        {150, 150, 150},
+        {175, 175, 175},
+        {200, 200, 200},
+        {225, 225, 225},
+        {250, 250, 250}
       ]
       assert Leds.convert_to_leds_structure(list) == %{
         1 => 0,
@@ -71,7 +71,7 @@ defmodule Fledex.LedsTest do
         |> Leds.light(0x00FF00)
 
       assert Leds.get_light(leds, offset)   == 0xFF0000
-      assert Leds.get_light(leds, offset+1) == 0x00FF00
+      assert Leds.get_light(leds, offset + 1) == 0x00FF00
     end
 
     test "setting several leds and updating first one" do
@@ -82,7 +82,7 @@ defmodule Fledex.LedsTest do
         |> Leds.light(0x0000FF, offset)
 
       assert Leds.get_light(leds, offset)   == 0x0000FF
-      assert Leds.get_light(leds, offset+1) == 0x00FF00
+      assert Leds.get_light(leds, offset + 1) == 0x00FF00
       assert map_size(leds.leds) == 2
     end
 
@@ -103,9 +103,9 @@ defmodule Fledex.LedsTest do
         |> Leds.light(leds_some, offset)
 
       assert Leds.get_light(leds_all, offset)    == 0x00FF00
-      assert Leds.get_light(leds_all, offset+1)  == 0x0000FF
-      assert Leds.get_light(leds_all, offset+10) == 0x00FF00
-      assert Leds.get_light(leds_all, offset+11) == 0x0000FF
+      assert Leds.get_light(leds_all, offset + 1)  == 0x0000FF
+      assert Leds.get_light(leds_all, offset + 10) == 0x00FF00
+      assert Leds.get_light(leds_all, offset + 11) == 0x0000FF
     end
 
     test "embedding leds with overlap" do
@@ -121,14 +121,13 @@ defmodule Fledex.LedsTest do
         nil
       )
       leds_all = Leds.new(10)
-        |> Leds.light(0xFF0000, offset+1) # this led will be overwritten with 0x0000FF
+        |> Leds.light(0xFF0000, offset + 1) # this led will be overwritten with 0x0000FF
         |> Leds.light(leds_some, offset)
 
-
       assert Leds.get_light(leds_all, offset)    == 0x00FF00
-      assert Leds.get_light(leds_all, offset+1)  == 0x0000FF
-      assert Leds.get_light(leds_all, offset+10) == 0x00FF00
-      assert Leds.get_light(leds_all, offset+11) == 0x0000FF
+      assert Leds.get_light(leds_all, offset + 1)  == 0x0000FF
+      assert Leds.get_light(leds_all, offset + 10) == 0x00FF00
+      assert Leds.get_light(leds_all, offset + 11) == 0x0000FF
     end
     test "setting leds by name" do
       leds = Leds.new(10)

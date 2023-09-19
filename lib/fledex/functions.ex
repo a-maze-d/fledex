@@ -11,14 +11,13 @@ defmodule Fledex.Functions do
   defp step(false, hue), do: hue
   defp step(true, hue), do: -hue
 
-
   @spec create_rainbow_circular_hsv(pos_integer, byte, boolean) :: list(hsv)
   def create_rainbow_circular_hsv(num_leds, initialHue \\ 0, reversed \\ false)
-  def create_rainbow_circular_hsv(0, _, _), do: []
+  def create_rainbow_circular_hsv(0, _na, _na), do: []
   def create_rainbow_circular_hsv(num_leds, initialHue, reversed) do
-    hueChange = Kernel.trunc(65535 / num_leds)
-    for n <- 0..(num_leds-1) do
-      {(initialHue + step(reversed, n*hueChange>>>8)) &&& 0xFF, 240, 255}
+    hue_change = Kernel.trunc(65_535 / num_leds)
+    for n <- 0..(num_leds - 1) do
+      {(initialHue + step(reversed, n * hue_change>>>8)) &&& 0xFF, 240, 255}
     end
   end
 
@@ -31,21 +30,21 @@ defmodule Fledex.Functions do
   @spec create_gradient_rgb(pos_integer, rgb, rgb) ::
           list(rgb)
   def create_gradient_rgb(num_leds, {sr, sg, sb} = _start_color, {er, eg, eb} = _end_color) when num_leds > 0 do
-    rdist87 = (er-sr) <<< 7
-    gdist87 = (eg-sg) <<< 7
-    bdist87 = (eb-sb) <<< 7
+    rdist87 = (er - sr) <<< 7
+    gdist87 = (eg - sg) <<< 7
+    bdist87 = (eb - sb) <<< 7
 
-    steps = num_leds+1
-    rdelta = (trunc(rdist87 / steps))*2
-    gdelta = (trunc(gdist87 / steps))*2
-    bdelta = (trunc(bdist87 / steps))*2
+    steps = num_leds + 1
+    rdelta = (trunc(rdist87 / steps)) * 2
+    gdelta = (trunc(gdist87 / steps)) * 2
+    bdelta = (trunc(bdist87 / steps)) * 2
 
     r88 = sr <<< 8
     g88 = sg <<< 8
     b88 = sb <<< 8
 
-    for n <- 1..steps-1 do
-      {(r88 + rdelta*n) >>> 8, (g88 + gdelta*n) >>> 8, (b88 + bdelta*n) >>> 8}
+    for n <- 1..steps - 1 do
+      {(r88 + rdelta * n) >>> 8, (g88 + gdelta * n) >>> 8, (b88 + bdelta * n) >>> 8}
     end
 
   end

@@ -16,7 +16,7 @@ defmodule Fledex.UtilsTest do
     assert Utils.split_into_subpixels(pixel) == {0xFF, 0x77, 0x22}
   end
   test "add_subpixels" do
-    pixels = [{20, 40, 100}, {20,40,100}, {20,40,100}]
+    pixels = [{20, 40, 100}, {20, 40, 100}, {20, 40, 100}]
     assert Utils.add_subpixels(pixels) == {60, 120, 300}
   end
 end

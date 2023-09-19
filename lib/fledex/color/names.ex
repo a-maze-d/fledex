@@ -5,10 +5,10 @@ defmodule Fledex.Color.Names do
     # TODO: Do some more transformations to the color data, so that we get fast access
     quote do
       @colors unquote(Macro.escape(colors))
-      def colors() do
+      def colors do
         @colors
       end
-      def names() do
+      def names do
         Enum.map(@colors, fn %{name: name} = _colorinfo -> name end)
       end
       def get_color_int(name) do
@@ -18,13 +18,14 @@ defmodule Fledex.Color.Names do
     end
   end
 
-  def load_color_file() do
-    # Name ,Hex (RGB) ,Red (RGB) ,Green (RGB) ,Blue (RGB) ,Hue (HSL/HSV) ,Satur. (HSL) ,Light (HSL) ,Satur.(HSV) ,Value (HSV),Source
+  def load_color_file do
+    # Name, Hex (RGB), Red (RGB), Green (RGB), Blue (RGB), Hue (HSL/HSV), Satur. (HSL),
+    #   Light (HSL), Satur.(HSV), Value (HSV), Source
     "#{Path.dirname(__DIR__)}/color/names.csv"
       |> File.stream!()
       |> Stream.drop(1)
       |> Stream.with_index()
-      |> Stream.map(fn {line,index} -> parse_line(index, line) end)
+      |> Stream.map(fn {line, index} -> parse_line(index, line) end)
       |> Stream.map(fn [index, name, hex, r, g, b, h, s1, l1, s2, v2, _sources] ->
           %{
             index: index,
@@ -53,7 +54,7 @@ defmodule Fledex.Color.Names do
   end
   defp clean_and_convert(hex_string) do
     hex_string = String.replace(hex_string, "#", "")
-    {hex_int,_} = Integer.parse(hex_string, 16)
+    {hex_int, _} = Integer.parse(hex_string, 16)
     hex_int
   end
   defp to_byte(value) do
@@ -61,9 +62,9 @@ defmodule Fledex.Color.Names do
       |> String.replace("—", "0")
 
     case Float.parse(value) do
-      {value, "%"} -> trunc((value/100) * 255)
-      {value, "°"} -> trunc((value/360) * 255)
-      _ -> raise "Error in converting to byte value (#{value})"
+      {value, "%"} -> trunc((value / 100) * 255)
+      {value, "°"} -> trunc((value / 360) * 255)
+      _na -> raise "Error in converting to byte value (#{value})"
     end
   end
 end

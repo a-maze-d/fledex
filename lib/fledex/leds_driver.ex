@@ -12,9 +12,9 @@ defmodule Fledex.LedsDriver do
 
   require Logger
 
+  alias Fledex.Color.Utils
   alias Fledex.LedStripDriver.Driver
   alias Fledex.LedStripDriver.LoggerDriver
-  alias Fledex.Color.Utils
 
   @type t :: %{
     timer: %{
@@ -66,11 +66,11 @@ defmodule Fledex.LedsDriver do
   @spec init(map) :: {:ok, t} | {:stop, String.t}
   def init(init_args) when is_map(init_args) do
     state = init_state(init_args)
-    state = if (state[:timer][:disabled] == false), do: start_timer(state), else: state
+    state = if state[:timer][:disabled] == false, do: start_timer(state), else: state
 
     {:ok, state}
   end
-  def init(_) do
+  def init(_na) do
     {:stop, "Init args need to be a map"}
   end
 
@@ -155,8 +155,8 @@ defmodule Fledex.LedsDriver do
   @spec handle_call({:exist_namespace, atom}, {pid, any}, t) :: {:reply, boolean, t}
   def handle_call({:exist_namespace, name}, _from, %{namespaces: namespaces} = state) do
     exists = case Map.fetch(namespaces, name) do
-      {:ok, _} -> true
-      _ -> false
+      {:ok, _na} -> true
+      _na -> false
     end
     {:reply, exists, state}
   end
@@ -176,7 +176,7 @@ defmodule Fledex.LedsDriver do
   @spec handle_info({:update_timeout, (t -> t)}, t) :: {:noreply, t}
   def handle_info({:update_timeout, func}, state) do
     # here should now come some processing for now we just increase the counter and reschdule the timer
-    state = update_in(state, [:timer, :counter], &(&1+1))
+    state = update_in(state, [:timer, :counter], &(&1 + 1))
     state = start_timer(state)
 
     # Logger.info "calling #{inspect func}"
@@ -198,7 +198,7 @@ defmodule Fledex.LedsDriver do
         state = state.namespaces
           |> merge_namespaces(state.led_strip.merge_strategy)
           |> Driver.transfer(state)
-          |> put_in([:timer,:is_dirty], false)
+          |> put_in([:timer, :is_dirty], false)
     #       {state, %{metadata: "done"}}
     #   end
     # )
@@ -227,7 +227,7 @@ defmodule Fledex.LedsDriver do
 
   @spec match_length(list(list(colorint))) :: list(list(colorint))
   def match_length(leds) when leds == nil, do: leds
-  def match_length(leds) when length(leds) == 0, do: leds
+  def match_length(leds) when leds == [], do: leds
   def match_length(leds) do
     max_length = Enum.reduce(leds, 0, fn(sequence, acc) -> max(acc, length(sequence)) end)
     Enum.map(leds, fn(sequence) -> extend(sequence, max_length - length(sequence)) end)
@@ -253,7 +253,7 @@ defmodule Fledex.LedsDriver do
     case merge_strategy do
       :avg -> Utils.avg(rgb, count)
       :cap -> Utils.cap(rgb)
-      _ -> raise "Unknown merge strategy"
+      _na -> raise "Unknown merge strategy"
     end
   end
 end

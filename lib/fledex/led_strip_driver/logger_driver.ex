@@ -5,7 +5,7 @@ defmodule Fledex.LedStripDriver.LoggerDriver do
   alias Fledex.Color.Utils
 
   @default_update_freq 10
-  @divisor 255/5
+  @divisor 255 / 5
   @block <<"\u2588">>
 
   @moduledoc """
@@ -47,7 +47,7 @@ defmodule Fledex.LedStripDriver.LoggerDriver do
 
   @spec to_ansi_color(colorint) :: String.t
   defp to_ansi_color(value) do
-    {r,g,b} = Utils.split_into_subpixels(value)
+    {r, g, b} = Utils.split_into_subpixels(value)
     IO.ANSI.color(trunc(r/@divisor), trunc(g/@divisor), trunc(b/@divisor))
   end
 

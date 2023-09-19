@@ -24,10 +24,9 @@ defmodule Fledex do
       Module.register_attribute(__MODULE__, :strip_name, accumulate: false)
       Module.register_attribute(__MODULE__, :strip_opts, accumulate: false)
       Module.register_attribute(__MODULE__, :loops, accumulate: true)
-      @before_compile Fledex
+      @before_compile
     end
   end
-
 
   @doc """
     This introduces a new `live_loop` (animation) that will be played over
@@ -46,7 +45,6 @@ defmodule Fledex do
         unquote(loop_name),
         loop_options,
         unquote(func_ast),
-        Keyword.get(loop_options, :callback_module, Fledex)
       })
     end
 
@@ -69,15 +67,17 @@ defmodule Fledex do
     After parsing the Dsl the collected definitions will be passed to this function
     wich will process each definition by calling the specified callback functions
   """
+  @impl Fledex.Callbacks
   def register(loops \\ []) do
     # IO.puts("register: #{inspect loops}")
     # bring to orig order
     loops = Enum.reverse(loops)
 
-    for {strip_name, strip_options, loop_name, loop_options, func, callback_module} <- loops do
+    for {strip_name, strip_options, loop_name, loop_options, func} <- loops do
       # IO.puts("\tregister: #{inspect loop}")
-      callback_module.register(strip_name, strip_options, loop_name, loop_options, func)
+      register(strip_name, strip_options, loop_name, loop_options, func)
     end
+    :ok
   end
 
   @doc """
@@ -94,10 +94,10 @@ defmodule Fledex do
     )
   end
 
-  def pre_define_live_loops() do
+  def pre_define_live_loops do
   end
 
-  def post_define_live_loops() do
+  def post_define_live_loops do
   end
 
   # defp check_env(_server_name, _name) do
@@ -110,31 +110,3 @@ defmodule Fledex do
     register(Module.get_attribute(env.module, :loops))
   end
 end
-
-# defmodule F do
-#   # def run() do
-#   use Fledex
-
-#   led_strip "chain1" do
-#     live_loop :john, test: 10, tset: "string1" do
-#       data ->
-#         data.something
-#         # _e = data.something
-#         # with_opts test:  10
-#         # with_opts tset: "string1"
-#         # IO.puts "server_name: #{inspect @server_name}"
-#     end
-
-#     live_loop :detti, test: 20, tset: "string2" do
-#       data -> data.something + 10
-#     end
-#   end
-
-#   led_strip "chain2" do
-#     live_loop :john, test: 5, tset: "1string" do
-#       data -> data.something - 10
-#     end
-#   end
-
-#   # end
-# end

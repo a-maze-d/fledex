@@ -6,9 +6,9 @@ defmodule Fledex.Leds do
 
   require Logger
 
+  alias Fledex.Color.Utils
   alias Fledex.Functions
   alias Fledex.LedsDriver
-  alias Fledex.Color.Utils
 
   @enforce_keys [:count, :leds, :opts]
   defstruct count: 0, leds: %{}, opts: %{}, meta: %{index: 1} #, fill: :none
@@ -20,7 +20,7 @@ defmodule Fledex.Leds do
   }
 
   @spec new() :: t
-  def new() do
+  def new do
     new(0)
   end
   @spec new(integer) :: t
@@ -56,7 +56,7 @@ defmodule Fledex.Leds do
   @spec convert_to_leds_structure(list(rgb), integer) :: map
   def convert_to_leds_structure(rgbs, offset \\ 0) do
     offset_oneindex = offset + 1
-    Enum.zip_with(offset_oneindex..(offset_oneindex + length(rgbs)), rgbs, fn(index,{r,g,b}) ->
+    Enum.zip_with(offset_oneindex..(offset_oneindex + length(rgbs)), rgbs, fn(index, {r, g, b}) ->
       {index, (r <<< 16) + (g <<< 8) + b}
     end) |>  Map.new
   end
@@ -103,7 +103,7 @@ defmodule Fledex.Leds do
   """
   @spec update(t, (colorint | t), pos_integer) :: t
   def update(leds, led, offset) when offset > 0 do
-    do_update(leds,led,offset)
+    do_update(leds, led, offset)
   end
   def update(_leds, _led, offset) do
     raise ArgumentError, message: "the offset needs to be > 0 (found: #{offset})"
@@ -116,7 +116,7 @@ defmodule Fledex.Leds do
   end
   @spec do_update(t, colorint, pos_integer) :: t
   defp do_update(%__MODULE__{count: count, leds: leds, opts: opts, meta: meta}, rgb, offset) when is_integer(rgb) do
-    __MODULE__.new(count, Map.put(leds, offset, rgb), opts, %{meta | index: offset+1})
+    __MODULE__.new(count, Map.put(leds, offset, rgb), opts, %{meta | index: offset + 1})
   end
   @spec do_update(t, t, pos_integer) :: t
   defp do_update(%__MODULE__{count: count1, leds: leds1, opts: opts1, meta: meta1}, %__MODULE__{count: count2, leds: leds2}, offset) do
@@ -126,19 +126,19 @@ defmodule Fledex.Leds do
       {index, value}
     end))
     leds = Map.merge(leds1, remapped_new_leds)
-    __MODULE__.new(count1, leds, opts1, %{meta1 | index: offset+count2})
+    __MODULE__.new(count1, leds, opts1, %{meta1 | index: offset + count2})
   end
   @spec do_update(t, atom, pos_integer) :: t
   defp do_update(leds, atom, offset) when is_atom(atom) do
     color_int = get_color_int(atom)
-    do_update(leds, color_int ,offset)
+    do_update(leds, color_int, offset)
   end
   defp do_update(leds, led, offset) do
     raise ArgumentError, message: "unknown data #{inspect leds}, #{inspect led}, #{inspect offset}"
   end
 
   @spec to_binary(t) :: binary
-  def to_binary(%__MODULE__{count: count, leds: _leds, opts: _opts, meta: _meta}=leds) do
+  def to_binary(%__MODULE__{count: count, leds: _leds, opts: _opts, meta: _meta} = leds) do
     Enum.reduce(1..count, <<>>, fn index, acc ->
       acc <> <<get_light(leds, index)>>
     end)
@@ -179,7 +179,7 @@ defmodule Fledex.Leds do
   def get_light(%__MODULE__{leds: leds} = _leds, index) do
     case Map.fetch(leds, index) do
       {:ok, value} -> value
-      _ -> 0
+      _na -> 0
     end
   end
 

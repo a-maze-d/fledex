@@ -14,4 +14,5 @@ as really done. Here the outstanding tasks that I can think of.
 - [ ] Add documentation on how to connect the LED strip to a RaspberryPi Zero (with and without level shifter)
 - [ ] Cleanup files
 - [x] Publish to hex (v1.1 has been published)
+- [ ] Fix all credo issues by running `mix credo --all`
 

@@ -1,7 +1,7 @@
 defmodule Fledex.LedAnimatorTest do
   use ExUnit.Case
-  alias Fledex.TestHelpers.LedAnimatorHelper
   alias Fledex.LedAnimator
+  alias Fledex.TestHelpers.LedAnimatorHelper
 
   import ExUnit.CaptureLog
   require Logger
@@ -40,7 +40,7 @@ defmodule Fledex.LedAnimatorTest do
       end)
         |> assert_logs()
     end
-    def run_simple_workflow() do
+    def run_simple_workflow do
       start_server()
         |> wait()
         |> shutdown_server()
@@ -62,13 +62,13 @@ defmodule Fledex.LedAnimatorTest do
       case line do
         "wait" ->
           assert acc.wait == acc.led
-          %{acc | wait: acc.wait+1}
+          %{acc | wait: acc.wait + 1}
         "send" ->
-          assert acc.send == acc.wait-1
-          %{acc | send: acc.send+1}
+          assert acc.send == acc.wait - 1
+          %{acc | send: acc.send + 1}
         "led" ->
-          assert acc.led == acc.send-1
-          %{acc | led: acc.led+1}
+          assert acc.led == acc.send - 1
+          %{acc | led: acc.led + 1}
       end
     end
 
@@ -78,7 +78,7 @@ defmodule Fledex.LedAnimatorTest do
       middle
     end
 
-    def start_server() do
+    def start_server do
       init_args = %{
         def_func: &LedAnimatorHelper.logging_def_func/1,
         send_config_func: &LedAnimatorHelper.logging_send_config_func/1,

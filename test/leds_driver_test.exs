@@ -45,7 +45,10 @@ defmodule Fledex.LedDriverTest do
   describe "test timer to ensure it reschedules itself" do
     test "handle_info for the update timer timeout" do
       update_func = &(&1)
-      LedsDriver.handle_info({:update_timeout, update_func}, LedsDriver.init_state(%{timer: %{counter: 1, update_func: update_func}}))
+      LedsDriver.handle_info(
+        {:update_timeout, update_func},
+        LedsDriver.init_state(%{timer: %{counter: 1, update_func: update_func}})
+      )
       assert_receive {:update_timeout, _update_func}
     end
     test "ensure the config can be updated in the update function" do
@@ -73,15 +76,15 @@ defmodule Fledex.LedDriverTest do
     test "state is dirty after client calls" do
       {:ok, state} = LedsDriver.init(%{timer: %{disabled: true}})
       assert state.timer.is_dirty == false
-      {:reply, _, state} = LedsDriver.handle_call({:define_namespace, "name"}, self(), state)
+      {:reply, _na, state} = LedsDriver.handle_call({:define_namespace, "name"}, self(), state)
       assert state.timer.is_dirty == true
       state = put_in(state, [:timer, :is_dirty], false)
       assert state.timer.is_dirty == false
-      {:reply, _, state} = LedsDriver.handle_call({:set_leds, "name", [0xFF0000]}, self(), state)
+      {:reply, _na, state} = LedsDriver.handle_call({:set_leds, "name", [0xFF0000]}, self(), state)
       assert state.timer.is_dirty == true
       state = put_in(state, [:timer, :is_dirty], false)
       assert state.timer.is_dirty == false
-      {:reply, _, state} = LedsDriver.handle_call({:drop_namespace, "name"}, self(), state)
+      {:reply, _na, state} = LedsDriver.handle_call({:drop_namespace, "name"}, self(), state)
       assert state.timer.is_dirty == true
     end
   end
@@ -91,7 +94,7 @@ defmodule Fledex.LedDriverTest do
       assert LedsDriver.merge_namespaces(namespaces, :avg) == []
     end
     test "merge pixels" do
-      pixels = [0,0xFF]
+      pixels = [0, 0xFF]
       assert LedsDriver.merge_pixels(pixels, :avg) == 0x7F
     end
     test "merge leds" do
@@ -163,7 +166,7 @@ defmodule Fledex.LedDriverTest do
       }
       state = LedsDriver.init_state(init_args)
 
-      assert capture_io( fn ->
+      assert capture_io(fn ->
         response = LedsDriver.transfer_data(state)
         assert response.timer.is_dirty == false
       end) == "\e[38;5;100m█\e[38;5;30m█\e[38;5;90m█\e[38;5;30m█\e[38;5;100m█\e[38;5;90m█\r\n"
@@ -175,39 +178,39 @@ defmodule Fledex.LedDriverTest do
       {:ok, state} = LedsDriver.init(%{})
       name = :john
       response = LedsDriver.handle_call({:define_namespace, name}, self(), state)
-      assert match?({:reply, {:ok, _},_}, response)
-      {_, _, state} = response
+      assert match?({:reply, {:ok, _}, _}, response)
+      {_na, _na, state} = response
       assert map_size(state.namespaces) == 1
       assert Map.keys(state.namespaces) == [:john]
     end
     test "define_namespace second name" do
       {:ok, state} = LedsDriver.init(%{})
       name = :john
-      {_, _, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
+      {_na, _na, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
       name2 = :jane
       response2 = LedsDriver.handle_call({:define_namespace, name2}, self(), state)
       assert match?({:reply, {:ok, _}, _}, response2)
-      {_, _, state2} = response2
+      {_na, _na, state2} = response2
       assert map_size(state2.namespaces) == 2
       assert Map.keys(state2.namespaces) |> Enum.sort() == [:john, :jane] |> Enum.sort()
     end
     test "test drop_namespace" do
       {:ok, state} = LedsDriver.init(%{})
       name = :john
-      {_, _, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
+      {_na, _na, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
       name2 = :jane
-      {_, _, state} = LedsDriver.handle_call({:define_namespace, name2}, self(), state)
+      {_na, _na, state} = LedsDriver.handle_call({:define_namespace, name2}, self(), state)
 
-      {_, _, state} = LedsDriver.handle_call({:drop_namespace, name}, self(), state)
+      {_na, _na, state} = LedsDriver.handle_call({:drop_namespace, name}, self(), state)
       assert Map.keys(state.namespaces) == [:jane]
     end
     test "test set_leds" do
       {:ok, state} = LedsDriver.init(%{})
       name = :john
       leds = [0xFF0000, 0x00FF00, 0x0000FF, 0x00FF00, 0xFF0000, 0x0000FF]
-      {_, _, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
+      {_na, _na, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
 
-      {_, _, state} = LedsDriver.handle_call({:set_leds, name, leds}, self(), state)
+      {_na, _na, state} = LedsDriver.handle_call({:set_leds, name, leds}, self(), state)
       assert state.namespaces == %{
         john: [0xFF0000, 0x00FF00, 0x0000FF, 0x00FF00, 0xFF0000, 0x0000FF]
       }

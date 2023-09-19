@@ -102,7 +102,7 @@ defmodule Fledex.LedAnimator do
 
     state = start_timer(state)
 
-    {:noreply, %{state | counter: counter+1}}
+    {:noreply, %{state | counter: counter + 1}}
   end
 
   @spec start_timer(ledAnimatorState) :: ledAnimatorState
@@ -111,7 +111,6 @@ defmodule Fledex.LedAnimator do
 
     %{state | timer_ref: ref}
   end
-
 
   @spec update_config(ledAnimatorState, ledAnimatorConfig) :: ledAnimatorState
   def update_config(state, config) do

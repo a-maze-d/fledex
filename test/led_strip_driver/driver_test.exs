@@ -65,7 +65,7 @@ defmodule Fledex.LedStripDriver.DriverTest do
 
     test "transfer" do
       state = %{
-        timer: %{ counter: 0},
+        timer: %{counter: 0},
         led_strip: %{
           driver_modules: [TestDriver, TestDriver2],
           config: %{
