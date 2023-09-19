@@ -1,6 +1,7 @@
 defmodule Fledex.LedStripDriver.LoggerDriver do
   @behaviour Fledex.LedStripDriver.Driver
   use Fledex.Color.Types
+  require Logger
 
   alias Fledex.Color.Utils
 
@@ -30,8 +31,7 @@ defmodule Fledex.LedStripDriver.LoggerDriver do
 
   @impl true
   @spec transfer(list(colorint), pos_integer, map) :: map
-  def transfer(leds, counter, config) do
-    if (rem(counter, config.update_freq) == 0 and length(leds) > 0) do
+  def transfer(leds, counter, config) when rem(counter, config.update_freq) == 0 and leds != [] do
       log_color_code = config.log_color_code
       output = Enum.reduce(leds, <<>>, fn value, acc ->
         if log_color_code do
@@ -40,8 +40,11 @@ defmodule Fledex.LedStripDriver.LoggerDriver do
           acc <> to_ansi_color(value) <> @block
         end
       end)
+      # Logger.info(output <> "\r")
       IO.puts(output <> "\r")
-    end
+      config
+  end
+  def transfer(_leds, _counter, config) do
     config
   end
 

@@ -18,8 +18,8 @@ defmodule Fledex.ColorTest do
 
   describe "color names tests" do
     test "loading color file" do
-      colors = Fledex.Color.Names.load_color_file()
-      assert length(colors) > 0
+      colors = load_color_file()
+      assert colors != []
     end
   end
 end

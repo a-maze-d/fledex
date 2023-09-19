@@ -10,57 +10,87 @@ defmodule Fledex.Color.Conversion.Approximate do
   @hue_purple 192
   @hue_pink 224
 
+  @frac_48_128 Fledex.Color.Utils.frac8(48, 128)
+  @frac_32_85 Fledex.Color.Utils.frac8(32, 85)
+  @frac_24_128 Fledex.Color.Utils.frac8(24, 128)
+  @frac_8_42 Fledex.Color.Utils.frac8(8, 42)
+
   alias Fledex.Color.Utils
 
   @spec rgb2hsv(rgb) :: hsv
   def rgb2hsv({r, g, b}) do
     desat = find_desaturation({r, g, b})
+    s = calc_saturation(desat)
+
     {r, g, b} = {r - desat, g - desat, b - desat}
-    s = 255 - desat
-    s = if s != 255 do
-      255 - trunc(:math.sqrt((255 - s) * 256))
-    else
-      s
-    end
     if r + g + b == 0 do
       {0, 0, 255 - s}
     else
       {r, g, b} = scale_to_compensate({r, g, b}, s)     # for desaturation
       total = r + g + b
       {r, g, b} = scale_to_compensate({r, g, b}, total) # for small value
-      v = if total > 255 do
-        255
-      else
-        v = qadd8(desat, total)
-        if v != 255, do: :math.sqrt(v * 256), else: v
-      end
-      highest = Enum.max([r, g, b])
-      h = case {{r, g, b}, highest} do
-        {{r, 0, _b}, r} ->
-          ((@hue_purple + @hue_pink) / 2) + Utils.scale8(qsub8(r, 128), fixfrac8(48, 128))
-        {{r, g, _b}, r} when r - g > g ->
-          @hue_red + Utils.scale8(g, fixfrac8(32, 85))
-        {{r, g, _b}, r} ->
-          @hue_orange + Utils.scale8(qsub8((g - 85) + (171 - r), 4), fixfrac8(32, 85))
-        {{r, g, 0}, g} ->
-          @hue_yellow + ((Utils.scale8(qsub8(171, r), 47) + Utils.scale8(qsub8(g, 171), 96)) / 2)
-        {{_r, g, b}, g} when g - b > b ->
-          @hue_green + Utils.scale8(b, fixfrac8(32, 85))
-        {{_r, g, b}, g} ->
-          @hue_aqua + Utils.scale8(qsub8(b, 85), fixfrac8(8, 42))
-        {{0, _g, b}, b} ->
-          @hue_aqua + ((@hue_blue - @hue_aqua) / 4) + Utils.scale8(qsub8(b, 128), fixfrac8(24, 128))
-        {{r, _g, b}, b} when b - r > r ->
-          @hue_blue + Utils.scale8(r, fixfrac8(32, 85))
-        {{r, _g, b}, b} ->
-          @hue_purple + Utils.scale8(qsub8(r, 85), fixfrac8(32, 85))
-      end
-      {h + 1, s, v}
+      v = calc_value(total, desat)
+      h = calc_hue({r, g, b})
+      {h, s, v}
     end
   end
 
-  defp fixfrac8(n, d) do
-    trunc((n * 256) / d)
+  defp calc_saturation(desat) do
+    s = 255 - desat
+    if s != 255 do
+      255 - trunc(:math.sqrt((255 - s) * 256))
+    else
+      s
+    end
+  end
+
+  defp calc_value(total, desat) do
+    if total > 255 do
+      255
+    else
+      v = qadd8(desat, total)
+      if v != 255, do: :math.sqrt(v * 256), else: v
+    end
+  end
+
+  defp calc_hue({r, 0, _b}, r) do
+    # pink-red-range
+    ((@hue_purple + @hue_pink) / 2) + Utils.scale8(qsub8(r, 128), @frac_48_128)
+  end
+  defp calc_hue({r, g, _b}, r) when r - g > g do
+    # red-orange-range
+    @hue_red + Utils.scale8(g, @frac_32_85)
+  end
+  defp calc_hue({r, g, _b}, r) do
+    # orange-yellow-range
+    @hue_orange + Utils.scale8(qsub8((g - 85) + (171 - r), 4), @frac_32_85)
+  end
+  defp calc_hue({r, g, 0}, g) do
+    # yellow-green-range
+    @hue_yellow + ((Utils.scale8(qsub8(171, r), 47) + Utils.scale8(qsub8(g, 171), 96)) / 2)
+  end
+  defp calc_hue({_r, g, b}, g) when g - b > b do
+    # green-aqua-range
+    @hue_green + Utils.scale8(b, @frac_32_85)
+  end
+  defp calc_hue({_r, g, b}, g) do
+    # aqua-aquablue-range?
+    @hue_aqua + Utils.scale8(qsub8(b, 85), @frac_8_42)
+  end
+  defp calc_hue({0, _g, b}, b) do
+    # aquablue-blue-range
+    @hue_aqua + ((@hue_blue - @hue_aqua) / 4) + Utils.scale8(qsub8(b, 128), @frac_24_128)
+  end
+  defp calc_hue({r, _g, b}, b) when b - r > r do
+    # blue-purple-range
+    @hue_blue + Utils.scale8(r, @frac_32_85)
+  end
+  defp calc_hue({r, _g, b}, b) do
+    # purple-pink-range
+    @hue_purple + Utils.scale8(qsub8(r, 85), @frac_32_85)
+  end
+  defp calc_hue(rgb) do
+    calc_hue(rgb, Enum.max(rgb)) + 1
   end
 
   @spec scale_to_compensate(rgb, byte) :: rgb

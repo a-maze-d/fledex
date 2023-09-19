@@ -12,18 +12,18 @@ defmodule Fledex.Functions do
   defp step(true, hue), do: -hue
 
   @spec create_rainbow_circular_hsv(pos_integer, byte, boolean) :: list(hsv)
-  def create_rainbow_circular_hsv(num_leds, initialHue \\ 0, reversed \\ false)
-  def create_rainbow_circular_hsv(0, _na, _na), do: []
-  def create_rainbow_circular_hsv(num_leds, initialHue, reversed) do
+  def create_rainbow_circular_hsv(num_leds, initial_hue \\ 0, reversed \\ false)
+  def create_rainbow_circular_hsv(0, _initial_hue, _reversed), do: []
+  def create_rainbow_circular_hsv(num_leds, initial_hue, reversed) do
     hue_change = Kernel.trunc(65_535 / num_leds)
     for n <- 0..(num_leds - 1) do
-      {(initialHue + step(reversed, n * hue_change>>>8)) &&& 0xFF, 240, 255}
+      {(initial_hue + step(reversed, n * hue_change>>>8)) &&& 0xFF, 240, 255}
     end
   end
 
   @spec create_rainbow_circular_rgb(pos_integer, byte, boolean) :: list(rgb)
-  def create_rainbow_circular_rgb(num_leds, initialHue \\ 0, reversed \\ false) do
-    create_rainbow_circular_hsv(num_leds, initialHue, reversed)
+  def create_rainbow_circular_rgb(num_leds, initial_hue \\ 0, reversed \\ false) do
+    create_rainbow_circular_hsv(num_leds, initial_hue, reversed)
     |> hsv2rgb()
   end
 

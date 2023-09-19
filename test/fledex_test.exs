@@ -5,11 +5,16 @@ defmodule Fledex.Test do
 
   describe "test macros" do
     test "simple led strip macro" do
-      use Fledex
+      defmodule TestModule1 do
+        use Fledex
+        led_strip do
+          assert Module.get_attribute(__MODULE__, :strip_name) == :default
+        end
+      end
       # def register(list) do
       #   IO.puts(inspect list)
       # end
-      # led_strip do
+      # live_loop :merry do
       #   data -> IO.puts(inspect data)
       # end
       # :ok
@@ -21,6 +26,12 @@ defmodule Fledex.Test do
 #       end
     end
     test "simple live_loop macro" do
+      defmodule TestModule2 do
+        use Fledex
+        live_loop :merry do
+          data -> IO.puts(inspect data)
+        end
+      end
 #       live_loop :john do
 #         call_test_function()
 #       end

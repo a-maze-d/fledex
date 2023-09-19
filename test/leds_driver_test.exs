@@ -179,38 +179,38 @@ defmodule Fledex.LedDriverTest do
       name = :john
       response = LedsDriver.handle_call({:define_namespace, name}, self(), state)
       assert match?({:reply, {:ok, _}, _}, response)
-      {_na, _na, state} = response
+      {:reply, _na, state} = response
       assert map_size(state.namespaces) == 1
       assert Map.keys(state.namespaces) == [:john]
     end
     test "define_namespace second name" do
       {:ok, state} = LedsDriver.init(%{})
       name = :john
-      {_na, _na, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
+      {:reply, _na, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
       name2 = :jane
       response2 = LedsDriver.handle_call({:define_namespace, name2}, self(), state)
       assert match?({:reply, {:ok, _}, _}, response2)
-      {_na, _na, state2} = response2
+      {:reply, _na, state2} = response2
       assert map_size(state2.namespaces) == 2
       assert Map.keys(state2.namespaces) |> Enum.sort() == [:john, :jane] |> Enum.sort()
     end
     test "test drop_namespace" do
       {:ok, state} = LedsDriver.init(%{})
       name = :john
-      {_na, _na, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
+      {:reply, _na, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
       name2 = :jane
-      {_na, _na, state} = LedsDriver.handle_call({:define_namespace, name2}, self(), state)
+      {:reply, _na, state} = LedsDriver.handle_call({:define_namespace, name2}, self(), state)
 
-      {_na, _na, state} = LedsDriver.handle_call({:drop_namespace, name}, self(), state)
+      {:reply, _na, state} = LedsDriver.handle_call({:drop_namespace, name}, self(), state)
       assert Map.keys(state.namespaces) == [:jane]
     end
     test "test set_leds" do
       {:ok, state} = LedsDriver.init(%{})
       name = :john
       leds = [0xFF0000, 0x00FF00, 0x0000FF, 0x00FF00, 0xFF0000, 0x0000FF]
-      {_na, _na, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
+      {:reply, _na, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
 
-      {_na, _na, state} = LedsDriver.handle_call({:set_leds, name, leds}, self(), state)
+      {:reply, _na, state} = LedsDriver.handle_call({:set_leds, name, leds}, self(), state)
       assert state.namespaces == %{
         john: [0xFF0000, 0x00FF00, 0x0000FF, 0x00FF00, 0xFF0000, 0x0000FF]
       }

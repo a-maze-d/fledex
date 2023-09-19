@@ -71,7 +71,7 @@ defmodule Fledex.Color.Correction do
 
       {r, g, b}
   end
-  def define_correction(_na, _na , _na) do
+  def define_correction(_scale, _color_correction , _temperature_correction) do
     {0, 0, 0}
   end
 
@@ -96,5 +96,5 @@ defmodule Fledex.Color.Correction do
     work = work / 0x10000
     Kernel.trunc(work) &&& 0xFF
   end
-  def calculate_color_correction(_na, _na, _na), do: 0
+  def calculate_color_correction(_scale, _cc, _ct), do: 0
 end

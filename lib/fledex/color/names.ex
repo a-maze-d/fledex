@@ -4,6 +4,8 @@ defmodule Fledex.Color.Names do
 
     # TODO: Do some more transformations to the color data, so that we get fast access
     quote do
+      import Fledex.Color.Names
+
       @colors unquote(Macro.escape(colors))
       def colors do
         @colors

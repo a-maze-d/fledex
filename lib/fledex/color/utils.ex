@@ -3,10 +3,18 @@ defmodule Fledex.Color.Utils do
   use Fledex.Color.Names
   import Bitwise
 
+  @spec frac8(0..255, 0..255) :: 0..255
+  @doc """
+    calculate a fraction mapped to a 8bit range
+  """
+  def frac8(n, d) do
+    trunc((n * 256) / d)
+  end
+
   @spec scale8_video_addition(boolean, 0..255, 0..255) :: 0|1
   defp scale8_video_addition(false, _value, _scale), do: 0
   defp scale8_video_addition(true, value, scale) when value != 0 and scale != 0, do: 1
-  defp scale8_video_addition(_na, _na, _na), do: 0
+  defp scale8_video_addition(_addition, _value, _scale), do: 0
 
   @spec scale8(0..255, 0..255, boolean) :: 0..255
   def scale8(value, scale, video \\ false)

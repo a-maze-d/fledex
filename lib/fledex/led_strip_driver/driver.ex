@@ -10,7 +10,7 @@ defmodule Fledex.LedStripDriver.Driver do
     @spec init(map, Fledex.LedDriver.t) :: Fledex.LedDriver.t
     def init(init_args, state) do
       configs = for module <- state.led_strip.driver_modules do
-        Logger.info("Creating driver: #{inspect module}")
+        # Logger.trace("Creating driver: #{inspect module}")
         module_init_args = init_args[:led_strip][:config][module] || %{}
         config = module.init(module_init_args)
         {module, config}

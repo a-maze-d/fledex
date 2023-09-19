@@ -1,8 +1,9 @@
 defmodule Fledex.LedStripDriver.SpiDriver do
-  alias Fledex.Color.Correction
-
   @behaviour Fledex.LedStripDriver.Driver
   use Fledex.Color.Types
+
+  alias Fledex.Color.Correction
+  alias Fledex.Color.Utils
 
   @impl true
   @spec init(map) :: map
@@ -41,7 +42,7 @@ defmodule Fledex.LedStripDriver.SpiDriver do
     binary = leds
       |> Correction.apply_rgb_correction(config.color_correction)
       |> Enum.reduce(<<>>, fn led, acc ->
-        {r, g, b} = Fledex.Color.Utils.convert_to_subpixels(led)
+        {r, g, b} = Utils.convert_to_subpixels(led)
         acc <> <<r, g, b>>
       end)
     {:ok, _} = Circuits.SPI.transfer(config.ref, binary)
