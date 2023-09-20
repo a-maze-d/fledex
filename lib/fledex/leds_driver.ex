@@ -76,44 +76,55 @@ defmodule Fledex.LedsDriver do
 
   @spec init_state(map) :: t
   def init_state(init_args) when is_map(init_args) do
-    driver_modules = case init_args[:led_strip][:driver_modules] do
-      nil ->
-        #Logger.warn("No driver_modules defined/ #{inspect @default_driver_modules} will be used")
-        @default_driver_modules
-      driver_modules when not is_list(driver_modules) ->
-        Logger.warn("driver_modules is not a list")
-        [driver_modules]
-      driver_modules ->
-        driver_modules
-    end
-    only_dirty_update = if init_args[:timer][:only_dirty_update] == nil do
-      false
-    else
-       init_args[:timer][:only_dirty_update]
-    end
-    is_dirty = if init_args[:timer][:is_dirty] == nil do
-      false
-    else
-      init_args[:timer][:is_dirty]
-    end
+    # only_dirty_update = if init_args[:timer][:only_dirty_update] == nil do
+    #   false
+    # else
+    #    init_args[:timer][:only_dirty_update]
+    # end
+    # is_dirty = if init_args[:timer][:is_dirty] == nil do
+    #   false
+    # else
+    #   init_args[:timer][:is_dirty]
+    # end
     state = %{
-      timer: %{
-        disabled: init_args[:timer][:disabled] || false,
-        counter: init_args[:timer][:counter] || 0,
-        update_timeout: init_args[:timer][:update_timeout] || @default_update_timeout,
-        update_func: init_args[:timer][:update_func] || &transfer_data/1,
-        only_dirty_update: only_dirty_update,
-        is_dirty: is_dirty,
-        ref: nil
-      },
-      led_strip: %{
-        merge_strategy: init_args[:led_strip][:merge_strategy] || :avg,
-        driver_modules: driver_modules,
-        config: init_args[:led_strip][:config] || %{}
-      },
+      timer: init_timer(init_args[:timer]),
+      led_strip: init_led_strip(init_args[:led_strip]),
       namespaces: init_args[:namespaces] || %{}
     }
     Driver.init(init_args, state)
+  end
+
+  defp init_led_strip(nil), do: init_led_strip(%{})
+  defp init_led_strip(init_args) do
+    %{
+      merge_strategy: init_args[:merge_strategy] || :avg,
+      driver_modules: define_drivers(init_args[:driver_modules]),
+      config: init_args[:config] || %{}
+    }
+  end
+  defp define_drivers(nil) do
+    #Logger.warn("No driver_modules defined/ #{inspect @default_driver_modules} will be used")
+    @default_driver_modules
+  end
+  defp define_drivers(driver_modules) when is_list(driver_modules) do
+    driver_modules
+  end
+  defp define_drivers(driver_modules) do
+    Logger.warn("driver_modules is not a list")
+    [driver_modules]
+  end
+
+  defp init_timer(nil), do: init_timer(%{})
+  defp init_timer(init_args) do
+    %{
+      disabled: init_args[:disabled] || false,
+      counter: init_args[:counter] || 0,
+      update_timeout: init_args[:update_timeout] || @default_update_timeout,
+      update_func: init_args[:update_func] || &transfer_data/1,
+      only_dirty_update: init_args[:only_dirty_update] || false,
+      is_dirty: init_args[:is_dirty] || false,
+      ref: nil
+    }
   end
 
   @impl true
