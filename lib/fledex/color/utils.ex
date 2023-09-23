@@ -100,7 +100,7 @@ defmodule Fledex.Color.Utils do
   def convert_to_subpixels(rgb) do
     case rgb do
       %{rgb: x} -> x
-      x when is_atom(x) -> Names.get_color_int(x) |> split_into_subpixels()
+      x when is_atom(x) -> Names.get_color_sub_pixels(x)
       x when is_integer(x) -> split_into_subpixels(x)
       x -> x
     end

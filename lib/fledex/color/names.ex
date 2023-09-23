@@ -11,17 +11,23 @@ defmodule Fledex.Color.Names do
   end
 
   @colors colors
+  @color_names Enum.map(@colors, fn %{name: name} = _colorinfo -> name end)
   def colors do
     @colors
     # unquote(Macro.escape(colors))
   end
 
   def names do
-    Enum.map(@colors, fn %{name: name} = _colorinfo -> name end)
+    @color_names
   end
   def get_color_int(name) when is_atom(name) do
     # call the function with the same name as the atom
     colorinfo = apply(__MODULE__, name, [])
     colorinfo.hex
+  end
+  def get_color_sub_pixels(name) when is_atom(name) do
+    # call the function with the same name as the atom
+    colorinfo = apply(__MODULE__, name, [])
+    colorinfo.rgb
   end
 end
