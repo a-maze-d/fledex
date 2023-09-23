@@ -27,13 +27,7 @@ TODO: We still need to do this
 ```elixir
 # frame = Kino.Frame.new() |> Kino.render()
 
-{:ok, pid} =
-  LedsDriver.start_link(%{
-    led_strip: %{
-      # [KinoDriver, SpiDriver],
-      driver_modules: [KinoDriver]
-    }
-  })
+{:ok, pid} = LedsDriver.start_link(:kino)
 ```
 
 We now define a couple of helper functions. The first 2 functions are talking binaries directly

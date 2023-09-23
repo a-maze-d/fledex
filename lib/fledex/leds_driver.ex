@@ -12,6 +12,7 @@ defmodule Fledex.LedsDriver do
 
   require Logger
 
+  alias Fledex.Color.Correction
   alias Fledex.Color.Utils
   alias Fledex.LedStripDriver.Driver
   alias Fledex.LedStripDriver.LoggerDriver
@@ -40,7 +41,8 @@ defmodule Fledex.LedsDriver do
   #client code
   @spec start_link(atom | map, atom | {:global, any} | {:via, atom, any}) ::
           :ignore | {:error, any} | {:ok, pid}
-  def start_link(config \\ %{}, server_name \\ __MODULE__)
+  def start_link(config \\ :none, server_name \\ __MODULE__)
+  def start_link(:none, server_name), do: start_link(%{}, server_name)
   def start_link(:kino, server_name) do
     config = %{
       timer: %{only_dirty_update: false},
@@ -50,7 +52,7 @@ defmodule Fledex.LedsDriver do
         config: %{
           KinoDriver => %{
             update_freq: 1,
-            color_correction: Fledex.Color.Correction.no_color_correction()
+            color_correction: Correction.no_color_correction()
             # frame: frame
           }
         }
