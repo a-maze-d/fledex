@@ -1,11 +1,11 @@
 defmodule Fledex.Leds do
-  import Bitwise
-
-  use Fledex.Color.Types
-  use Fledex.Color.Names
-
   require Logger
 
+  use Fledex.Color.Types
+
+  import Bitwise
+
+  alias Fledex.Color.Names
   alias Fledex.Color.Utils
   alias Fledex.Functions
   alias Fledex.LedsDriver
@@ -130,7 +130,7 @@ defmodule Fledex.Leds do
   end
   @spec do_update(t, atom, pos_integer) :: t
   defp do_update(leds, atom, offset) when is_atom(atom) do
-    color_int = get_color_int(atom)
+    color_int = Names.get_color_int(atom)
     do_update(leds, color_int, offset)
   end
   defp do_update(leds, led, offset) do

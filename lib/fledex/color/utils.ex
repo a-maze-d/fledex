@@ -1,7 +1,8 @@
 defmodule Fledex.Color.Utils do
   use Fledex.Color.Types
-  use Fledex.Color.Names
+
   import Bitwise
+  alias Fledex.Color.Names
 
   @spec frac8(0..255, 0..255) :: 0..255
   @doc """
@@ -95,10 +96,11 @@ defmodule Fledex.Color.Utils do
     (r<<<16) + (g<<<8) + b
   end
 
-  @spec convert_to_subpixels((colorint | atom | rgb)) :: rgb
+  @spec convert_to_subpixels((colorint | atom | rgb | %{rgb: rgb})) :: rgb
   def convert_to_subpixels(rgb) do
     case rgb do
-      x when is_atom(x) -> get_color_int(x) |> split_into_subpixels()
+      %{rgb: x} -> x
+      x when is_atom(x) -> Names.get_color_int(x) |> split_into_subpixels()
       x when is_integer(x) -> split_into_subpixels(x)
       x -> x
     end

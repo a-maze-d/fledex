@@ -36,7 +36,8 @@ Urls:
 * https://en.wikipedia.org/wiki/List_of_colors:_G%E2%80%93M
 * https://en.wikipedia.org/wiki/List_of_colors:_N%E2%80%93Z
 
-The color names and attributes have been extracted from Wikipedia and been converted to a csv file and can be found in the [names.csv](lib/color/names.csv) file. 
+The color names and attributes have been extracted from Wikipedia and been converted to a csv file and can be found in the [names.csv](lib/color/names.csv) file.
+Only modification made was to rename Vermilion, since it appears twice in the data. We now have a Vermilion and Vermilion2
 
 ## License:
 Text is available under the Creative Commons Attribution-ShareAlike License 3.0; additional terms may apply. By using this site, you agree to the Terms of Use and Privacy Policy. Wikipedia® is a registered trademark of the Wikimedia Foundation, Inc., a non-profit organization.
