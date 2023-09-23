@@ -78,7 +78,7 @@ defmodule Fledex.Color.Correction do
   @spec no_color_correction() :: rgb
   def no_color_correction do
     # This should correspond to 255, but we do the proper calculation at compile time
-    define_correction(Color.uncorrectedColor, Temperature.uncorrectedTemperature)
+    define_correction(Color.uncorrected_color, Temperature.uncorrected_temperature)
   end
 
   @spec apply_rgb_correction(list(rgb), (byte | rgb)) :: list(rgb)
