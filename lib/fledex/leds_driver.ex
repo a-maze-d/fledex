@@ -38,10 +38,28 @@ defmodule Fledex.LedsDriver do
   @default_driver_modules [LoggerDriver]
 
   #client code
-  @spec start_link(map, atom | {:global, any} | {:via, atom, any}) ::
+  @spec start_link(atom | map, atom | {:global, any} | {:via, atom, any}) ::
           :ignore | {:error, any} | {:ok, pid}
-  def start_link(init_arg, server_name \\ __MODULE__) do
-    GenServer.start_link(__MODULE__, init_arg, name: server_name)
+  def start_link(config \\ %{}, server_name \\ __MODULE__)
+  def start_link(:kino, server_name) do
+    config = %{
+      timer: %{only_dirty_update: false},
+      led_strip: %{
+        merge_strategy: :cap,
+        driver_modules: [KinoDriver], # [KinoDriver, SpiDriver],
+        config: %{
+          KinoDriver => %{
+            update_freq: 1,
+            color_correction: Fledex.Color.Correction.no_color_correction()
+            # frame: frame
+          }
+        }
+      }
+    }
+    start_link(config, server_name)
+  end
+  def start_link(init_args, server_name) when is_map(init_args) do
+    GenServer.start_link(__MODULE__, init_args, name: server_name)
   end
 
   @spec define_namespace(atom, atom) :: ({:ok, atom} | {:error, String.t})
