@@ -5,7 +5,7 @@
 # hardware but on a normal livebook, This makes it easier to stay up-to-date and experiment
 # We start to define our fledex library, directly linking to the latest version on github
 Mix.install([
-  {:fledex, git: "https://github.com/a-maze-d/fledex.git"},
+  {:fledex, path: "Documents/code/fledex"},
   {:kino, "~>0.8"}
 ])
 
@@ -27,12 +27,32 @@ TODO: We still need to do this
 ```elixir
 # frame = Kino.Frame.new() |> Kino.render()
 
-{:ok, pid} = LedsDriver.start_link(:kino)
+{:ok, pid} = Fledex.LedsDriver.start_link(:kino)
 ```
 
-We now define a couple of helper functions. The first 2 functions are talking binaries directly
-with the LED driver, the latter two are making use of the Leds client module that helps to
-create nice effects like a rainbow.
+We now define our animations with our dsl with the following steps:
+
+* First we define a new strip (with a name, which will be used in the future to find out `LedsDriver` process, but not yet).
+* Then within this strip we define several `live_loop`s that correspond to an animation (and will use the `LedAnimator`). Each animaation is identified by its own name
+* Within each animation we define a function that will repeatedly be executed
+* Inside that function we can define one or several `Leds`, either directly or through an led sequence (like a rainbow function).
+* and animate those leds depending on some trigger data (data that comes into the animation function).
+
+**Note:** The animation function itself can also create some animation by using `Leds.send()` and `Process.sleep()`, but it's better to avoid this and schedule this as part of the next function call.
+
+**Note 2:** The `live_loop` has quite a few options to configure the behavior of various aspects of the loop, but we'll look at thos separately.
+
+```elixir
+defmodule Test do
+  use Fledex
+
+  led_strip :strip1 do
+    live_loop :anne do
+      data -> IO.puts(inspect(data))
+    end
+  end
+end
+```
 
 ```elixir
 defmodule Helpers do

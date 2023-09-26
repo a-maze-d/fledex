@@ -48,12 +48,11 @@ defmodule Fledex.LedsDriver do
       timer: %{only_dirty_update: false},
       led_strip: %{
         merge_strategy: :cap,
-        driver_modules: [KinoDriver], # [KinoDriver, SpiDriver],
+        driver_modules: [Fledex.LedStripDriver.KinoDriver],
         config: %{
-          KinoDriver => %{
+          Fledex.LedStripDriver.KinoDriver => %{
             update_freq: 1,
             color_correction: Correction.no_color_correction()
-            # frame: frame
           }
         }
       }

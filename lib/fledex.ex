@@ -1,7 +1,6 @@
 # NOTE: This module is very much in a brain-storming phase and surely will not work
 # yet. The best is if you ignore it for now :-)
 defmodule Fledex do
-  @behaviour Fledex.Callbacks
   @moduledoc """
   This module should provide some simple macros that allow to define the
   led strip and to update it. The code you would write (in livebook) would
@@ -18,6 +17,9 @@ defmodule Fledex do
           end
       end
   """
+  @behaviour Fledex.Callbacks
+  require Logger
+
   defmacro __using__(_opts) do
     quote do
       import Fledex
@@ -37,17 +39,14 @@ defmodule Fledex do
     func_ast = {:fn, [], block}
 
     quote do
-      loop_options = unquote(loop_options)
-
       Module.put_attribute(__MODULE__, :loops, {
-        Module.get_attribute(__MODULE__, :strip_name, :default),
+        Module.get_attribute(__MODULE__, :strip_name, __MODULE__),
         Module.get_attribute(__MODULE__, :strip_options, []),
         unquote(loop_name),
-        loop_options,
+        unquote(loop_options),
         unquote(func_ast),
       })
     end
-
     # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
 
@@ -73,8 +72,8 @@ defmodule Fledex do
     # bring to orig order
     loops = Enum.reverse(loops)
 
-    for {strip_name, strip_options, loop_name, loop_options, func} <- loops do
-      # IO.puts("\tregister: #{inspect loop}")
+    for {strip_name, strip_options, loop_name, loop_options, func} = loop <- loops do
+      IO.puts("\tregister: #{inspect loop}")
       register(strip_name, strip_options, loop_name, loop_options, func)
     end
     :ok
@@ -89,7 +88,7 @@ defmodule Fledex do
   def register(strip_name, strip_options, loop_name, loop_options, func) do
     result = func.(%{something: 10})
 
-    IO.puts(
+    Logger.info(
       "strip_name: #{inspect(strip_name)}, strip_options: #{inspect(strip_options)}, loop_name: #{inspect(loop_name)}, options: #{inspect(loop_options)}, expression: #{inspect(func)}, result: #{result}"
     )
   end
@@ -105,8 +104,16 @@ defmodule Fledex do
   #   # do we have a Leds defined (with the specified name)?
   # end
 
-  defmacro __before_compile__(env) do
+  defmacro __before_compile__(_env) do
     IO.puts("compiling now...")
-    register(Module.get_attribute(env.module, :loops))
+    Logger.error("compiling now...")
+    loops = Module.get_attribute(__MODULE__, :loops)
+    quote do
+      defmodule T do
+        def run do
+          register(unquote(Macro.escape(loops)))
+        end
+      end
+    end
   end
 end
