@@ -5,36 +5,36 @@ defmodule Fledex.Test do
 
   describe "test macros" do
     test "simple led strip macro" do
-      defmodule TestModule1 do
-        use Fledex
-        led_strip do
-          assert Module.get_attribute(__MODULE__, :strip_name) == :default
-        end
-      end
-      # def register(list) do
-      #   IO.puts(inspect list)
-      # end
-      # live_loop :merry do
-      #   data -> IO.puts(inspect data)
-      # end
-      # :ok
-#       assert Process.whereis(LedsDriver) == nil
-#       led_strip do
-#         pid = Process.whereis(LedsDriver)
-#         assert pid != nil
-#         assert Process.alive?(pid) == true
+#       defmodule TestModule1 do
+#         use Fledex
+#         led_strip do
+#           assert Module.get_attribute(__MODULE__, :strip_name) == :default
+#         end
 #       end
+#       # def register(list) do
+#       #   IO.puts(inspect list)
+#       # end
+#       # live_loop :merry do
+#       #   data -> IO.puts(inspect data)
+#       # end
+#       # :ok
+# #       assert Process.whereis(LedsDriver) == nil
+# #       led_strip do
+# #         pid = Process.whereis(LedsDriver)
+# #         assert pid != nil
+# #         assert Process.alive?(pid) == true
+# #       end
     end
     test "simple live_loop macro" do
-      defmodule TestModule2 do
-        use Fledex
-        live_loop :merry do
-          data -> IO.puts(inspect data)
-        end
-      end
-#       live_loop :john do
-#         call_test_function()
+#       defmodule TestModule2 do
+#         use Fledex
+#         live_loop :merry do
+#           data -> IO.puts(inspect data)
+#         end
 #       end
+# #       live_loop :john do
+# #         call_test_function()
+# #       end
     end
   end
 end

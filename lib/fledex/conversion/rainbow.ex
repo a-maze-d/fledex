@@ -1,6 +1,7 @@
 defmodule Fledex.Color.Conversion.Rainbow do
   import Bitwise
-  use Fledex.Color.Types
+
+  alias Fledex.Color.Types
   alias Fledex.Color.Utils
 
   @k255 255
@@ -8,7 +9,7 @@ defmodule Fledex.Color.Conversion.Rainbow do
   @k170 170
   @k85   85
 
-  @spec hsv2rgb(hsv, (rgb -> rgb)) :: rgb
+  @spec hsv2rgb(Types.hsv, (Types.rgb -> Types.rgb)) :: Types.rgb
   def hsv2rgb({h, s, v}, extra_color_correction) do
     determine_rgb(h)
       |> extra_color_correction.()
@@ -16,7 +17,7 @@ defmodule Fledex.Color.Conversion.Rainbow do
       |> scale_brightness(v)
   end
 
-  @spec determine_rgb(byte) :: rgb
+  @spec determine_rgb(byte) :: Types.rgb
   defp determine_rgb(h) do
     main = {(h &&& 0x80) > 0, (h &&& 0x40) > 0, (h &&& 0x20) > 0}
     offset = h &&& 0x1F
@@ -27,7 +28,7 @@ defmodule Fledex.Color.Conversion.Rainbow do
     build_rgb(main, third, twothird)
   end
 
-  @spec build_rgb({boolean, boolean, boolean}, byte, byte) :: rgb
+  @spec build_rgb({boolean, boolean, boolean}, byte, byte) :: Types.rgb
   defp build_rgb({false, false, false}, third, _twothird) do
     {@k255 - third, third, 0}
   end
@@ -53,7 +54,7 @@ defmodule Fledex.Color.Conversion.Rainbow do
     {@k170 + third, 0, @k85 - third}
   end
 
-  @spec desaturate(rgb, byte) :: rgb
+  @spec desaturate(Types.rgb, byte) :: Types.rgb
   defp desaturate({r, g, b}, 255), do: {r, g, b}
   defp desaturate(_na, 0), do: {255, 255, 255}
   defp desaturate({r, g, b}, s) do
@@ -66,7 +67,7 @@ defmodule Fledex.Color.Conversion.Rainbow do
   end
 
   # scales the brightness (the v part of HSV, aka HSB)
-  @spec scale_brightness(rgb, byte) :: rgb
+  @spec scale_brightness(Types.rgb, byte) :: Types.rgb
   defp scale_brightness(rgb, 255), do: rgb
   defp scale_brightness(_na, v) when ((v * v) >>> 8) == 0, do: {0, 0, 0}
   defp scale_brightness({r, g, b}, v) do

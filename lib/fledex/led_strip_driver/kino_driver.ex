@@ -1,9 +1,8 @@
 defmodule Fledex.LedStripDriver.KinoDriver do
   @behaviour Fledex.LedStripDriver.Driver
 
-  use Fledex.Color.Types
-
   alias Fledex.Color.Correction
+  alias Fledex.Color.Types
 
   @default_update_freq 50
   @base16 16
@@ -20,7 +19,7 @@ defmodule Fledex.LedStripDriver.KinoDriver do
   end
 
   @impl true
-  @spec transfer(list(colorint), pos_integer, map) :: map
+  @spec transfer(list(Types.colorint), pos_integer, map) :: map
   def transfer(leds, counter, config) do
     if (rem(counter, config.update_freq) == 0 and length(leds) > 0) do
       output = leds

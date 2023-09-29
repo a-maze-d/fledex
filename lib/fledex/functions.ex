@@ -1,9 +1,9 @@
 defmodule Fledex.Functions do
   import Bitwise
-  use Fledex.Color.Types
 
   alias Fledex.Color.Conversion
   alias Fledex.Color.Correction
+  alias Fledex.Color.Types
 
   @spec step(boolean, byte) :: integer
   # Depending whether we want to reverse we move hue forward or backwards
@@ -11,7 +11,7 @@ defmodule Fledex.Functions do
   defp step(false, hue), do: hue
   defp step(true, hue), do: -hue
 
-  @spec create_rainbow_circular_hsv(pos_integer, byte, boolean) :: list(hsv)
+  @spec create_rainbow_circular_hsv(pos_integer, byte, boolean) :: list(Types.hsv)
   def create_rainbow_circular_hsv(num_leds, initial_hue \\ 0, reversed \\ false)
   def create_rainbow_circular_hsv(0, _initial_hue, _reversed), do: []
   def create_rainbow_circular_hsv(num_leds, initial_hue, reversed) do
@@ -21,14 +21,14 @@ defmodule Fledex.Functions do
     end
   end
 
-  @spec create_rainbow_circular_rgb(pos_integer, byte, boolean) :: list(rgb)
+  @spec create_rainbow_circular_rgb(pos_integer, byte, boolean) :: list(Types.rgb)
   def create_rainbow_circular_rgb(num_leds, initial_hue \\ 0, reversed \\ false) do
     create_rainbow_circular_hsv(num_leds, initial_hue, reversed)
     |> hsv2rgb()
   end
 
-  @spec create_gradient_rgb(pos_integer, rgb, rgb) ::
-          list(rgb)
+  @spec create_gradient_rgb(pos_integer, Types.rgb, Types.rgb) ::
+          list(Types.rgb)
   def create_gradient_rgb(num_leds, {sr, sg, sb} = _start_color, {er, eg, eb} = _end_color) when num_leds > 0 do
     rdist87 = (er - sr) <<< 7
     gdist87 = (eg - sg) <<< 7
@@ -49,7 +49,7 @@ defmodule Fledex.Functions do
 
   end
 
-  @spec hsv2rgb(list(hsv), (hsv, (rgb -> rgb) -> rgb), (rgb -> rgb)) :: list(rgb)
+  @spec hsv2rgb(list(Types.hsv), (Types.hsv, (Types.rgb -> Types.rgb) -> Types.rgb), (Types.rgb -> Types.rgb)) :: list(Types.rgb)
   def hsv2rgb(leds,
               conversion_function \\ &Conversion.Rainbow.hsv2rgb/2,
               color_correction \\ &Correction.color_correction_none/1

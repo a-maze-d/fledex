@@ -1,11 +1,10 @@
 defmodule Fledex.Leds do
   require Logger
 
-  use Fledex.Color.Types
-
   import Bitwise
 
   alias Fledex.Color.Names
+  alias Fledex.Color.Types
   alias Fledex.Color.Utils
   alias Fledex.Functions
   alias Fledex.LedsDriver
@@ -53,7 +52,7 @@ defmodule Fledex.Leds do
     put_in(leds.leds, Map.merge(leds.leds, led_values))
   end
 
-  @spec convert_to_leds_structure(list(rgb), integer) :: map
+  @spec convert_to_leds_structure(list(Types.rgb), integer) :: map
   def convert_to_leds_structure(rgbs, offset \\ 0) do
     offset_oneindex = offset + 1
     Enum.zip_with(offset_oneindex..(offset_oneindex + length(rgbs)), rgbs, fn(index, {r, g, b}) ->
@@ -78,11 +77,11 @@ defmodule Fledex.Leds do
     raise "You need to specify at least a start_color and end_color"
   end
 
-  @spec light(t, (colorint | t | atom)) :: t
+  @spec light(t, (Types.colorint | t | atom)) :: t
   def light(leds, rgb) do
     do_update(leds, rgb)
   end
-  @spec light(t, (colorint | t | atom), pos_integer) :: t
+  @spec light(t, (Types.colorint | t | atom), pos_integer) :: t
   def light(leds, led, offset) do
     do_update(leds, led, offset)
   end
@@ -93,7 +92,7 @@ defmodule Fledex.Leds do
     func.(leds, config)
   end
 
-  @spec update(t, (colorint | rgb | atom)) :: t
+  @spec update(t, (Types.colorint | Types.rgb | atom)) :: t
   def update(leds, led) do
     do_update(leds, led)
   end
@@ -101,7 +100,7 @@ defmodule Fledex.Leds do
   :offset is 1 indexed. Offset needs to be >0 if it's bigger than the :count
   then the led will be stored, but ignored
   """
-  @spec update(t, (colorint | t), pos_integer) :: t
+  @spec update(t, (Types.colorint | t), pos_integer) :: t
   def update(leds, led, offset) when offset > 0 do
     do_update(leds, led, offset)
   end
@@ -109,12 +108,12 @@ defmodule Fledex.Leds do
     raise ArgumentError, message: "the offset needs to be > 0 (found: #{offset})"
   end
 
-  @spec do_update(t, (colorint | rgb | atom)) :: t
+  @spec do_update(t, (Types.colorint | Types.rgb | atom)) :: t
   defp do_update(%__MODULE__{meta: meta} = leds, rgb) do
     index = meta[:index]  || 1
     do_update(leds, rgb, index)
   end
-  @spec do_update(t, colorint, pos_integer) :: t
+  @spec do_update(t, Types.colorint, pos_integer) :: t
   defp do_update(%__MODULE__{count: count, leds: leds, opts: opts, meta: meta}, rgb, offset) when is_integer(rgb) do
     __MODULE__.new(count, Map.put(leds, offset, rgb), opts, %{meta | index: offset + 1})
   end
@@ -175,7 +174,7 @@ defmodule Fledex.Leds do
     LedsDriver.set_leds(namespace, vals, server_name)
   end
 
-  @spec get_light(t, pos_integer) :: colorint
+  @spec get_light(t, pos_integer) :: Types.colorint
   def get_light(%__MODULE__{leds: leds} = _leds, index) do
     case Map.fetch(leds, index) do
       {:ok, value} -> value
@@ -183,7 +182,7 @@ defmodule Fledex.Leds do
     end
   end
 
-  @spec rotate(list(colorint), pos_integer, boolean) :: list(colorint)
+  @spec rotate(list(Types.colorint), pos_integer, boolean) :: list(Types.colorint)
   def rotate(vals, offset, rotate_left \\ true)
   def rotate(vals, 0, _rotate_left), do: vals
   def rotate(vals, offset, rotate_left) do

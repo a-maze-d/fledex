@@ -43,15 +43,32 @@ We now define our animations with our dsl with the following steps:
 **Note 2:** The `live_loop` has quite a few options to configure the behavior of various aspects of the loop, but we'll look at thos separately.
 
 ```elixir
-defmodule Test do
-  use Fledex
+# defmodule Test do
+#   use Fledex, :strip1
 
-  led_strip :strip1 do
-    live_loop :anne do
-      data -> IO.puts(inspect(data))
-    end
+#   led_strip :strip1 do
+#     live_loop :anne do
+#       data -> IO.puts(inspect(data))
+#     end
+#   end
+# end
+
+import Fledex
+
+defmodule T do
+  def func(data) do
+    IO.puts(inspect(data))
+    data.something + 10
   end
 end
+
+register(
+  :strip1,
+  [],
+  :john,
+  [],
+  &T.func/1
+)
 ```
 
 ```elixir

@@ -20,15 +20,27 @@ defmodule Fledex do
   @behaviour Fledex.Callbacks
   require Logger
 
-  defmacro __using__(_opts) do
-    quote do
+  defmacro __using__(opts) do
+    opts = if Macro.quoted_literal?(opts) do
+      Macro.prewalk(opts, &expand_alias(&1, __CALLER__))
+    else
+      opts
+    end
+    quote bind_quoted: [opts: opts] do
       import Fledex
-      Module.register_attribute(__MODULE__, :strip_name, accumulate: false)
-      Module.register_attribute(__MODULE__, :strip_opts, accumulate: false)
-      Module.register_attribute(__MODULE__, :loops, accumulate: true)
+      defmodule opts do
+        Module.register_attribute(opts, :strip_name, accumulate: false)
+        Module.register_attribute(opts, :strip_opts, accumulate: false)
+        Module.register_attribute(opts, :loops, accumulate: true)
+      end
       @before_compile
     end
   end
+
+  defp expand_alias({:__aliases__, _meta, _args} = alias, env) do
+    Macro.expand(alias, %{env | function: {:action, 2}})
+  end
+  defp expand_alias(other, _env), do: other
 
   @doc """
     This introduces a new `live_loop` (animation) that will be played over
@@ -39,15 +51,15 @@ defmodule Fledex do
     func_ast = {:fn, [], block}
 
     quote do
-      Module.put_attribute(__MODULE__, :loops, {
-        Module.get_attribute(__MODULE__, :strip_name, __MODULE__),
-        Module.get_attribute(__MODULE__, :strip_options, []),
+      Module.put_attribute(:strip1, :loops, {
+        Module.get_attribute(:strip1, :strip_name, __MODULE__),
+        Module.get_attribute(:strip1, :strip_options, []),
         unquote(loop_name),
         unquote(loop_options),
         unquote(func_ast),
       })
     end
-    # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
+    |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
 
   @doc """
@@ -56,10 +68,11 @@ defmodule Fledex do
   """
   defmacro led_strip(strip_name \\ :default, strip_options \\ [], do: block) do
     quote do
-      Module.put_attribute(__MODULE__, :strip_name, unquote(strip_name))
-      Module.put_attribute(__MODULE__, :strip_options, unquote(strip_options))
+      Module.put_attribute(:strip1, :strip_name, unquote(strip_name))
+      Module.put_attribute(:strip1, :strip_options, unquote(strip_options))
       unquote(block)
-    end # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
+    end
+    |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
 
   @doc """
@@ -107,7 +120,7 @@ defmodule Fledex do
   defmacro __before_compile__(_env) do
     IO.puts("compiling now...")
     Logger.error("compiling now...")
-    loops = Module.get_attribute(__MODULE__, :loops)
+    loops = Module.get_attribute(:strip1, :loops)
     quote do
       defmodule T do
         def run do
@@ -115,5 +128,6 @@ defmodule Fledex do
         end
       end
     end
+    |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
 end

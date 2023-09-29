@@ -1,5 +1,6 @@
 defmodule Fledex.Color.Conversion.Approximate do
-  use Fledex.Color.Types
+  alias Fledex.Color.Types
+  alias Fledex.Color.Utils
 
   @hue_red 0
   @hue_orange 32
@@ -15,9 +16,7 @@ defmodule Fledex.Color.Conversion.Approximate do
   @frac_24_128 Fledex.Color.Utils.frac8(24, 128)
   @frac_8_42 Fledex.Color.Utils.frac8(8, 42)
 
-  alias Fledex.Color.Utils
-
-  @spec rgb2hsv(rgb) :: hsv
+  @spec rgb2hsv(Types.rgb) :: Types.hsv
   def rgb2hsv({r, g, b}) do
     desat = find_desaturation({r, g, b})
     s = calc_saturation(desat)
@@ -93,7 +92,7 @@ defmodule Fledex.Color.Conversion.Approximate do
     calc_hue(rgb, Enum.max(rgb)) + 1
   end
 
-  @spec scale_to_compensate(rgb, byte) :: rgb
+  @spec scale_to_compensate(Types.rgb, byte) :: Types.rgb
   defp scale_to_compensate({r, g, b}, s) when s < 255 do
     s = if s == 0, do: 1, else: s
     scaleup = 65_535 / (s)
@@ -104,7 +103,7 @@ defmodule Fledex.Color.Conversion.Approximate do
   end
   defp scale_to_compensate({r, g, b}, _s), do: {r, g, b}
 
-  @spec find_desaturation(rgb) :: byte
+  @spec find_desaturation(Types.rgb) :: byte
   defp find_desaturation({r, g, b}) do
     #     // find desaturation
     #     uint8_t desat = 255;

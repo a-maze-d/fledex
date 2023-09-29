@@ -1,10 +1,9 @@
 defmodule Fledex.Color.Conversion.Spectrum do
-  use Fledex.Color.Types
-
   alias Fledex.Color.Conversion.Raw
+  alias Fledex.Color.Types
   alias Fledex.Color.Utils
 
-  @spec hsv2rgb(hsv, (rgb -> rgb)) :: rgb
+  @spec hsv2rgb(Types.hsv, (Types.rgb -> Types.rgb)) :: Types.rgb
   def hsv2rgb({h, s, v}, extra_color_correction) do
     #     CHSV hsv2(hsv);
     # hsv2.hue = scale8( hsv2.hue, 191);

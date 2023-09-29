@@ -1,7 +1,7 @@
 defmodule Fledex.Color.Correction do
   import Bitwise
-  use Fledex.Color.Types
 
+  alias Fledex.Color.Types
   alias Fledex.Color.Utils
 
   defmodule Color do
@@ -50,16 +50,16 @@ defmodule Fledex.Color.Correction do
       def uncorrected_temperature,     do: 0xFFFFFF # 255, 255, 255 */
   end
 
-  @spec color_correction_g2(rgb) :: rgb
+  @spec color_correction_g2(Types.rgb) :: Types.rgb
   def color_correction_g2({r, g, b}) do
     {r, g >>> 2, b}
   end
-  @spec color_correction_none(rgb) :: rgb
+  @spec color_correction_none(Types.rgb) :: Types.rgb
   def color_correction_none({r, g, b}) do
       {r, g, b}
   end
 
-  @spec define_correction(byte, colorint, colorint) :: rgb
+  @spec define_correction(byte, Types.colorint, Types.colorint) :: Types.rgb
   def define_correction(scale \\ 255, color_correction, temperature_correction)
   def define_correction(scale, color_correction, temperature_correction) when scale > 0 do
       {ccr, ccg, ccb} = Utils.split_into_subpixels(color_correction)
@@ -75,13 +75,13 @@ defmodule Fledex.Color.Correction do
     {0, 0, 0}
   end
 
-  @spec no_color_correction() :: rgb
+  @spec no_color_correction() :: Types.rgb
   def no_color_correction do
     # This should correspond to 255, but we do the proper calculation at compile time
     define_correction(Color.uncorrected_color, Temperature.uncorrected_temperature)
   end
 
-  @spec apply_rgb_correction(list(rgb), (byte | rgb)) :: list(rgb)
+  @spec apply_rgb_correction(list(Types.rgb), (byte | Types.rgb)) :: list(Types.rgb)
   def apply_rgb_correction(leds, {255, 255, 255}), do: leds
   def apply_rgb_correction(leds, 0xFFFFFF), do: leds
   def apply_rgb_correction(leds, correction) do

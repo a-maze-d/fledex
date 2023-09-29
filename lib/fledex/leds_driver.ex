@@ -8,11 +8,11 @@ defmodule Fledex.LedsDriver do
   The role the LedsDriver plays is similar to the one a window server  plays on a normal computer
   """
   @behaviour GenServer
-  use Fledex.Color.Types
 
   require Logger
 
   alias Fledex.Color.Correction
+  alias Fledex.Color.Types
   alias Fledex.Color.Utils
   alias Fledex.LedStripDriver.Driver
   alias Fledex.LedStripDriver.LoggerDriver
@@ -192,7 +192,7 @@ defmodule Fledex.LedsDriver do
   end
 
   @impl true
-  @spec handle_call({:set_leds, atom, list(colorint)}, {pid, any}, t)
+  @spec handle_call({:set_leds, atom, list(Types.colorint)}, {pid, any}, t)
       :: {:reply, (:ok | {:error, String.t}), t}
   def handle_call({:set_leds, name, leds}, _from, %{namespaces: namespaces} = state) do
     state = put_in(state, [:timer, :is_dirty], true)
@@ -235,19 +235,19 @@ defmodule Fledex.LedsDriver do
     state
   end
 
-  @spec merge_namespaces(map, atom) :: list(colorint)
+  @spec merge_namespaces(map, atom) :: list(Types.colorint)
   def merge_namespaces(namespaces, merge_strategy) do
     namespaces
       |> get_leds()
       |> merge_leds(merge_strategy)
   end
-  @spec get_leds(map) :: list(list(colorint))
+  @spec get_leds(map) :: list(list(Types.colorint))
   def get_leds(namespaces) do
     Enum.reduce(namespaces, [], fn {_key, value}, acc ->
       acc ++ [value]
     end)
   end
-  @spec merge_leds(list(list(colorint)), atom) :: list(colorint)
+  @spec merge_leds(list(list(Types.colorint)), atom) :: list(Types.colorint)
   def merge_leds(leds, merge_strategy) do
     leds = match_length(leds)
     Enum.zip_with(leds, fn elems ->
@@ -255,20 +255,20 @@ defmodule Fledex.LedsDriver do
     end)
   end
 
-  @spec match_length(list(list(colorint))) :: list(list(colorint))
+  @spec match_length(list(list(Types.colorint))) :: list(list(Types.colorint))
   def match_length(leds) when leds == nil, do: leds
   def match_length(leds) when leds == [], do: leds
   def match_length(leds) do
     max_length = Enum.reduce(leds, 0, fn(sequence, acc) -> max(acc, length(sequence)) end)
     Enum.map(leds, fn(sequence) -> extend(sequence, max_length - length(sequence)) end)
   end
-  @spec extend(list(colorint), pos_integer) :: list(colorint)
+  @spec extend(list(Types.colorint), pos_integer) :: list(Types.colorint)
   def extend(sequence, 0), do: sequence
   def extend(sequence, extra) do
     extra_length = Enum.reduce(1..extra, [], fn(_index, acc) -> acc ++ [0x000000] end)
     sequence ++ extra_length
   end
-  @spec merge_pixels(list(colorint), atom) :: colorint
+  @spec merge_pixels(list(Types.colorint), atom) :: Types.colorint
   def merge_pixels(elems, merge_strategy) do
     count = length(elems)
     elems
@@ -278,7 +278,7 @@ defmodule Fledex.LedsDriver do
     |> Utils.combine_subpixels()
   end
 
-  @spec apply_merge_strategy({pos_integer, pos_integer, pos_integer}, pos_integer, atom) :: rgb
+  @spec apply_merge_strategy({pos_integer, pos_integer, pos_integer}, pos_integer, atom) :: Types.rgb
   def apply_merge_strategy(rgb, count, merge_strategy) do
     case merge_strategy do
       :avg -> Utils.avg(rgb, count)

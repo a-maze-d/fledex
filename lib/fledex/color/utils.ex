@@ -1,8 +1,8 @@
 defmodule Fledex.Color.Utils do
-  use Fledex.Color.Types
-
   import Bitwise
+
   alias Fledex.Color.Names
+  alias Fledex.Color.Types
 
   @spec frac8(0..255, 0..255) :: 0..255
   @doc """
@@ -25,16 +25,16 @@ defmodule Fledex.Color.Utils do
     ((value * scale) >>> 8) + addition
   end
 
-  @spec nscale8(rgb, 0..255, boolean) :: rgb
+  @spec nscale8(Types.rgb, 0..255, boolean) :: Types.rgb
   def nscale8(rgb, scale, video \\ true)
   def nscale8({r, g, b}, scale, video) when is_integer(scale) do
     nscale8({r, g, b}, {scale, scale, scale}, video)
   end
-  @spec nscale8(rgb, rgb, boolean) :: rgb
+  @spec nscale8(Types.rgb, Types.rgb, boolean) :: Types.rgb
   def nscale8({r, g, b}, {sr, sg, sb}, video) do
     {scale8(r, sr, video), scale8(g, sg, video), scale8(b, sb, video)}
   end
-  @spec nscale8(colorint, rgb, boolean) :: colorint
+  @spec nscale8(Types.colorint, Types.rgb, boolean) :: Types.colorint
   def nscale8(color, rgb, video) do
     split_into_subpixels(color)
       |> nscale8(rgb, video)
@@ -45,7 +45,7 @@ defmodule Fledex.Color.Utils do
   Splits the rgb-integer value into it's subpixels and returns an
   `{r, g, b}` tupel
   """
-  @spec split_into_subpixels(colorint) :: rgb
+  @spec split_into_subpixels(Types.colorint) :: Types.rgb
   def split_into_subpixels(elem) do
     r = elem |> Bitwise.&&&(0xFF0000) |> Bitwise.>>>(16)
     g = elem |> Bitwise.&&&(0x00FF00) |> Bitwise.>>>(8)
@@ -58,14 +58,14 @@ defmodule Fledex.Color.Utils do
   The result {r1+r2+..., g1+g2+..., b1+b2+...} is probably outside of the standard
   8bit range and will have to be rescaled
   """
-  @spec add_subpixels(list(rgb)) :: {pos_integer, pos_integer, pos_integer}
+  @spec add_subpixels(list(Types.rgb)) :: {pos_integer, pos_integer, pos_integer}
   def add_subpixels(elems) do
     Enum.reduce(elems, {0, 0, 0}, fn {r, g, b}, {accr, accg, accb} ->
       {r + accr, g + accg, b + accb}
     end)
   end
 
-  @spec avg({pos_integer, pos_integer, pos_integer}, pos_integer) :: rgb
+  @spec avg({pos_integer, pos_integer, pos_integer}, pos_integer) :: Types.rgb
   @doc """
   This function rescales the rgb values with count (default: 1) and combines
   them to a single integer
@@ -77,7 +77,7 @@ defmodule Fledex.Color.Utils do
     {r, g, b}
   end
 
-  @spec cap({pos_integer, pos_integer, pos_integer}, Range.t) :: rgb
+  @spec cap({pos_integer, pos_integer, pos_integer}, Range.t) :: Types.rgb
   def cap({r, g, b}, min_max \\ 0..255) do
     {do_cap(r, min_max), do_cap(g, min_max), do_cap(b, min_max)}
   end
@@ -91,12 +91,12 @@ defmodule Fledex.Color.Utils do
     end
   end
 
-  @spec combine_subpixels(rgb) :: colorint
+  @spec combine_subpixels(Types.rgb) :: Types.colorint
   def combine_subpixels({r, g, b}) do
     (r<<<16) + (g<<<8) + b
   end
 
-  @spec convert_to_subpixels((colorint | atom | rgb | %{rgb: rgb})) :: rgb
+  @spec convert_to_subpixels((Types.colorint | atom | Types.rgb | %{rgb: Types.rgb})) :: Types.rgb
   def convert_to_subpixels(rgb) do
     case rgb do
       %{rgb: x} -> x
