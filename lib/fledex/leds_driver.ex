@@ -15,7 +15,7 @@ defmodule Fledex.LedsDriver do
   alias Fledex.Color.Types
   alias Fledex.Color.Utils
   alias Fledex.LedStripDriver.Driver
-  alias Fledex.LedStripDriver.LoggerDriver
+  alias Fledex.LedStripDriver.NullDriver
 
   @type t :: %{
     timer: %{
@@ -36,7 +36,7 @@ defmodule Fledex.LedsDriver do
   }
 
   @default_update_timeout 50
-  @default_driver_modules [LoggerDriver]
+  @default_driver_modules [NullDriver]
 
   #client code
   @spec start_link(atom | map, atom | {:global, any} | {:via, atom, any}) ::
@@ -95,16 +95,6 @@ defmodule Fledex.LedsDriver do
 
   @spec init_state(map) :: t
   def init_state(init_args) when is_map(init_args) do
-    # only_dirty_update = if init_args[:timer][:only_dirty_update] == nil do
-    #   false
-    # else
-    #    init_args[:timer][:only_dirty_update]
-    # end
-    # is_dirty = if init_args[:timer][:is_dirty] == nil do
-    #   false
-    # else
-    #   init_args[:timer][:is_dirty]
-    # end
     state = %{
       timer: init_timer(init_args[:timer]),
       led_strip: init_led_strip(init_args[:led_strip]),

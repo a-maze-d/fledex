@@ -10,8 +10,15 @@ defmodule Fledex.Leds do
   alias Fledex.LedsDriver
 
   @enforce_keys [:count, :leds, :opts]
-  defstruct count: 0, leds: %{}, opts: %{}, meta: %{index: 1} #, fill: :none
-  @type t :: %__MODULE__{count: integer, leds: map, opts: map, meta: map}
+  defstruct server_name: nil, namespace: nil, count: 0, leds: %{}, opts: %{}, meta: %{index: 1} #, fill: :none
+  @type t :: %__MODULE__{
+    server_name: atom,
+    namespace: atom,
+    count: integer,
+    leds: map,
+    opts: map,
+    meta: map
+  }
 
   @func_ids %{
     rainbow: &Fledex.Leds.rainbow/2,
@@ -36,7 +43,23 @@ defmodule Fledex.Leds do
   end
   @spec new(integer, map, map, map) :: t
   def new(count, leds, opts, meta) do
-    %__MODULE__{count: count, leds: leds, opts: opts, meta: meta}
+    new(count, leds, opts, meta, :default, Fledex.LedsDriver)
+  end
+  @spec new(integer, map, map, map, atom, atom) :: t
+  def new(count, leds, opts, meta, namespace, server_name) do
+    %__MODULE__{
+      server_name: server_name,
+      namespace: namespace,
+      count: count,
+      leds: leds,
+      opts: opts,
+      meta: meta
+    }
+  end
+
+  @spec set_driver_info(t, namespace :: atom, server_name :: atom) :: t
+  def set_driver_info(leds, namespace, server_name \\  Fledex.LedsDriver) do
+      %__MODULE__{leds | server_name: server_name, namespace: namespace}
   end
 
   @spec rainbow(t, map) :: t
@@ -152,26 +175,24 @@ defmodule Fledex.Leds do
 
   @spec send(t, map) :: any
   def send(leds, opts \\ %{}) do
-    namespace = opts[:namespace] || :default
-    server_name = opts[:server_name] || Fledex.LedsDriver
     offset = opts[:offset] || 0
     rotate_left = if opts[:rotate_left] != nil, do: opts[:rotate_left], else: true
 
     # we probably want to do some validation here and probably
     # want to optimise it a bit
     # a) is the server running?
-    if Process.whereis(server_name) == nil do
+    if Process.whereis(leds.server_name) == nil do
       Logger.warn("The server wasn't started. You should start it before using this function")
-      {:ok, _pid} = LedsDriver.start_link(%{}, server_name)
+      {:ok, _pid} = LedsDriver.start_link(%{}, leds.server_name)
     end
     # b) Is a namespace defined?
-    exists = LedsDriver.exist_namespace(namespace, server_name)
+    exists = LedsDriver.exist_namespace(leds.namespace, leds.server_name)
     if not exists do
       Logger.warn("The namespace hasn't been defined. This should be done before calling this function")
-      LedsDriver.define_namespace(namespace, server_name)
+      LedsDriver.define_namespace(leds.namespace, leds.server_name)
     end
     vals = rotate(to_list(leds), offset, rotate_left)
-    LedsDriver.set_leds(namespace, vals, server_name)
+    LedsDriver.set_leds(leds.namespace, vals, leds.server_name)
   end
 
   @spec get_light(t, pos_integer) :: Types.colorint
