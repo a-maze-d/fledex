@@ -2,7 +2,6 @@ defmodule Fledex.LedStripDriver.NullDriver do
   @behaviour Fledex.LedStripDriver.Driver
 
   alias Fledex.Color.Types
-  alias Fledex.Color.Utils
   @moduledoc """
     This is a dummy implementation of the LedStripDriver that doesn't do
     anything (similar to a /dev/null device). This can be useful if you
@@ -10,7 +9,7 @@ defmodule Fledex.LedStripDriver.NullDriver do
   """
   @impl true
   @spec init(map) :: map
-  def init(init_module_args) do
+  def init(_init_module_args) do
     %{
       # not storing anything
     }

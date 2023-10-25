@@ -8,7 +8,7 @@ defmodule Fledex.LedDriverTest do
 
   describe "test init/1" do
     test "init_args are correctly set (disable timer)" do
-      {:ok, state} = LedsDriver.init(%{timer: %{disabled: true}})
+      {:ok, state} = LedsDriver.init({%{timer: %{disabled: true}}, :strip_name})
       assert state.timer.disabled == true
       assert state.timer.counter == 0
       assert state.timer.update_timeout == 50
@@ -16,16 +16,17 @@ defmodule Fledex.LedDriverTest do
       assert state.timer.only_dirty_update == false
       assert state.timer.is_dirty == false
       assert state.timer.ref == nil
+      # TODO: add more fields
     end
 
     test "init_args are correctly set (with active timer)" do
       update_func = &(&1)
-      {:ok, state} = LedsDriver.init(%{
+      {:ok, state} = LedsDriver.init({%{
         timer: %{
           update_func: update_func,
           only_dirty_update: false
         }
-      })
+      }, :strip_name})
       assert state.timer.disabled == false
       assert state.timer.counter == 0
       assert state.timer.update_timeout == 50
@@ -33,12 +34,13 @@ defmodule Fledex.LedDriverTest do
       assert state.timer.only_dirty_update == false
       assert state.timer.is_dirty == false
       assert state.timer.ref != nil
+      #TODO: add more fields
 
       assert_receive {:update_timeout, _update_func}
     end
 
     test "start server" do
-      assert match?({:ok, _}, LedsDriver.start_link(%{timer: %{disable: true}}))
+      assert match?({:ok, _}, LedsDriver.start_link(%{timer: %{disable: true}}, :strip_name))
     end
   end
 
@@ -47,7 +49,7 @@ defmodule Fledex.LedDriverTest do
       update_func = &(&1)
       LedsDriver.handle_info(
         {:update_timeout, update_func},
-        LedsDriver.init_state(%{timer: %{counter: 1, update_func: update_func}})
+        LedsDriver.init_state(%{timer: %{counter: 1, update_func: update_func}}, :strip_name)
       )
       assert_receive {:update_timeout, _update_func}
     end
@@ -62,7 +64,7 @@ defmodule Fledex.LedDriverTest do
           update_func: update_func
         },
       }
-      state = LedsDriver.init_state(init_args)
+      state = LedsDriver.init_state(init_args, :strip_name)
       state = %{state | led_strip: %{
         update_counter: 0
       }}
@@ -74,7 +76,7 @@ defmodule Fledex.LedDriverTest do
 
   describe "test update shortcutting" do
     test "state is dirty after client calls" do
-      {:ok, state} = LedsDriver.init(%{timer: %{disabled: true}})
+      {:ok, state} = LedsDriver.init({%{timer: %{disabled: true}}, :strip_name})
       assert state.timer.is_dirty == false
       {:reply, _na, state} = LedsDriver.handle_call({:define_namespace, "name"}, self(), state)
       assert state.timer.is_dirty == true
@@ -164,7 +166,7 @@ defmodule Fledex.LedDriverTest do
           jane: [0x00FF00, 0x0000FF, 0xFF0000, 0x0000FF, 0x00FF00, 0xFF0000]
         }
       }
-      state = LedsDriver.init_state(init_args)
+      state = LedsDriver.init_state(init_args, :strip_name)
 
       assert capture_io(fn ->
         response = LedsDriver.transfer_data(state)
@@ -175,7 +177,7 @@ defmodule Fledex.LedDriverTest do
   end
   describe "test client API" do
     test "define leds first set" do
-      {:ok, state} = LedsDriver.init(%{})
+      {:ok, state} = LedsDriver.init({%{}, :strip_name})
       name = :john
       response = LedsDriver.handle_call({:define_namespace, name}, self(), state)
       assert match?({:reply, {:ok, _}, _}, response)
@@ -184,7 +186,7 @@ defmodule Fledex.LedDriverTest do
       assert Map.keys(state.namespaces) == [:john]
     end
     test "define_namespace second name" do
-      {:ok, state} = LedsDriver.init(%{})
+      {:ok, state} = LedsDriver.init({%{}, :strip_name})
       name = :john
       {:reply, _na, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
       name2 = :jane
@@ -195,7 +197,7 @@ defmodule Fledex.LedDriverTest do
       assert Map.keys(state2.namespaces) |> Enum.sort() == [:john, :jane] |> Enum.sort()
     end
     test "test drop_namespace" do
-      {:ok, state} = LedsDriver.init(%{})
+      {:ok, state} = LedsDriver.init({%{}, :strip_name})
       name = :john
       {:reply, _na, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
       name2 = :jane
@@ -205,7 +207,7 @@ defmodule Fledex.LedDriverTest do
       assert Map.keys(state.namespaces) == [:jane]
     end
     test "test set_leds" do
-      {:ok, state} = LedsDriver.init(%{})
+      {:ok, state} = LedsDriver.init({%{}, :strip_name})
       name = :john
       leds = [0xFF0000, 0x00FF00, 0x0000FF, 0x00FF00, 0xFF0000, 0x0000FF]
       {:reply, _na, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)

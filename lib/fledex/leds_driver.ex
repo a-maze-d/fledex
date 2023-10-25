@@ -16,8 +16,10 @@ defmodule Fledex.LedsDriver do
   alias Fledex.Color.Utils
   alias Fledex.LedStripDriver.Driver
   alias Fledex.LedStripDriver.NullDriver
+  alias Fledex.Utils.PubSub
 
   @type t :: %{
+    strip_name: atom,
     timer: %{
       disabled: boolean,
       counter: pos_integer,
@@ -38,12 +40,13 @@ defmodule Fledex.LedsDriver do
   @default_update_timeout 50
   @default_driver_modules [NullDriver]
 
-  #client code
+  # client code
   @spec start_link(atom | map, atom | {:global, any} | {:via, atom, any}) ::
           :ignore | {:error, any} | {:ok, pid}
-  def start_link(config \\ :none, server_name \\ __MODULE__)
-  def start_link(:none, server_name), do: start_link(%{}, server_name)
-  def start_link(:kino, server_name) do
+  def start_link(config \\ :none, strip_name \\ __MODULE__)
+  def start_link(:none, strip_name), do: start_link(%{}, strip_name)
+
+  def start_link(:kino, strip_name) do
     config = %{
       timer: %{only_dirty_update: false},
       led_strip: %{
@@ -57,53 +60,62 @@ defmodule Fledex.LedsDriver do
         }
       }
     }
-    start_link(config, server_name)
-  end
-  def start_link(init_args, server_name) when is_map(init_args) do
-    GenServer.start_link(__MODULE__, init_args, name: server_name)
+
+    start_link(config, strip_name)
   end
 
-  @spec define_namespace(atom, atom) :: ({:ok, atom} | {:error, String.t})
-  def define_namespace(namespace, server_name \\ __MODULE__) do
-    GenServer.call(server_name, {:define_namespace, namespace})
+  def start_link(init_args, strip_name) when is_map(init_args) do
+    GenServer.start_link(__MODULE__, {init_args, strip_name}, name: strip_name)
   end
+
+  @spec define_namespace(atom, atom) :: {:ok, atom} | {:error, String.t()}
+  def define_namespace(namespace, strip_name \\ __MODULE__) do
+    GenServer.call(strip_name, {:define_namespace, namespace})
+  end
+
   @spec drop_namespace(atom, atom) :: :ok
-  def drop_namespace(namespace, server_name \\ __MODULE__) do
-    GenServer.call(server_name, {:drop_namespace, namespace})
+  def drop_namespace(namespace, strip_name \\ __MODULE__) do
+    GenServer.call(strip_name, {:drop_namespace, namespace})
   end
+
   @spec exist_namespace(atom, atom) :: boolean
-  def exist_namespace(namespace, server_name \\ __MODULE__) do
-    GenServer.call(server_name, {:exist_namespace, namespace})
+  def exist_namespace(namespace, strip_name \\ __MODULE__) do
+    GenServer.call(strip_name, {:exist_namespace, namespace})
   end
-  @spec set_leds(atom, list(pos_integer), atom) :: (:ok | {:error, String.t})
-  def set_leds(namespace, leds, server_name \\ __MODULE__) do
-    GenServer.call(server_name, {:set_leds, namespace, leds})
+
+  @spec set_leds(atom, list(pos_integer), atom) :: :ok | {:error, String.t()}
+  def set_leds(namespace, leds, strip_name \\ __MODULE__) do
+    GenServer.call(strip_name, {:set_leds, namespace, leds})
   end
 
   # server code
   @impl true
-  @spec init(map) :: {:ok, t} | {:stop, String.t}
-  def init(init_args) when is_map(init_args) do
-    state = init_state(init_args)
+  @spec init({map, atom}) :: {:ok, t} | {:stop, String.t()}
+  def init({init_args, strip_name}) when is_map(init_args) and is_atom(strip_name) do
+    state = init_state(init_args, strip_name)
     state = if state[:timer][:disabled] == false, do: start_timer(state), else: state
 
     {:ok, state}
   end
+
   def init(_na) do
     {:stop, "Init args need to be a map"}
   end
 
-  @spec init_state(map) :: t
-  def init_state(init_args) when is_map(init_args) do
+  @spec init_state(map, atom) :: t
+  def init_state(init_args, strip_name) when is_map(init_args) and is_atom(strip_name) do
     state = %{
+      strip_name: strip_name,
       timer: init_timer(init_args[:timer]),
       led_strip: init_led_strip(init_args[:led_strip]),
       namespaces: init_args[:namespaces] || %{}
     }
+
     Driver.init(init_args, state)
   end
 
   defp init_led_strip(nil), do: init_led_strip(%{})
+
   defp init_led_strip(init_args) do
     %{
       merge_strategy: init_args[:merge_strategy] || :avg,
@@ -111,34 +123,39 @@ defmodule Fledex.LedsDriver do
       config: init_args[:config] || %{}
     }
   end
+
   defp define_drivers(nil) do
-    #Logger.warn("No driver_modules defined/ #{inspect @default_driver_modules} will be used")
+    # Logger.warn("No driver_modules defined/ #{inspect @default_driver_modules} will be used")
     @default_driver_modules
   end
+
   defp define_drivers(driver_modules) when is_list(driver_modules) do
     driver_modules
   end
+
   defp define_drivers(driver_modules) do
     Logger.warn("driver_modules is not a list")
     [driver_modules]
   end
 
   defp init_timer(nil), do: init_timer(%{})
+
   defp init_timer(init_args) do
     %{
       disabled: init_args[:disabled] || false,
       counter: init_args[:counter] || 0,
       update_timeout: init_args[:update_timeout] || @default_update_timeout,
-      update_func: init_args[:update_func] || &transfer_data/1,
+      update_func: init_args[:update_func] || (&transfer_data/1),
       only_dirty_update: init_args[:only_dirty_update] || false,
       is_dirty: init_args[:is_dirty] || false,
-      ref: nil
+      ref: nil,
+      pubsub_name: nil
     }
   end
 
   @impl true
-  @spec terminate(reason, state :: Fledex.LedDriver.t) :: :ok
-  when reason: :normal | :shutdown | {:shutdown, term()} | term()
+  @spec terminate(reason, state :: Fledex.LedDriver.t()) :: :ok
+        when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(reason, state) do
     Driver.terminate(reason, state)
   end
@@ -149,17 +166,19 @@ defmodule Fledex.LedsDriver do
     update_func = state[:timer][:update_func]
 
     ref = Process.send_after(self(), {:update_timeout, update_func}, update_timeout)
-    state = update_in(state, [:timer, :ref], fn (_current_ref) -> ref end )
+    state = update_in(state, [:timer, :ref], fn _current_ref -> ref end)
 
     state
   end
 
   @impl true
-  @spec handle_call({:define_namespace, atom}, {pid, any}, t) :: {:reply, ({:ok, atom} | {:error, binary}), t}
+  @spec handle_call({:define_namespace, atom}, {pid, any}, t) ::
+          {:reply, {:ok, atom} | {:error, binary}, t}
   def handle_call({:define_namespace, name}, _from, %{namespaces: namespaces} = state) do
     state = put_in(state, [:timer, :is_dirty], true)
+
     case Map.has_key?(namespaces, name) do
-      false ->  {:reply, {:ok, name}, %{state | namespaces: Map.put_new(namespaces, name, [])}}
+      false -> {:reply, {:ok, name}, %{state | namespaces: Map.put_new(namespaces, name, [])}}
       true -> {:reply, {:error, "namespace already exists"}, state}
     end
   end
@@ -174,22 +193,38 @@ defmodule Fledex.LedsDriver do
   @impl true
   @spec handle_call({:exist_namespace, atom}, {pid, any}, t) :: {:reply, boolean, t}
   def handle_call({:exist_namespace, name}, _from, %{namespaces: namespaces} = state) do
-    exists = case Map.fetch(namespaces, name) do
-      {:ok, _na} -> true
-      _na -> false
-    end
+    exists =
+      case Map.fetch(namespaces, name) do
+        {:ok, _na} -> true
+        _na -> false
+      end
+
     {:reply, exists, state}
   end
 
   @impl true
-  @spec handle_call({:set_leds, atom, list(Types.colorint)}, {pid, any}, t)
-      :: {:reply, (:ok | {:error, String.t}), t}
+  @spec handle_call({:set_leds, atom, list(Types.colorint())}, {pid, any}, t) ::
+          {:reply, :ok | {:error, String.t()}, t}
   def handle_call({:set_leds, name, leds}, _from, %{namespaces: namespaces} = state) do
     state = put_in(state, [:timer, :is_dirty], true)
+
     case Map.has_key?(namespaces, name) do
-      true ->  {:reply, :ok, %{state | namespaces: Map.put(namespaces, name, leds)}}
-      false -> {:reply, {:error, "no such namespace, you need to define one first with :define_namespace"}, state}
+      true ->
+        {:reply, :ok, %{state | namespaces: Map.put(namespaces, name, leds)}}
+
+      false ->
+        {:reply,
+         {:error, "no such namespace, you need to define one first with :define_namespace"},
+         state}
     end
+  end
+
+  def handle_call({:set_pubsub_name, pubsub_name}, _from, state) do
+    {:reply, :ok, put_in(state, [:timer, :pubsub_name], pubsub_name)}
+  end
+
+  def handle_call(:pubsub_name, _from, state) do
+    {:reply, {:ok, state.timer.pubsub_name}, state}
   end
 
   @impl true
@@ -202,65 +237,80 @@ defmodule Fledex.LedsDriver do
     # Logger.info "calling #{inspect func}"
     state = func.(state)
 
+    PubSub.broadcast(:fledex, "trigger", {:trigger, Map.put(%{}, state.strip_name , state.timer.counter)})
     {:noreply, state}
   end
 
   @spec transfer_data(t) :: t
-  def transfer_data(%{timer: %{is_dirty: is_dirty, only_dirty_updates: only_dirty_updates}} = state) when only_dirty_updates == true and is_dirty == false do
+  def transfer_data(
+        %{timer: %{is_dirty: is_dirty, only_dirty_updates: only_dirty_updates}} = state
+      )
+      when only_dirty_updates == true and is_dirty == false do
     # we shortcut if there is nothing to update and if we are allowed to shortcut
     state
   end
+
   def transfer_data(state) do
     # state = :telemetry.span(
     #   [:transfer_data],
     #   %{timer_counter: state.timer.counter},
     #   fn ->
-        state = state.namespaces
-          |> merge_namespaces(state.led_strip.merge_strategy)
-          |> Driver.transfer(state)
-          |> put_in([:timer, :is_dirty], false)
+    state =
+      state.namespaces
+      |> merge_namespaces(state.led_strip.merge_strategy)
+      |> Driver.transfer(state)
+      |> put_in([:timer, :is_dirty], false)
+
     #       {state, %{metadata: "done"}}
     #   end
     # )
     state
   end
 
-  @spec merge_namespaces(map, atom) :: list(Types.colorint)
+  @spec merge_namespaces(map, atom) :: list(Types.colorint())
   def merge_namespaces(namespaces, merge_strategy) do
     namespaces
-      |> get_leds()
-      |> merge_leds(merge_strategy)
+    |> get_leds()
+    |> merge_leds(merge_strategy)
   end
-  @spec get_leds(map) :: list(list(Types.colorint))
+
+  @spec get_leds(map) :: list(list(Types.colorint()))
   def get_leds(namespaces) do
     Enum.reduce(namespaces, [], fn {_key, value}, acc ->
       acc ++ [value]
     end)
   end
-  @spec merge_leds(list(list(Types.colorint)), atom) :: list(Types.colorint)
+
+  @spec merge_leds(list(list(Types.colorint())), atom) :: list(Types.colorint())
   def merge_leds(leds, merge_strategy) do
     leds = match_length(leds)
+
     Enum.zip_with(leds, fn elems ->
-        merge_pixels(elems, merge_strategy)
+      merge_pixels(elems, merge_strategy)
     end)
   end
 
-  @spec match_length(list(list(Types.colorint))) :: list(list(Types.colorint))
+  @spec match_length(list(list(Types.colorint()))) :: list(list(Types.colorint()))
   def match_length(leds) when leds == nil, do: leds
   def match_length(leds) when leds == [], do: leds
+
   def match_length(leds) do
-    max_length = Enum.reduce(leds, 0, fn(sequence, acc) -> max(acc, length(sequence)) end)
-    Enum.map(leds, fn(sequence) -> extend(sequence, max_length - length(sequence)) end)
+    max_length = Enum.reduce(leds, 0, fn sequence, acc -> max(acc, length(sequence)) end)
+    Enum.map(leds, fn sequence -> extend(sequence, max_length - length(sequence)) end)
   end
-  @spec extend(list(Types.colorint), pos_integer) :: list(Types.colorint)
+
+  @spec extend(list(Types.colorint()), pos_integer) :: list(Types.colorint())
   def extend(sequence, 0), do: sequence
+
   def extend(sequence, extra) do
-    extra_length = Enum.reduce(1..extra, [], fn(_index, acc) -> acc ++ [0x000000] end)
+    extra_length = Enum.reduce(1..extra, [], fn _index, acc -> acc ++ [0x000000] end)
     sequence ++ extra_length
   end
-  @spec merge_pixels(list(Types.colorint), atom) :: Types.colorint
+
+  @spec merge_pixels(list(Types.colorint()), atom) :: Types.colorint()
   def merge_pixels(elems, merge_strategy) do
     count = length(elems)
+
     elems
     |> Enum.map(fn elem -> Utils.split_into_subpixels(elem) end)
     |> Utils.add_subpixels()
@@ -268,7 +318,8 @@ defmodule Fledex.LedsDriver do
     |> Utils.combine_subpixels()
   end
 
-  @spec apply_merge_strategy({pos_integer, pos_integer, pos_integer}, pos_integer, atom) :: Types.rgb
+  @spec apply_merge_strategy({pos_integer, pos_integer, pos_integer}, pos_integer, atom) ::
+          Types.rgb()
   def apply_merge_strategy(rgb, count, merge_strategy) do
     case merge_strategy do
       :avg -> Utils.avg(rgb, count)

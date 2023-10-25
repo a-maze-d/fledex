@@ -22,7 +22,8 @@ defmodule Fledex.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger],
+      mod: {Fledex.Application, []}
     ]
   end
 
@@ -40,9 +41,10 @@ defmodule Fledex.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:circuits_spi, "~> 1.4"},
+      {:circuits_spi, "~> 2.0-pre.0"},
       {:telemetry, "~> 1.2"},
-      {:kino, "~>0.8"},
+      {:kino, "~>0.11"},
+      {:phoenix_pubsub, "~>2.1"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
     ]
