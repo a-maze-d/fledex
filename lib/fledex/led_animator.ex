@@ -29,8 +29,10 @@ defmodule Fledex.LedAnimator do
    From the above example it can be seen that two things can be updated:
    * The led_definition_function and
    * The send config (even though we will have to implement that as a function too due to the handling of the index)
-   * (optional) how long we wait for a reinvocation. The default will sync to the driver
-     update frequency.
+
+   Note: the time is not something that can be specified, since the animator will be triggered by
+   `LedsDriver` in it's update frequency. Thus to implement some wait pattern, the trigger counter (or some
+   other timer logic) should be used
 
    Both of them can be set by defining an appropriate function and setting and resetting a reference at will
   """
@@ -43,10 +45,8 @@ defmodule Fledex.LedAnimator do
   alias Fledex.Utils.PubSub
 
   @type ledAnimatorConfig :: %{
-      optional(:def_func) => ((integer) -> Leds.t()),
-      optional(:send_config_func) => ((integer) -> map()),
-      optional(:wait_config_func) => ((integer) -> non_neg_integer),
-      optional(:debug) => map,
+      optional(:def_func) => ((map) -> Leds.t()),
+      optional(:send_config_func) => ((map) -> map()),
       optional(:counter) => integer,
       optional(:timer_ref) => reference | nil,
       optional(:strip_name) => atom,
@@ -57,10 +57,6 @@ defmodule Fledex.LedAnimator do
     :triggers => map,
     :def_func => ((integer) -> Leds.t()),
     :send_config_func => ((integer) -> map()),
-    :wait_config_func => ((integer) -> non_neg_integer),
-    :debug => map,
-    # :counter => integer,
-    # :timer_ref => reference | nil,
     :strip_name => atom,
     :animator_name => atom
   }
@@ -87,15 +83,11 @@ defmodule Fledex.LedAnimator do
 
   ### server side
   @default_leds Leds.new(30)
-  def default_def_func(_counter) do
+  def default_def_func(_triggers) do
     @default_leds
   end
-  def default_send_config_func(counter) do
-    %{namespace: :default, offset: counter, rotate_left: true}
-  end
-  @default_wait 1_000
-  def default_wait_config_func(_counter) do
-    @default_wait
+  def default_send_config_func(_triggers) do
+    %{rotate_left: true}
   end
 
   @impl true
@@ -105,19 +97,12 @@ defmodule Fledex.LedAnimator do
       triggers: %{},
       def_func: &default_def_func/1,
       send_config_func: &default_send_config_func/1,
-      wait_config_func: &default_wait_config_func/1,
-      debug: %{},
-      # counter: 0,
-      # timer_ref: nil,
       strip_name: strip_name,
       animator_name: animator_name
     }
     state = update_config(state, init_args)
 
-    # LedsDriver.start_link(%{name: server_name})
-    if state.debug[:dont_send] != nil and Process.alive?(Process.whereis(strip_name)) do
-      LedsDriver.define_namespace(state.animator_name, state.strip_name)
-    end
+    LedsDriver.define_namespace(state.animator_name, state.strip_name)
 
     {:ok, state, {:continue, :start_timer}}
   end
@@ -126,55 +111,34 @@ defmodule Fledex.LedAnimator do
   @spec handle_continue(:start_timer, ledAnimatorState) :: {:noreply, ledAnimatorState}
   def handle_continue(:start_timer, state) do
     PubSub.subscribe(:fledex, "trigger")
-    # state = start_timer(state)
     {:noreply, state}
   end
-
-  # @spec start_timer(ledAnimatorState) :: ledAnimatorState
-  # defp start_timer(state) do
-  #   ref = Process.send_after(self(), :update_timeout, state.wait_config_func.(state.counter))
-
-  #   %{state | timer_ref: ref}
-  # end
-
-  # @impl true
-  # @spec handle_info(:update_timeout, ledAnimatorState) :: {:noreply, ledAnimatorState}
-  # def handle_info(:update_timeout, %{
-  #       def_func: def_func,
-  #       send_config_func: send_config_func,
-  #       wait_config_func: _wait_config_func,
-  #       counter: counter,
-  #       debug: debug
-  #     } = state) do
-
-  #   # we want to call both functions even if we don't want to send the leds
-  #   config = send_config_func.(counter)
-  #   leds = def_func.(counter)
-  #   if debug[:dont_send] != nil, do: Leds.send(leds, config)
-
-  #   state = start_timer(state)
-
-  #   {:noreply, %{state | counter: counter + 1}}
-  # end
 
   @impl true
   @spec handle_info({:trigger, map}, ledAnimatorState) :: {:noreply, ledAnimatorState}
   def handle_info({:trigger, triggers}, %{
     strip_name: strip_name,
+    animator_name: animator_name,
     def_func: def_func,
-    send_config_func: send_config_func,
-    debug: debug
+    send_config_func: send_config_func
   } = state) when is_map_key(triggers, strip_name) do
+    # Logger.info("#{strip_name}, #{animator_name}")
     # we only want to trigger the led update if we have a trigger from the driver (=strip_name as key)
     # otherwise we collect the triggers. Now it's time to merge previously collected triggers in
     triggers = Map.merge(state.triggers, triggers)
 
-    # we want to call both functions even if we don't want to send the leds
+    # independent on the configs say we want to ensure we use the correct namespace (animator_name)
+    # and server_name (strip_name). Therefore we inject it
     config = send_config_func.(triggers)
+      # |> Map.merge(%{namespace: animator_name})
     leds = def_func.(triggers)
-    if debug[:dont_send] != nil, do: Leds.send(leds, config)
-
-    Logger.info("trigger #{inspect triggers}")
+      |> Leds.set_driver_info(animator_name, strip_name)
+    try do
+      Leds.send(leds, config)
+    catch
+      UndefinedFunctionError -> Logger.info("Function couldn't be found")
+    end
+    # Logger.info("trigger #{inspect triggers}")
 
     {:noreply, %{state | triggers: %{}}}
   end
@@ -191,10 +155,6 @@ defmodule Fledex.LedAnimator do
       triggers: Map.merge(state.triggers, config[:triggers] || %{}),
       def_func: Map.get(config, :def_func, state.def_func),
       send_config_func: Map.get(config, :send_config_func, state.send_config_func),
-      wait_config_func: Map.get(config, :wait_config_func, state.wait_config_func),
-      # counter: Map.get(config, :counter, state.counter),
-      debug: Map.merge(state.debug, Map.get(config, :debug, %{})),
-      # timer_ref: state.timer_ref,
       strip_name: state.strip_name,
       animator_name: state.animator_name
     }
@@ -212,17 +172,9 @@ defmodule Fledex.LedAnimator do
   @spec terminate(reason, state :: ledAnimatorState) :: :ok
   when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(_reason, %{
-    # send_config_func: send_config_func,
-    # counter: counter,
-    debug: debug,
     strip_name: strip_name,
     animator_name: animator_name
   } = _state) do
-    if debug[:dont_send] != nil do
-      # config = send_config_func.(counter)
-      # namespace = config[:namespace] || server_name
-      # driver_name = config[:driver_name] || Fledex.LedsDriver
       LedsDriver.drop_namespace(animator_name, strip_name)
-    end
   end
 end

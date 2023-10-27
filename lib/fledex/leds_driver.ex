@@ -65,16 +65,19 @@ defmodule Fledex.LedsDriver do
   end
 
   def start_link(init_args, strip_name) when is_map(init_args) do
+    # Logger.info(Exception.format_stacktrace())
     GenServer.start_link(__MODULE__, {init_args, strip_name}, name: strip_name)
   end
 
   @spec define_namespace(atom, atom) :: {:ok, atom} | {:error, String.t()}
   def define_namespace(namespace, strip_name \\ __MODULE__) do
+    # Logger.info("defining namespace: #{strip_name}-#{namespace}")
     GenServer.call(strip_name, {:define_namespace, namespace})
   end
 
   @spec drop_namespace(atom, atom) :: :ok
   def drop_namespace(namespace, strip_name \\ __MODULE__) do
+    # Logger.info("dropping namespace: #{strip_name}-#{namespace}")
     GenServer.call(strip_name, {:drop_namespace, namespace})
   end
 
@@ -125,7 +128,7 @@ defmodule Fledex.LedsDriver do
   end
 
   defp define_drivers(nil) do
-    # Logger.warn("No driver_modules defined/ #{inspect @default_driver_modules} will be used")
+    # Logger.warning("No driver_modules defined/ #{inspect @default_driver_modules} will be used")
     @default_driver_modules
   end
 
@@ -134,7 +137,7 @@ defmodule Fledex.LedsDriver do
   end
 
   defp define_drivers(driver_modules) do
-    Logger.warn("driver_modules is not a list")
+    Logger.warning("driver_modules is not a list")
     [driver_modules]
   end
 

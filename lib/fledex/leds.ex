@@ -182,13 +182,14 @@ defmodule Fledex.Leds do
     # want to optimise it a bit
     # a) is the server running?
     if Process.whereis(leds.server_name) == nil do
-      Logger.warn("The server wasn't started. You should start it before using this function")
+      Logger.warning("The server #{leds.server_name} wasn't started. You should start it before using this function")
       {:ok, _pid} = LedsDriver.start_link(%{}, leds.server_name)
     end
     # b) Is a namespace defined?
     exists = LedsDriver.exist_namespace(leds.namespace, leds.server_name)
     if not exists do
-      Logger.warn("The namespace hasn't been defined. This should be done before calling this function")
+      Logger.error(Exception.format_stacktrace())
+      Logger.warning("The namespace hasn't been defined. This should be done before calling this function")
       LedsDriver.define_namespace(leds.namespace, leds.server_name)
     end
     vals = rotate(to_list(leds), offset, rotate_left)

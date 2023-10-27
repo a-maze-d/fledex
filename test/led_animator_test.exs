@@ -4,7 +4,7 @@ defmodule Fledex.LedAnimatorTest do
   alias Fledex.LedsDriver
   alias Fledex.TestHelpers.LedAnimatorHelper
 
-  import ExUnit.CaptureLog
+  # import ExUnit.CaptureLog
   require Logger
 
   @strip_name :test_strip
@@ -23,10 +23,6 @@ defmodule Fledex.LedAnimatorTest do
       init_args = %{
         def_func: &LedAnimatorHelper.default_def_func/1,
         send_config_func: &LedAnimatorHelper.default_send_config_func/1,
-        wait_config_func: &LedAnimatorHelper.default_wait_config_func/1,
-        debug: %{},
-        # counter: 0,
-        # timer_ref: nil,
         strip_name: :test_strip,
         animator_name: :test_animator,
         triggers: %{}
@@ -42,10 +38,6 @@ defmodule Fledex.LedAnimatorTest do
       {:ok, state, {:continue, :start_timer}} = LedAnimator.init({init_args, :test_strip, :test_animator})
       assert state.def_func != nil
       assert state.send_config_func != nil
-      assert state.wait_config_func != nil
-      assert state.debug == %{}
-      # assert state.counter == 0
-      # assert state.timer_ref == nil
       assert state.strip_name == :test_strip
       assert state.animator_name == :test_animator
     end
@@ -118,10 +110,6 @@ defmodule Fledex.LedAnimatorTest do
       init_args = %{
         def_func: &LedAnimatorHelper.logging_def_func/1,
         send_config_func: &LedAnimatorHelper.logging_send_config_func/1,
-        wait_config_func: &LedAnimatorHelper.logging_wait_config_func/1,
-        debug: %{dont_send: true},
-        counter: 0,
-        timer_ref: nil
       }
 
       {:ok, pid} = Fledex.LedAnimator.start_link(init_args, strip_name, :test_animator)
