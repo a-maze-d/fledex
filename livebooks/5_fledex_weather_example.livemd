@@ -3,6 +3,7 @@
 ```elixir
 Mix.install([
   {:fledex, path: "/home/maze/Documents/code/fledex"},
+  {:json, "~>1.4"},
   {:kino, "~>0.11"}
 ])
 
@@ -12,6 +13,7 @@ alias Fledex.Leds
 alias Fledex.LedsDriver
 alias Fledex.LedStripDriver.KinoDriver
 alias Fledex.Color.Correction
+alias Fledex.Utils.PubSub
 
 {:ok, pid} = LedAnimationManager.start_link()
 
@@ -24,7 +26,7 @@ In the last project we created a clock. We could make a call to get the current 
 
 If we would take the same approach as in the clock example, we would make an API call every 500ms which probably will result in us getting blocked. It is completely unnecessary to make that many call, since the wheather is not changing that frequently.
 
-What we will do is to check every 30min what the latest weather news is.
+What we will do is to check every 15 min what the latest weather news is.
 
 There are plenty of Weather APIs on the internet, but most of them require to register which is not ideal for a public example. Therefore I decided to use [Open-Meteo](https://open-meteo.com/) which provides all we need.
 
@@ -54,68 +56,130 @@ We need to decide for which location we want to get the weather. We use the coor
 
 As can be seen we get the information we are interested in, the current temperature (in °C)
 
-```elixir
-:inets.start()
-```
+## Configuring the led strip
 
-```elixir
-url =
-  ~c"https://api.open-meteo.com/v1/forecast?latitude=47.4729344&longitude=19.0468802&current=temperature_2m"
-
-{:ok, resp} = :httpc.request(:get, {url, []}, [], body_format: :binary)
-{{_, 200, ~c"OK"}, _headers, body} = resp
-```
+Now it's time to prepare our led strip. First we define our strip and we set a very low refresh rate. An update every 10 sec is enough.
 
 ```elixir
 # we start with the default configuration
-:ok = LedAnimationManager.register_strip(:clock, :kino)
+:ok = LedAnimationManager.register_strip(:weather, :kino)
 # and then we modify the timer update frequency to 500ms
-{:ok, _old_value} = LedsDriver.change_config([:timer, :update_timeout], 500, :clock)
+{:ok, _old_value} = LedsDriver.change_config([:timer, :update_timeout], 10_000, :weather)
 
 :ok
 ```
 
+Now we define two animations, the first one creates blue (below zero), green (zero), or red (above zero) indicators. The indicators have the length of the temperature and start from zero to either go to the left (negative) or the right (positive).
+
+As and additional bonus, the termometer is showing the full scale, if no proper measurement is received (arbitrarily high value of 100).
+
 ```elixir
-LedAnimationManager.register_animations(:clock, %{
-  seconds: %{
-    def_func: fn _triggers ->
-      Leds.new(60) |> Leds.light(:red)
-    end,
-    send_config_func: fn _triggers ->
-      # we work with utc times and adjust, so we don't need to load a timezone library
-      %{hour: _hour, minute: _minute, second: second} = Time.utc_now() |> Time.add(1, :hour)
-      # Logger.info("#{second}")
-      %{offset: second, rotate_left: false}
-    end
-  },
-  minutes: %{
-    def_func: fn _triggers ->
-      Leds.new(60) |> Leds.light(:green)
-    end,
-    send_config_func: fn _triggers ->
-      # we work with utc times and adjust, so we don't need to load a timezone library
-      %{hour: _hour, minute: minute, second: _second} = Time.utc_now() |> Time.add(1, :hour)
-      # Logger.info("#{second}")
-      %{offset: minute, rotate_left: false}
-    end
-  },
-  hours: %{
-    def_func: fn _triggers ->
-      Leds.new(60) |> Leds.light(:blue)
-    end,
-    send_config_func: fn _triggers ->
-      # we work with utc times and adjust, so we don't need to load a timezone library
-      %{hour: hour, minute: _minute, second: _second} = Time.utc_now() |> Time.add(1, :hour)
-      # Logger.info("#{second}")
-      %{offset: hour, rotate_left: false}
+LedAnimationManager.register_animations(:weather, %{
+  temperature: %{
+    def_func: fn triggers ->
+      temp = triggers[:temperature] || 100
+      temp = round(temp)
+
+      temp =
+        if temp == 100 do
+          100
+        else
+          temp = min(temp, 40)
+          max(temp, -20)
+        end
+
+      {leds, offset} =
+        case temp do
+          temp when temp == 100 ->
+            {Leds.new(61)
+             |> Leds.light(:blue, 1, 20)
+             |> Leds.light(:green)
+             |> Leds.light(:red, 22, 40), 1}
+
+          temp when temp < 0 ->
+            {Leds.new(1) |> Leds.light(:blue) |> Leds.func(:repeat, %{amount: -temp}), 21 + temp}
+
+          temp when temp == 0 ->
+            {Leds.new(1) |> Leds.light(:may_green), 21}
+
+          temp when temp > 0 ->
+            {Leds.new(1) |> Leds.light(:red) |> Leds.func(:repeat, %{amount: temp}), 22}
+        end
+
+      Leds.new(61) |> Leds.light(leds, offset)
     end
   },
   help: %{
+    # we allow temperatures down to -20C and up to +40C
     def_func: fn _triggers ->
-      Leds.new(5)
+      negative_scale =
+        Leds.new(5)
+        |> Leds.light(:ash_gray)
+        |> Leds.func(:repeat, %{amount: 4})
+
+      positive_scale =
+        Leds.new(5)
+        |> Leds.light(:ash_gray, 5)
+        |> Leds.func(:repeat, %{amount: 8})
+
+      Leds.new(61)
+      |> Leds.light(negative_scale)
       |> Leds.light(:ash_gray)
-      |> Leds.func(:repeat, %{amount: 12})
+      |> Leds.light(positive_scale)
     end
   }
 })
+
+# For testing we can send an arbitrary temperature this way:
+# Fledex.Utils.PubSub.broadcast(:fledex, "trigger", {:trigger, %{temperature: -15.2}})
+```
+
+## Getting the weather data
+
+Before we can start with the weather data, we need to make sure that we can make http client calls (also over https) and therefore we start the two services.
+
+```elixir
+:ok = :inets.start()
+:ok = :ssl.start()
+```
+
+Now we can make the actual call. We do want to make this call in regular intervals (every 15 min), parse the response and publish the temperature through pubsub. To do this we create a small server. We start it with our URL (note, the parsing in the server is URL specific, so you can't simply change it to another site) and with our 15min refresh interval (specified in ms).
+
+The server will extract the temperature and send it via pubsub to our update functions.
+
+```elixir
+defmodule CallUrlPeriodic do
+  use GenServer
+
+  def start_link(url, interval_ms) do
+    GenServer.start_link(__MODULE__, %{url: url, interval_ms: interval_ms})
+  end
+
+  @impl true
+  def init(state) do
+    :timer.send_interval(state.interval_ms, :work)
+    # we send ourselve immediately a request
+    send(self(), :work)
+    {:ok, state}
+  end
+
+  @impl true
+  def handle_info(:work, state) do
+    {:ok, resp} =
+      :httpc.request(:get, {String.to_charlist(state.url), []}, [], body_format: :binary)
+
+    {{_, 200, ~c"OK"}, _headers, body} = resp
+    json = JSON.decode!(body)
+    temperature = json["current"]["temperature_2m"]
+    PubSub.broadcast(:fledex, "trigger", {:trigger, %{temperature: temperature}})
+
+    {:noreply, state}
+  end
+end
+
+{:ok, pid} =
+  CallUrlPeriodic.start_link(
+    "https://api.open-meteo.com/v1/forecast?latitude=47.4729344&longitude=19.0468802&current=temperature_2m",
+    900_000
+  )
 ```

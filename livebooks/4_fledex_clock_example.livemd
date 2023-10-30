@@ -1,4 +1,4 @@
-# 4. Fledex: Implementing a Clock
+# 4. Fledex: Clock Example
 
 ```elixir
 Mix.install([

@@ -87,7 +87,7 @@ defmodule Fledex.LedAnimator do
     @default_leds
   end
   def default_send_config_func(_triggers) do
-    %{rotate_left: true}
+    %{}
   end
 
   @impl true
@@ -161,9 +161,9 @@ defmodule Fledex.LedAnimator do
   @spec update_config(ledAnimatorState, ledAnimatorConfig) :: ledAnimatorState
   def update_config(state, config) do
     %{
-      triggers: Map.merge(state.triggers, config[:triggers] || %{}),
-      def_func: Map.get(config, :def_func, state.def_func),
-      send_config_func: Map.get(config, :send_config_func, state.send_config_func),
+      triggers: Map.merge(state.triggers, config[:triggers] || state[:triggers]),
+      def_func: Map.get(config, :def_func, &default_def_func/1),
+      send_config_func: Map.get(config, :send_config_func, &default_send_config_func/1),
       strip_name: state.strip_name,
       animator_name: state.animator_name
     }

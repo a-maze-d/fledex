@@ -131,6 +131,16 @@ defmodule Fledex.Leds do
   def light(leds, led, offset) do
     do_update(leds, led, offset)
   end
+  @spec light(t, (Types.colorint | t | atom), pos_integer, pos_integer) :: t
+  def light(leds, led, offset, repeat) do
+    led = case led do
+      led when is_integer(led) -> __MODULE__.new(1) |> __MODULE__.light(led)
+      led when is_atom(led) -> __MODULE__.new(1) |> __MODULE__.light(led)
+      led when is_struct(led) -> led
+    end
+    led = led |> __MODULE__.func(:repeat, %{amount: repeat})
+    __MODULE__.light(leds, led, offset)
+  end
 
   @spec func(t, atom, map) :: t
   def func(leds, func_id, config \\ %{}) do
