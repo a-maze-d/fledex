@@ -1,0 +1,80 @@
+# 4. Fledex: Implementing a Clock
+
+```elixir
+Mix.install([
+  {:fledex, path: "/home/maze/Documents/code/fledex"},
+  {:kino, "~>0.11"}
+])
+
+# we define a couple of aliases to not have to type that much
+alias Fledex.LedAnimationManager
+alias Fledex.Leds
+alias Fledex.LedsDriver
+alias Fledex.LedStripDriver.KinoDriver
+alias Fledex.Color.Correction
+
+{:ok, pid} = LedAnimationManager.start_link()
+
+:ok
+```
+
+## Intro
+
+The goal of this project is to create a clock that displays its hour, minute and second on the trip. We use the kino driver as output and we limit the amount of leds to a reasonable number.
+Therefore we can't really display every second and every minute. We can get a bit creative in how we display it.
+
+But before we get there, we first initiate our led strip and ensure that it updates with a very low frequency (transferring updates in high frequency is just a waste of energy)
+
+```elixir
+# we start with the default configuration
+:ok = LedAnimationManager.register_strip(:clock, :kino)
+# and then we modify the timer update frequency to 500ms
+{:ok, _old_value} = LedsDriver.change_config([:timer, :update_timeout], 500, :clock)
+
+:ok
+```
+
+```elixir
+LedAnimationManager.register_animations(:clock, %{
+  seconds: %{
+    def_func: fn _triggers ->
+      Leds.new(60) |> Leds.light(:red)
+    end,
+    send_config_func: fn _triggers ->
+      # we work with utc times and adjust, so we don't need to load a timezone library
+      %{hour: _hour, minute: _minute, second: second} = Time.utc_now() |> Time.add(1, :hour)
+      # Logger.info("#{second}")
+      %{offset: second, rotate_left: false}
+    end
+  },
+  minutes: %{
+    def_func: fn _triggers ->
+      Leds.new(60) |> Leds.light(:green)
+    end,
+    send_config_func: fn _triggers ->
+      # we work with utc times and adjust, so we don't need to load a timezone library
+      %{hour: _hour, minute: minute, second: _second} = Time.utc_now() |> Time.add(1, :hour)
+      # Logger.info("#{second}")
+      %{offset: minute, rotate_left: false}
+    end
+  },
+  hours: %{
+    def_func: fn _triggers ->
+      Leds.new(60) |> Leds.light(:blue)
+    end,
+    send_config_func: fn _triggers ->
+      # we work with utc times and adjust, so we don't need to load a timezone library
+      %{hour: hour, minute: _minute, second: _second} = Time.utc_now() |> Time.add(1, :hour)
+      # Logger.info("#{second}")
+      %{offset: hour, rotate_left: false}
+    end
+  },
+  help: %{
+    def_func: fn _triggers ->
+      Leds.new(5)
+      |> Leds.light(:ash_gray)
+      |> Leds.func(:repeat, %{amount: 12})
+    end
+  }
+})
+```

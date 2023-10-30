@@ -4,7 +4,8 @@ defmodule Fledex.LedStripDriver.KinoDriver do
   alias Fledex.Color.Correction
   alias Fledex.Color.Types
 
-  @default_update_freq 50
+  # we update as often as the driver updates us
+  @default_update_freq 1
   @base16 16
   @block <<"\u2588">>
 

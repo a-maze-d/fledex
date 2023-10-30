@@ -36,10 +36,10 @@ In the above diagram an example is shown on how such a DSL might look like.
 
 # The Triggers
 
-What is still missing in the diagram is on how external events can be used as triggers for the animations.
+The `LedsDriver` is publishing via `PubSub` an event (a trigger) that gets picked up by the `LedAnimator`s to change their animation. The trigger can not only be created by the driver, but also by external events. The difference is that only the triggers from the driver are used by the `LedAnimator`s to redefine the animation. All other triggers are collected over time and can be used when updating the animation. 
 
 For example: we want to be able to check the current temperature in regular interval and trigger a re-animation to adjust the "display" depending on the temperature.
 
 # Final Notes
 ## Naming
-The led naming, the namespace naming, and the `LedsDriver` server naming should all be driven by the `Fledex`  DSL. Even though it would be possible to have different names it helps to align them.The `led_strip` name becomes the `LedsDriver` server name. The `live_loop` name becomes, comined with the `led_strip` name, the namespace name and the `LedAnimator` server name.
+The led naming, the namespace naming, and the `LedsDriver` server naming should all be driven by the `Fledex`  DSL. Even though it would be possible to have different names it helps to align them. The `led_strip` name becomes the `LedsDriver` server name. The `live_loop` name becomes the namespace name and combined with the `led_strip` name the `LedAnimator` server name.

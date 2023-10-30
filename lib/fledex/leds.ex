@@ -10,6 +10,7 @@ defmodule Fledex.Leds do
   alias Fledex.LedsDriver
 
   @enforce_keys [:count, :leds, :opts]
+  # TODO: move the server_name and namespace into the opts where they belong
   defstruct server_name: nil, namespace: nil, count: 0, leds: %{}, opts: %{}, meta: %{index: 1} #, fill: :none
   @type t :: %__MODULE__{
     server_name: atom,
@@ -22,7 +23,8 @@ defmodule Fledex.Leds do
 
   @func_ids %{
     rainbow: &Fledex.Leds.rainbow/2,
-    gradient: &Fledex.Leds.gradient/2
+    gradient: &Fledex.Leds.gradient/2,
+    repeat: &Fledex.Leds.repeat/2
   }
 
   @spec new() :: t
@@ -100,6 +102,27 @@ defmodule Fledex.Leds do
     raise "You need to specify at least a start_color and end_color"
   end
 
+  @spec repeat(t, %{amount: integer}) :: t
+  def repeat(
+    %__MODULE__{
+      server_name: server_name,
+      namespace: namespace,
+      count: count,
+      leds: leds,
+      opts: opts,
+      meta: meta
+    },
+    %{amount: amount}
+  ) when amount > 1 do
+    index = meta[:index]  || 1
+    new_index = (amount - 1) * count + index
+    new_count = count * amount
+    new_leds = Enum.reduce(2..amount, leds, fn round, acc ->
+      Map.merge(acc, remap_leds(leds, count * (round - 1) + 1))
+    end)
+    __MODULE__.new(new_count, new_leds, opts, %{meta | index: new_index}, namespace, server_name)
+  end
+
   @spec light(t, (Types.colorint | t | atom)) :: t
   def light(leds, rgb) do
     do_update(leds, rgb)
@@ -137,18 +160,27 @@ defmodule Fledex.Leds do
     do_update(leds, rgb, index)
   end
   @spec do_update(t, Types.colorint, pos_integer) :: t
-  defp do_update(%__MODULE__{count: count, leds: leds, opts: opts, meta: meta}, rgb, offset) when is_integer(rgb) do
-    __MODULE__.new(count, Map.put(leds, offset, rgb), opts, %{meta | index: offset + 1})
+  defp do_update(
+    %__MODULE__{server_name: server_name, namespace: namespace, count: count, leds: leds, opts: opts, meta: meta},
+    rgb,
+    offset
+  ) when is_integer(rgb) do
+    __MODULE__.new(count, Map.put(leds, offset, rgb), opts, %{meta | index: offset + 1}, namespace, server_name)
   end
   @spec do_update(t, t, pos_integer) :: t
-  defp do_update(%__MODULE__{count: count1, leds: leds1, opts: opts1, meta: meta1}, %__MODULE__{count: count2, leds: leds2}, offset) do
+  defp do_update(
+    %__MODULE__{server_name: server_name, namespace: namespace, count: count1, leds: leds1, opts: opts1, meta: meta1},
+    %__MODULE__{count: count2, leds: leds2},
+    offset
+  ) do
     # remap the indicies (1 indexed)
-    remapped_new_leds = Map.new(Enum.map(leds2, fn {key, value} ->
-      index = offset + key - 1
-      {index, value}
-    end))
+    remapped_new_leds = remap_leds(leds2, offset)
+    # Map.new(Enum.map(leds2, fn {key, value} ->
+    #   index = offset + key - 1
+    #   {index, value}
+    # end))
     leds = Map.merge(leds1, remapped_new_leds)
-    __MODULE__.new(count1, leds, opts1, %{meta1 | index: offset + count2})
+    __MODULE__.new(count1, leds, opts1, %{meta1 | index: offset + count2}, namespace, server_name)
   end
   @spec do_update(t, atom, pos_integer) :: t
   defp do_update(leds, atom, offset) when is_atom(atom) do
@@ -157,6 +189,13 @@ defmodule Fledex.Leds do
   end
   defp do_update(leds, led, offset) do
     raise ArgumentError, message: "unknown data #{inspect leds}, #{inspect led}, #{inspect offset}"
+  end
+
+  defp remap_leds(leds, offset) do
+    Map.new(Enum.map(leds, fn {key, value} ->
+      index = offset + key - 1
+      {index, value}
+    end))
   end
 
   @spec to_binary(t) :: binary

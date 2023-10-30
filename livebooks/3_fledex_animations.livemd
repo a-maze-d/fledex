@@ -1,4 +1,4 @@
-# Using the animator
+# 3. Fledex: Animations
 
 ```elixir
 # In this example we'll use the simple setup (experiments are inteded to not run on real
@@ -20,6 +20,10 @@ alias Fledex.Color.Correction
 
 :ok
 ```
+
+## Preparation
+
+To start with, we define a couple of aliases to make our life easier and more importantly, we start our `LedAnimationManager`. We will use it to create animations. The animations are actually maintained by the LedAnimator, but we will interact with it only through the `LedAnimationManager`.
 
 ## Helper functions
 
@@ -47,7 +51,6 @@ Now it's time to define our first animation by using the `LedAnimationManager`. 
 We call our led strip `:john` (it has to be an atom). In this example we will only use the simple kino driver (and configure it with defaults) and thereby display the result within our livebook.
 
 ```elixir
-if Process.whereis(:john) != nil, do: LedAnimationManager.unregister_strip(:john)
 LedAnimationManager.register_strip(:john, :kino)
 
 LedAnimationManager.register_animations(:john, %{
@@ -115,3 +118,31 @@ LedAnimationManager.register_animations(:john, %{
   }
 })
 ```
+
+## Use of anonymous functions
+
+It is also possible to use an anonymous function during the definition which avoids to create a separate module. Here we redefine our above definition, but this time we define `:doe` with an anonymous function. To really see that we have changed the definition we define the leds  as all blue. In addition we change the `send_config_func` to animate the dots even faster.
+
+The advantage of using the anonymous functions is that you don't get any compilation error, that occures if you recompile the module. Try it out by reevaluating the below definition several times and then doing the same thing with the previous definition.
+
+This allows for a smooth replacement of definitions.
+
+```elixir
+LedAnimationManager.register_animations(:john, %{
+  caine: %{
+    def_func: &HelperFunctions2.red_leds/1,
+    send_config_func: &HelperFunctions2.send_config/1
+  },
+  doe: %{
+    def_func: fn _triggers ->
+      Leds.new(50) |> Leds.light(:blue) |> Leds.light(:blue) |> Leds.light(:blue)
+    end,
+    send_config_func: fn triggers ->
+      faster_offset = 50 - rem(triggers[:john] >>> 1, 50)
+      %{offset: faster_offset}
+    end
+  }
+})
+```
+
+From now on we will _only_ define our definitions through the use of anonymous functions.

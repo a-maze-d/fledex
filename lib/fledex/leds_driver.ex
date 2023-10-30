@@ -91,6 +91,10 @@ defmodule Fledex.LedsDriver do
     GenServer.call(strip_name, {:set_leds, namespace, leds})
   end
 
+  def change_config(config_path, value, strip_name \\ __MODULE__) do
+    GenServer.call(strip_name, {:change_config, config_path, value})
+  end
+
   # server code
   @impl true
   @spec init({map, atom}) :: {:ok, t} | {:stop, String.t()}
@@ -152,7 +156,6 @@ defmodule Fledex.LedsDriver do
       only_dirty_update: init_args[:only_dirty_update] || false,
       is_dirty: init_args[:is_dirty] || false,
       ref: nil,
-      pubsub_name: nil
     }
   end
 
@@ -222,12 +225,10 @@ defmodule Fledex.LedsDriver do
     end
   end
 
-  def handle_call({:set_pubsub_name, pubsub_name}, _from, state) do
-    {:reply, :ok, put_in(state, [:timer, :pubsub_name], pubsub_name)}
-  end
-
-  def handle_call(:pubsub_name, _from, state) do
-    {:reply, {:ok, state.timer.pubsub_name}, state}
+  def handle_call({:change_config, config_path, value}, _from, state) do
+    previous_value = get_in(state, config_path)
+    state = put_in(state, config_path, value)
+    {:reply, {:ok, previous_value}, state}
   end
 
   @impl true

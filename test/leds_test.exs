@@ -245,6 +245,21 @@ defmodule Fledex.LedsTest do
         0x0C00F2
       ]
     end
+
+    test "repeat" do
+      leds = Leds.new(3) |> Leds.light(:red) |> Leds.light(:red) |> Leds.light(:red) |> Leds.func(:repeat, %{amount: 3})
+      assert leds.count == 9
+      assert Leds.get_light(leds, 1) == 0xff0000
+      assert Leds.get_light(leds, 2) == 0xff0000
+      assert Leds.get_light(leds, 3) == 0xff0000
+      assert Leds.get_light(leds, 4) == 0xff0000
+      assert Leds.get_light(leds, 5) == 0xff0000
+      assert Leds.get_light(leds, 6) == 0xff0000
+      assert Leds.get_light(leds, 7) == 0xff0000
+      assert Leds.get_light(leds, 8) == 0xff0000
+      assert Leds.get_light(leds, 9) == 0xff0000
+      assert leds.meta.index == 10
+    end
   end
 
 # loop

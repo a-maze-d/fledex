@@ -127,12 +127,12 @@ defmodule Fledex.LedAnimator do
     # otherwise we collect the triggers. Now it's time to merge previously collected triggers in
     triggers = Map.merge(state.triggers, triggers)
 
+    # we can get two different responses, with or without triggers, we make sure our result contains the triggers
+    {leds, triggers} = def_func.(triggers) |> get_with_triggers(triggers)
     # independent on the configs say we want to ensure we use the correct namespace (animator_name)
     # and server_name (strip_name). Therefore we inject it
-    config = send_config_func.(triggers)
-      # |> Map.merge(%{namespace: animator_name})
-    leds = def_func.(triggers)
-      |> Leds.set_driver_info(animator_name, strip_name)
+    leds = Leds.set_driver_info(leds, animator_name, strip_name)
+    {config, triggers} = send_config_func.(triggers) |> get_with_triggers(triggers)
     try do
       Leds.send(leds, config)
     catch
@@ -140,13 +140,22 @@ defmodule Fledex.LedAnimator do
     end
     # Logger.info("trigger #{inspect triggers}")
 
-    {:noreply, %{state | triggers: %{}}}
+    {:noreply, %{state | triggers: triggers}}
   end
+  # the response can be with or without trigger, we ensure that it's always with a trigger, in the worst case
+  # with the original triggers.
   def handle_info({:trigger, triggers}, state) do
     # if the trigger is not from the driver (=strip_name as key) we only want to collect
     # the triggers for when we want an update of the leds
 
     {:noreply, %{state | triggers: Map.merge(state.triggers, triggers)}}
+  end
+
+  defp get_with_triggers(response, orig_triggers) do
+    case response do
+      {leds, triggers} -> {leds, triggers}
+      leds -> {leds, orig_triggers}
+    end
   end
 
   @spec update_config(ledAnimatorState, ledAnimatorConfig) :: ledAnimatorState

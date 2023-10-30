@@ -39,12 +39,25 @@ defmodule Fledex.LedDriverTest do
       assert_receive {:update_timeout, _update_func}
     end
 
+    test "change config" do
+      {:ok, state} = LedsDriver.init({%{timer: %{disabled: true}}, :strip_name})
+      assert state.timer.update_timeout == 50
+      {:reply, {:ok, old_value}, state} = LedsDriver.handle_call(
+        {:change_config, [:timer, :update_timeout], 100},
+        {self(), :tag},
+        state
+      )
+      assert old_value == 50
+      assert state.timer.update_timeout == 100
+    end
+
     test "start server" do
       assert match?({:ok, _}, LedsDriver.start_link(%{timer: %{disable: true}}, :strip_name))
     end
   end
 
   describe "test timer to ensure it reschedules itself" do
+
     test "handle_info for the update timer timeout" do
       update_func = &(&1)
       LedsDriver.handle_info(

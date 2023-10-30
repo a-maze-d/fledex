@@ -1,0 +1,121 @@
+# 5. Fledex: Weather example
+
+```elixir
+Mix.install([
+  {:fledex, path: "/home/maze/Documents/code/fledex"},
+  {:kino, "~>0.11"}
+])
+
+# we define a couple of aliases to not have to type that much
+alias Fledex.LedAnimationManager
+alias Fledex.Leds
+alias Fledex.LedsDriver
+alias Fledex.LedStripDriver.KinoDriver
+alias Fledex.Color.Correction
+
+{:ok, pid} = LedAnimationManager.start_link()
+
+:ok
+```
+
+## Intro
+
+In the last project we created a clock. We could make a call to get the current time in every redraw loop. This approach is not possible for data that we are fetching from an external source. In this example we will create a weather display. We will get the information from an API.
+
+If we would take the same approach as in the clock example, we would make an API call every 500ms which probably will result in us getting blocked. It is completely unnecessary to make that many call, since the wheather is not changing that frequently.
+
+What we will do is to check every 30min what the latest weather news is.
+
+There are plenty of Weather APIs on the internet, but most of them require to register which is not ideal for a public example. Therefore I decided to use [Open-Meteo](https://open-meteo.com/) which provides all we need.
+
+We need to decide for which location we want to get the weather. We use the coordinate for Budapest (`47.4729344`,`19.0468802`). Then we can make the call `"https://api.open-meteo.com/v1/forecast?latitude=47.4729344&longitude=19.0468802&current=temperature_2m"` to get data like the following:
+
+```json
+{
+  "latitude": 47.5,
+  "longitude": 19.0625,
+  "generationtime_ms": 0.04100799560546875,
+  "utc_offset_seconds": 0,
+  "timezone": "GMT",
+  "timezone_abbreviation": "GMT",
+  "elevation": 113,
+  "current_units": {
+    "time": "iso8601",
+    "interval": "seconds",
+    "temperature_2m": "°C"
+  },
+  "current": {
+    "time": "2023-10-30T13:30",
+    "interval": 900,
+    "temperature_2m": 22.1
+  }
+}
+```
+
+As can be seen we get the information we are interested in, the current temperature (in °C)
+
+```elixir
+:inets.start()
+```
+
+```elixir
+url =
+  ~c"https://api.open-meteo.com/v1/forecast?latitude=47.4729344&longitude=19.0468802&current=temperature_2m"
+
+{:ok, resp} = :httpc.request(:get, {url, []}, [], body_format: :binary)
+{{_, 200, ~c"OK"}, _headers, body} = resp
+```
+
+```elixir
+# we start with the default configuration
+:ok = LedAnimationManager.register_strip(:clock, :kino)
+# and then we modify the timer update frequency to 500ms
+{:ok, _old_value} = LedsDriver.change_config([:timer, :update_timeout], 500, :clock)
+
+:ok
+```
+
+```elixir
+LedAnimationManager.register_animations(:clock, %{
+  seconds: %{
+    def_func: fn _triggers ->
+      Leds.new(60) |> Leds.light(:red)
+    end,
+    send_config_func: fn _triggers ->
+      # we work with utc times and adjust, so we don't need to load a timezone library
+      %{hour: _hour, minute: _minute, second: second} = Time.utc_now() |> Time.add(1, :hour)
+      # Logger.info("#{second}")
+      %{offset: second, rotate_left: false}
+    end
+  },
+  minutes: %{
+    def_func: fn _triggers ->
+      Leds.new(60) |> Leds.light(:green)
+    end,
+    send_config_func: fn _triggers ->
+      # we work with utc times and adjust, so we don't need to load a timezone library
+      %{hour: _hour, minute: minute, second: _second} = Time.utc_now() |> Time.add(1, :hour)
+      # Logger.info("#{second}")
+      %{offset: minute, rotate_left: false}
+    end
+  },
+  hours: %{
+    def_func: fn _triggers ->
+      Leds.new(60) |> Leds.light(:blue)
+    end,
+    send_config_func: fn _triggers ->
+      # we work with utc times and adjust, so we don't need to load a timezone library
+      %{hour: hour, minute: _minute, second: _second} = Time.utc_now() |> Time.add(1, :hour)
+      # Logger.info("#{second}")
+      %{offset: hour, rotate_left: false}
+    end
+  },
+  help: %{
+    def_func: fn _triggers ->
+      Leds.new(5)
+      |> Leds.light(:ash_gray)
+      |> Leds.func(:repeat, %{amount: 12})
+    end
+  }
+})
+```
