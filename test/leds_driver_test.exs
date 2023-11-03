@@ -3,6 +3,7 @@ defmodule Fledex.LedDriverTest do
   import ExUnit.CaptureIO
   alias Fledex.LedsDriver
   alias Fledex.LedStripDriver.LoggerDriver
+  alias Fledex.LedStripDriver.NullDriver
 
   doctest LedsDriver
 
@@ -17,6 +18,10 @@ defmodule Fledex.LedDriverTest do
       assert state.timer.is_dirty == false
       assert state.timer.ref == nil
       # TODO: add more fields
+      assert state.led_strip.merge_strategy == :avg
+      assert state.led_strip.driver_modules == [NullDriver]
+      assert state.led_strip.config == %{NullDriver => %{}}
+      assert state.namespaces == %{}
     end
 
     test "init_args are correctly set (with active timer)" do
@@ -34,7 +39,12 @@ defmodule Fledex.LedDriverTest do
       assert state.timer.only_dirty_update == false
       assert state.timer.is_dirty == false
       assert state.timer.ref != nil
+      assert state.led_strip.merge_strategy == :avg
+      assert state.led_strip.driver_modules == [NullDriver]
+      assert state.led_strip.config == %{NullDriver => %{}}
+      assert state.namespaces == %{}
       #TODO: add more fields
+      # strip_name: atom,
 
       assert_receive {:update_timeout, _update_func}
     end
@@ -52,7 +62,7 @@ defmodule Fledex.LedDriverTest do
     end
 
     test "start server" do
-      assert match?({:ok, _}, LedsDriver.start_link(%{timer: %{disable: true}}, :strip_name))
+      assert match?({:ok, _}, LedsDriver.start_link(:strip_name, %{timer: %{disable: true}}))
     end
   end
 

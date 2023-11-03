@@ -12,7 +12,7 @@ defmodule Fledex.LedAnimatorTest do
     {:ok, pid} = start_supervised(
       %{
         id: LedsDriver,
-        start: {LedsDriver, :start_link, [:none, @strip_name]}
+        start: {LedsDriver, :start_link, [@strip_name, :none]}
       })
     %{strip_name: @strip_name,
       pid: pid}

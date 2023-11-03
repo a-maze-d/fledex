@@ -38,7 +38,7 @@ Leds.new(50)
   |> Leds.light(:red)
   |> Leds.light(:green1) 
   |> Leds.light(:blue)
-  |> send() # :default namespace is used as default
+  |> Leds.send() # :default namespace is used as default
 ```
 All other LEDs would be set to off
 

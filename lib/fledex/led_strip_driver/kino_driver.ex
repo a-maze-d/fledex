@@ -22,7 +22,7 @@ defmodule Fledex.LedStripDriver.KinoDriver do
   @impl true
   @spec reinit(map) :: map
   def reinit(module_config) do
-    %{ module_config | frame: Kino.Frame.new() |> Kino.render()}
+    %{module_config | frame: Kino.Frame.new() |> Kino.render()}
   end
 
   @impl true

@@ -10,11 +10,8 @@ defmodule Fledex.Leds do
   alias Fledex.LedsDriver
 
   @enforce_keys [:count, :leds, :opts]
-  # TODO: move the server_name and namespace into the opts where they belong
-  defstruct server_name: nil, namespace: nil, count: 0, leds: %{}, opts: %{}, meta: %{index: 1} #, fill: :none
+  defstruct count: 0, leds: %{}, opts: %{}, meta: %{index: 1} #, fill: :none
   @type t :: %__MODULE__{
-    server_name: atom,
-    namespace: atom,
     count: integer,
     leds: map,
     opts: map,
@@ -45,13 +42,7 @@ defmodule Fledex.Leds do
   end
   @spec new(integer, map, map, map) :: t
   def new(count, leds, opts, meta) do
-    new(count, leds, opts, meta, :default, Fledex.LedsDriver)
-  end
-  @spec new(integer, map, map, map, atom, atom) :: t
-  def new(count, leds, opts, meta, namespace, server_name) do
     %__MODULE__{
-      server_name: server_name,
-      namespace: namespace,
       count: count,
       leds: leds,
       opts: opts,
@@ -60,8 +51,9 @@ defmodule Fledex.Leds do
   end
 
   @spec set_driver_info(t, namespace :: atom, server_name :: atom) :: t
-  def set_driver_info(leds, namespace, server_name \\  Fledex.LedsDriver) do
-      %__MODULE__{leds | server_name: server_name, namespace: namespace}
+  def set_driver_info(%{opts: opts} = leds, namespace, server_name \\  Fledex.LedsDriver) do
+    opts = %{opts | server_name: server_name, namespace: namespace}
+    %__MODULE__{leds | opts: opts}
   end
 
   @spec rainbow(t, map) :: t
@@ -105,8 +97,6 @@ defmodule Fledex.Leds do
   @spec repeat(t, %{amount: integer}) :: t
   def repeat(
     %__MODULE__{
-      server_name: server_name,
-      namespace: namespace,
       count: count,
       leds: leds,
       opts: opts,
@@ -120,7 +110,7 @@ defmodule Fledex.Leds do
     new_leds = Enum.reduce(2..amount, leds, fn round, acc ->
       Map.merge(acc, remap_leds(leds, count * (round - 1) + 1))
     end)
-    __MODULE__.new(new_count, new_leds, opts, %{meta | index: new_index}, namespace, server_name)
+    __MODULE__.new(new_count, new_leds, opts, %{meta | index: new_index})
   end
 
   @spec light(t, (Types.colorint | t | atom)) :: t
@@ -171,15 +161,15 @@ defmodule Fledex.Leds do
   end
   @spec do_update(t, Types.colorint, pos_integer) :: t
   defp do_update(
-    %__MODULE__{server_name: server_name, namespace: namespace, count: count, leds: leds, opts: opts, meta: meta},
+    %__MODULE__{count: count, leds: leds, opts: opts, meta: meta},
     rgb,
     offset
   ) when is_integer(rgb) do
-    __MODULE__.new(count, Map.put(leds, offset, rgb), opts, %{meta | index: offset + 1}, namespace, server_name)
+    __MODULE__.new(count, Map.put(leds, offset, rgb), opts, %{meta | index: offset + 1})
   end
   @spec do_update(t, t, pos_integer) :: t
   defp do_update(
-    %__MODULE__{server_name: server_name, namespace: namespace, count: count1, leds: leds1, opts: opts1, meta: meta1},
+    %__MODULE__{count: count1, leds: leds1, opts: opts1, meta: meta1},
     %__MODULE__{count: count2, leds: leds2},
     offset
   ) do
@@ -190,7 +180,7 @@ defmodule Fledex.Leds do
     #   {index, value}
     # end))
     leds = Map.merge(leds1, remapped_new_leds)
-    __MODULE__.new(count1, leds, opts1, %{meta1 | index: offset + count2}, namespace, server_name)
+    __MODULE__.new(count1, leds, opts1, %{meta1 | index: offset + count2})
   end
   @spec do_update(t, atom, pos_integer) :: t
   defp do_update(leds, atom, offset) when is_atom(atom) do
@@ -230,19 +220,19 @@ defmodule Fledex.Leds do
     # we probably want to do some validation here and probably
     # want to optimise it a bit
     # a) is the server running?
-    if Process.whereis(leds.server_name) == nil do
-      Logger.warning("The server #{leds.server_name} wasn't started. You should start it before using this function")
-      {:ok, _pid} = LedsDriver.start_link(%{}, leds.server_name)
+    if Process.whereis(leds.opts.server_name) == nil do
+      Logger.warning("The server #{leds.opts.server_name} wasn't started. You should start it before using this function")
+      {:ok, _pid} = LedsDriver.start_link(leds.opts.server_name, %{})
     end
     # b) Is a namespace defined?
-    exists = LedsDriver.exist_namespace(leds.namespace, leds.server_name)
+    exists = LedsDriver.exist_namespace(leds.opts.server_name, leds.opts.namespace)
     if not exists do
       Logger.error(Exception.format_stacktrace())
       Logger.warning("The namespace hasn't been defined. This should be done before calling this function")
-      LedsDriver.define_namespace(leds.namespace, leds.server_name)
+      LedsDriver.define_namespace(leds.opts.server_name, leds.opts.namespace)
     end
     vals = rotate(to_list(leds), offset, rotate_left)
-    LedsDriver.set_leds(leds.namespace, vals, leds.server_name)
+    LedsDriver.set_leds(vals, leds.opts.server_name, leds.opts.namespace)
   end
 
   @spec get_light(t, pos_integer) :: Types.colorint

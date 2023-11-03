@@ -64,7 +64,7 @@ Now it's time to prepare our led strip. First we define our strip and we set a v
 # we start with the default configuration
 :ok = LedAnimationManager.register_strip(:weather, :kino)
 # and then we modify the timer update frequency to 10 sec
-{:ok, _old_value} = LedsDriver.change_config([:timer, :update_timeout], 10_000, :weather)
+{:ok, _old_value} = LedsDriver.change_config(:weather, [:timer, :update_timeout], 10_000)
 
 :ok
 ```

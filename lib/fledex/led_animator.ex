@@ -102,7 +102,7 @@ defmodule Fledex.LedAnimator do
     }
     state = update_config(state, init_args)
 
-    LedsDriver.define_namespace(state.animator_name, state.strip_name)
+    LedsDriver.define_namespace(state.strip_name, state.animator_name)
 
     {:ok, state, {:continue, :start_timer}}
   end

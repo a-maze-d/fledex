@@ -41,12 +41,11 @@ defmodule Fledex.LedsDriver do
   @default_driver_modules [NullDriver]
 
   # client code
-  @spec start_link(atom | map, atom | {:global, any} | {:via, atom, any}) ::
+  @spec start_link(atom | {:global, any} | {:via, atom, any}, atom | map) ::
           :ignore | {:error, any} | {:ok, pid}
-  def start_link(config \\ :none, strip_name \\ __MODULE__)
-  def start_link(:none, strip_name), do: start_link(%{}, strip_name)
-
-  def start_link(:kino, strip_name) do
+  def start_link(strip_name \\ __MODULE__, config \\ :none)
+  def start_link(strip_name, :none), do: start_link(strip_name, %{})
+  def start_link(strip_name, :kino) do
     config = %{
       timer: %{only_dirty_update: false},
       led_strip: %{
@@ -61,39 +60,40 @@ defmodule Fledex.LedsDriver do
       }
     }
 
-    start_link(config, strip_name)
+    start_link(strip_name, config)
   end
-
-  def start_link(init_args, strip_name) when is_map(init_args) do
+  def start_link(strip_name, init_args) when is_map(init_args) do
     # Logger.info(Exception.format_stacktrace())
     GenServer.start_link(__MODULE__, {init_args, strip_name}, name: strip_name)
   end
 
   @spec define_namespace(atom, atom) :: {:ok, atom} | {:error, String.t()}
-  def define_namespace(namespace, strip_name \\ __MODULE__) do
+  def define_namespace(strip_name \\ __MODULE__, namespace) do
     # Logger.info("defining namespace: #{strip_name}-#{namespace}")
     GenServer.call(strip_name, {:define_namespace, namespace})
   end
 
   @spec drop_namespace(atom, atom) :: :ok
-  def drop_namespace(namespace, strip_name \\ __MODULE__) do
+  def drop_namespace(strip_name \\ __MODULE__, namespace) do
     # Logger.info("dropping namespace: #{strip_name}-#{namespace}")
     GenServer.call(strip_name, {:drop_namespace, namespace})
   end
 
   @spec exist_namespace(atom, atom) :: boolean
-  def exist_namespace(namespace, strip_name \\ __MODULE__) do
+  def exist_namespace( strip_name \\ __MODULE__, namespace) do
     GenServer.call(strip_name, {:exist_namespace, namespace})
   end
 
-  @spec set_leds(atom, list(pos_integer), atom) :: :ok | {:error, String.t()}
-  def set_leds(namespace, leds, strip_name \\ __MODULE__) do
+  @spec set_leds(atom, atom, list(pos_integer)) :: :ok | {:error, String.t()}
+  def set_leds(strip_name \\ __MODULE__, namespace, leds) do
     GenServer.call(strip_name, {:set_leds, namespace, leds})
   end
 
-  def change_config(config_path, value, strip_name \\ __MODULE__) do
+  @spec change_config(atom, list(atom), any) :: {:ok, any}
+  def change_config(strip_name \\ __MODULE__, config_path, value) do
     GenServer.call(strip_name, {:change_config, config_path, value})
   end
+  @spec reinit_drivers(atom) :: :ok
   def reinit_drivers(strip_name \\ __MODULE__) do
     GenServer.call(strip_name, :reinit_drivers)
   end

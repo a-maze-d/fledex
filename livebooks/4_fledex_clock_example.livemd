@@ -29,7 +29,7 @@ But before we get there, we first initiate our led strip and ensure that it upda
 # we start with the default configuration
 :ok = LedAnimationManager.register_strip(:clock, :kino)
 # and then we modify the timer update frequency to 500ms
-{:ok, _old_value} = LedsDriver.change_config([:timer, :update_timeout], 500, :clock)
+{:ok, _old_value} = LedsDriver.change_config(:clock, [:timer, :update_timeout], 500)
 
 :ok
 ```

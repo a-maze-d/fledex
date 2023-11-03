@@ -72,7 +72,7 @@ defmodule Fledex.LedAnimationManager do
 
   defp register_strip(strip_name, driver_config, state) do
     # Logger.info("registering led_strip: #{strip_name}")
-    {:ok, _pid} = LedsDriver.start_link(driver_config, strip_name)
+    {:ok, _pid} = LedsDriver.start_link(strip_name, driver_config)
     Map.put_new(state, strip_name, nil)
   end
   defp unregister_strip(strip_name, state) do
