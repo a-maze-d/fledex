@@ -17,11 +17,11 @@ defmodule Fledex.LedDriverTest do
       assert state.timer.only_dirty_update == false
       assert state.timer.is_dirty == false
       assert state.timer.ref == nil
-      # TODO: add more fields
       assert state.led_strip.merge_strategy == :avg
       assert state.led_strip.driver_modules == [NullDriver]
       assert state.led_strip.config == %{NullDriver => %{}}
       assert state.namespaces == %{}
+      assert state.strip_name == :strip_name
     end
 
     test "init_args are correctly set (with active timer)" do
@@ -43,8 +43,7 @@ defmodule Fledex.LedDriverTest do
       assert state.led_strip.driver_modules == [NullDriver]
       assert state.led_strip.config == %{NullDriver => %{}}
       assert state.namespaces == %{}
-      #TODO: add more fields
-      # strip_name: atom,
+      assert state.strip_name == :strip_name
 
       assert_receive {:update_timeout, _update_func}
     end

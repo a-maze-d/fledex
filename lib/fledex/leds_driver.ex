@@ -80,7 +80,7 @@ defmodule Fledex.LedsDriver do
   end
 
   @spec exist_namespace(atom, atom) :: boolean
-  def exist_namespace( strip_name \\ __MODULE__, namespace) do
+  def exist_namespace(strip_name \\ __MODULE__, namespace) do
     GenServer.call(strip_name, {:exist_namespace, namespace})
   end
 
