@@ -6,29 +6,40 @@ defmodule Fledex.LedAnimationManager do
   alias Fledex.LedAnimator
   alias Fledex.LedsDriver
 
-  ### for debugging only
-  def run do
-    {:ok, pid} = __MODULE__.start_link()
-    __MODULE__.register_strip(:t, :none)
-    __MODULE__.register_animations(:t, %{t1: %{}, t2: %{}})
-    __MODULE__.register_animations(:t, %{t1: %{}, t3: %{}})
-    Process.sleep(5_000)
-    GenServer.stop(pid)
-    :ok
-  end
+  # ### for debugging only
+  # def run do
+  #   {:ok, pid} = __MODULE__.start_link()
+  #   __MODULE__.register_strip(:t, :none)
+  #   __MODULE__.register_animations(:t, %{t1: %{}, t2: %{}})
+  #   __MODULE__.register_animations(:t, %{t1: %{}, t3: %{}})
+  #   Process.sleep(5_000)
+  #   GenServer.stop(pid)
+  #   :ok
+  # end
 
   ### client side
   def start_link do
+    # we should only have a single server running. Therefore we check whether need to do something
+    # or if the server is already running
+    pid = GenServer.whereis(__MODULE__)
+    if pid == nil do
       GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
+    else
+      {:ok, pid}
+    end
   end
 
   def register_strip(strip_name, driver_config) do
+    # Logger.debug("register strip: #{strip_name}")
     GenServer.call(__MODULE__, {:register_strip, strip_name, driver_config})
+
   end
   def unregister_strip(strip_name) do
+    # Logger.debug("unregister strip: #{strip_name}")
     GenServer.call(__MODULE__, {:unregister, strip_name})
   end
   def register_animations(strip_name, configs) do
+    # Logger.debug("register animation: #{strip_name}, #{inspect configs}")
     GenServer.call(__MODULE__, {:register_animations, strip_name, configs})
   end
 
@@ -41,10 +52,15 @@ defmodule Fledex.LedAnimationManager do
 
   @impl true
   def handle_call({:register_strip, strip_name, driver_config}, _pid, state) when is_atom(strip_name) do
-    if Process.whereis(strip_name) == nil do
+    pid = Process.whereis(strip_name)
+    if pid == nil do
       {:reply, :ok, register_strip(strip_name, driver_config, state)}
     else
-      {:reply, {:error, "Process already exists"}, state}
+      # we have a bit of a problem when using the kino driver, since it will not be reinitialized
+      # when calling this function again (and thereby we don't get any frame/display).
+      # Therefore we add here an extra step to reinitiate the the drivers while registering the strip.
+      :ok = LedsDriver.reinit_drivers(strip_name)
+      {:reply, :ok, state}
     end
   end
   def handle_call({:register_animations, strip_name, configs}, _pid, state) do
@@ -61,7 +77,8 @@ defmodule Fledex.LedAnimationManager do
   end
   defp unregister_strip(strip_name, state) do
     # Logger.info("unregistering led_strip_ #{strip_name}")
-    keys = Map.keys(state[strip_name])
+    map = state[strip_name] || %{}
+    keys = Map.keys(map)
     shutdown_animators(strip_name, keys)
     GenServer.stop(strip_name, :shutdown)
     Map.drop(state, [strip_name])

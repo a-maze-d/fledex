@@ -22,6 +22,12 @@ defmodule Fledex.LedStripDriver.SpiDriver do
     put_in(config.ref, open_spi(config))
   end
 
+  @impl true
+  @spec reinit(map) :: map
+  def reinit(module_config) do
+    module_config
+  end
+
   @spec open_spi(map) :: reference
   def open_spi(config) do
     {:ok, ref} =

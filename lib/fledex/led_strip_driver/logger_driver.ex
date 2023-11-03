@@ -30,6 +30,12 @@ defmodule Fledex.LedStripDriver.LoggerDriver do
   end
 
   @impl true
+  @spec reinit(map) :: map
+  def reinit(module_config) do
+    module_config
+  end
+
+  @impl true
   @spec transfer(list(Types.colorint), pos_integer, map) :: map
   def transfer(leds, counter, config) when rem(counter, config.update_freq) == 0 and leds != [] do
       log_color_code = config.log_color_code

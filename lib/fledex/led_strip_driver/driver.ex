@@ -4,6 +4,7 @@ defmodule Fledex.LedStripDriver.Driver do
   alias Fledex.Color.Types
 
   @callback init(module_init_args :: map) :: map
+  @callback reinit(module_config::map) :: map
   @callback transfer(leds :: list(Types.colorint), counter :: pos_integer, config :: map) :: map
   @callback terminate(reason, config :: map) :: :ok
     when reason: :normal | :shutdown | {:shutdown, term()} | term()
@@ -17,6 +18,15 @@ defmodule Fledex.LedStripDriver.Driver do
         {module, config}
       end
 
+      put_in(state.led_strip.config, Enum.into(configs, %{}))
+    end
+
+    def reinit(state) do
+      configs = for module <- state.led_strip.driver_modules do
+        module_config = state.led_strip.config[module]
+        config = module.reinit(module_config)
+        {module, config}
+      end
       put_in(state.led_strip.config, Enum.into(configs, %{}))
     end
 

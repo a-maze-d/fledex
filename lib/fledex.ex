@@ -5,6 +5,7 @@ defmodule Fledex do
   This module should provide some simple macros that allow to define the
   led strip and to update it. The code you would write (in livebook) would
   look something like the following:
+  iex> use Fledex
   iex> led_strip do
           live_loop :john, send_config: %{offset: counter}, delay_config: counter do
             config = %{
@@ -17,7 +18,6 @@ defmodule Fledex do
           end
       end
   """
-  @behaviour Fledex.Callbacks
   require Logger
 
   defmacro __using__(opts) do
@@ -26,14 +26,12 @@ defmodule Fledex do
     else
       opts
     end
+
     quote bind_quoted: [opts: opts] do
       import Fledex
-      defmodule opts do
-        Module.register_attribute(opts, :strip_name, accumulate: false)
-        Module.register_attribute(opts, :strip_opts, accumulate: false)
-        Module.register_attribute(opts, :loops, accumulate: true)
-      end
-      @before_compile
+      import Fledex.Leds
+      # let's start our animation manager. The manager makes sure only one will be started
+      Fledex.LedAnimationManager.start_link()
     end
   end
 
@@ -48,86 +46,137 @@ defmodule Fledex do
     know whether it changes
   """
   defmacro live_loop(loop_name, loop_options \\ [], do: block) do
-    func_ast = {:fn, [], block}
-
+    def_func_ast = {:fn, [], block}
+    send_config = loop_options[:send_config]  || &Fledex.LedAnimator.default_send_config_func/1
+    # Logger.warning(inspect block)
     quote do
-      Module.put_attribute(:strip1, :loops, {
-        Module.get_attribute(:strip1, :strip_name, __MODULE__),
-        Module.get_attribute(:strip1, :strip_options, []),
-        unquote(loop_name),
-        unquote(loop_options),
-        unquote(func_ast),
-      })
+      {
+       unquote(loop_name),
+        %{
+          def_func: unquote(def_func_ast),
+          send_config_func: unquote(send_config)
+        }
+      }
     end
-    |> tap(& IO.puts Code.format_string! Macro.to_string &1)
+      # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
+
+    # quote do
+    #   Module.put_attribute(:strip1, :loops, {
+    #     Module.get_attribute(:strip1, :strip_name, __MODULE__),
+    #     Module.get_attribute(:strip1, :strip_options, []),
+    #     unquote(loop_name),
+    #     unquote(loop_options),
+    #     unquote(func_ast),
+    #   })
+    # end
+    # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
 
   @doc """
     This introduces a new led_strip. Probably we only have a single
     led strip and then the default name (the module name) will be used.
   """
-  defmacro led_strip(strip_name \\ :default, strip_options \\ [], do: block) do
+  defmacro led_strip(strip_name, strip_options \\ :kino, do: block) do
+    # Logger.error(inspect block)
+    {_ast, configs_ast} = Macro.prewalk(block, [], fn
+       {:live_loop, meta, children}, acc -> {{:live_loop, meta, children}, [{:live_loop, meta, children} | acc]}
+       other, acc -> {other, acc}
+    end)
+    # Logger.error(inspect configs_ast)
+
     quote do
-      Module.put_attribute(:strip1, :strip_name, unquote(strip_name))
-      Module.put_attribute(:strip1, :strip_options, unquote(strip_options))
-      unquote(block)
+      strip_name = unquote(strip_name)
+      strip_options = unquote(strip_options)
+      Fledex.LedAnimationManager.register_strip(strip_name, strip_options)
+      Fledex.LedAnimationManager.register_animations(strip_name, Map.new(unquote(configs_ast)))
     end
-    |> tap(& IO.puts Code.format_string! Macro.to_string &1)
+      # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
 
-  @doc """
-    After parsing the Dsl the collected definitions will be passed to this function
-    wich will process each definition by calling the specified callback functions
-  """
-  @impl Fledex.Callbacks
-  def register(loops \\ []) do
-    # IO.puts("register: #{inspect loops}")
-    # bring to orig order
-    loops = Enum.reverse(loops)
+  # def create_map(config) do
+  #   # Logger.info("Config: #{inspect config}")
+  #   Map.new(config)
+  #   # Logger.info("Map: #{inspect map}")
+  # end
 
-    for {strip_name, strip_options, loop_name, loop_options, func} = loop <- loops do
-      IO.puts("\tregister: #{inspect loop}")
-      register(strip_name, strip_options, loop_name, loop_options, func)
-    end
-    :ok
-  end
+  # @doc """
+  #   After parsing the Dsl the collected definitions will be passed to this function
+  #   wich will process each definition by calling the specified callback functions
+  # """
+  # @impl Fledex.Callbacks
+  # def register(loops \\ []) do
+  #   # IO.puts("register: #{inspect loops}")
+  #   # bring to orig order
+  #   loops = Enum.reverse(loops)
 
-  @doc """
-    This is the default implementation of the register function that will
-    search for the LED strip (LedDriver) and the defined live_loop (LedAnimator) and update them according
-    to the definitions
-  """
-  @impl Fledex.Callbacks
-  def register(strip_name, strip_options, loop_name, loop_options, func) do
-    result = func.(%{something: 10})
+  #   for {strip_name, strip_options, loop_name, loop_options, func} = loop <- loops do
+  #     IO.puts("\tregister: #{inspect loop}")
+  #     register(strip_name, strip_options, loop_name, loop_options, func)
+  #   end
+  #   :ok
+  # end
 
-    Logger.info(
-      "strip_name: #{inspect(strip_name)}, strip_options: #{inspect(strip_options)}, loop_name: #{inspect(loop_name)}, options: #{inspect(loop_options)}, expression: #{inspect(func)}, result: #{result}"
-    )
-  end
+  # @doc """
+  #   This is the default implementation of the register function that will
+  #   search for the LED strip (LedDriver) and the defined live_loop (LedAnimator) and update them according
+  #   to the definitions
+  # """
+  # @impl Fledex.Callbacks
+  # def register(strip_name, strip_options, loop_name, loop_options, func) do
+  #   result = func.(%{something: 10})
 
-  def pre_define_live_loops do
-  end
+  #   Logger.info("
+  #     strip_name: #{inspect(strip_name)},
+  #     strip_options: #{inspect(strip_options)},
+  #     loop_name: #{inspect(loop_name)},
+  #     options: #{inspect(loop_options)},
+  #     expression: #{inspect(func)}, result: #{result}
+  #   ")
+  # end
 
-  def post_define_live_loops do
-  end
+  # def pre_define_live_loops do
+  # end
+
+  # def post_define_live_loops do
+  # end
 
   # defp check_env(_server_name, _name) do
   #   # is the server running (with the specified name)?
   #   # do we have a Leds defined (with the specified name)?
   # end
 
-  defmacro __before_compile__(_env) do
-    IO.puts("compiling now...")
-    Logger.error("compiling now...")
-    loops = Module.get_attribute(:strip1, :loops)
-    quote do
-      defmodule T do
-        def run do
-          register(unquote(Macro.escape(loops)))
-        end
+  # defmacro __before_compile__(_env) do
+  #   IO.puts("compiling now...")
+  #   Logger.error("compiling now...")
+  #   loops = Module.get_attribute(:strip1, :loops)
+  #   quote do
+  #     defmodule T do
+  #       def run do
+  #         register(unquote(Macro.escape(loops)))
+  #       end
+  #     end
+  #   end
+  #   |> tap(& IO.puts Code.format_string! Macro.to_string &1)
+  # end
+end
+
+defmodule Fledex.Runner do
+  def run do
+    use Fledex
+    led_strip :john do
+      live_loop :jane, send_config: fn _triggers -> %{} end do
+        _triggers -> Fledex.Leds.new(30)
+      end
+      live_loop :marry, send_config: fn _triggers -> %{} end do
+        _triggers -> Fledex.Leds.new(40)
       end
     end
-    |> tap(& IO.puts Code.format_string! Macro.to_string &1)
+
+  end
+  def loop do
+    use Fledex
+    live_loop :fiona, send_config: fn _triggers -> %{} end do
+      _triggers -> Fledex.Leds.new(30)
+    end
   end
 end

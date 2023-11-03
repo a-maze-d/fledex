@@ -16,6 +16,12 @@ defmodule Fledex.LedStripDriver.NullDriver do
   end
 
   @impl true
+  @spec reinit(map) :: map
+  def reinit(module_config) do
+    module_config
+  end
+
+  @impl true
   @spec transfer(list(Types.colorint), pos_integer, map) :: map
   def transfer(_leds, _counter, config) do
     config

@@ -94,6 +94,9 @@ defmodule Fledex.LedsDriver do
   def change_config(config_path, value, strip_name \\ __MODULE__) do
     GenServer.call(strip_name, {:change_config, config_path, value})
   end
+  def reinit_drivers(strip_name \\ __MODULE__) do
+    GenServer.call(strip_name, :reinit_drivers)
+  end
 
   # server code
   @impl true
@@ -163,6 +166,7 @@ defmodule Fledex.LedsDriver do
   @spec terminate(reason, state :: Fledex.LedDriver.t()) :: :ok
         when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(reason, state) do
+    Logger.info(Exception.format_stacktrace())
     Driver.terminate(reason, state)
   end
 
@@ -225,10 +229,18 @@ defmodule Fledex.LedsDriver do
     end
   end
 
+  @impl true
+  @spec handle_call({:change_config, list(atom), any}, {pid, any}, t) :: {:reply, {:ok, any}, t}
   def handle_call({:change_config, config_path, value}, _from, state) do
     previous_value = get_in(state, config_path)
     state = put_in(state, config_path, value)
     {:reply, {:ok, previous_value}, state}
+  end
+
+  @impl true
+  @spec handle_call(:reinit_drivers, {pid, any}, t) :: {:reply, :ok, t}
+  def handle_call(:reinit_drivers, _from, state) do
+    {:reply, :ok, Driver.reinit(state)}
   end
 
   @impl true

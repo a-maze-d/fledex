@@ -30,7 +30,7 @@ What we will do is to check every 15 min what the latest weather news is.
 
 There are plenty of Weather APIs on the internet, but most of them require to register which is not ideal for a public example. Therefore I decided to use [Open-Meteo](https://open-meteo.com/) which provides all we need.
 
-We need to decide for which location we want to get the weather. We use the coordinate for Budapest (`47.4729344`,`19.0468802`). Then we can make the call `"https://api.open-meteo.com/v1/forecast?latitude=47.4729344&longitude=19.0468802&current=temperature_2m"` to get data like the following:
+We need to decide for which location we want to get the weather. We use the coordinate for Budapest (`47.4729344`,`19.0468802`). Then we can make the call [`https://api.open-meteo.com/v1/forecast?latitude=47.4729344&longitude=19.0468802&current=temperature_2m`](https://api.open-meteo.com/v1/forecast?latitude=47.4729344&longitude=19.0468802&current=temperature_2m) to get data like the following:
 
 ```json
 {
@@ -63,7 +63,7 @@ Now it's time to prepare our led strip. First we define our strip and we set a v
 ```elixir
 # we start with the default configuration
 :ok = LedAnimationManager.register_strip(:weather, :kino)
-# and then we modify the timer update frequency to 500ms
+# and then we modify the timer update frequency to 10 sec
 {:ok, _old_value} = LedsDriver.change_config([:timer, :update_timeout], 10_000, :weather)
 
 :ok
@@ -71,7 +71,9 @@ Now it's time to prepare our led strip. First we define our strip and we set a v
 
 Now we define two animations, the first one creates blue (below zero), green (zero), or red (above zero) indicators. The indicators have the length of the temperature and start from zero to either go to the left (negative) or the right (positive).
 
-As and additional bonus, the termometer is showing the full scale, if no proper measurement is received (arbitrarily high value of 100).
+The temperature will be delivered to us as part of the trigger. We'll look at how we will get  this information in the section below.
+
+As and additional bonus, the thermometer is showing the full scale, if no proper measurement is received (arbitrarily high value of 100).
 
 ```elixir
 LedAnimationManager.register_animations(:weather, %{
@@ -93,7 +95,7 @@ LedAnimationManager.register_animations(:weather, %{
           temp when temp == 100 ->
             {Leds.new(61)
              |> Leds.light(:blue, 1, 20)
-             |> Leds.light(:green)
+             |> Leds.light(:may_green)
              |> Leds.light(:red, 22, 40), 1}
 
           temp when temp < 0 ->
@@ -129,9 +131,14 @@ LedAnimationManager.register_animations(:weather, %{
     end
   }
 })
+```
 
-# For testing we can send an arbitrary temperature this way:
-# Fledex.Utils.PubSub.broadcast(:fledex, "trigger", {:trigger, %{temperature: -15.2}})
+For testing we can send an arbitrary temperature value to our strip in the following way. This allows us to also see whether the strip has the correct behavior when the temperature is at zero (or even below) degree. It wouldn't be really practical if we need to wait until the outside temperature reaches those levels.
+
+Here we send a temperature value of -15.2 degree (which the strip should round to 15 degree)
+
+```elixir
+Fledex.Utils.PubSub.broadcast(:fledex, "trigger", {:trigger, %{temperature: -15.2}})
 ```
 
 ## Getting the weather data

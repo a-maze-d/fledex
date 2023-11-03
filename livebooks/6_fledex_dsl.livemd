@@ -1,0 +1,63 @@
+# 6. Fledex: DSL
+
+```elixir
+# In this example we'll use the simple setup (experiments are inteded to not run on real
+# hardware but on a normal livebook, This makes it easier to stay up-to-date and experiment
+# We start to define our fledex library, directly linking to the latest version on github
+Mix.install([
+  {:fledex, path: "/home/maze/Documents/code/fledex"},
+  {:kino, "~>0.11"}
+])
+```
+
+## Intro
+
+We now define our animations with our DSL with the following steps:
+
+* First we have to `use Fledex` in order to import `Fledex`, to load our DSL macros (`led_strip` and `live_loop`), and to import `Fledex.Leds`. This means we won't write `Leds` in fron of functions. By default this will also start the LedAnimationManager if it's not already running which will take care of all the animation coordinations.
+
+```elixir
+use Fledex
+```
+
+* We define a new strip with a name (`:clock`), and configure it (we use the `:kino` default driver for display). This will internally create a new `LedsDriver` server (if it's not already running) that will control the strip. Its server name will be identical to the `led_strip` name.
+* Then within this strip we define several `live_loop`s that correspond to an animation (and will use internally the `LedAnimator`). Each animaation is identified by its own name (`:help`, `:hour`, `:minute`, `:seconds`)
+* Within each animation we define a function that will repeatedly be executed
+* Inside that function we can define one or several `Leds`, either directly or through an led sequence (like a rainbow function) and animate those leds depending on some trigger data (data that comes into the animation function). An explanation of what we are doing in our example here will be given after the code.
+
+It is also possble to define some other configurations (like the `send_config_func` as we have done in the "[Fledex Clock Example](./4_fledex_clock_example.livemd)") but we will look at this a bit later.
+
+```elixir
+led_strip :clock, :kino do
+  live_loop :nelp do
+    _triggers -> new(5) |> light(:ash_gray) |> func(:repeat, %{amount: 12})
+  end
+
+  live_loop :hour do
+    _triggers ->
+      %{hour: hour, minute: _minute, second: _second} = Time.utc_now() |> Time.add(1, :hour)
+      new(24) |> light(:blue, hour + 1)
+  end
+
+  live_loop :minute do
+    _triggers ->
+      %{hour: _hour, minute: minute, second: _second} = Time.utc_now() |> Time.add(1, :hour)
+      new(60) |> light(:may_green, minute + 1)
+  end
+
+  live_loop :second do
+    _triggers ->
+      %{hour: _hour, minute: _minute, second: second} = Time.utc_now() |> Time.add(1, :hour)
+      new(60) |> light(:red, second + 1)
+  end
+end
+```
+
+In our example we first define an "animation" (that doesn't really anymate since it's static). It is used to make it easier to read the time by having a dash every 5 steps. This is a repetitive task and therefore we define it only once and then make use of the `:repeat` function (and repeat it 12 times).
+
+For all other animations we make a call to the system time (`Time.utc_now()`) and therefore don't require the `_trigger` information. We shift the result to the right timezone (we add 1 hour, for UTC+1)
+We parse the result, depending on the animation into the different aspects of interest (`hour`, `minute`, `second`).
+
+We then define a sequence of `Leds` of the right length (`24` for `hour`s, and `60` for `minute`s and `second`s). We switch on only a single light in some color at the correct position (with the offset corresponding to `hour`, `minute` or `second`)
+
+Note: in the clock example we defined a static sequence of `Leds` and offsetted it. This requires the definition of a `send_config_func`. We will look on how to do it with the DSL as a next step.

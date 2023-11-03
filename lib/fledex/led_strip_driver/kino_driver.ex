@@ -20,6 +20,12 @@ defmodule Fledex.LedStripDriver.KinoDriver do
   end
 
   @impl true
+  @spec reinit(map) :: map
+  def reinit(module_config) do
+    %{ module_config | frame: Kino.Frame.new() |> Kino.render()}
+  end
+
+  @impl true
   @spec transfer(list(Types.colorint), pos_integer, map) :: map
   def transfer(leds, counter, config) do
     if (rem(counter, config.update_freq) == 0 and length(leds) > 0) do
