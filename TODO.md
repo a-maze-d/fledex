@@ -20,4 +20,5 @@ as really done. Here the outstanding tasks that I can think of.
 - [x] Publish to hex (v1.1 has been published)
 - [x] Fix all credo issues by running `mix credo --all`
 - [ ] Fix TODOs
-- [ ] Finish the dsl livebook example
+- [ ] Finish the dsl livebook example (mostly done, but the send_config part is not done yet)
+- [ ] Add an example where several nodes are connected to transfer pubsub messages accross nodes

@@ -232,7 +232,7 @@ defmodule Fledex.Leds do
       LedsDriver.define_namespace(leds.opts.server_name, leds.opts.namespace)
     end
     vals = rotate(to_list(leds), offset, rotate_left)
-    LedsDriver.set_leds(vals, leds.opts.server_name, leds.opts.namespace)
+    LedsDriver.set_leds(leds.opts.server_name, leds.opts.namespace, vals)
   end
 
   @spec get_light(t, pos_integer) :: Types.colorint
