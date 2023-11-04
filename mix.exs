@@ -11,13 +11,9 @@ defmodule Fledex.MixProject do
       package: package(),
       deps: deps(),
       name: "fledex",
-      source_url: "https://github.com/a-maze-d/fledex",
-      elixirc_paths: elixirc_paths(Mix.env())
+      source_url: "https://github.com/a-maze-d/fledex"
     ]
   end
-
-  defp elixirc_paths(:test), do: ["test/helpers"] ++ elixirc_paths(:prod)
-  defp elixirc_paths(_), do: ["lib"]
 
   # Run "mix help compile.app" to learn about applications.
   def application do

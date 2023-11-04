@@ -30,7 +30,7 @@ defmodule Fledex.Leds do
   end
   @spec new(integer) :: t
   def new(count) do
-    new(count, %{})
+    new(count, %{server_name: nil, namespace: nil})
   end
   @spec new(integer, map) :: t
   def new(count, opts) do

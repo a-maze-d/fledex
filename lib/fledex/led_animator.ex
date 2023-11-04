@@ -45,8 +45,8 @@ defmodule Fledex.LedAnimator do
   alias Fledex.Utils.PubSub
 
   @type ledAnimatorConfig :: %{
-      optional(:def_func) => ((map) -> Leds.t()),
-      optional(:send_config_func) => ((map) -> map()),
+      optional(:def_func) => (map -> Leds.t),
+      optional(:send_config_func) => (map -> map),
       optional(:counter) => integer,
       optional(:timer_ref) => reference | nil,
       optional(:strip_name) => atom,
@@ -91,7 +91,7 @@ defmodule Fledex.LedAnimator do
   end
 
   @impl true
-  @spec init({ledAnimatorConfig, atom, atom}) :: {:ok, ledAnimatorState, {:continue, :start_timer}}
+  @spec init({ledAnimatorConfig, atom, atom}) :: {:ok, ledAnimatorState}
   def init({init_args, strip_name, animator_name}) do
     state = %{
       triggers: %{},
@@ -103,15 +103,9 @@ defmodule Fledex.LedAnimator do
     state = update_config(state, init_args)
 
     LedsDriver.define_namespace(state.strip_name, state.animator_name)
-
-    {:ok, state, {:continue, :start_timer}}
-  end
-
-  @impl true
-  @spec handle_continue(:start_timer, ledAnimatorState) :: {:noreply, ledAnimatorState}
-  def handle_continue(:start_timer, state) do
     PubSub.subscribe(:fledex, "trigger")
-    {:noreply, state}
+
+    {:ok, state}
   end
 
   @impl true
@@ -184,6 +178,6 @@ defmodule Fledex.LedAnimator do
     strip_name: strip_name,
     animator_name: animator_name
   } = _state) do
-      LedsDriver.drop_namespace(animator_name, strip_name)
+      LedsDriver.drop_namespace(strip_name, animator_name)
   end
 end

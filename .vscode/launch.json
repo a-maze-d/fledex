@@ -5,6 +5,7 @@
     "version": "0.2.0",
     "configurations": [
 
+
         {
             "type": "mix_task",
             "name": "mix (Default task)",
@@ -16,6 +17,7 @@
             "name": "mix test",
             "request": "launch",
             "task": "test",
+            "exitAfterTaskReturns": false,
             "taskArgs": [
                 "--trace"
             ],

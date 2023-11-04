@@ -15,10 +15,11 @@ as really done. Here the outstanding tasks that I can think of.
 - [ ] Change the name registration from atoms to strings (to avoid garbage collection issues)?
 - [ ] Get the library into nerves-livebook
 - [ ] Add proper API/module documentation
-- [ ] Add documentation on how to connect the LED strip to a RaspberryPi Zero (with and without level shifter)
+- [ ] Add documentation on how to connect the LED strip to a RaspberryPi Zero (with and without level shifter).
+      This could be part of the first example
 - [x] Cleanup files
 - [x] Publish to hex (v1.1 has been published)
 - [x] Fix all credo issues by running `mix credo --all`
-- [ ] Fix TODOs
+- [x] Fix TODOs
 - [ ] Finish the dsl livebook example (mostly done, but the send_config part is not done yet)
 - [ ] Add an example where several nodes are connected to transfer pubsub messages accross nodes

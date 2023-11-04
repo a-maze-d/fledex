@@ -1,11 +1,27 @@
 defmodule Fledex.LedAnimatorTest do
   use ExUnit.Case
   alias Fledex.LedAnimator
+  alias Fledex.Leds
   alias Fledex.LedsDriver
-  alias Fledex.TestHelpers.LedAnimatorHelper
 
-  # import ExUnit.CaptureLog
+  import ExUnit.CaptureLog
   require Logger
+
+  def default_def_func(_triggers) do
+    Leds.new(30)
+  end
+  def default_send_config_func(_triggers) do
+    %{namespace: "test"}
+  end
+  # some logging versions to test the workflow
+  def logging_def_func(triggers) do
+    Logger.info("creating led definition, #{triggers.test_strip}")
+    Leds.new(30)
+  end
+  def logging_send_config_func(triggers) do
+    Logger.info("creating send config, #{triggers.test_strip}")
+    %{namespace: "test#{ExUnit.configuration()[:seed]}"}
+  end
 
   @strip_name :test_strip
   setup do
@@ -21,21 +37,21 @@ defmodule Fledex.LedAnimatorTest do
   describe "init" do
     test "config applied correctly (all set)" do
       init_args = %{
-        def_func: &LedAnimatorHelper.default_def_func/1,
-        send_config_func: &LedAnimatorHelper.default_send_config_func/1,
+        def_func: &default_def_func/1,
+        send_config_func: &default_send_config_func/1,
         strip_name: :test_strip,
         animator_name: :test_animator,
         triggers: %{}
       }
 
-      {:ok, state, {:continue, :start_timer}} = Fledex.LedAnimator.init({init_args, :test_strip, :test_animator})
+      {:ok, state} = Fledex.LedAnimator.init({init_args, :test_strip, :test_animator})
       assert state == init_args
     end
 
     test "config applied correctly (none_set)" do
       init_args = %{}
 
-      {:ok, state, {:continue, :start_timer}} = LedAnimator.init({init_args, :test_strip, :test_animator})
+      {:ok, state} = LedAnimator.init({init_args, :test_strip, :test_animator})
       assert state.def_func != nil
       assert state.send_config_func != nil
       assert state.strip_name == :test_strip
@@ -44,17 +60,23 @@ defmodule Fledex.LedAnimatorTest do
   end
 
   describe "test workflow" do
-    # TODO: we need to rethink this test, see the run() funtion
-    # test "validate continuous workflow", %{strip_name: strip_name, pid: pid} do
-    #   # ensure our driver is running
-    #   assert Process.alive?(pid)
+    # what is important is to check whether our def and send functions are called
+    # repeatedly. and that our trigger is incrementing properly.
+    # for this we start an animation, let it run for a while and capture the logs
+    # once we have shut down the animation we validate the logs that the functions
+    # are called alternatingly and that the trigger is incrementing as expected
+    test "validate continuous workflow", %{strip_name: strip_name, pid: pid} do
+      # ensure our driver is running
+      assert Process.alive?(pid)
 
-    #   capture_log([], fn -> run_simple_workflow(strip_name) end)
-    #     |> assert_logs()
+      capture_log([], fn ->
+        run_simple_workflow(strip_name)
+      end)
+        |> assert_logs()
 
-    #   # ensure our animator did not kill our driver while shutting down
-    #   assert Process.alive?(pid)
-    # end
+      # ensure our animator did not kill our driver while shutting down
+      assert Process.alive?(pid)
+    end
 
     def run_simple_workflow(strip_name) do
       start_server(strip_name)
@@ -72,48 +94,42 @@ defmodule Fledex.LedAnimatorTest do
       |> Enum.map(fn line -> extract_keyword(line) end)
       # The asserts are following a very simple state machine pattern. The log lines need
       # to come in a very specfic order (and cyclic)
-      |> Enum.reduce(%{wait: 0, send: 0, led: 0}, &count_and_assert/2)
+      |> Enum.reduce(%{trigger: 0, send: 0, led: 0}, &count_and_assert/2)
     end
 
     def count_and_assert(line, acc) do
       case line do
-        "wait" ->
-          # IO.puts("#{acc.send}, #{acc.wait}, #{acc.led}: #{line}")
-          assert acc.wait == acc.led
-          %{acc | wait: acc.wait + 1}
-
-        "send" ->
-          if acc.send == 0 and acc.wait == 0 and acc.led == 0 do
+        {"send", trigger} ->
+          if acc.send == 0 and acc.led == 0 do
             # this happens when we are not yet fully set up. Thus we ignore the first one
             acc
           else
             # IO.puts("#{acc.send}, #{acc.wait}, #{acc.led}: #{line}")
-            assert acc.send == acc.wait - 1
+            assert acc.send == acc.led - 1
+            assert acc.trigger == trigger
             %{acc | send: acc.send + 1}
           end
-        "led" ->
+        {"led", trigger} ->
           # IO.puts("#{acc.send}, #{acc.wait}, #{acc.led}: #{line}")
-          assert acc.led == acc.send - 1
-          %{acc | led: acc.led + 1}
+          assert acc.led == acc.send
+          if acc.trigger != 0, do: assert acc.trigger + 1 == trigger
+          %{acc | led: acc.led + 1, trigger: trigger}
       end
     end
 
     def extract_keyword(line) do
-      [_left, middle, _right] =
-        String.slice(line, 20, String.length(line))
-        |> String.split(" ")
-
-      middle
+      result = Regex.named_captures(~r/.*creating\s(?<word>\S+).*, (?<trigger>\d*)/, line)
+      {trigger, _rest} = Integer.parse(result["trigger"] || "0")
+      {result["word"], trigger}
     end
 
     def start_server(strip_name) do
       init_args = %{
-        def_func: &LedAnimatorHelper.logging_def_func/1,
-        send_config_func: &LedAnimatorHelper.logging_send_config_func/1,
+        def_func: &logging_def_func/1,
+        send_config_func: &logging_send_config_func/1,
       }
 
-      {:ok, pid} = Fledex.LedAnimator.start_link(init_args, strip_name, :test_animator)
-      # GenServer.start(LedAnimator, {init_args, :test_animator}, name: :test_animator)
+      {:ok, pid} = LedAnimator.start_link(init_args, strip_name, :test_animator)
       pid
     end
 

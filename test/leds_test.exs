@@ -9,7 +9,7 @@ defmodule Fledex.LedsTest do
       leds = Leds.new()
       assert leds.count == 0
       assert leds.leds == %{}
-      assert leds.opts == %{}
+      assert leds.opts == %{namespace: nil, server_name: nil}
       assert leds.meta == %{index: 1}
     end
 
@@ -17,7 +17,7 @@ defmodule Fledex.LedsTest do
       leds = Leds.new(96)
       assert leds.count == 96
       assert leds.leds == %{}
-      assert leds.opts == %{}
+      assert leds.opts == %{namespace: nil, server_name: nil}
       assert leds.meta == %{index: 1}
     end
 
