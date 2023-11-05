@@ -11,8 +11,8 @@ defmodule Fledex do
               reversed: true
             }
 
-            Leds.new(50)
-              |> Leds.func(:rainbow, config)
+            leds(50)
+              |> func(:rainbow, config)
           end
       end
   """

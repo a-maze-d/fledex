@@ -8,7 +8,7 @@ defmodule Fledex.LedAnimatorTest do
   require Logger
 
   def default_def_func(_triggers) do
-    Leds.new(30)
+    Leds.leds(30)
   end
   def default_send_config_func(_triggers) do
     %{namespace: "test"}
@@ -16,7 +16,7 @@ defmodule Fledex.LedAnimatorTest do
   # some logging versions to test the workflow
   def logging_def_func(triggers) do
     Logger.info("creating led definition, #{triggers.test_strip}")
-    Leds.new(30)
+    Leds.leds(30)
   end
   def logging_send_config_func(triggers) do
     Logger.info("creating send config, #{triggers.test_strip}")

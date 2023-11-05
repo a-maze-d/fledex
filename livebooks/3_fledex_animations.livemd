@@ -33,7 +33,7 @@ Note that the functions get in a map (here called triggers) that can contain ser
 
 ```elixir
 defmodule HelperFunctions do
-  @rainbow Leds.new(50) |> Leds.func(:rainbow, num_leds: 50, reversed: true)
+  @rainbow Leds.leds(50) |> Leds.func(:rainbow, num_leds: 50, reversed: true)
   def rainbow(_triggers) do
     @rainbow
   end
@@ -69,7 +69,7 @@ We can now redefine our animation by regisetering different functions. Here we d
 import Bitwise
 
 defmodule HelperFunctions2 do
-  @red_leds Leds.new(50) |> Leds.light(:red) |> Leds.light(:red) |> Leds.light(:red)
+  @red_leds Leds.leds(50) |> Leds.light(:red) |> Leds.light(:red) |> Leds.light(:red)
   def red_leds(_triggers) do
     @red_leds
   end
@@ -96,7 +96,7 @@ It's also possible to define serveral animations. Here we continue with our prev
 import Bitwise
 
 defmodule HelperFunctions3 do
-  @rgb_leds Leds.new(50) |> Leds.light(:red) |> Leds.light(:green) |> Leds.light(:blue)
+  @rgb_leds Leds.leds(50) |> Leds.light(:red) |> Leds.light(:green) |> Leds.light(:blue)
   def rgb_leds(_triggers) do
     @rgb_leds
   end
@@ -135,7 +135,7 @@ LedAnimationManager.register_animations(:john, %{
   },
   doe: %{
     def_func: fn _triggers ->
-      Leds.new(50) |> Leds.light(:blue) |> Leds.light(:blue) |> Leds.light(:blue)
+      Leds.leds(50) |> Leds.light(:blue) |> Leds.light(:blue) |> Leds.light(:blue)
     end,
     send_config_func: fn triggers ->
       faster_offset = 50 - rem(triggers[:john] >>> 1, 50)

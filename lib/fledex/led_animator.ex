@@ -82,7 +82,7 @@ defmodule Fledex.LedAnimator do
   end
 
   ### server side
-  @default_leds Leds.new(30)
+  @default_leds Leds.leds(30)
   def default_def_func(_triggers) do
     @default_leds
   end

@@ -24,24 +24,49 @@ defmodule Fledex.Leds do
     repeat: &Fledex.Leds.repeat/2
   }
 
-  @spec new() :: t
-  def new do
-    new(0)
+  # @spec new() :: t
+  # def new do
+  #   new(0)
+  # end
+  # @spec new(integer) :: t
+  # def new(count) do
+  #   new(count, %{server_name: nil, namespace: nil})
+  # end
+  # @spec new(integer, map) :: t
+  # def new(count, opts) do
+  #   new(count, %{}, opts)
+  # end
+  # @spec new(integer, map, map) :: t
+  # def new(count, leds, opts) do
+  #   new(count, leds, opts, %{index: 1})
+  # end
+  # @spec new(integer, map, map, map) :: t
+  # def new(count, leds, opts, meta) do
+  #   %__MODULE__{
+  #     count: count,
+  #     leds: leds,
+  #     opts: opts,
+  #     meta: meta
+  #   }
+  # end
+  @spec leds() :: t
+  def leds do
+    leds(0)
   end
-  @spec new(integer) :: t
-  def new(count) do
-    new(count, %{server_name: nil, namespace: nil})
+  @spec leds(integer) :: t
+  def leds(count) do
+    leds(count, %{server_name: nil, namespace: nil})
   end
-  @spec new(integer, map) :: t
-  def new(count, opts) do
-    new(count, %{}, opts)
+  @spec leds(integer, map) :: t
+  def leds(count, opts) do
+    leds(count, %{}, opts)
   end
-  @spec new(integer, map, map) :: t
-  def new(count, leds, opts) do
-    new(count, leds, opts, %{index: 1})
+  @spec leds(integer, map, map) :: t
+  def leds(count, leds, opts) do
+    leds(count, leds, opts, %{index: 1})
   end
-  @spec new(integer, map, map, map) :: t
-  def new(count, leds, opts, meta) do
+  @spec leds(integer, map, map, map) :: t
+  def leds(count, leds, opts, meta) do
     %__MODULE__{
       count: count,
       leds: leds,
@@ -110,7 +135,7 @@ defmodule Fledex.Leds do
     new_leds = Enum.reduce(2..amount, leds, fn round, acc ->
       Map.merge(acc, remap_leds(leds, count * (round - 1) + 1))
     end)
-    __MODULE__.new(new_count, new_leds, opts, %{meta | index: new_index})
+    __MODULE__.leds(new_count, new_leds, opts, %{meta | index: new_index})
   end
 
   @spec light(t, (Types.colorint | t | atom)) :: t
@@ -124,8 +149,8 @@ defmodule Fledex.Leds do
   @spec light(t, (Types.colorint | t | atom), pos_integer, pos_integer) :: t
   def light(leds, led, offset, repeat) do
     led = case led do
-      led when is_integer(led) -> __MODULE__.new(1) |> __MODULE__.light(led)
-      led when is_atom(led) -> __MODULE__.new(1) |> __MODULE__.light(led)
+      led when is_integer(led) -> __MODULE__.leds(1) |> __MODULE__.light(led)
+      led when is_atom(led) -> __MODULE__.leds(1) |> __MODULE__.light(led)
       led when is_struct(led) -> led
     end
     led = led |> __MODULE__.func(:repeat, %{amount: repeat})
@@ -165,7 +190,7 @@ defmodule Fledex.Leds do
     rgb,
     offset
   ) when is_integer(rgb) do
-    __MODULE__.new(count, Map.put(leds, offset, rgb), opts, %{meta | index: offset + 1})
+    __MODULE__.leds(count, Map.put(leds, offset, rgb), opts, %{meta | index: offset + 1})
   end
   @spec do_update(t, t, pos_integer) :: t
   defp do_update(
@@ -180,7 +205,7 @@ defmodule Fledex.Leds do
     #   {index, value}
     # end))
     leds = Map.merge(leds1, remapped_new_leds)
-    __MODULE__.new(count1, leds, opts1, %{meta1 | index: offset + count2})
+    __MODULE__.leds(count1, leds, opts1, %{meta1 | index: offset + count2})
   end
   @spec do_update(t, atom, pos_integer) :: t
   defp do_update(leds, atom, offset) when is_atom(atom) do

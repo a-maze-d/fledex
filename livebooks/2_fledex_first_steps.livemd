@@ -97,7 +97,7 @@ defmodule Helpers do
         reversed: true
       }
 
-      Leds.new(50)
+      Leds.leds(50)
       |> Leds.func(:rainbow, config)
       |> Leds.send(%{namespace: namespace, offset: index})
 
@@ -114,7 +114,7 @@ defmodule Helpers do
         end_color: 0x0000FF
       }
 
-      Leds.new(50)
+      Leds.leds(50)
       |> Leds.func(:gradient, config)
       |> Leds.send(%{namespace: namespace, offset: index, rotate_left: true})
 

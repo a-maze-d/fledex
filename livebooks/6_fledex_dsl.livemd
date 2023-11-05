@@ -5,8 +5,7 @@
 # hardware but on a normal livebook, This makes it easier to stay up-to-date and experiment
 # We start to define our fledex library, directly linking to the latest version on github
 Mix.install([
-  {:fledex, path: "/home/maze/Documents/code/fledex"},
-  {:kino, "~>0.11"}
+  {:fledex, path: "/home/maze/Documents/code/fledex"}
 ])
 ```
 
@@ -30,25 +29,25 @@ It is also possble to define some other configurations (like the `send_config_fu
 ```elixir
 led_strip :clock, :kino do
   live_loop :nelp do
-    _triggers -> new(5) |> light(:ash_gray) |> func(:repeat, %{amount: 12})
+    _triggers -> leds(5) |> light(:ash_gray) |> func(:repeat, %{amount: 12})
   end
 
   live_loop :hour do
     _triggers ->
       %{hour: hour, minute: _minute, second: _second} = Time.utc_now() |> Time.add(1, :hour)
-      new(24) |> light(:blue, hour + 1)
+      leds(24) |> light(:blue, hour + 1)
   end
 
   live_loop :minute do
     _triggers ->
       %{hour: _hour, minute: minute, second: _second} = Time.utc_now() |> Time.add(1, :hour)
-      new(60) |> light(:may_green, minute + 1)
+      leds(60) |> light(:may_green, minute + 1)
   end
 
   live_loop :second do
     _triggers ->
       %{hour: _hour, minute: _minute, second: second} = Time.utc_now() |> Time.add(1, :hour)
-      new(60) |> light(:red, second + 1)
+      leds(60) |> light(:red, second + 1)
   end
 end
 ```

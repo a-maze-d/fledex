@@ -38,7 +38,7 @@ But before we get there, we first initiate our led strip and ensure that it upda
 LedAnimationManager.register_animations(:clock, %{
   seconds: %{
     def_func: fn _triggers ->
-      Leds.new(60) |> Leds.light(:red)
+      Leds.leds(60) |> Leds.light(:red)
     end,
     send_config_func: fn _triggers ->
       # we work with utc times and adjust, so we don't need to load a timezone library
@@ -49,7 +49,7 @@ LedAnimationManager.register_animations(:clock, %{
   },
   minutes: %{
     def_func: fn _triggers ->
-      Leds.new(60) |> Leds.light(:green)
+      Leds.leds(60) |> Leds.light(:green)
     end,
     send_config_func: fn _triggers ->
       # we work with utc times and adjust, so we don't need to load a timezone library
@@ -60,7 +60,7 @@ LedAnimationManager.register_animations(:clock, %{
   },
   hours: %{
     def_func: fn _triggers ->
-      Leds.new(60) |> Leds.light(:blue)
+      Leds.leds(60) |> Leds.light(:blue)
     end,
     send_config_func: fn _triggers ->
       # we work with utc times and adjust, so we don't need to load a timezone library
@@ -71,7 +71,7 @@ LedAnimationManager.register_animations(:clock, %{
   },
   help: %{
     def_func: fn _triggers ->
-      Leds.new(5)
+      Leds.leds(5)
       |> Leds.light(:ash_gray)
       |> Leds.func(:repeat, %{amount: 12})
     end

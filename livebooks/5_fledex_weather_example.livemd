@@ -93,38 +93,38 @@ LedAnimationManager.register_animations(:weather, %{
       {leds, offset} =
         case temp do
           temp when temp == 100 ->
-            {Leds.new(61)
+            {Leds.leds(61)
              |> Leds.light(:blue, 1, 20)
              |> Leds.light(:may_green)
              |> Leds.light(:red, 22, 40), 1}
 
           temp when temp < 0 ->
-            {Leds.new(1) |> Leds.light(:blue) |> Leds.func(:repeat, %{amount: -temp}), 21 + temp}
+            {Leds.leds(1) |> Leds.light(:blue) |> Leds.func(:repeat, %{amount: -temp}), 21 + temp}
 
           temp when temp == 0 ->
-            {Leds.new(1) |> Leds.light(:may_green), 21}
+            {Leds.leds(1) |> Leds.light(:may_green), 21}
 
           temp when temp > 0 ->
-            {Leds.new(1) |> Leds.light(:red) |> Leds.func(:repeat, %{amount: temp}), 22}
+            {Leds.leds(1) |> Leds.light(:red) |> Leds.func(:repeat, %{amount: temp}), 22}
         end
 
-      Leds.new(61) |> Leds.light(leds, offset)
+      Leds.leds(61) |> Leds.light(leds, offset)
     end
   },
   help: %{
     # we allow temperatures down to -20C and up to +40C
     def_func: fn _triggers ->
       negative_scale =
-        Leds.new(5)
+        Leds.leds(5)
         |> Leds.light(:ash_gray)
         |> Leds.func(:repeat, %{amount: 4})
 
       positive_scale =
-        Leds.new(5)
+        Leds.leds(5)
         |> Leds.light(:ash_gray, 5)
         |> Leds.func(:repeat, %{amount: 8})
 
-      Leds.new(61)
+      Leds.leds(61)
       |> Leds.light(negative_scale)
       |> Leds.light(:ash_gray)
       |> Leds.light(positive_scale)

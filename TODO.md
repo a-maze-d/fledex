@@ -19,3 +19,5 @@ as really done. Here the outstanding tasks that I can think of.
   - [ ] Add more macro tests (v0.2)
   - [ ] Extend the Fledex macros to allow easy configuration with a config macro (v0.3)
 - [ ] Add an example where several nodes are connected to transfer pubsub messages accross nodes (v0.3)
+- [ ] Change the `Leds`' `new` function to an `leds` function. That makes it more natural to read if the Leds module gets imported. (v0.2)
+- [ ] Remove unnecessary imports in the examples (v0.3)

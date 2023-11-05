@@ -6,7 +6,7 @@ defmodule Fledex.LedsTest do
 
   describe "basic tests" do
     test "struct definition" do
-      leds = Leds.new()
+      leds = Leds.leds()
       assert leds.count == 0
       assert leds.leds == %{}
       assert leds.opts == %{namespace: nil, server_name: nil}
@@ -14,7 +14,7 @@ defmodule Fledex.LedsTest do
     end
 
     test "setting number of leds" do
-      leds = Leds.new(96)
+      leds = Leds.leds(96)
       assert leds.count == 96
       assert leds.leds == %{}
       assert leds.opts == %{namespace: nil, server_name: nil}
@@ -51,7 +51,7 @@ defmodule Fledex.LedsTest do
     end
 
     test "setting leds in sequence" do
-      leds = Leds.new(10)
+      leds = Leds.leds(10)
         |> Leds.func(:rainbow)
 
       Enum.each(leds.leds, fn led ->
@@ -66,7 +66,7 @@ defmodule Fledex.LedsTest do
 
     test "setting leds in non-sequence" do
       offset = 5
-      leds = Leds.new(10)
+      leds = Leds.leds(10)
         |> Leds.light(0xFF0000, offset)
         |> Leds.light(0x00FF00)
 
@@ -76,7 +76,7 @@ defmodule Fledex.LedsTest do
 
     test "setting several leds and updating first one" do
       offset = 5
-      leds = Leds.new(10)
+      leds = Leds.leds(10)
         |> Leds.light(0xFF0000, offset)
         |> Leds.light(0x00FF00)
         |> Leds.light(0x0000FF, offset)
@@ -88,7 +88,7 @@ defmodule Fledex.LedsTest do
 
     test "embedding leds in leds" do
       offset = 5
-      leds_some = Leds.new(
+      leds_some = Leds.leds(
         20,
         %{
           1 => 0x00FF00,
@@ -99,7 +99,7 @@ defmodule Fledex.LedsTest do
         nil
       )
 
-      leds_all = Leds.new(100)
+      leds_all = Leds.leds(100)
         |> Leds.light(leds_some, offset)
 
       assert Leds.get_light(leds_all, offset)    == 0x00FF00
@@ -110,7 +110,7 @@ defmodule Fledex.LedsTest do
 
     test "embedding leds with overlap" do
       offset = 5
-      leds_some = Leds.new(
+      leds_some = Leds.leds(
         20,
         %{
           1 => 0x00FF00,
@@ -120,7 +120,7 @@ defmodule Fledex.LedsTest do
         },
         nil
       )
-      leds_all = Leds.new(10)
+      leds_all = Leds.leds(10)
         |> Leds.light(0xFF0000, offset + 1) # this led will be overwritten with 0x0000FF
         |> Leds.light(leds_some, offset)
 
@@ -130,7 +130,7 @@ defmodule Fledex.LedsTest do
       assert Leds.get_light(leds_all, offset + 11) == 0x0000FF
     end
     test "setting leds by name" do
-      leds = Leds.new(10)
+      leds = Leds.leds(10)
         |> Leds.light(:light_salmon)
         |> Leds.light(:red)
         |> Leds.light(:green)
@@ -145,7 +145,7 @@ defmodule Fledex.LedsTest do
     end
 
     test "get binary with led values" do
-      leds = Leds.new(
+      leds = Leds.leds(
         5,
         %{
           1 => 0x00FF00,
@@ -160,7 +160,7 @@ defmodule Fledex.LedsTest do
     end
 
     test "get list with led values" do
-      leds = Leds.new(
+      leds = Leds.leds(
         5,
         %{
           1 => 0x00FF00,
@@ -182,7 +182,7 @@ defmodule Fledex.LedsTest do
         reversed: true
       }
 
-      list = Leds.new(20)
+      list = Leds.leds(20)
       |> Leds.func(:rainbow, config)
       |> Leds.to_list()
 
@@ -217,7 +217,7 @@ defmodule Fledex.LedsTest do
         end_color: 0x0000FF
       }
 
-      list = Leds.new(20)
+      list = Leds.leds(20)
       |> Leds.func(:gradient, config)
       |> Leds.to_list()
 
@@ -247,7 +247,7 @@ defmodule Fledex.LedsTest do
     end
 
     test "repeat" do
-      leds = Leds.new(3) |> Leds.light(:red) |> Leds.light(:red) |> Leds.light(:red) |> Leds.func(:repeat, %{amount: 3})
+      leds = Leds.leds(3) |> Leds.light(:red) |> Leds.light(:red) |> Leds.light(:red) |> Leds.func(:repeat, %{amount: 3})
       assert leds.count == 9
       assert Leds.get_light(leds, 1) == 0xff0000
       assert Leds.get_light(leds, 2) == 0xff0000
@@ -261,11 +261,4 @@ defmodule Fledex.LedsTest do
       assert leds.meta.index == 10
     end
   end
-
-# loop
-#   Leds.new(10)
-#     |> Leds.light 0xFF0000
-#     |> Leds.light 0x00FF00
-#     |> send()
-
 end
