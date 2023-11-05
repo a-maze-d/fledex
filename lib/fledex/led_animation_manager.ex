@@ -6,17 +6,6 @@ defmodule Fledex.LedAnimationManager do
   alias Fledex.LedAnimator
   alias Fledex.LedsDriver
 
-  # ### for debugging only
-  # def run do
-  #   {:ok, pid} = __MODULE__.start_link()
-  #   __MODULE__.register_strip(:t, :none)
-  #   __MODULE__.register_animations(:t, %{t1: %{}, t2: %{}})
-  #   __MODULE__.register_animations(:t, %{t1: %{}, t3: %{}})
-  #   Process.sleep(5_000)
-  #   GenServer.stop(pid)
-  #   :ok
-  # end
-
   ### client side
   def start_link do
     # we should only have a single server running. Therefore we check whether need to do something
@@ -32,15 +21,17 @@ defmodule Fledex.LedAnimationManager do
   def register_strip(strip_name, driver_config) do
     # Logger.debug("register strip: #{strip_name}")
     GenServer.call(__MODULE__, {:register_strip, strip_name, driver_config})
-
   end
   def unregister_strip(strip_name) do
     # Logger.debug("unregister strip: #{strip_name}")
-    GenServer.call(__MODULE__, {:unregister, strip_name})
+    GenServer.call(__MODULE__, {:unregister_strip, strip_name})
   end
   def register_animations(strip_name, configs) do
     # Logger.debug("register animation: #{strip_name}, #{inspect configs}")
     GenServer.call(__MODULE__, {:register_animations, strip_name, configs})
+  end
+  def get_info(strip_name \\ :all) do
+    GenServer.call(__MODULE__, {:get_info, strip_name})
   end
 
   ### server side
@@ -69,6 +60,13 @@ defmodule Fledex.LedAnimationManager do
   def handle_call({:unregister_strip, strip_name}, _pid, state) when is_atom(strip_name) do
     {:reply, :ok, unregister_strip(strip_name, state)}
   end
+  def handle_call({:get_info, strip_name}, _from, state) do
+    return_value = case strip_name do
+      :all -> state
+      other -> state[other]
+    end
+    {:reply, {:ok, return_value}, state}
+  end
 
   defp register_strip(strip_name, driver_config, state) do
     # Logger.info("registering led_strip: #{strip_name}")
@@ -78,9 +76,9 @@ defmodule Fledex.LedAnimationManager do
   defp unregister_strip(strip_name, state) do
     # Logger.info("unregistering led_strip_ #{strip_name}")
     map = state[strip_name] || %{}
-    keys = Map.keys(map)
-    shutdown_animators(strip_name, keys)
-    GenServer.stop(strip_name, :shutdown)
+    animation_names = Map.keys(map)
+    shutdown_animators(strip_name, animation_names)
+    GenServer.stop(strip_name)
     Map.drop(state, [strip_name])
   end
   defp register_animations(strip_name, configs, state) do

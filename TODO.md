@@ -4,7 +4,7 @@ as really done. Here the outstanding tasks that I can think of.
 # Tasks
 - [ ] Add installation instructions
 - [x] Provide several notebook examples (test env, prod)
-  - [ ] This requires still some minor modifications once the next version is published to not load the code from my local drive (v0.2)
+  - [ ] This requires still some minor modifications once the next version is published to not load the code from my local drive (v0.3)
 - [ ] Perform an extra round of testing on hardware (v0.3) 
 - [ ] Enable Telemetry?
 - [ ] Connect everything into a supervision tree (to make it more robust) (v0.4)
@@ -19,5 +19,7 @@ as really done. Here the outstanding tasks that I can think of.
   - [ ] Add more macro tests (v0.2)
   - [ ] Extend the Fledex macros to allow easy configuration with a config macro (v0.3)
 - [ ] Add an example where several nodes are connected to transfer pubsub messages accross nodes (v0.3)
-- [ ] Change the `Leds`' `new` function to an `leds` function. That makes it more natural to read if the Leds module gets imported. (v0.2)
+- [x] Change the `Leds`' `new` function to an `leds` function. That makes it more natural to read if the Leds module gets imported. (v0.2)
 - [ ] Remove unnecessary imports in the examples (v0.3)
+- [ ] Add type specs (v0.3)
+- [ ] Add more unit tests (v0.3)

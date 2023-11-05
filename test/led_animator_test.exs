@@ -1,11 +1,13 @@
 defmodule Fledex.LedAnimatorTest do
   use ExUnit.Case
+
+  import ExUnit.CaptureLog
+  require Logger
+
   alias Fledex.LedAnimator
   alias Fledex.Leds
   alias Fledex.LedsDriver
 
-  import ExUnit.CaptureLog
-  require Logger
 
   def default_def_func(_triggers) do
     Leds.leds(30)

@@ -1,5 +1,5 @@
 defmodule Fledex.UtilsTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   alias Fledex.Color.Utils
 

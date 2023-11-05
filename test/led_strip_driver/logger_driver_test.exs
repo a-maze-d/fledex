@@ -1,5 +1,6 @@
 defmodule Fledex.LedStripDriver.LoggerDriverTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
+
   alias Fledex.LedStripDriver.LoggerDriver
 
   describe "init" do

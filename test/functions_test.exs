@@ -1,10 +1,12 @@
 defmodule Fledex.FunctionsTest do
-  require Logger
+  use ExUnit.Case, async: true
+
   import Fledex.Color.Correction.Color
   import Fledex.Color.Correction.Temperature
-  alias Fledex.Color.Correction
 
-  use ExUnit.Case
+  require Logger
+
+  alias Fledex.Color.Correction
   alias Fledex.Functions
 
   doctest Functions

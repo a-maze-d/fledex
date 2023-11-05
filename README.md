@@ -16,7 +16,7 @@ by adding `fledex` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:fledex, "~> 0.1.0"}
+    {:fledex, "~> 0.2.0"}
   ]
 end
 ```

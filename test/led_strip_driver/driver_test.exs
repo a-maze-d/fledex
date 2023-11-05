@@ -1,5 +1,6 @@
 defmodule Fledex.LedStripDriver.DriverTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
+
   alias Fledex.LedStripDriver.Driver
 
   defmodule TestDriver do

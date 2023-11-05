@@ -1,36 +1,34 @@
 defmodule Fledex.Test do
   use ExUnit.Case
-#   use Fledex
-#   alias Fledex.LedsDriver
 
+  @server_name :john
   describe "test macros" do
     test "simple led strip macro" do
-#       defmodule TestModule1 do
-#         use Fledex
-#         led_strip do
-#           assert Module.get_attribute(__MODULE__, :strip_name) == :default
-#         end
-#       end
-#       # def register(list) do
-#       #   IO.puts(inspect list)
-#       # end
-#       # live_loop :merry do
-#       #   data -> IO.puts(inspect data)
-#       # end
-#       # :ok
-# #       assert Process.whereis(LedsDriver) == nil
-# #       led_strip do
-# #         pid = Process.whereis(LedsDriver)
-# #         assert pid != nil
-# #         assert Process.alive?(pid) == true
-# #       end
+      # ensure our servers are not started
+      assert GenServer.whereis(@server_name) == nil
+      assert GenServer.whereis(Fledex.LedAnimationManager) == nil
+
+      use Fledex
+      led_strip @server_name do
+        # we don't define here anything
+      end
+
+      # did the correct servers get started?
+      assert GenServer.whereis(@server_name) != nil
+      assert GenServer.whereis(Fledex.LedAnimationManager) != nil
+
+      # cleanup
+      GenServer.stop(Fledex.LedAnimationManager)
+
+      assert GenServer.whereis(@server_name) == nil
+      assert GenServer.whereis(Fledex.LedAnimationManager) == nil
     end
+
     test "simple live_loop macro" do
-#       defmodule TestModule2 do
-#         use Fledex
-#         live_loop :merry do
-#           data -> IO.puts(inspect data)
-#         end
+      use Fledex
+      live_loop :merry do
+        data -> IO.puts(inspect data)
+      end
 #       end
 # #       live_loop :john do
 # #         call_test_function()
@@ -43,7 +41,6 @@ end
 # defmodule F do
 #   # def run() do
 #   use Fledex
-
 #   led_strip "chain1" do
 #     live_loop :john, test: 10, tset: "string1" do
 #       data ->

@@ -1,5 +1,5 @@
 defmodule Fledex.LedsTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   alias Fledex.Leds
 
   doctest Leds

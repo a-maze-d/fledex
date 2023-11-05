@@ -166,7 +166,6 @@ defmodule Fledex.LedsDriver do
   @spec terminate(reason, state :: Fledex.LedDriver.t()) :: :ok
         when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(reason, state) do
-    Logger.info(Exception.format_stacktrace())
     Driver.terminate(reason, state)
   end
 
