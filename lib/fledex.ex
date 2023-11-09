@@ -30,14 +30,18 @@ defmodule Fledex do
       # import also the Leds definitions so no namespace is required
       import Fledex.Leds
       # let's start our animation manager. The manager makes sure only one will be started
-      Fledex.LedAnimationManager.start_link()
+      if not Keyword.get(opts, :dont_start, false) do
+        Fledex.LedAnimationManager.start_link()
+      end
     end
   end
 
-  defp expand_alias({:__aliases__, _meta, _args} = alias, env) do
+  # Note: we could make this function private but we use it to ensure that Fledex is
+  #       loaded correctly.
+  def expand_alias({:__aliases__, _meta, _args} = alias, env) do
     Macro.expand(alias, %{env | function: {:action, 2}})
   end
-  defp expand_alias(other, _env), do: other
+  def expand_alias(other, _env), do: other
 
   @doc """
     This introduces a new `live_loop` (animation) that will be played over

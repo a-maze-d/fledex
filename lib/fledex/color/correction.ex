@@ -14,40 +14,40 @@ defmodule Fledex.Color.Correction do
 
   defmodule Temperature do
       # Black Body Radiators
-      def candle,           do: 0xFF9329 # 1900 K, 255, 147, 41 */,
-      def tungsten_40w,     do: 0xFFC58F # 2600 K, 255, 197, 143 */,
-      def tungsten_100w,    do: 0xFFD6AA # 2850 K, 255, 214, 170 */,
-      def halogen,          do: 0xFFF1E0 # 3200 K, 255, 241, 224 */,
-      def carbon_arc,       do: 0xFFFAF4 # 5200 K, 255, 250, 244 */,
-      def high_noon_sun,    do: 0xFFFFFB # 5400 K, 255, 255, 251 */,
-      def direct_sunlight,  do: 0xFFFFFF # 6000 K, 255, 255, 255 */,
-      def overcast_sky,     do: 0xC9E2FF # 7000 K, 201, 226, 255 */,
-      def clear_blue_sky,   do: 0x409CFF # 20000 K, 64, 156, 255 */,
+      def candle,           do: 0xFF9329 # 1900 K, 255, 147, 41
+      def tungsten_40w,     do: 0xFFC58F # 2600 K, 255, 197, 143
+      def tungsten_100w,    do: 0xFFD6AA # 2850 K, 255, 214, 170
+      def halogen,          do: 0xFFF1E0 # 3200 K, 255, 241, 224
+      def carbon_arc,       do: 0xFFFAF4 # 5200 K, 255, 250, 244
+      def high_noon_sun,    do: 0xFFFFFB # 5400 K, 255, 255, 251
+      def direct_sunlight,  do: 0xFFFFFF # 6000 K, 255, 255, 255
+      def overcast_sky,     do: 0xC9E2FF # 7000 K, 201, 226, 255
+      def clear_blue_sky,   do: 0x409CFF # 20000 K, 64, 156, 255
 
       # Gaseous Light Sources
       # Warm (yellower) flourescent light bulbs
-      def warm_fluorescent,           do: 0xFFF4E5 # 0 K, 255, 244, 229 */,
+      def warm_fluorescent,           do: 0xFFF4E5 # 0 K, 255, 244, 229
       # Standard flourescent light bulbs
-      def standard_fluorescent,       do: 0xF4FFFA # 0 K, 244, 255, 250 */,
+      def standard_fluorescent,       do: 0xF4FFFA # 0 K, 244, 255, 250
       # Cool white (bluer) flourescent light bulbs
-      def cool_white_fluorescent,     do: 0xD4EBFF # 0 K, 212, 235, 255 */,
+      def cool_white_fluorescent,     do: 0xD4EBFF # 0 K, 212, 235, 255
       # Full spectrum flourescent light bulbs
-      def full_spectrum_fluorescent,  do: 0xFFF4F2 # 0 K, 255, 244, 242 */,
+      def full_spectrum_fluorescent,  do: 0xFFF4F2 # 0 K, 255, 244, 242
       # Grow light flourescent light bulbs
-      def grow_light_fluorescent,     do: 0xFFEFF7 # 0 K, 255, 239, 247 */,
+      def grow_light_fluorescent,     do: 0xFFEFF7 # 0 K, 255, 239, 247
       # Black light flourescent light bulbs
-      def black_light_fluorescent,    do: 0xA700FF # 0 K, 167, 0, 255 */,
+      def black_light_fluorescent,    do: 0xA700FF # 0 K, 167, 0, 255
       # Mercury vapor light bulbs
-      def mercury_vapor,              do: 0xD8F7FF # 0 K, 216, 247, 255 */,
+      def mercury_vapor,              do: 0xD8F7FF # 0 K, 216, 247, 255
       # Sodium vapor light bulbs
-      def sodium_vapor,               do: 0xFFD1B2 # 0 K, 255, 209, 178 */,
+      def sodium_vapor,               do: 0xFFD1B2 # 0 K, 255, 209, 178
       # Metal-halide light bulbs
-      def metal_halide,               do: 0xF2FCFF # 0 K, 242, 252, 255 */,
+      def metal_halide,               do: 0xF2FCFF # 0 K, 242, 252, 255
       # High-pressure sodium light bulbs
-      def high_pressure_sodium,       do: 0xFFB74C # 0 K, 255, 183, 76 */,
+      def high_pressure_sodium,       do: 0xFFB74C # 0 K, 255, 183, 76
 
       # Uncorrected temperature (0xFFFFFF)
-      def uncorrected_temperature,     do: 0xFFFFFF # 255, 255, 255 */
+      def uncorrected_temperature,     do: 0xFFFFFF # 255, 255, 255
   end
 
   @spec color_correction_g2(Types.rgb) :: Types.rgb

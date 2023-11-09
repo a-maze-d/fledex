@@ -88,8 +88,8 @@ defmodule Fledex.Color.Conversion.Approximate do
     # purple-pink-range
     @hue_purple + Utils.scale8(qsub8(r, 85), @frac_32_85)
   end
-  defp calc_hue(rgb) do
-    calc_hue(rgb, Enum.max(rgb)) + 1
+  defp calc_hue({r, g, b} = rgb) do
+    calc_hue(rgb, Enum.max([r, g, b])) + 1
   end
 
   @spec scale_to_compensate(Types.rgb, byte) :: Types.rgb

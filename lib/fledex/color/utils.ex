@@ -1,13 +1,18 @@
 defmodule Fledex.Color.Utils do
+  @moduledoc """
+  Most functions are reimplementations from FastLED. Here is a detailed
+  explanation of those functions:
+  https://github.com/FastLED/FastLED/wiki/High-performance-math
+  """
   import Bitwise
 
   alias Fledex.Color.Names
   alias Fledex.Color.Types
 
-  @spec frac8(0..255, 0..255) :: 0..255
   @doc """
     calculate a fraction mapped to a 8bit range
   """
+  @spec frac8(0..255, 0..255) :: 0..255
   def frac8(n, d) do
     trunc((n * 256) / d)
   end
@@ -17,6 +22,10 @@ defmodule Fledex.Color.Utils do
   defp scale8_video_addition(true, value, scale) when value != 0 and scale != 0, do: 1
   defp scale8_video_addition(_addition, _value, _scale), do: 0
 
+  @doc """
+  THis function scales a value into a specific range. the video parameter
+  indicates whether the returned value should be correct to not return 0
+  """
   @spec scale8(0..255, 0..255, boolean) :: 0..255
   def scale8(value, scale, video \\ false)
   def scale8(0, _scale, _video), do: 0
@@ -25,6 +34,10 @@ defmodule Fledex.Color.Utils do
     ((value * scale) >>> 8) + addition
   end
 
+  @doc """
+  same as #scale8, except that it does it for all 3 rgb value
+  at the same time.
+  """
   @spec nscale8(Types.rgb, 0..255, boolean) :: Types.rgb
   def nscale8(rgb, scale, video \\ true)
   def nscale8({r, g, b}, scale, video) when is_integer(scale) do
@@ -65,23 +78,25 @@ defmodule Fledex.Color.Utils do
     end)
   end
 
-  @spec avg({pos_integer, pos_integer, pos_integer}, pos_integer) :: Types.rgb
   @doc """
-  This function rescales the rgb values with count (default: 1) and combines
-  them to a single integer
+  This function calculates the average of the given "rgb" values
   """
-  def avg({r, g, b}, count \\ 1) do
-    r = Kernel.trunc(r / count)
-    g = Kernel.trunc(g / count)
-    b = Kernel.trunc(b / count)
-    {r, g, b}
+  @spec avg(list(Types.rgb)) :: Types.rgb
+  def avg(elems) do
+    count = length(elems)
+    {r, g, b} = add_subpixels(elems)
+    {trunc(r / count), trunc(g / count), trunc(b / count)}
   end
 
-  @spec cap({pos_integer, pos_integer, pos_integer}, Range.t) :: Types.rgb
-  def cap({r, g, b}, min_max \\ 0..255) do
+  @doc """
+  This function combines (adds) the given rgb values and caps them to the given range
+  (by default 0..255)
+  """
+  @spec cap(list(Types.rgb), Range.t) :: Types.rgb
+  def cap(elems, min_max \\ 0..255) do
+    {r, g, b} = add_subpixels(elems)
     {do_cap(r, min_max), do_cap(g, min_max), do_cap(b, min_max)}
   end
-
   @spec do_cap(pos_integer, Range.t) :: pos_integer
   defp do_cap(value, min..max) when min <= max do
     case value do
@@ -91,11 +106,17 @@ defmodule Fledex.Color.Utils do
     end
   end
 
+  @doc """
+  This function combines the subpixels to a single (color) integer value
+  """
   @spec combine_subpixels(Types.rgb) :: Types.colorint
   def combine_subpixels({r, g, b}) do
     (r<<<16) + (g<<<8) + b
   end
 
+  @doc """
+  This function splits a single (color) integer value into it's rgb components
+  """
   @spec convert_to_subpixels((Types.colorint | atom | Types.rgb | %{rgb: Types.rgb})) :: Types.rgb
   def convert_to_subpixels(rgb) do
     case rgb do

@@ -6,6 +6,7 @@ defmodule Fledex.FunctionsTest do
 
   require Logger
 
+  alias Fledex.Color.Conversion.Rainbow
   alias Fledex.Color.Correction
   alias Fledex.Functions
 
@@ -26,6 +27,10 @@ defmodule Fledex.FunctionsTest do
         {204, 240, 255},
         {230, 240, 255}
       ]
+    end
+    test "create 0 pixels with rainbow colors and offset 0" do
+      assert Functions.create_rainbow_circular_hsv(0, 0, true) == []
+      assert Functions.create_rainbow_circular_hsv(0, 0, false) == []
     end
 
     test "create 10 pixels with rainbow colors and offset 50" do
@@ -194,5 +199,19 @@ defmodule Fledex.FunctionsTest do
             {0x31, 0xFB, 0x8A}
           ]
     end
+  end
+  describe "test hsv2rgb function" do
+    assert [{173, 14, 5}] == Fledex.Functions.hsv2rgb(
+      [{5, 219, 216}],
+      &Rainbow.hsv2rgb/2,
+      &Correction.color_correction_none/1
+    )
+    assert [{173, 14, 5}] == Fledex.Functions.hsv2rgb(
+      [{5, 219, 216}],
+      &Rainbow.hsv2rgb/2
+    )
+    assert [{173, 14, 5}] == Fledex.Functions.hsv2rgb(
+      [{5, 219, 216}]
+    )
   end
 end

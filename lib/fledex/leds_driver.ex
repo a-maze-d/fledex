@@ -47,7 +47,7 @@ defmodule Fledex.LedsDriver do
   def start_link(strip_name, :none), do: start_link(strip_name, %{})
   def start_link(strip_name, :kino) do
     config = %{
-      timer: %{only_dirty_update: false},
+      timer: %{only_dirty_update: true},
       led_strip: %{
         merge_strategy: :cap,
         driver_modules: [Fledex.LedStripDriver.KinoDriver],
@@ -55,6 +55,25 @@ defmodule Fledex.LedsDriver do
           Fledex.LedStripDriver.KinoDriver => %{
             update_freq: 1,
             color_correction: Correction.no_color_correction()
+          }
+        }
+      }
+    }
+
+    start_link(strip_name, config)
+  end
+  def start_link(strip_name, :spi) do
+    config = %{
+      timer: %{only_dirty_update: true},
+      led_strip: %{
+        merge_strategy: :cap,
+        driver_modules: [Fledex.LedStripDriver.SpiDriver],
+        config: %{
+          Fledex.LedStripDriver.SpiDriver => %{
+            color_correction: Correction.define_correction(
+              Correction.Color.typical_smd5050(),
+              Correction.Temperature.uncorrected_temperature()
+            )
           }
         }
       }
@@ -264,7 +283,6 @@ defmodule Fledex.LedsDriver do
     # we shortcut if there is nothing to update and if we are allowed to shortcut
     state
   end
-
   def transfer_data(state) do
     # state = :telemetry.span(
     #   [:transfer_data],
@@ -306,9 +324,7 @@ defmodule Fledex.LedsDriver do
   end
 
   @spec match_length(list(list(Types.colorint()))) :: list(list(Types.colorint()))
-  def match_length(leds) when leds == nil, do: leds
   def match_length(leds) when leds == [], do: leds
-
   def match_length(leds) do
     max_length = Enum.reduce(leds, 0, fn sequence, acc -> max(acc, length(sequence)) end)
     Enum.map(leds, fn sequence -> extend(sequence, max_length - length(sequence)) end)
@@ -324,22 +340,20 @@ defmodule Fledex.LedsDriver do
 
   @spec merge_pixels(list(Types.colorint()), atom) :: Types.colorint()
   def merge_pixels(elems, merge_strategy) do
-    count = length(elems)
-
     elems
     |> Enum.map(fn elem -> Utils.split_into_subpixels(elem) end)
-    |> Utils.add_subpixels()
-    |> apply_merge_strategy(count, merge_strategy)
+    # |> Utils.add_subpixels()
+    |> apply_merge_strategy(merge_strategy)
     |> Utils.combine_subpixels()
   end
 
-  @spec apply_merge_strategy({pos_integer, pos_integer, pos_integer}, pos_integer, atom) ::
+  @spec apply_merge_strategy(list(Types.colorint()), atom) ::
           Types.rgb()
-  def apply_merge_strategy(rgb, count, merge_strategy) do
+  def apply_merge_strategy(rgb, merge_strategy) do
     case merge_strategy do
-      :avg -> Utils.avg(rgb, count)
+      :avg -> Utils.avg(rgb)
       :cap -> Utils.cap(rgb)
-      _na -> raise "Unknown merge strategy"
+      na -> raise ArgumentError, message: "Unknown merge strategy #{na}"
     end
   end
 end

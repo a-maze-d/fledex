@@ -1,10 +1,19 @@
 defmodule Fledex.LedsTest do
   use ExUnit.Case, async: true
   alias Fledex.Leds
+  alias Fledex.LedsDriver
 
   doctest Leds
 
   describe "basic tests" do
+    test "define raw struct" do
+      assert Leds.leds() == %Leds{
+        count: 0,
+        leds: %{},
+        opts: %{namespace: nil, server_name: nil},
+        meta: %{index: 1}
+      }
+    end
     test "struct definition" do
       leds = Leds.leds()
       assert leds.count == 0
@@ -173,6 +182,16 @@ defmodule Fledex.LedsTest do
 
       assert Leds.to_list(leds) == [0x00FF00, 0x0000FF, 0, 0x00FF00, 0x0000FF]
     end
+    test "setting driver info" do
+      leds = Leds.leds() |> Leds.set_driver_info(:test_name, :test_strip)
+      assert leds.opts.namespace == :test_name
+      assert leds.opts.server_name == :test_strip
+
+      leds = Leds.leds() |> Leds.set_driver_info(:test_name)
+      assert leds.opts.namespace == :test_name
+      assert leds.opts.server_name == LedsDriver
+
+    end
   end
   describe "test functions" do
     test "rainbow" do
@@ -245,7 +264,6 @@ defmodule Fledex.LedsTest do
         0x0C00F2
       ]
     end
-
     test "repeat" do
       leds = Leds.leds(3) |> Leds.light(:red) |> Leds.light(:red) |> Leds.light(:red) |> Leds.func(:repeat, %{amount: 3})
       assert leds.count == 9
@@ -259,6 +277,92 @@ defmodule Fledex.LedsTest do
       assert Leds.get_light(leds, 8) == 0xff0000
       assert Leds.get_light(leds, 9) == 0xff0000
       assert leds.meta.index == 10
+    end
+    test "repeat with different input types" do
+      leds = Leds.leds(10, %{
+        1 => 0xff0000,
+        2 => 0x00ff00,
+        3 => 0x0000ff
+      }, %{})
+        |> Leds.light(0xaabbcc, 4, 2)
+        |> Leds.light(:may_green, 6, 2)
+        |> Leds.light(Leds.leds(1) |> Leds.light(:red), 8, 2)
+      assert leds.leds[1] == 0xff0000
+      assert leds.leds[2] == 0x00ff00
+      assert leds.leds[3] == 0x0000ff
+      assert leds.leds[4] == 0xaabbcc
+      assert leds.leds[5] == 0xaabbcc
+      assert leds.leds[6] == 0x4c9141
+      assert leds.leds[7] == 0x4c9141
+      assert leds.leds[8] == 0xff0000
+      assert leds.leds[9] == 0xff0000
+    end
+  end
+  describe "internal functions" do
+    test "rotate" do
+      vals = [1, 2, 3, 4, 5, 6, 7, 8]
+      assert Leds.rotate(vals, 0, true) == [1, 2, 3, 4, 5, 6, 7, 8]
+      assert Leds.rotate(vals, 1, true) == [2, 3, 4, 5, 6, 7, 8, 1]
+      assert Leds.rotate(vals, 0, false) == [1, 2, 3, 4, 5, 6, 7, 8]
+      assert Leds.rotate(vals, 1, false) == [8, 1, 2, 3, 4, 5, 6, 7]
+      assert Leds.rotate(vals, 2) == [3, 4, 5, 6, 7, 8, 1, 2]
+    end
+  end
+  describe "errors" do
+    test "light on negative offset position" do
+      assert_raise ArgumentError, ~r/the offset needs to be > 0/, fn ->
+        Leds.light(Leds.leds(2), :red, -1)
+      end
+    end
+    test "gradient with missing config parameters" do
+      assert_raise ArgumentError, ~r/start_color and end_color/, fn ->
+        Leds.gradient(Leds.leds(10), %{})
+      end
+      assert_raise ArgumentError, ~r/start_color and end_color/, fn ->
+        Leds.gradient(Leds.leds(10), %{start_color: :red})
+      end
+      assert_raise ArgumentError, ~r/start_color and end_color/, fn ->
+        Leds.gradient(Leds.leds(10), %{end_color: :red})
+      end
+    end
+    test "wrong structure" do
+      assert_raise ArgumentError, ~r/unknown data/, fn ->
+        Leds.light(%{}, :red, 1)
+      end
+    end
+  end
+end
+
+defmodule Fledex.LedsTestSync do
+  # all the sync tests that require some GenServer. We want to run
+  # them in a sync way. We split them out for that reason
+  use ExUnit.Case
+
+  import ExUnit.CaptureLog
+  require Logger
+
+  alias Fledex.Leds
+
+  # @strip_name :test_strip
+  # setup do
+  #   {:ok, pid} = start_supervised(
+  #     %{
+  #       id: LedsDriver,
+  #       start: {LedsDriver, :start_link, [@strip_name, :none]}
+  #     })
+  #   %{strip_name: @strip_name,
+  #     pid: pid}
+  # end
+
+  describe "send functions" do
+    test "correct setup and warnings" do
+      leds = Leds.leds(20) |> Leds.light(:red, 1, 10)
+      {:ok, log} = with_log (fn ->
+        Leds.send(leds)
+      end)
+      assert String.match?(log, ~r/warning/)
+      assert String.match?(log, ~r/You should start it/)
+      assert String.match?(log, ~r/namespace hasn't been defined/)
     end
   end
 end

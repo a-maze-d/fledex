@@ -45,7 +45,7 @@ is probably a good start to ensure that the library is loaded correctly.
         #        SpiDriver => %{
         #          color_correction:
         #            Correction.define_correction(
-        #              Correction.Color.typicalSMD5050(),
+        #              Correction.Color.typical_smd5050(),
         #              Correction.Temperature.uncorrected_temperature()
         #            )
         #        }

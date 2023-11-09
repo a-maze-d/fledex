@@ -1,13 +1,17 @@
 defmodule Fledex.LedDriverTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   import ExUnit.CaptureIO
+  import ExUnit.CaptureLog
+
+  require Logger
+
   alias Fledex.LedsDriver
   alias Fledex.LedStripDriver.LoggerDriver
   alias Fledex.LedStripDriver.NullDriver
 
-  doctest LedsDriver
+  # doctest LedsDriver
 
-  describe "test init/1" do
+  describe "test init" do
     test "init_args are correctly set (disable timer)" do
       {:ok, state} = LedsDriver.init({%{timer: %{disabled: true}}, :strip_name})
       assert state.timer.disabled == true
@@ -23,7 +27,6 @@ defmodule Fledex.LedDriverTest do
       assert state.namespaces == %{}
       assert state.strip_name == :strip_name
     end
-
     test "init_args are correctly set (with active timer)" do
       update_func = &(&1)
       {:ok, state} = LedsDriver.init({%{
@@ -44,10 +47,25 @@ defmodule Fledex.LedDriverTest do
       assert state.led_strip.config == %{NullDriver => %{}}
       assert state.namespaces == %{}
       assert state.strip_name == :strip_name
-
       assert_receive {:update_timeout, _update_func}
     end
-
+    test "init args need to be a map" do
+      assert {:stop, "Init args need to be a map"} == LedsDriver.init([])
+    end
+    test "init drivers with single item throws warning" do
+      config = %{
+        timer: %{disabled: true},
+        led_strip: %{
+          merge_strategy: :cap,
+          driver_modules: Fledex.LedStripDriver.NullDriver
+        }
+      }
+      {{:ok, _state}, log} = with_log(fn ->
+        LedsDriver.init({config, :strip_name})
+      end)
+      assert String.match?(log, ~r/warning/)
+      assert String.match?(log, ~r/driver_modules is not a list/)
+    end
     test "change config" do
       {:ok, state} = LedsDriver.init({%{timer: %{disabled: true}}, :strip_name})
       assert state.timer.update_timeout == 50
@@ -59,14 +77,9 @@ defmodule Fledex.LedDriverTest do
       assert old_value == 50
       assert state.timer.update_timeout == 100
     end
-
-    test "start server" do
-      assert match?({:ok, _}, LedsDriver.start_link(:strip_name, %{timer: %{disable: true}}))
-    end
   end
 
   describe "test timer to ensure it reschedules itself" do
-
     test "handle_info for the update timer timeout" do
       update_func = &(&1)
       LedsDriver.handle_info(
@@ -111,7 +124,15 @@ defmodule Fledex.LedDriverTest do
       {:reply, _na, state} = LedsDriver.handle_call({:drop_namespace, "name"}, self(), state)
       assert state.timer.is_dirty == true
     end
+    test "transfer shortcutting" do
+      {:ok, state} = LedsDriver.init({%{timer: %{disabled: true}}, :strip_name})
+      state = state
+        |> put_in([:timer, :is_dirty], false)
+        |> put_in([:timer, :only_dirty_updates], true)
+      assert state == LedsDriver.transfer_data(state)
+    end
   end
+
   describe "test transfer_data aspects" do
     test "merging empty namespaces" do
       namespaces = %{}
@@ -128,6 +149,11 @@ defmodule Fledex.LedDriverTest do
       ]
       assert LedsDriver.merge_leds(leds, :avg) ==
         [0x7F0000, 0x007F00, 0x00007F, 0x00007F, 0x007F00, 0x7F0000]
+      assert LedsDriver.merge_leds(leds, :cap) ==
+        [0xFF0000, 0x00FF00, 0x0000FF, 0x0000FF, 0x00FF00, 0xFF0000]
+      assert_raise ArgumentError, ~r/Unknown merge strategy/, fn ->
+         LedsDriver.merge_leds(leds, :non_existant)
+      end
     end
     test "merge leds of different length" do
       leds = [
@@ -175,6 +201,7 @@ defmodule Fledex.LedDriverTest do
         [0xFF7F7F, 0x448844, 0x551155]
     end
   end
+
   describe "e2e tests" do
     test "e2e flow" do
       init_args = %{
@@ -197,7 +224,8 @@ defmodule Fledex.LedDriverTest do
 
     end
   end
-  describe "test client API" do
+
+  describe "test client API (on server side)" do
     test "define leds first set" do
       {:ok, state} = LedsDriver.init({%{}, :strip_name})
       name = :john
@@ -218,6 +246,13 @@ defmodule Fledex.LedDriverTest do
       assert map_size(state2.namespaces) == 2
       assert Map.keys(state2.namespaces) |> Enum.sort() == [:john, :jane] |> Enum.sort()
     end
+    test "define namespace again gives error" do
+      {:ok, state} = LedsDriver.init({%{}, :strip_name})
+      name = :john
+      assert {:reply, {:ok, ^name}, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
+      assert {:reply, {:error, message}, _state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
+      assert String.match?(message, ~r/namespace already exists/)
+    end
     test "test drop_namespace" do
       {:ok, state} = LedsDriver.init({%{}, :strip_name})
       name = :john
@@ -232,12 +267,138 @@ defmodule Fledex.LedDriverTest do
       {:ok, state} = LedsDriver.init({%{}, :strip_name})
       name = :john
       leds = [0xFF0000, 0x00FF00, 0x0000FF, 0x00FF00, 0xFF0000, 0x0000FF]
-      {:reply, _na, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
+      {:reply, {:ok, ^name}, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
 
-      {:reply, _na, state} = LedsDriver.handle_call({:set_leds, name, leds}, self(), state)
+      {:reply, :ok, state} = LedsDriver.handle_call({:set_leds, name, leds}, self(), state)
       assert state.namespaces == %{
         john: [0xFF0000, 0x00FF00, 0x0000FF, 0x00FF00, 0xFF0000, 0x0000FF]
       }
+    end
+    test "test set leds without namespace" do
+      {:ok, state} = LedsDriver.init({%{}, :strip_name})
+      name = :john
+      leds = [0xFF0000, 0x00FF00, 0x0000FF, 0x00FF00, 0xFF0000, 0x0000FF]
+      # {:reply, _na, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
+
+      {:reply, {:error, message}, _state} = LedsDriver.handle_call({:set_leds, name, leds}, self(), state)
+      assert String.match?(message, ~r/no such namespace/)
+    end
+  end
+end
+
+defmodule Fledex.LedsDriverTest.TestDriver do
+  @behaviour Fledex.LedStripDriver.Driver
+
+  import ExUnit.Assertions
+
+  def init(module_init_args) do
+    assert module_init_args.test == 123
+    Map.put_new(module_init_args, :test2, 321)
+  end
+  def reinit(module_config) do
+    assert module_config == %{test: 321, test2: 123}
+    Map.put_new(module_config, :test3, "abc")
+  end
+  def transfer(_leds, _counter, _config) do
+    :ok
+  end
+  def terminate(_reason, config) do
+    assert config == %{test: 321, test2: 123, test3: "abc"}
+    :ok
+  end
+end
+defmodule Fledex.LedsDriverTestSync do
+  use ExUnit.Case
+  alias Fledex.LedsDriver
+
+  @strip_name :test_strip
+  setup do
+    {:ok, pid} = start_supervised(
+      %{
+        id: LedsDriver,
+        start: {LedsDriver, :start_link, [@strip_name, %{
+          timer: %{disable: true},
+          led_strip: %{
+            driver_modules: [Fledex.LedsDriverTest.TestDriver],
+            config: %{
+              Fledex.LedsDriverTest.TestDriver => %{test: 123}
+            }
+          }
+        }]}
+      })
+    %{strip_name: @strip_name,
+      pid: pid}
+  end
+
+  @namespace :namespace
+  describe "startup tests" do
+    test "start server with custom parameters" do
+      assert {:ok, pid} = LedsDriver.start_link(:test_strip_name, %{timer: %{disable: true}})
+      :ok = GenServer.stop(pid)
+    end
+    test "start server with default parameters" do
+      assert {:ok, pid} = LedsDriver.start_link()
+      :ok = GenServer.stop(pid)
+      assert {:ok, pid} = LedsDriver.start_link(:test_strip_name1)
+      :ok = GenServer.stop(pid)
+      assert {:ok, pid} = LedsDriver.start_link(:test_strip_name2, :none)
+      :ok = GenServer.stop(pid)
+      assert {:ok, pid} = LedsDriver.start_link(:test_strip_name3, :spi)
+      :ok = GenServer.stop(pid)
+    end
+    test "client API calls", %{strip_name: strip_name} do
+      # we only make sure that they are correctly wired to the server side calls
+      # that are tested independently
+      assert {:ok, :namespace} == LedsDriver.define_namespace(strip_name, @namespace)
+      assert true == LedsDriver.exist_namespace(strip_name, @namespace)
+      assert :ok == LedsDriver.set_leds(strip_name, @namespace, [0xff0000, 0x00ff00, 0x0000ff])
+      assert {:ok, %{test: 123, test2: 321}} == LedsDriver.change_config(strip_name,
+        [:led_strip, :config, Fledex.LedsDriverTest.TestDriver],
+        %{test: 321, test2: 123}
+      )
+      assert :ok == LedsDriver.reinit_drivers(strip_name)
+      assert :ok == LedsDriver.drop_namespace(strip_name, @namespace)
+      assert :ok == GenServer.stop(strip_name)
+    end
+  end
+end
+
+defmodule Fledex.LedsDriverTestSync2 do
+  use ExUnit.Case
+  alias Fledex.LedsDriver
+
+  setup do
+    {:ok, _pid} = start_supervised(
+      %{
+        id: LedsDriver,
+        start: {LedsDriver, :start_link, [Fledex.LedsDriver, %{
+          timer: %{disable: true},
+          led_strip: %{
+            driver_modules: [Fledex.LedsDriverTest.TestDriver],
+            config: %{
+              Fledex.LedsDriverTest.TestDriver => %{test: 123}
+            }
+          }
+        }]}
+      })
+      %{}
+  end
+
+  @namespace :namespace
+  describe "test default server_name" do
+    test "client API calls" do
+      # we only make sure that they are correctly wired to the server side calls
+      # that are tested independently
+      assert {:ok, :namespace} == LedsDriver.define_namespace(@namespace)
+      assert true == LedsDriver.exist_namespace(@namespace)
+      assert :ok == LedsDriver.set_leds(@namespace, [0xff0000, 0x00ff00, 0x0000ff])
+      assert {:ok, %{test: 123, test2: 321}} == LedsDriver.change_config(
+        [:led_strip, :config, Fledex.LedsDriverTest.TestDriver],
+        %{test: 321, test2: 123}
+      )
+      assert :ok == LedsDriver.reinit_drivers()
+      assert :ok == LedsDriver.drop_namespace(@namespace)
+      assert :ok == GenServer.stop(Fledex.LedsDriver)
     end
   end
 end

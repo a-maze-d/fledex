@@ -8,7 +8,6 @@ defmodule Fledex.LedAnimatorTest do
   alias Fledex.Leds
   alias Fledex.LedsDriver
 
-
   def default_def_func(_triggers) do
     Leds.leds(30)
   end
@@ -50,6 +49,13 @@ defmodule Fledex.LedAnimatorTest do
       assert state == init_args
     end
 
+    test "default funcs" do
+      init_args = %{}
+      {:ok, state} = Fledex.LedAnimator.init({init_args, :test_strip, :test_animator})
+      assert Leds.leds(30) == state.def_func.(%{test_strip: 10})
+      assert %{} == state.send_config_func.(%{test_strip: 10})
+
+    end
     test "config applied correctly (none_set)" do
       init_args = %{}
 
@@ -60,7 +66,15 @@ defmodule Fledex.LedAnimatorTest do
       assert state.animator_name == :test_animator
     end
   end
-
+  describe "test triggers" do
+    test "merging triggers" do
+      {:noreply, state} = LedAnimator.handle_info({:trigger, %{test_strip: 10}}, %{triggers: %{}})
+      assert state.triggers.test_strip == 10
+      {:noreply, state} = LedAnimator.handle_info({:trigger, %{test_strip: 11, new_strip: 10}}, state)
+      assert state.triggers.test_strip == 11
+      assert state.triggers.new_strip == 10
+    end
+  end
   describe "test workflow" do
     # what is important is to check whether our def and send functions are called
     # repeatedly. and that our trigger is incrementing properly.
@@ -142,6 +156,40 @@ defmodule Fledex.LedAnimatorTest do
 
     def shutdown_server(pid) do
       GenServer.stop(pid)
+    end
+  end
+
+  @animator_name :test_animator
+  describe "trigger" do
+    test "trigger as cache", %{strip_name: strip_name}  do
+      LedsDriver.define_namespace(strip_name, @animator_name)
+      state = %{
+        def_func: fn (triggers) ->
+          assert length(Map.keys(triggers)) == 2
+          assert triggers.something == "abc"
+          assert triggers[strip_name] == 11
+          {Leds.leds(0), Map.put_new(triggers, :test1, 4)}
+        end,
+        send_config_func: fn (triggers) ->
+          assert length(Map.keys(triggers)) == 3
+          assert triggers.something == "abc"
+          assert triggers[strip_name] == 11
+          assert triggers.test1 == 4
+          {%{}, Map.put_new(triggers, :test2, 7)}
+        end,
+        strip_name: :test_strip,
+        animator_name: :test_animator,
+        triggers: %{
+          test_strip: 10,
+          something: "abc"
+        }
+      }
+      {:noreply, state} = LedAnimator.handle_info({:trigger, Map.put_new(%{}, strip_name, 11)}, state)
+      assert length(Map.keys(state.triggers)) == 4
+      assert state.triggers.something == "abc"
+      assert state.triggers[strip_name] == 11
+      assert state.triggers.test1 == 4
+      assert state.triggers.test2 == 7
     end
   end
 end

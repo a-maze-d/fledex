@@ -116,7 +116,7 @@ defmodule Fledex.Leds do
     put_in(leds.leds, Map.merge(leds.leds, led_values))
   end
   def gradient(_leds, _config) do
-    raise "You need to specify at least a start_color and end_color"
+    raise ArgumentError, message: "You need to specify at least a start_color and end_color"
   end
 
   @spec repeat(t, %{amount: integer}) :: t
@@ -142,9 +142,16 @@ defmodule Fledex.Leds do
   def light(leds, rgb) do
     do_update(leds, rgb)
   end
+ @doc """
+  offset is 1 indexed. Offset needs to be > 0 if it's bigger than the count
+  then the led will be stored, but ignored
+  """
   @spec light(t, (Types.colorint | t | atom), pos_integer) :: t
-  def light(leds, led, offset) do
+  def light(leds, led, offset) when offset > 0 do
     do_update(leds, led, offset)
+  end
+  def light(_leds, _led, offset) do
+   raise ArgumentError, message: "the offset needs to be > 0 (found: #{offset})"
   end
   @spec light(t, (Types.colorint | t | atom), pos_integer, pos_integer) :: t
   def light(leds, led, offset, repeat) do
@@ -161,22 +168,6 @@ defmodule Fledex.Leds do
   def func(leds, func_id, config \\ %{}) do
     func = @func_ids[func_id]
     func.(leds, config)
-  end
-
-  @spec update(t, (Types.colorint | Types.rgb | atom)) :: t
-  def update(leds, led) do
-    do_update(leds, led)
-  end
-  @doc """
-  :offset is 1 indexed. Offset needs to be >0 if it's bigger than the :count
-  then the led will be stored, but ignored
-  """
-  @spec update(t, (Types.colorint | t), pos_integer) :: t
-  def update(leds, led, offset) when offset > 0 do
-    do_update(leds, led, offset)
-  end
-  def update(_leds, _led, offset) do
-    raise ArgumentError, message: "the offset needs to be > 0 (found: #{offset})"
   end
 
   @spec do_update(t, (Types.colorint | Types.rgb | atom)) :: t
@@ -200,10 +191,6 @@ defmodule Fledex.Leds do
   ) do
     # remap the indicies (1 indexed)
     remapped_new_leds = remap_leds(leds2, offset)
-    # Map.new(Enum.map(leds2, fn {key, value} ->
-    #   index = offset + key - 1
-    #   {index, value}
-    # end))
     leds = Map.merge(leds1, remapped_new_leds)
     __MODULE__.leds(count1, leds, opts1, %{meta1 | index: offset + count2})
   end
@@ -237,27 +224,28 @@ defmodule Fledex.Leds do
     end)
   end
 
-  @spec send(t, map) :: any
+  @spec send(t, map) :: :ok | {:error, String}
   def send(leds, opts \\ %{}) do
     offset = opts[:offset] || 0
     rotate_left = if opts[:rotate_left] != nil, do: opts[:rotate_left], else: true
-
+    server_name = leds.opts.server_name || LedsDriver
+    namespace = leds.opts.namespace || :default
     # we probably want to do some validation here and probably
     # want to optimise it a bit
     # a) is the server running?
-    if Process.whereis(leds.opts.server_name) == nil do
-      Logger.warning("The server #{leds.opts.server_name} wasn't started. You should start it before using this function")
-      {:ok, _pid} = LedsDriver.start_link(leds.opts.server_name, %{})
+    if Process.whereis(server_name) == nil do
+      Logger.warning("The server #{server_name} wasn't started. You should start it before using this function")
+      {:ok, _pid} = LedsDriver.start_link(server_name, %{})
     end
     # b) Is a namespace defined?
-    exists = LedsDriver.exist_namespace(leds.opts.server_name, leds.opts.namespace)
+    exists = LedsDriver.exist_namespace(server_name, namespace)
     if not exists do
-      Logger.error(Exception.format_stacktrace())
+      # Logger.error(Exception.format_stacktrace())
       Logger.warning("The namespace hasn't been defined. This should be done before calling this function")
-      LedsDriver.define_namespace(leds.opts.server_name, leds.opts.namespace)
+      LedsDriver.define_namespace(server_name, namespace)
     end
     vals = rotate(to_list(leds), offset, rotate_left)
-    LedsDriver.set_leds(leds.opts.server_name, leds.opts.namespace, vals)
+    LedsDriver.set_leds(server_name, namespace, vals)
   end
 
   @spec get_light(t, pos_integer) :: Types.colorint

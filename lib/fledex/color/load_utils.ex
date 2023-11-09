@@ -1,8 +1,9 @@
 defmodule Fledex.Color.LoadUtils do
-  def load_color_file do
+  def names_file, do: "#{Path.dirname(__DIR__)}/color/names.csv"
+  def load_color_file(names_file) do
     # Name, Hex (RGB), Red (RGB), Green (RGB), Blue (RGB), Hue (HSL/HSV), Satur. (HSL),
     #   Light (HSL), Satur.(HSV), Value (HSV), Source
-    "#{Path.dirname(__DIR__)}/color/names.csv"
+    names_file
     |> File.stream!()
     |> Stream.drop(1)
     |> Stream.with_index()
@@ -33,7 +34,8 @@ defmodule Fledex.Color.LoadUtils do
     |> remove_trailing_underscore()
     |> String.to_atom()
   end
-  defp remove_trailing_underscore(<<name, "_">>), do: name
+
+  # defp remove_trailing_underscore(<<name, "_">>), do: name
   defp remove_trailing_underscore(name), do: name
   defp clean_and_convert(hex_string) do
     hex_string = String.replace(hex_string, "#", "")
@@ -47,7 +49,6 @@ defmodule Fledex.Color.LoadUtils do
     case Float.parse(value) do
       {value, "%"} -> trunc((value / 100) * 255)
       {value, "°"} -> trunc((value / 360) * 255)
-      _na -> raise "Error in converting to byte value (#{value})"
     end
   end
 end

@@ -127,11 +127,7 @@ defmodule Fledex.LedAnimator do
     # and server_name (strip_name). Therefore we inject it
     leds = Leds.set_driver_info(leds, animator_name, strip_name)
     {config, triggers} = send_config_func.(triggers) |> get_with_triggers(triggers)
-    try do
-      Leds.send(leds, config)
-    catch
-      UndefinedFunctionError -> Logger.info("Function couldn't be found")
-    end
+    Leds.send(leds, config)
     # Logger.info("trigger #{inspect triggers}")
 
     {:noreply, %{state | triggers: triggers}}
@@ -147,8 +143,8 @@ defmodule Fledex.LedAnimator do
 
   defp get_with_triggers(response, orig_triggers) do
     case response do
-      {leds, triggers} -> {leds, triggers}
-      leds -> {leds, orig_triggers}
+      {something, triggers} -> {something, triggers}
+      something -> {something, orig_triggers}
     end
   end
 
@@ -178,6 +174,7 @@ defmodule Fledex.LedAnimator do
     strip_name: strip_name,
     animator_name: animator_name
   } = _state) do
-      LedsDriver.drop_namespace(strip_name, animator_name)
+    PubSub.unsubscribe(:fledex, "trigger")
+    LedsDriver.drop_namespace(strip_name, animator_name)
   end
 end

@@ -6,6 +6,7 @@ defmodule Fledex.MixProject do
       app: :fledex,
       version: "0.2.0",
       elixir: "~> 1.14",
+      elixirc_path: elixirc_paths(Mix.env),
       start_permanent: Mix.env() == :prod,
       description: description(),
       package: package(),
@@ -15,13 +16,22 @@ defmodule Fledex.MixProject do
     ]
   end
 
+  # specified per env which files to compile
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
+
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger],
+      extra_applications: [:logger] ++ extra_applications(Mix.env),
       mod: {Fledex.Application, []}
     ]
   end
+
+  defp extra_applications(env)
+  defp extra_applications(:dev), do: [:circuits_sim]
+  defp extra_applications(:test), do: [:circuits_sim]
+  defp extra_applications(_), do: []
 
   defp description() do
     "A small library to easily control an LED strip with nerves (or nerves-livebook)"
@@ -42,7 +52,8 @@ defmodule Fledex.MixProject do
       {:kino, "~>0.11"},
       {:phoenix_pubsub, "~>2.1"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
-      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:circuits_sim, git: "https://github.com/elixir-circuits/circuits_sim/", only: [:dev, :test]}
     ]
   end
 end

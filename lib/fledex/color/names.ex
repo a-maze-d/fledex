@@ -1,7 +1,8 @@
 defmodule Fledex.Color.Names do
+  @external_resource Fledex.Color.LoadUtils.names_file()
   alias Fledex.Color.LoadUtils
 
-  colors = LoadUtils.load_color_file()
+  colors = LoadUtils.load_color_file(@external_resource)
   for color <- colors do
     name = color.name
     def unquote(name)(), do: unquote(Macro.escape(color))
