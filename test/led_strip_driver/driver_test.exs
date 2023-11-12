@@ -15,7 +15,7 @@ defmodule Fledex.LedStripDriver.DriverTest do
       config
     end
     def transfer(_leds, _count, config) do
-      config
+      {config, :ok}
     end
     def terminate(_reason, _config) do
       :ok
@@ -33,7 +33,7 @@ defmodule Fledex.LedStripDriver.DriverTest do
       config
     end
     def transfer(_leds, _count, config) do
-      Map.put(config, :a3, 4)
+      {Map.put(config, :a3, 4), :ok}
     end
     def terminate(_reason, _config) do
       :ok

@@ -173,8 +173,10 @@ defmodule Fledex.Leds do
   @spec do_update(t, (Types.colorint | Types.rgb | atom)) :: t
   defp do_update(%__MODULE__{meta: meta} = leds, rgb) do
     index = meta[:index]  || 1
+    index = if index < 1, do: 1, else: index
     do_update(leds, rgb, index)
   end
+
   @spec do_update(t, Types.colorint, pos_integer) :: t
   defp do_update(
     %__MODULE__{count: count, leds: leds, opts: opts, meta: meta},
@@ -242,7 +244,7 @@ defmodule Fledex.Leds do
     if not exists do
       # Logger.error(Exception.format_stacktrace())
       Logger.warning("The namespace hasn't been defined. This should be done before calling this function")
-      LedsDriver.define_namespace(server_name, namespace)
+      :ok = LedsDriver.define_namespace(server_name, namespace)
     end
     vals = rotate(to_list(leds), offset, rotate_left)
     LedsDriver.set_leds(server_name, namespace, vals)

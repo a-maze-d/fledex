@@ -6,13 +6,29 @@ defmodule Fledex.MixProject do
       app: :fledex,
       version: "0.2.0",
       elixir: "~> 1.14",
-      elixirc_path: elixirc_paths(Mix.env),
+      elixirc_paths: elixirc_paths(Mix.env),
       start_permanent: Mix.env() == :prod,
       description: description(),
       package: package(),
       deps: deps(),
       name: "fledex",
-      source_url: "https://github.com/a-maze-d/fledex"
+      source_url: "https://github.com/a-maze-d/fledex",
+      # dialyzer: [
+      #   flags: [:missing_return, :extra_return, :unmatched_returns, :error_handling, :underspecs]
+      # ],
+      test_coverage: [
+        tool: ExCoveralls,
+        ignore_modules: [
+          Fledex.Test.CircuitsSim.Device.WS2801
+        ],
+      ],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test,
+        "coveralls.cobertura": :test
+      ]
     ]
   end
 
@@ -51,9 +67,11 @@ defmodule Fledex.MixProject do
       {:telemetry, "~> 1.2"},
       {:kino, "~>0.11"},
       {:phoenix_pubsub, "~>2.1"},
+      {:circuits_sim, git: "https://github.com/elixir-circuits/circuits_sim/", optional: true},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:circuits_sim, git: "https://github.com/elixir-circuits/circuits_sim/", only: [:dev, :test]}
+      # {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:excoveralls, "~> 0.18", only: :test},
     ]
   end
 end

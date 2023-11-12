@@ -43,7 +43,7 @@ defmodule Fledex.LedStripDriver.SpiDriver do
   end
 
   @impl true
-  @spec transfer(list(Types.colorint), pos_integer, map) :: map
+  @spec transfer(list(Types.colorint), pos_integer, map) :: {map, any}
   def transfer(leds, _counter, config) do
     binary = leds
       |> Correction.apply_rgb_correction(config.color_correction)
@@ -51,8 +51,8 @@ defmodule Fledex.LedStripDriver.SpiDriver do
         {r, g, b} = Utils.convert_to_subpixels(led)
         acc <> <<r, g, b>>
       end)
-    {:ok, _} = Circuits.SPI.transfer(config.ref, binary)
-    config
+      response = Circuits.SPI.transfer(config.ref, binary)
+    {config, response}
   end
 
   @impl true

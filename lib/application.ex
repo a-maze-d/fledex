@@ -14,7 +14,7 @@ defmodule Fledex.Application do
     children = [
       {Phoenix.PubSub, [name: :fledex, adapter_name: :pg2]}
     ]
-    Supervisor.start_link(children, strategy: :one_for_one)
+    {:ok, _pid} = Supervisor.start_link(children, strategy: :one_for_one)
     # Fledex.LedAnimationManager.run
     {:ok, self()}
   end

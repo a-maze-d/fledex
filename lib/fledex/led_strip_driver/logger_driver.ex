@@ -23,10 +23,12 @@ defmodule Fledex.LedStripDriver.LoggerDriver do
   @impl true
   @spec init(map) :: map
   def init(init_module_args) do
-    %{
-      update_freq: init_module_args[:update_freq] || @default_update_freq,
-      log_color_code: init_module_args[:log_color_code] || false
+    default_config = %{
+      update_freq: @default_update_freq,
+      log_color_code: false,
+      terminal: true
     }
+    Map.merge(default_config, init_module_args)
   end
 
   @impl true
@@ -36,22 +38,24 @@ defmodule Fledex.LedStripDriver.LoggerDriver do
   end
 
   @impl true
-  @spec transfer(list(Types.colorint), pos_integer, map) :: map
+  @spec transfer(list(Types.colorint), pos_integer, map) :: {map, any}
   def transfer(leds, counter, config) when rem(counter, config.update_freq) == 0 and leds != [] do
-      log_color_code = config.log_color_code
       output = Enum.reduce(leds, <<>>, fn value, acc ->
-        if log_color_code do
-          acc <> <<value>>
+        if config.log_color_code do
+          acc <> Integer.to_string(value) <> ","
         else
           acc <> to_ansi_color(value) <> @block
         end
       end)
-      # Logger.info(output <> "\r")
-      IO.puts(output <> "\r")
-      config
+      if config.terminal do
+        IO.puts(output <> "\r")
+      else
+        Logger.info(output <> "\r")
+      end
+      {config, :ok}
   end
   def transfer(_leds, _counter, config) do
-    config
+    {config, :ok}
   end
 
   @spec to_ansi_color(Types.colorint) :: String.t

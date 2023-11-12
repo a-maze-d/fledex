@@ -22,9 +22,9 @@ defmodule Fledex.LedStripDriver.NullDriver do
   end
 
   @impl true
-  @spec transfer(list(Types.colorint), pos_integer, map) :: map
+  @spec transfer(list(Types.colorint), pos_integer, map) :: {map, any}
   def transfer(_leds, _counter, config) do
-    config
+    {config, :ok}
   end
 
   @impl true

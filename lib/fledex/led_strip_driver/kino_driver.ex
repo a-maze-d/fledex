@@ -12,11 +12,13 @@ defmodule Fledex.LedStripDriver.KinoDriver do
   @impl true
   @spec init(map) :: map
   def init(init_args) do
-    %{
-      update_freq: init_args[:update_freq] || @default_update_freq,
+    default_config = %{
+      update_freq: @default_update_freq,
+      # only call the Kino functions if necessary
       frame: init_args[:frame] || Kino.Frame.new() |> Kino.render(),
-      color_correction: init_args[:color_correction] || Correction.no_color_correction()
+      color_correction: Correction.no_color_correction()
     }
+    Map.merge(default_config, init_args)
   end
 
   @impl true
@@ -26,7 +28,7 @@ defmodule Fledex.LedStripDriver.KinoDriver do
   end
 
   @impl true
-  @spec transfer(list(Types.colorint), pos_integer, map) :: map
+  @spec transfer(list(Types.colorint), pos_integer, map) :: {map, any}
   def transfer(leds, counter, config) do
     if (rem(counter, config.update_freq) == 0 and length(leds) > 0) do
       output = leds
@@ -35,9 +37,9 @@ defmodule Fledex.LedStripDriver.KinoDriver do
           hex = value |> Integer.to_string(@base16) |> String.pad_leading(6, "0")
           acc <> "<span style=\"color: ##{hex}\">" <> @block <> "</span>"
       end)
-      Kino.Frame.render(config.frame, Kino.Markdown.new(output))
+      :ok = Kino.Frame.render(config.frame, Kino.Markdown.new(output))
     end
-    config
+    {config, :ok}
   end
 
   @impl true

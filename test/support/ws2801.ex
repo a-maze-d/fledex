@@ -1,7 +1,3 @@
-# TODO: I haven't managed to configure things correctly so that we can move this
-#       module into the test/support folder :-( Things should work, but something is not quite right
-#       Problem is that we can't leave it here because we want to keep the CircuitsSim library
-#       for tests only. Thus this won't compile in non-test mode :-(
 defmodule Fledex.Test.CircuitsSim.Device.WS2801 do
   alias CircuitsSim.SPI.SPIServer
 
@@ -21,16 +17,15 @@ defmodule Fledex.Test.CircuitsSim.Device.WS2801 do
     @impl true
     def transfer(state, data) do
       # The device is write only, so just return zeros.
-      result = :binary.copy(<<0>>, byte_size(data))
+      # result = :binary.copy(<<0>>, byte_size(data))
+      result = data
       {result, state}
     end
 
     @impl true
     def render(_state) do
       [
-        # case state.render do
-        #   :default -> TM1620.binary_clock(state.data)
-        # end
+        "leds: "
       ]
     end
 

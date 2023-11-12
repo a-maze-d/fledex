@@ -102,8 +102,8 @@ defmodule Fledex.LedAnimator do
     }
     state = update_config(state, init_args)
 
-    LedsDriver.define_namespace(state.strip_name, state.animator_name)
-    PubSub.subscribe(:fledex, "trigger")
+    :ok= LedsDriver.define_namespace(state.strip_name, state.animator_name)
+    :ok = PubSub.subscribe(:fledex, "trigger")
 
     {:ok, state}
   end

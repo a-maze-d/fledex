@@ -23,7 +23,7 @@ defmodule Fledex.Color.Utils do
   defp scale8_video_addition(_addition, _value, _scale), do: 0
 
   @doc """
-  THis function scales a value into a specific range. the video parameter
+  This function scales a value into a specific range. the video parameter
   indicates whether the returned value should be correct to not return 0
   """
   @spec scale8(0..255, 0..255, boolean) :: 0..255
@@ -120,7 +120,8 @@ defmodule Fledex.Color.Utils do
   @spec convert_to_subpixels((Types.colorint | atom | Types.rgb | %{rgb: Types.rgb})) :: Types.rgb
   def convert_to_subpixels(rgb) do
     case rgb do
-      %{rgb: x} -> x
+      %{rgb: {r, g, b}} -> {r, g, b}
+      %{rgb: x} when is_integer(x) -> convert_to_subpixels(x)
       x when is_atom(x) -> Names.get_color_sub_pixels(x)
       x when is_integer(x) -> split_into_subpixels(x)
       x -> x

@@ -162,7 +162,7 @@ defmodule Fledex.LedAnimatorTest do
   @animator_name :test_animator
   describe "trigger" do
     test "trigger as cache", %{strip_name: strip_name}  do
-      LedsDriver.define_namespace(strip_name, @animator_name)
+      :ok = LedsDriver.define_namespace(strip_name, @animator_name)
       state = %{
         def_func: fn (triggers) ->
           assert length(Map.keys(triggers)) == 2

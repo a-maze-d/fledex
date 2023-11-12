@@ -230,7 +230,7 @@ defmodule Fledex.LedDriverTest do
       {:ok, state} = LedsDriver.init({%{}, :strip_name})
       name = :john
       response = LedsDriver.handle_call({:define_namespace, name}, self(), state)
-      assert match?({:reply, {:ok, _}, _}, response)
+      assert match?({:reply, :ok, _}, response)
       {:reply, _na, state} = response
       assert map_size(state.namespaces) == 1
       assert Map.keys(state.namespaces) == [:john]
@@ -241,7 +241,7 @@ defmodule Fledex.LedDriverTest do
       {:reply, _na, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
       name2 = :jane
       response2 = LedsDriver.handle_call({:define_namespace, name2}, self(), state)
-      assert match?({:reply, {:ok, _}, _}, response2)
+      assert match?({:reply, :ok, _}, response2)
       {:reply, _na, state2} = response2
       assert map_size(state2.namespaces) == 2
       assert Map.keys(state2.namespaces) |> Enum.sort() == [:john, :jane] |> Enum.sort()
@@ -249,7 +249,7 @@ defmodule Fledex.LedDriverTest do
     test "define namespace again gives error" do
       {:ok, state} = LedsDriver.init({%{}, :strip_name})
       name = :john
-      assert {:reply, {:ok, ^name}, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
+      assert {:reply, :ok, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
       assert {:reply, {:error, message}, _state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
       assert String.match?(message, ~r/namespace already exists/)
     end
@@ -267,7 +267,7 @@ defmodule Fledex.LedDriverTest do
       {:ok, state} = LedsDriver.init({%{}, :strip_name})
       name = :john
       leds = [0xFF0000, 0x00FF00, 0x0000FF, 0x00FF00, 0xFF0000, 0x0000FF]
-      {:reply, {:ok, ^name}, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
+      {:reply, :ok, state} = LedsDriver.handle_call({:define_namespace, name}, self(), state)
 
       {:reply, :ok, state} = LedsDriver.handle_call({:set_leds, name, leds}, self(), state)
       assert state.namespaces == %{
@@ -299,8 +299,8 @@ defmodule Fledex.LedsDriverTest.TestDriver do
     assert module_config == %{test: 321, test2: 123}
     Map.put_new(module_config, :test3, "abc")
   end
-  def transfer(_leds, _counter, _config) do
-    :ok
+  def transfer(_leds, _counter, config) do
+    {config, :ok}
   end
   def terminate(_reason, config) do
     assert config == %{test: 321, test2: 123, test3: "abc"}
@@ -349,7 +349,7 @@ defmodule Fledex.LedsDriverTestSync do
     test "client API calls", %{strip_name: strip_name} do
       # we only make sure that they are correctly wired to the server side calls
       # that are tested independently
-      assert {:ok, :namespace} == LedsDriver.define_namespace(strip_name, @namespace)
+      assert :ok == LedsDriver.define_namespace(strip_name, @namespace)
       assert true == LedsDriver.exist_namespace(strip_name, @namespace)
       assert :ok == LedsDriver.set_leds(strip_name, @namespace, [0xff0000, 0x00ff00, 0x0000ff])
       assert {:ok, %{test: 123, test2: 321}} == LedsDriver.change_config(strip_name,
@@ -389,7 +389,7 @@ defmodule Fledex.LedsDriverTestSync2 do
     test "client API calls" do
       # we only make sure that they are correctly wired to the server side calls
       # that are tested independently
-      assert {:ok, :namespace} == LedsDriver.define_namespace(@namespace)
+      assert :ok == LedsDriver.define_namespace(@namespace)
       assert true == LedsDriver.exist_namespace(@namespace)
       assert :ok == LedsDriver.set_leds(@namespace, [0xff0000, 0x00ff00, 0x0000ff])
       assert {:ok, %{test: 123, test2: 321}} == LedsDriver.change_config(

@@ -6,6 +6,7 @@
     "configurations": [
 
 
+
         {
             "type": "mix_task",
             "name": "mix (Default task)",

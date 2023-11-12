@@ -86,7 +86,8 @@ defmodule Fledex.LedsDriver do
     GenServer.start_link(__MODULE__, {init_args, strip_name}, name: strip_name)
   end
 
-  @spec define_namespace(atom, atom) :: {:ok, atom} | {:error, String.t()}
+  # TODO: Maybe we should change the return type to not return the namespace
+  @spec define_namespace(atom, atom) :: :ok | {:error, String.t()}
   def define_namespace(strip_name \\ __MODULE__, namespace) do
     # Logger.info("defining namespace: #{strip_name}-#{namespace}")
     GenServer.call(strip_name, {:define_namespace, namespace})
@@ -201,12 +202,12 @@ defmodule Fledex.LedsDriver do
 
   @impl true
   @spec handle_call({:define_namespace, atom}, {pid, any}, t) ::
-          {:reply, {:ok, atom} | {:error, binary}, t}
+          {:reply, :ok | {:error, binary}, t}
   def handle_call({:define_namespace, name}, _from, %{namespaces: namespaces} = state) do
     state = put_in(state, [:timer, :is_dirty], true)
 
     case Map.has_key?(namespaces, name) do
-      false -> {:reply, {:ok, name}, %{state | namespaces: Map.put_new(namespaces, name, [])}}
+      false -> {:reply, :ok, %{state | namespaces: Map.put_new(namespaces, name, [])}}
       true -> {:reply, {:error, "namespace already exists"}, state}
     end
   end
@@ -342,7 +343,6 @@ defmodule Fledex.LedsDriver do
   def merge_pixels(elems, merge_strategy) do
     elems
     |> Enum.map(fn elem -> Utils.split_into_subpixels(elem) end)
-    # |> Utils.add_subpixels()
     |> apply_merge_strategy(merge_strategy)
     |> Utils.combine_subpixels()
   end
