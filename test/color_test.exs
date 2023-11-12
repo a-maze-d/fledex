@@ -1,6 +1,7 @@
 defmodule Fledex.ColorTest do
   use ExUnit.Case, async: true
 
+  alias Fledex.Color.Utils
   alias Fledex.Color.Conversion.Approximate
   alias Fledex.Color.Conversion.Rainbow
   alias Fledex.Color.Conversion.Raw
@@ -26,9 +27,13 @@ defmodule Fledex.ColorTest do
   describe "color conversion tests" do
     test "approximate" do
       assert {15, 168, 255} == Approximate.rgb2hsv({216, 56, 30})
+      assert {0, 0, 0} == Approximate.rgb2hsv({0, 0, 0})
     end
     test "rainbow" do
       assert {173, 14, 5} == Rainbow.hsv2rgb({5, 219, 216}, fn rgb -> rgb end)
+      assert {173, 10, 0} == Rainbow.hsv2rgb({5, 255, 216}, fn rgb -> rgb end)
+      assert {183, 183, 183} == Rainbow.hsv2rgb({5, 0, 216}, fn rgb -> rgb end)
+      assert {0, 0, 0} == Rainbow.hsv2rgb({5, 0, 5}, fn rgb -> rgb end)
     end
     test "raw" do
       assert {198, 44, 30} == Raw.hsv2rgb({5, 219, 216}, fn rgb -> rgb end)
@@ -109,6 +114,52 @@ defmodule Fledex.ColorTest do
       assert Correction.define_correction(0, 0xFFFFFF, 0xFFFFFF) == {0, 0, 0}
       assert Correction.apply_rgb_correction([{0x7F, 0x7F, 0x7f}], 0xFFFFFF) == [{0x7F, 0x7F, 0x7F}]
       assert Correction.calculate_color_correction(0x10, 0, 0) == 0
+    end
+  end
+  describe "color conversions" do
+    test "approximate rgb2hsv" do
+    # Wikipedia has the following table:
+    # https://en.wikipedia.org/wiki/HSL_and_HSV
+    # This should take us around the whole Hue scale. But note, we do have an approximation, so not 100% accurate
+    # Color 	      R 	    G 	    B 	    H 	   H2 	    C 	    C2 	    V 	    L 	    I 	Y′601 	SHSV 	  SHSL 	  SHSI
+    # #FFFFFF 	1.000 	1.000 	1.000 	n/a 	  n/a 	  0.000 	0.000 	1.000 	1.000 	1.000 	1.000 	0.000 	0.000 	0.000
+    # #808080 	0.500 	0.500 	0.500 	n/a 	  n/a 	  0.000 	0.000 	0.500 	0.500 	0.500 	0.500 	0.000 	0.000 	0.000
+    # #000000 	0.000 	0.000 	0.000 	n/a 	  n/a 	  0.000 	0.000 	0.000 	0.000 	0.000 	0.000 	0.000 	0.000 	0.000
+    # #FF0000 	1.000 	0.000 	0.000 	0.0° 	  0.0° 	  1.000 	1.000 	1.000 	0.500 	0.333 	0.299 	1.000 	1.000 	1.000
+    # #BFBF00 	0.750 	0.750 	0.000 	60.0° 	60.0° 	0.750 	0.750 	0.750 	0.375 	0.500 	0.664 	1.000 	1.000 	1.000
+    # #008000 	0.000 	0.500 	0.000 	120.0° 	120.0° 	0.500 	0.500 	0.500 	0.250 	0.167 	0.293 	1.000 	1.000 	1.000
+    # #80FFFF 	0.500 	1.000 	1.000 	180.0° 	180.0° 	0.500 	0.500 	1.000 	0.750 	0.833 	0.850 	0.500 	1.000 	0.400
+    # #8080FF 	0.500 	0.500 	1.000 	240.0° 	240.0° 	0.500 	0.500 	1.000 	0.750 	0.667 	0.557 	0.500 	1.000 	0.250
+    # #BF40BF 	0.750 	0.250 	0.750 	300.0° 	300.0° 	0.500 	0.500 	0.750 	0.500 	0.583 	0.457 	0.667 	0.500 	0.571
+    # #A0A424 	0.628 	0.643 	0.142 	61.8° 	61.5° 	0.501 	0.494 	0.643 	0.393 	0.471 	0.581 	0.779 	0.638 	0.699
+    # #411BEA 	0.255 	0.104 	0.918 	251.1° 	250.0° 	0.814 	0.750 	0.918 	0.511 	0.426 	0.242 	0.887 	0.832 	0.756
+    # #1EAC41 	0.116 	0.675 	0.255 	134.9° 	133.8° 	0.559 	0.504 	0.675 	0.396 	0.349 	0.460 	0.828 	0.707 	0.667
+    # #F0C80E 	0.941 	0.785 	0.053 	49.5° 	50.5° 	0.888 	0.821 	0.941 	0.497 	0.593 	0.748 	0.944 	0.893 	0.911
+    # #B430E5 	0.704 	0.187 	0.897 	283.7° 	284.8° 	0.710 	0.636 	0.897 	0.542 	0.596 	0.423 	0.792 	0.775 	0.686
+    # #ED7651 	0.931 	0.463 	0.316 	14.3° 	13.2° 	0.615 	0.556 	0.931 	0.624 	0.570 	0.586 	0.661 	0.817 	0.446
+    # #FEF888 	0.998 	0.974 	0.532 	56.9° 	57.4° 	0.466 	0.454 	0.998 	0.765 	0.835 	0.931 	0.467 	0.991 	0.363
+    # #19CB97 	0.099 	0.795 	0.591 	162.4° 	163.4° 	0.696 	0.620 	0.795 	0.447 	0.495 	0.564 	0.875 	0.779 	0.800
+    # #362698 	0.211 	0.149 	0.597 	248.3° 	247.3° 	0.448 	0.420 	0.597 	0.373 	0.319 	0.219 	0.750 	0.601 	0.533
+    # #7E7EB8 	0.495 	0.493 	0.721 	240.5° 	240.4° 	0.228 	0.227 	0.721 	0.607 	0.570 	0.520 	0.316 	0.290 	0.135
+    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0xffffff)) == {0, 0, 255}
+    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0x808080)) == {0, 0, 181}
+    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0x000000)) == {0, 0, 0}
+    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0xff0000)) == {0, 255, 255}
+    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0xbfbf00)) == {63, 255, 255}
+    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0x008000)) == {96, 255, 181}
+    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0x80ffff)) == {195, 74, 255}
+    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0x8080ff)) == {195, 74, 255}
+    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0xbf40bf)) == {0, 127, 255}
+    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0xa0a424)) == {71, 159, 255}
+    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0x411bea)) == {182, 172, 255}
+    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0x1eac41)) == {116, 168, 255}
+    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0xf0c80e)) == {43, 196, 255}
+    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0xb430e5)) == {248, 145, 255}
+    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0xed7651)) == {32, 111, 255}
+    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0xfef888)) == {55, 69, 255}
+    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0x19c897)) == {147, 175, 255}
+    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0x362698)) == {172, 157, 252}
+    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0x7e7eb8)) == {160, 76, 255}
     end
   end
 end

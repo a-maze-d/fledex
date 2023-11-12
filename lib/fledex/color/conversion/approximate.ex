@@ -48,7 +48,7 @@ defmodule Fledex.Color.Conversion.Approximate do
       255
     else
       v = qadd8(desat, total)
-      if v != 255, do: :math.sqrt(v * 256), else: v
+      if v != 255, do: trunc(:math.sqrt(v * 256)), else: v
     end
   end
 
@@ -89,7 +89,7 @@ defmodule Fledex.Color.Conversion.Approximate do
     @hue_purple + Utils.scale8(qsub8(r, 85), @frac_32_85)
   end
   defp calc_hue({r, g, b} = rgb) do
-    calc_hue(rgb, Enum.max([r, g, b])) + 1
+    rem(trunc(calc_hue(rgb, Enum.max([r, g, b]))) + 1, 256)
   end
 
   @spec scale_to_compensate(Types.rgb, byte) :: Types.rgb
@@ -105,11 +105,6 @@ defmodule Fledex.Color.Conversion.Approximate do
 
   @spec find_desaturation(Types.rgb) :: byte
   defp find_desaturation({r, g, b}) do
-    #     // find desaturation
-    #     uint8_t desat = 255;
-    #     if( r < desat) desat = r;
-    #     if( g < desat) desat = g;
-    #     if( b < desat) desat = b;
     255
       |> adj_desat(r)
       |> adj_desat(g)
