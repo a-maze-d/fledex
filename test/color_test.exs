@@ -36,6 +36,11 @@ defmodule Fledex.ColorTest do
     test "spectrum" do
       assert {204, 38, 30} == Spectrum.hsv2rgb({5, 219, 216}, fn rgb -> rgb end)
     end
+    test "set_colors" do
+      assert Raw.set_colors(0, 128, 150, 182) == {182, 150, 128}
+      assert Raw.set_colors(1, 128, 150, 182) == {128, 182, 150}
+      assert Raw.set_colors(2, 128, 150, 182) == {150, 128, 182}
+    end
   end
 
   describe "color names tests" do

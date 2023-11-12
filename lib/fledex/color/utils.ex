@@ -117,7 +117,7 @@ defmodule Fledex.Color.Utils do
   @doc """
   This function splits a single (color) integer value into it's rgb components
   """
-  @spec convert_to_subpixels((Types.colorint | atom | Types.rgb | %{rgb: Types.rgb})) :: Types.rgb
+  @spec convert_to_subpixels((Types.colorint | atom | Types.rgb | %{rgb: Types.rgb} | %{rgb: Types.colorint})) :: Types.rgb
   def convert_to_subpixels(rgb) do
     case rgb do
       %{rgb: {r, g, b}} -> {r, g, b}

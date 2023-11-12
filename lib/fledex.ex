@@ -16,14 +16,22 @@ defmodule Fledex do
           end
       end
   """
-  require Logger
+
+  @doc """
+  This function should not be used. It's only here for tests and can be removed
+  any any point in time. It only returns `:ok`
+  """
+  # @deprecated "This is only used for tests and hopefully can be removed soon"
+  def fledex_loaded do
+    :ok
+  end
 
   defmacro __using__(opts) do
-    opts = if Macro.quoted_literal?(opts) do
-      Macro.prewalk(opts, &expand_alias(&1, __CALLER__))
-    else
-      opts
-    end
+    # opts = if Macro.quoted_literal?(opts) do
+    #   Macro.prewalk(opts, &expand_alias(&1, __CALLER__))
+    # else
+    #   opts
+    # end
 
     quote bind_quoted: [opts: opts] do
       import Fledex
@@ -38,10 +46,10 @@ defmodule Fledex do
 
   # Note: we could make this function private but we use it to ensure that Fledex is
   #       loaded correctly.
-  def expand_alias({:__aliases__, _meta, _args} = alias, env) do
-    Macro.expand(alias, %{env | function: {:action, 2}})
-  end
-  def expand_alias(other, _env), do: other
+  # def expand_alias({:__aliases__, _meta, _args} = alias, env) do
+  #   Macro.expand(alias, %{env | function: {:action, 2}})
+  # end
+  # def expand_alias(other, _env), do: other
 
   @doc """
     This introduces a new `live_loop` (animation) that will be played over

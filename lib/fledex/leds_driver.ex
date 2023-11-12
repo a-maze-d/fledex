@@ -86,7 +86,6 @@ defmodule Fledex.LedsDriver do
     GenServer.start_link(__MODULE__, {init_args, strip_name}, name: strip_name)
   end
 
-  # TODO: Maybe we should change the return type to not return the namespace
   @spec define_namespace(atom, atom) :: :ok | {:error, String.t()}
   def define_namespace(strip_name \\ __MODULE__, namespace) do
     # Logger.info("defining namespace: #{strip_name}-#{namespace}")

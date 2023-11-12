@@ -35,7 +35,7 @@ defmodule Fledex.UtilsTest do
 
     assert Utils.nscale8({128, 128, 128}, Utils.frac8(32, 85)) == {49, 49, 49}
     assert Utils.nscale8({128, 128, 128}, Utils.frac8(32, 85), false) == {48, 48, 48}
-    assert Utils.nscale8(Utils.combine_subpixels({128, 128, 128}), Utils.frac8(32, 85)) == 3223857
+    assert Utils.nscale8(Utils.combine_subpixels({128, 128, 128}), Utils.frac8(32, 85)) == 3_223_857
   end
   test "convert to subpixels" do
     assert Utils.convert_to_subpixels(%{rgb: 0x123456}) == {0x12, 0x34, 0x56}
