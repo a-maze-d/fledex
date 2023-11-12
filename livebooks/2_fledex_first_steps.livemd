@@ -5,9 +5,7 @@
 # the libraries will be loaded, but on a nerves_livebook you can only use
 # what has been compiled in.
 Mix.install([
-  {:fledex, "~>0.1"},
-  {:circuits_spi, "~> 2.0-pre.0"},
-  {:kino, "~>0.11"}
+  {:fledex, "~>0.2"},
 ])
 
 # we define a couple of aliases to not have to type that much

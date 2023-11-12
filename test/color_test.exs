@@ -1,7 +1,6 @@
 defmodule Fledex.ColorTest do
   use ExUnit.Case, async: true
 
-  alias Fledex.Color.Utils
   alias Fledex.Color.Conversion.Approximate
   alias Fledex.Color.Conversion.Rainbow
   alias Fledex.Color.Conversion.Raw
@@ -13,6 +12,7 @@ defmodule Fledex.ColorTest do
 
   alias Fledex.Color.LoadUtils
   alias Fledex.Color.Names
+  alias Fledex.Color.Utils
 
   describe "color correction tests" do
     test "no_color_correction" do

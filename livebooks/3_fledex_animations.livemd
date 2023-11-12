@@ -5,8 +5,7 @@
 # hardware but on a normal livebook, This makes it easier to stay up-to-date and experiment
 # We start to define our fledex library, directly linking to the latest version on github
 Mix.install([
-  {:fledex, path: "/home/maze/Documents/code/fledex"},
-  {:kino, "~>0.11"}
+  {:fledex, "~>0.2"}
 ])
 
 # we define a couple of aliases to not have to type that much

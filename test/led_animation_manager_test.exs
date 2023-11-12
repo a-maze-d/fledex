@@ -45,6 +45,7 @@ defmodule Fledex.LedAnimationManagerTest do
       {:ok, state} = LedAnimationManager.get_info()
       assert Map.keys(state) == [strip_name, :strip_name2]
     end
+    # TODO: check this test it seems to be flaky
     test "re-register led_strip", %{strip_name: strip_name} do
       pid = GenServer.whereis(strip_name)
       assert pid != nil

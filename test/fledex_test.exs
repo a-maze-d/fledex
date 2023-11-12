@@ -33,6 +33,7 @@ defmodule Fledex.Test do
 
     end
 
+    # TODO: check this test, it seems to be flaky
     test "simple led strip macro" do
       # ensure our servers are not started
       assert GenServer.whereis(@server_name) == nil
