@@ -5,9 +5,10 @@ as really done. Here the outstanding tasks that I can think of.
 # Tasks
 - [ ] Documentation
   - [x] Provide several notebook examples (v0.2)
-  - [ ] Finish the dsl livebook example (mostly done, but the send_config part is not done yet) (v0.2)
+  - [ ] Finish the dsl livebook example (mostly done, but the send_config part is not done yet) (v0.3)
   - [ ] Add proper API/module documentation (v0.3)
   - [ ] Add type specs (v0.3)
+  - [ ] Improve hexdocs (add livebooks, create cheatsheet) (v0.3)
   - [ ] Add documentation on how to connect the LED strip to a RaspberryPi Zero (with and without level shifter).This could be part of the first example (v0.3 & v0.4)
   - [ ] Add installation instructions (v0.4)
 - [ ] Create a dsl (domain specific language) to (finally) easily program strips
@@ -22,11 +23,12 @@ as really done. Here the outstanding tasks that I can think of.
   - [x] Change the `Leds`' `new` function to an `leds` function. That makes it more natural to read if the Leds module gets imported. (v0.2)
   - [x] Remove unnecessary imports in the examples (v0.2)
   - [x] Add more unit tests, check mix coveralls.html (v0.2)
+  - [x] Upgrade to a final version of circuit_spi v2.0 (whenever available) (v0.2)
   - [ ] Fix flaxy tests (see TODOs) (v0.3)
   - [ ] Perform an extra round of testing on hardware (v0.3)
   - [ ] Connect everything into a supervision tree (to make it more robust) (v0.4)
   - [ ] Enable Telemetry? (v0.5)
-  - [ ] Upgrade to a final version of circuit_spi v2.0 (whenever available) (v0.?)
+  - [ ] Upgrade to a hex released version of circuits_sim as soon as available (v0.?)
 - [ ] LED-component library
   - [ ] Create foundation for a led-component-library that enables defining reusable led components. For example both the clock as well as the weather example have a scale it would be easy to define those as components that would make it easier to defining certain aspects (v0.5)
 - [ ] Increase consumption

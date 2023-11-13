@@ -63,11 +63,11 @@ defmodule Fledex.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:circuits_spi, "~> 2.0-pre.0"},
+      {:circuits_spi, "~> 2.0"},
       {:telemetry, "~> 1.2"},
       {:kino, "~>0.11"},
       {:phoenix_pubsub, "~>2.1"},
-      {:circuits_sim, git: "https://github.com/elixir-circuits/circuits_sim/", optional: true},
+      {:circuits_sim, git: "https://github.com/elixir-circuits/circuits_sim/", only: [:dev, :test]},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       # {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
