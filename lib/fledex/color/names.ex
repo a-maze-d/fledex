@@ -7,6 +7,10 @@ defmodule Fledex.Color.Names do
     name = color.name
     def unquote(name)(), do: unquote(Macro.escape(color)).hex
     def unquote(name)(:info), do: unquote(Macro.escape(color))
+    def unquote(name)(:rgb), do: unquote(Macro.escape(color)).rgb
+    def unquote(name)(:hex), do: unquote(Macro.escape(color)).hex
+    def unquote(name)(:hsv), do: unquote(Macro.escape(color)).hsv
+    def unquote(name)(:hsl), do: unquote(Macro.escape(color)).hsl
   end
 
   @colors colors
@@ -17,15 +21,5 @@ defmodule Fledex.Color.Names do
 
   def names do
     @color_names
-  end
-  def get_color_int(name) when is_atom(name) do
-    # call the function with the same name as the atom
-    colorinfo = apply(__MODULE__, name, [:info])
-    colorinfo.hex
-  end
-  def get_color_sub_pixels(name) when is_atom(name) do
-    # call the function with the same name as the atom
-    colorinfo = apply(__MODULE__, name, [:info])
-    colorinfo.rgb
   end
 end

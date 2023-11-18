@@ -198,7 +198,7 @@ defmodule Fledex.Leds do
   end
   @spec do_update(t, atom, pos_integer) :: t
   defp do_update(leds, atom, offset) when is_atom(atom) do
-    color_int = Names.get_color_int(atom)
+    color_int = apply(Names, atom, [:hex])
     do_update(leds, color_int, offset)
   end
   defp do_update(leds, led, offset) do

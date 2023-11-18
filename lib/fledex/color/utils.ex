@@ -122,7 +122,7 @@ defmodule Fledex.Color.Utils do
     case rgb do
       %{rgb: {r, g, b}} -> {r, g, b}
       %{rgb: x} when is_integer(x) -> convert_to_subpixels(x)
-      x when is_atom(x) -> Names.get_color_sub_pixels(x)
+      x when is_atom(x) -> apply(Names, x, [:rgb])
       x when is_integer(x) -> split_into_subpixels(x)
       x -> x
     end

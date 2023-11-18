@@ -1,0 +1,45 @@
+# 3b Fledex: Everything about Colors
+
+```elixir
+Mix.install([
+  {:fledex, path: "/home/maze/Documents/code/fledex"}
+])
+```
+
+## Color Information
+
+FLedex has an extensive set of predefined colors from [Wikipedia](https://en.wikipedia.org/wiki/List_of_colors:_A%E2%80%93F). You can retrieve those names by calling
+
+<!-- livebook:{"force_markdown":true} -->
+
+```elixir
+Fledex.Color.Names.names()
+```
+
+You can also retrieve the complete data set by calling
+
+<!-- livebook:{"force_markdown":true} -->
+
+```elixir
+Fledex.Color.Names.colors()
+```
+
+Here a list of all the colors:
+
+```elixir
+Kino.DataTable.new(Fledex.Color.Names.colors(),
+  keys: [:name, :rgb, :hex, :hsv, :hsl],
+  sorting_enabled: true
+)
+```
+
+You can also retrieve the information from a specific color, like `:almond` in the following way
+
+* `almond/0`: Every color has it's own function and the :hex value (represented as integer) will be returned
+* `almond/1`: This allows the retrieve a specific representation. It should be noted, that the color functions (that are oftne just approximations), do not provide the same results. The values returned here are the ones as defined on the Wikipedia page:
+  * `:info`: This retrieves the full data set
+  * `:hex`: This is the same as `almond/0`
+  * `:rgb`: This retrieves an RGB struct, i.e. `{r, g, b}
+  * `:hsv`: This retrieves an HSV struct, i.e. `{h, s, v}
+  * `:hsl`: This retrieves an HSL struct, i.e. `{h, s, l}
+

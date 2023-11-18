@@ -74,8 +74,10 @@ defmodule Fledex.ColorTest do
       assert Names.vermilion2() == 14_235_678
     end
     test "test quick access functions" do
-      assert 14_235_678 == Names.get_color_int(:vermilion2)
-      assert {216, 56, 30} == Names.get_color_sub_pixels(:vermilion2)
+      assert 14_235_678 == Names.vermilion2(:hex)
+      assert {216, 56, 30} == Names.vermilion2(:rgb)
+      assert {5,193, 122} == Names.vermilion2(:hsl)
+      assert {5, 219, 216} == Names.vermilion2(:hsv)
       assert :vermilion2 in Names.names()
     end
   end
