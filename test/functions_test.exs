@@ -1,4 +1,4 @@
-defmodule Fledex.FunctionsTest do
+defmodule Fledex.Leds.FunctionsTest do
   use ExUnit.Case, async: true
 
   import Fledex.Color.Correction.Color
@@ -8,7 +8,7 @@ defmodule Fledex.FunctionsTest do
 
   alias Fledex.Color.Conversion.Rainbow
   alias Fledex.Color.Correction
-  alias Fledex.Functions
+  alias Fledex.Leds.Functions
 
   doctest Functions
 
@@ -201,16 +201,16 @@ defmodule Fledex.FunctionsTest do
     end
   end
   describe "test hsv2rgb function" do
-    assert [{173, 14, 5}] == Fledex.Functions.hsv2rgb(
+    assert [{173, 14, 5}] == Functions.hsv2rgb(
       [{5, 219, 216}],
       &Rainbow.hsv2rgb/2,
       &Correction.color_correction_none/1
     )
-    assert [{173, 14, 5}] == Fledex.Functions.hsv2rgb(
+    assert [{173, 14, 5}] == Functions.hsv2rgb(
       [{5, 219, 216}],
       &Rainbow.hsv2rgb/2
     )
-    assert [{173, 14, 5}] == Fledex.Functions.hsv2rgb(
+    assert [{173, 14, 5}] == Functions.hsv2rgb(
       [{5, 219, 216}]
     )
   end

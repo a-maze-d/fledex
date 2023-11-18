@@ -60,3 +60,7 @@ We parse the result, depending on the animation into the different aspects of in
 We then define a sequence of `Leds` of the right length (`24` for `hour`s, and `60` for `minute`s and `second`s). We switch on only a single light in some color at the correct position (with the offset corresponding to `hour`, `minute` or `second`)
 
 Note: in the clock example we defined a static sequence of `Leds` and offsetted it. This requires the definition of a `send_config_func`. We will look on how to do it with the DSL as a next step.
+
+```elixir
+Kino.DataTable.new(Fledex.Color.Names.colors())
+```

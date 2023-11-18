@@ -6,7 +6,7 @@ defmodule Fledex.Leds do
   alias Fledex.Color.Names
   alias Fledex.Color.Types
   alias Fledex.Color.Utils
-  alias Fledex.Functions
+  alias Fledex.Leds.Functions
   alias Fledex.LedsDriver
 
   @enforce_keys [:count, :leds, :opts]

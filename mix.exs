@@ -1,10 +1,12 @@
 defmodule Fledex.MixProject do
   use Mix.Project
 
+  @version "0.2.0"
+  @source_url "https://github.com/a-maze-d/fledex"
   def project do
     [
       app: :fledex,
-      version: "0.2.0",
+      version: @version,
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env),
       start_permanent: Mix.env() == :prod,
@@ -12,7 +14,7 @@ defmodule Fledex.MixProject do
       package: package(),
       deps: deps(),
       name: "fledex",
-      source_url: "https://github.com/a-maze-d/fledex",
+      source_url: @source_url,
       # dialyzer: [
       #   flags: [:missing_return, :extra_return, :unmatched_returns, :error_handling, :underspecs]
       # ],
@@ -22,6 +24,8 @@ defmodule Fledex.MixProject do
           Fledex.Test.CircuitsSim.Device.WS2801
         ],
       ],
+      docs: docs(),
+      aliases: aliases(),
       preferred_cli_env: [
         coveralls: :test,
         "coveralls.detail": :test,
@@ -55,6 +59,7 @@ defmodule Fledex.MixProject do
   defp package() do
     [
       name: "fledex",
+      maintainers: ["Matthias Reik"],
       licenses: ["Apache-2.0"],
       links: %{"GitHub" => "https://github.com/a-maze-d/fledex"}
     ]
@@ -72,6 +77,52 @@ defmodule Fledex.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       # {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.18", only: :test},
+      # {:libcluster, "~> 3.3"}
     ]
+  end
+  defp docs do
+    [
+      source_ref: "v#{@version}",
+      source_url: @source_url,
+      main: "readme-1",
+      extras: [
+        "README.md",
+        "docs/architecture.md",
+        "livebooks/README.md",
+        "livebooks/1_first_steps_with_an_led_strip.livemd",
+        "livebooks/2_fledex_first_steps.livemd",
+        "livebooks/3_fledex_animations.livemd",
+        "livebooks/4_fledex_clock_example.livemd",
+        "livebooks/5_fledex_weather_example.livemd",
+        "livebooks/6_fledex_dsl.livemd"
+      ],
+      groups_for_extras: [
+        "LiveBooks": ~r/livebooks/
+      ],
+      groups_for_modules: [
+        "Core": [
+          Fledex,
+          Fledex.LedsDriver,
+          Fledex.Leds,
+          Fledex.Leds.Functions,
+          Fledex.Application,
+          Fledex.LedAnimationManager,
+          Fledex.LedAnimator
+        ],
+        "Utils": ~r/Fledex.Utils/,
+        "Drivers": ~r/Fledex.LedStripDriver/,
+        "Color": ~r/Fledex.Color/,
+      ]
+    ]
+  end
+  defp aliases do
+    [docs: ["docs", &copy_doc_images/1]]
+  end
+  defp copy_doc_images(_) do
+    File.cp(
+      "docs/architecture.drawio.png",
+      "doc/architecture.drawio.png",
+      on_conflict: fn (_source, _destination) -> true end
+    )
   end
 end

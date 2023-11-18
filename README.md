@@ -11,7 +11,7 @@ Quite a lot of inspiration came from the [FastLED project](http://fastled.io/) a
 ## Installation
 
 The library is [available in Hex](https://hex.pm/packages/fledex), the package can be installed
-by adding `fledex` to your list of dependencies in `mix.exs`:
+by adding `:fledex` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
@@ -41,6 +41,10 @@ Leds.leds(50)
   |> Leds.send() # :default namespace is used as default
 ```
 All other LEDs would be set to off
+
+The above approach is rather cumbersome with a lot of LEDs, and would be even more difficult if you want to animate it. Thus, instead of managing the LED strip yourself, you should use the FLedex DSL.
+
+Take a look at the [Livebook examples](README.md#livebook) on how to use the DSL
 
 ## Livebook
 You can find some [livebooks](livebooks/README.md) files that show you how to use the library in a notebook (with and without hardware). You should be able to do most of your development on a computer (emulating the LED strip with a KinoDriver) before adjusting it to the real hardware (with the SpiDriver). On real hardware you can even run it with serveral drivers at the same time.

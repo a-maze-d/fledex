@@ -29,7 +29,8 @@ defmodule Fledex.Test do
 
       # and check that both Fledex and Fledex.Leds are imported
       assert :erlang.fun_info(&fledex_loaded/0) # from Fledex
-      assert :erlang.fun_info(&leds/1) # from Fledex.Leds
+      assert :erlang.fun_info(&leds/1)          # from Fledex.Leds
+      assert :erlang.fun_info(&red/0)           # from Fledex.Color.Names
 
     end
 

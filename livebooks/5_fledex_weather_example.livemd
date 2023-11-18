@@ -3,7 +3,7 @@
 ```elixir
 Mix.install([
   {:fledex, "~>0.2"},
-  {:json, "~>1.4"},
+  {:jason, "~>1.2"},
 ])
 
 # we define a couple of aliases to not have to type that much
@@ -175,7 +175,7 @@ defmodule CallUrlPeriodic do
       :httpc.request(:get, {String.to_charlist(state.url), []}, [], body_format: :binary)
 
     {{_, 200, ~c"OK"}, _headers, body} = resp
-    json = JSON.decode!(body)
+    json = Jason.decode!(body)
     temperature = json["current"]["temperature_2m"]
     PubSub.broadcast(:fledex, "trigger", {:trigger, %{temperature: temperature}})
 
@@ -189,3 +189,6 @@ end
     900_000
   )
 ```
+
+# Annotations
+* To decode wmo codes: https://www.nodc.noaa.gov/archive/arc0021/0002199/1.1/data/0-data/HTML/WMO-CODE/WMO4677.HTM

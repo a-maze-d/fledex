@@ -64,6 +64,8 @@ LedAnimationManager.register_animations(:john, %{
 
 We can now redefine our animation by regisetering different functions. Here we define a 3 led wide red dot that moves slowly from right to left.
 
+Note: we are starting to use color names instead of defining it through an integer. If you want to learn more, then take a small detour to the [Color livebook](./3b_fledex_more about colors.livemd)
+
 ```elixir
 import Bitwise
 

@@ -35,8 +35,9 @@ defmodule Fledex do
 
     quote bind_quoted: [opts: opts] do
       import Fledex
-      # import also the Leds definitions so no namespace is required
+      # import also the Leds and the color name definitions so no namespace are required
       import Fledex.Leds
+      import Fledex.Color.Names
       # let's start our animation manager. The manager makes sure only one will be started
       if not Keyword.get(opts, :dont_start, false) do
         Fledex.LedAnimationManager.start_link()

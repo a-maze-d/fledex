@@ -5,7 +5,8 @@ defmodule Fledex.Color.Names do
   colors = LoadUtils.load_color_file(@external_resource)
   for color <- colors do
     name = color.name
-    def unquote(name)(), do: unquote(Macro.escape(color))
+    def unquote(name)(), do: unquote(Macro.escape(color)).hex
+    def unquote(name)(:info), do: unquote(Macro.escape(color))
   end
 
   @colors colors
@@ -19,12 +20,12 @@ defmodule Fledex.Color.Names do
   end
   def get_color_int(name) when is_atom(name) do
     # call the function with the same name as the atom
-    colorinfo = apply(__MODULE__, name, [])
+    colorinfo = apply(__MODULE__, name, [:info])
     colorinfo.hex
   end
   def get_color_sub_pixels(name) when is_atom(name) do
     # call the function with the same name as the atom
-    colorinfo = apply(__MODULE__, name, [])
+    colorinfo = apply(__MODULE__, name, [:info])
     colorinfo.rgb
   end
 end
