@@ -45,6 +45,7 @@ defmodule Fledex.LedAnimator do
   alias Fledex.Utils.PubSub
 
   @type ledAnimatorConfig :: %{
+      optional(:type) => atom,
       optional(:def_func) => (map -> Leds.t),
       optional(:send_config_func) => (map -> map),
       optional(:counter) => integer,
@@ -55,6 +56,7 @@ defmodule Fledex.LedAnimator do
 
   @type ledAnimatorState :: %{
     :triggers => map,
+    :type => atom,
     :def_func => ((integer) -> Leds.t()),
     :send_config_func => ((integer) -> map()),
     :strip_name => atom,
@@ -74,6 +76,9 @@ defmodule Fledex.LedAnimator do
   @spec config(atom, atom, ledAnimatorConfig) :: :ok
   def config(strip_name, animator_name, config) do
     GenServer.cast(build_server_name(strip_name, animator_name), {:config, config})
+  end
+  def get_info(strip_name, animator_name) do
+    GenServer.call(build_server_name(strip_name, animator_name), :info)
   end
 
   @spec shutdown(atom, atom) :: :ok
@@ -95,6 +100,7 @@ defmodule Fledex.LedAnimator do
   def init({init_args, strip_name, animator_name}) do
     state = %{
       triggers: %{},
+      type: :animation,
       def_func: &default_def_func/1,
       send_config_func: &default_send_config_func/1,
       strip_name: strip_name,
@@ -103,7 +109,10 @@ defmodule Fledex.LedAnimator do
     state = update_config(state, init_args)
 
     :ok= LedsDriver.define_namespace(state.strip_name, state.animator_name)
-    :ok = PubSub.subscribe(:fledex, "trigger")
+    case state.type do
+      :animation -> :ok = PubSub.subscribe(:fledex, "trigger")
+      # :static -> we don't subscribe because we paint only once
+    end
 
     {:ok, state}
   end
@@ -151,6 +160,7 @@ defmodule Fledex.LedAnimator do
   @spec update_config(ledAnimatorState, ledAnimatorConfig) :: ledAnimatorState
   def update_config(state, config) do
     %{
+      type: config[:type] || state.type,
       triggers: Map.merge(state.triggers, config[:triggers] || state[:triggers]),
       def_func: Map.get(config, :def_func, &default_def_func/1),
       send_config_func: Map.get(config, :send_config_func, &default_send_config_func/1),
@@ -165,6 +175,12 @@ defmodule Fledex.LedAnimator do
     state = update_config(state, config)
 
     {:noreply, state}
+  end
+
+  @impl true
+  @spec handle_call(:info, {pid, any}, ledAnimatorState) :: {:reply, {:ok, map}, ledAnimatorState}
+  def handle_call(:info, _from, state) do
+    {:reply, {:ok, state}, state}
   end
 
   @impl true

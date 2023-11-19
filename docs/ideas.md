@@ -103,5 +103,5 @@ end
 ```
 Through the ops it should be possible to specify the speed, it should be possible to synchronize (? not quite sure how that would work)
 
-We also want to have a `live_loop` so that things can be changed on the fly.
-Two `live_loop`s will mix the colors together from the two loops 
+We also want to have a `animation` so that things can be changed on the fly.
+Two `animation`s will mix the colors together from the two loops 

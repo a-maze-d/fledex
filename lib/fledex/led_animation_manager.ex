@@ -31,7 +31,7 @@ defmodule Fledex.LedAnimationManager do
     GenServer.call(__MODULE__, {:register_animations, strip_name, configs})
   end
   def get_info(strip_name \\ :all) do
-    GenServer.call(__MODULE__, {:get_info, strip_name})
+    GenServer.call(__MODULE__, {:info, strip_name})
   end
 
   ### server side
@@ -60,7 +60,7 @@ defmodule Fledex.LedAnimationManager do
   def handle_call({:unregister_strip, strip_name}, _pid, state) when is_atom(strip_name) do
     {:reply, :ok, unregister_strip(strip_name, state)}
   end
-  def handle_call({:get_info, strip_name}, _from, state) do
+  def handle_call({:info, strip_name}, _from, state) do
     return_value = case strip_name do
       :all -> state
       other -> state[other]
@@ -115,8 +115,13 @@ defmodule Fledex.LedAnimationManager do
 
   defp create_animators(strip_name, created_animations) do
     Enum.each(created_animations, fn {animator_name, config} ->
+      case config[:type] do
       # Logger.info("creating: #{strip_name}-#{animator_name}")
-      LedAnimator.start_link(config, strip_name, animator_name)
+        nil -> LedAnimator.start_link(config, strip_name, animator_name)
+        :animation -> LedAnimator.start_link(config, strip_name, animator_name)
+        # :component ->
+        # :static -> LedAnimator.start_link(config, strip_name, animator_name)
+      end
     end)
   end
 

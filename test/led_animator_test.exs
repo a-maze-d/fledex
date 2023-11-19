@@ -42,7 +42,8 @@ defmodule Fledex.LedAnimatorTest do
         send_config_func: &default_send_config_func/1,
         strip_name: :test_strip,
         animator_name: :test_animator,
-        triggers: %{}
+        triggers: %{},
+        type: :animation
       }
 
       {:ok, state} = Fledex.LedAnimator.init({init_args, :test_strip, :test_animator})

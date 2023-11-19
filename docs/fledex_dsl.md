@@ -4,12 +4,12 @@ This document describes the dsl (domain specific language) that I'm trying to cr
 # Ingredients
 We have several ingredients that control different aspects:
 1. `led_strip` enclosure defines a new led_strip. This should spin up a LedDriver instance. If this is not specified, a default should be assumed
-2. `live_loop` enclosure defines a single animate-able led sequence within an `led_strip`
+2. `animation` enclosure defines a single animate-able led sequence within an `led_strip`
 
 # Configuration
 Both parts need to be configurable through some simple `with` statements. Here some potential examples
 ```
-live_loop
+animation
     with loop_delay: 1_000,
     with animation_function: &move_one_left/1,
     with triggers: [:timer, :counter]

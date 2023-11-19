@@ -3,36 +3,31 @@ defmodule Fledex do
   This module should provide some simple macros that allow to define the
   led strip and to update it. The code you would write (in livebook) would
   look something like the following:
-  iex> use Fledex
-  iex> led_strip do
-          live_loop :john, send_config: %{offset: counter}, delay_config: counter do
-            config = %{
-              num_leds: 50,
-              reversed: true
-            }
+  ``` elixir
+    use Fledex
+    led_strip :strip_name do
+      animation :john do
+        config = %{
+          num_leds: 50,
+          reversed: true
+        }
 
-            leds(50)
-              |> func(:rainbow, config)
-          end
+        leds(50)
+          |> func(:rainbow, config)
       end
+    end
+  ```
   """
 
   @doc """
-  This function should not be used. It's only here for tests and can be removed
+  This function should not be used. It's only here for tests and might be removed
   any any point in time. It only returns `:ok`
   """
-  # @deprecated "This is only used for tests and hopefully can be removed soon"
   def fledex_loaded do
     :ok
   end
 
   defmacro __using__(opts) do
-    # opts = if Macro.quoted_literal?(opts) do
-    #   Macro.prewalk(opts, &expand_alias(&1, __CALLER__))
-    # else
-    #   opts
-    # end
-
     quote bind_quoted: [opts: opts] do
       import Fledex
       # import also the Leds and the color name definitions so no namespace are required
@@ -45,26 +40,20 @@ defmodule Fledex do
     end
   end
 
-  # Note: we could make this function private but we use it to ensure that Fledex is
-  #       loaded correctly.
-  # def expand_alias({:__aliases__, _meta, _args} = alias, env) do
-  #   Macro.expand(alias, %{env | function: {:action, 2}})
-  # end
-  # def expand_alias(other, _env), do: other
-
   @doc """
-    This introduces a new `live_loop` (animation) that will be played over
+    This introduces a new `animation` (animation) that will be played over
     and over again until it is changed. Therefore we we give it a name to
     know whether it changes
   """
-  defmacro live_loop(loop_name, loop_options \\ [], do: block) do
+  defmacro animation(name, options \\ [], do: block) do
     def_func_ast = {:fn, [], block}
-    send_config = loop_options[:send_config]  || &Fledex.LedAnimator.default_send_config_func/1
+    send_config = options[:send_config]  || &Fledex.LedAnimator.default_send_config_func/1
     # Logger.warning(inspect block)
     quote do
       {
-       unquote(loop_name),
+       unquote(name),
         %{
+          type: :animation,
           def_func: unquote(def_func_ast),
           send_config_func: unquote(send_config)
         }
@@ -74,13 +63,39 @@ defmodule Fledex do
   end
 
   @doc """
+  The static macro is equal to the animation macro, but it will not receive any triggers. Therefore,
+  there will not be any repainting and the `def_func` will not receive any parameter.
+  It will only be painted once at definition time.
+  """
+  defmacro static(name, options \\ [], do: block) do
+    def_func_ast = {:fn, [], [{:->, [], [[{:_triggers, [], Elixir}], block]}]}
+    send_config = options[:send_config]  || &Fledex.LedAnimator.default_send_config_func/1
+    quote do
+      {
+        unquote(name),
+        %{
+          type: :static,
+          def_func: unquote(def_func_ast),
+          send_config_func: unquote(send_config)
+        }
+      }
+    end
+      # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
+  end
+  # defmacro component(name, options \\ [], do: block) do
+
+  # end
+
+  @doc """
     This introduces a new led_strip. Probably we only have a single
     led strip and then the default name (the module name) will be used.
   """
   defmacro led_strip(strip_name, strip_options \\ :kino, do: block) do
     # Logger.error(inspect block)
     {_ast, configs_ast} = Macro.prewalk(block, [], fn
-       {:live_loop, meta, children}, acc -> {{:live_loop, meta, children}, [{:live_loop, meta, children} | acc]}
+       {:animation, meta, children}, acc -> {{:animation, meta, children}, [{:animation, meta, children} | acc]}
+       {:component, meta, children}, acc -> {{:component, meta, children}, [{:component, meta, children} | acc]}
+       {:static, meta, children}, acc -> {{:static, meta, children}, [{:static, meta, children} | acc]}
        other, acc -> {other, acc}
     end)
     # Logger.error(inspect configs_ast)
@@ -93,4 +108,7 @@ defmodule Fledex do
     end
       # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
+
+  # TODO: Add a component
+  # TODO: Add a static definition (that does not animate)
 end

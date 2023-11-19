@@ -8,14 +8,16 @@ defmodule Fledex.Color.LoadUtils do
     |> Stream.drop(1)
     |> Stream.with_index()
     |> Stream.map(fn {line, index} -> parse_line(index, line) end)
-    |> Stream.map(fn [index, name, hex, r, g, b, h, s1, l1, s2, v2, _sources] ->
+    |> Stream.map(fn [index, name, hex, r, g, b, h, s1, l1, s2, v2, source] ->
         %{
             index: index,
             name: convert_to_atom(name),
+            descriptive_name: String.trim(name),
             hex: clean_and_convert(hex),
             rgb: {to_byte(r), to_byte(g), to_byte(b)},
             hsl: {to_byte(h), to_byte(s1), to_byte(l1)},
-            hsv: {to_byte(h), to_byte(s2), to_byte(v2)}
+            hsv: {to_byte(h), to_byte(s2), to_byte(v2)},
+            source: String.trim(source)
         }
         end)
     |> Enum.to_list()

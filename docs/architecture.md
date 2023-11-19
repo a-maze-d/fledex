@@ -42,4 +42,4 @@ For example: we want to be able to check the current temperature in regular inte
 
 # Final Notes
 ## Naming
-The led naming, the namespace naming, and the `LedsDriver` server naming should all be driven by the `Fledex`  DSL. Even though it would be possible to have different names it helps to align them. The `led_strip` name becomes the `LedsDriver` server name. The `live_loop` name becomes the namespace name and combined with the `led_strip` name the `LedAnimator` server name.
+The led naming, the namespace naming, and the `LedsDriver` server naming should all be driven by the `Fledex`  DSL. Even though it would be possible to have different names it helps to align them. The `led_strip` name becomes the `LedsDriver` server name. The `animation` name becomes the namespace name and combined with the `led_strip` name the `LedAnimator` server name.

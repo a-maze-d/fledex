@@ -4,6 +4,7 @@ defmodule Fledex.Test do
   require Logger
 
   alias Fledex.LedAnimationManager
+  alias Fledex.LedAnimator
 
   @server_name :john
   describe "test macros" do
@@ -56,9 +57,9 @@ defmodule Fledex.Test do
       assert GenServer.whereis(LedAnimationManager) == nil
     end
 
-    test "simple live_loop macro" do
+    test "simple animation macro" do
       use Fledex, dont_start: true
-      config = live_loop :merry do
+      config = animation :merry do
         _triggers -> leds(10)
       end
       assert {:merry, %{def_func: def_func, send_config_func: send_config_func}} = config
@@ -66,10 +67,10 @@ defmodule Fledex.Test do
       assert send_config_func.(%{}) == %{}
     end
 
-    test "simple live_loop macro (with led_strip)" do
+    test "simple animation macro (with led_strip)" do
       use Fledex
       led_strip :john, :none do
-        live_loop :merry do
+        animation :merry do
          _triggers -> leds(10)
         end
       end
@@ -84,18 +85,18 @@ defmodule Fledex.Test do
     test "complex scenario" do
       use Fledex
       led_strip :doe, :none do
-        live_loop :caine do
+        animation :caine do
           _triggers -> leds(1)
         end
-        live_loop :smith do
+        animation :smith do
           _triggers -> leds(2)
         end
       end
       led_strip :john, :none do
-        live_loop :merry do
+        animation :merry do
          _triggers -> leds(10)
         end
-        live_loop :kate do
+        animation :kate do
           _triggers -> leds(11)
         end
       end
@@ -114,5 +115,28 @@ defmodule Fledex.Test do
       assert configs.doe.caine.send_config_func.(%{}) == %{}
       assert configs.doe.smith.send_config_func.(%{}) == %{}
    end
+  end
+  # static animations are internally animations, but they don't
+  # really animate since they don't register for updates
+  describe "static animation" do
+    test "no updates" do
+      use Fledex
+      led_strip :sten, :none do
+        static :svenson do
+          leds(5)
+        end
+      end
+
+      Process.sleep(500) # give a chance to triggers (even though we shouldn't collect any)
+      {:ok, configs} = LedAnimationManager.get_info()
+
+      # ensure that the block does not expect any triggers even though
+      # the function actually does contain it
+      assert configs.sten.svenson.def_func.(%{}) == leds(5)
+
+      info = LedAnimator.get_info(:sten, :svenson)
+      assert info.triggers == %{}, # there should not be any triggers, since we are static
+      assert info.type == :static
+    end
   end
 end

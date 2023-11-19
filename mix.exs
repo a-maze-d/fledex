@@ -92,6 +92,7 @@ defmodule Fledex.MixProject do
         "livebooks/1_first_steps_with_an_led_strip.livemd",
         "livebooks/2_fledex_first_steps.livemd",
         "livebooks/3_fledex_animations.livemd",
+        "livebooks/3b_fledex_more_about_colors.livemd",
         "livebooks/4_fledex_clock_example.livemd",
         "livebooks/5_fledex_weather_example.livemd",
         "livebooks/6_fledex_dsl.livemd"
@@ -112,11 +113,17 @@ defmodule Fledex.MixProject do
         "Utils": ~r/Fledex.Utils/,
         "Drivers": ~r/Fledex.LedStripDriver/,
         "Color": ~r/Fledex.Color/,
+      ],
+      groups_for_docs: [
+        "Color Names": & &1[:color_name]
       ]
     ]
   end
   defp aliases do
-    [docs: ["docs", &copy_doc_images/1]]
+    [
+      docs: ["docs", &copy_doc_images/1],
+      test: ["coveralls.html"]
+    ]
   end
   defp copy_doc_images(_) do
     File.cp(

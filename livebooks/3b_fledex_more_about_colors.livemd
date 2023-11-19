@@ -8,7 +8,7 @@ Mix.install([
 
 ## Color Information
 
-FLedex has an extensive set of predefined colors from [Wikipedia](https://en.wikipedia.org/wiki/List_of_colors:_A%E2%80%93F). You can retrieve those names by calling
+Fledex has an extensive set of predefined colors from [Wikipedia](https://en.wikipedia.org/wiki/List_of_colors:_A%E2%80%93F). You can retrieve those names by calling
 
 <!-- livebook:{"force_markdown":true} -->
 
@@ -37,9 +37,15 @@ You can also retrieve the information from a specific color, like `:almond` in t
 
 * `almond/0`: Every color has it's own function and the :hex value (represented as integer) will be returned
 * `almond/1`: This allows the retrieve a specific representation. It should be noted, that the color functions (that are oftne just approximations), do not provide the same results. The values returned here are the ones as defined on the Wikipedia page:
-  * `:info`: This retrieves the full data set
+  * `:all`: This retrieves the full data set
   * `:hex`: This is the same as `almond/0`
-  * `:rgb`: This retrieves an RGB struct, i.e. `{r, g, b}
-  * `:hsv`: This retrieves an HSV struct, i.e. `{h, s, v}
-  * `:hsl`: This retrieves an HSL struct, i.e. `{h, s, l}
+  * `:rgb`: This retrieves an RGB struct, i.e. `{r, g, b}`
+  * `:hsv`: This retrieves an HSV struct, i.e. `{h, s, v}`
+  * `:hsl`: This retrieves an HSL struct, i.e. `{h, s, l}`
+  * `:index`: The index of this color in the list of all colors
+  * `:desriptive_name`: a string with name (from this the Atom is derived)
+  * `:source`: Information where the color comes from, see Wikipedia for more details
+* `info/1` and `info/2`: They are convenience functions when you only have an atom as the color name. They map to the functions, thus `info(:almond)` is equal to `almond()` and `info(:almond, what)` is equal to `almond(what)`.
 
+## Color Conversions
+More info the follow

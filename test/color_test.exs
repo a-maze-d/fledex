@@ -59,26 +59,64 @@ defmodule Fledex.ColorTest do
         hsv: {5, 219, 216},
         index: 828,
         name: :vermilion2,
-        rgb: {216, 56, 30}
+        rgb: {216, 56, 30},
+        descriptive_name: "Vermilion2",
+        source: ""
       }]
     end
     test "calling by name" do
-      assert Names.vermilion2(:info) == %{
+      assert Names.vermilion2(:all) == %{
         hex: 14_235_678,
         hsl: {5, 193, 122},
         hsv: {5, 219, 216},
         index: 828,
         name: :vermilion2,
+        descriptive_name: "Vermilion2",
+        source: "",
         rgb: {216, 56, 30}
       }
-      assert Names.vermilion2() == 14_235_678
+    end
+    test "calling by name with atom" do
+      assert Names.info(:vermilion2, :all) == %{
+        hex: 14_235_678,
+        hsl: {5, 193, 122},
+        hsv: {5, 219, 216},
+        index: 828,
+        name: :vermilion2,
+        descriptive_name: "Vermilion2",
+        source: "",
+        rgb: {216, 56, 30}
+      }
     end
     test "test quick access functions" do
+      assert 14_235_678 == Names.vermilion2()
       assert 14_235_678 == Names.vermilion2(:hex)
       assert {216, 56, 30} == Names.vermilion2(:rgb)
-      assert {5,193, 122} == Names.vermilion2(:hsl)
+      assert {5, 193, 122} == Names.vermilion2(:hsl)
       assert {5, 219, 216} == Names.vermilion2(:hsv)
+      assert 828 == Names.vermilion2(:index)
+      assert "Vermilion2" == Names.vermilion2(:descriptive_name)
+      assert "" == Names.vermilion2(:source)
+      assert "Crayola" == Names.absolute_zero(:source)
+
       assert :vermilion2 in Names.names()
+    end
+    test "test quick access functions (with atom)" do
+      assert 14_235_678 == Names.info(:vermilion2)
+      assert 14_235_678 == Names.info(:vermilion2, :hex)
+      assert {216, 56, 30} == Names.info(:vermilion2, :rgb)
+      assert {5, 193, 122} == Names.info(:vermilion2, :hsl)
+      assert {5, 219, 216} == Names.info(:vermilion2, :hsv)
+      assert 828 == Names.info(:vermilion2, :index)
+      assert "Vermilion2" == Names.info(:vermilion2, :descriptive_name)
+      assert "" == Names.info(:vermilion2, :source)
+      assert "Crayola" == Names.info(:absolute_zero, :source)
+
+      assert :vermilion2 in Names.names()
+    end
+    test "color name import" do
+      import Fledex.Color.Names
+      assert 14_235_678 == vermilion2()
     end
   end
   describe "test color corrections" do

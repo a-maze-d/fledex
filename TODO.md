@@ -26,6 +26,7 @@ as really done. Here the outstanding tasks that I can think of.
   - [x] Add more unit tests, check mix coveralls.html (v0.2)
   - [x] Upgrade to a final version of circuit_spi v2.0 (whenever available) (v0.2)
   - [x] import the Fledex.Color.Names so colors can easily be defined through function calls instead of atom names )v0.3)
+  - [x] simplify the Fledex.Color.Names module (v0.3)
   - [ ] Fix flaxy tests (see TODOs) (v0.3)
   - [ ] Perform an extra round of testing on hardware (v0.3)
   - [ ] Enable Telemetry? (v0.5)
