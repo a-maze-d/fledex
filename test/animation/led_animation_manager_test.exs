@@ -87,3 +87,41 @@ defmodule Fledex.Animation.LedAnimationManagerTest do
     end
   end
 end
+
+defmodule Fledex.Animation.LedAnimationManagerTest2 do
+  defmodule TestAnimator do
+    @behaviour Fledex.Animation.BaseAnimation
+    def start_link(_config, _strip_name, _animation_name) do
+      pid = Process.spawn(fn -> Process.sleep(1_000) end, [:link])
+      Process.register(pid, :hello)
+      {:ok, pid}
+    end
+    def config(_strip_name, _animation_name, _config) do
+      :ok
+    end
+    def shutdown(_strip_name, _animation_name) do
+      :ok
+    end
+  end
+
+  use ExUnit.Case
+
+  alias Fledex.Animation.LedAnimationManager
+
+  describe "Animation with wrong name" do
+    test "register animation with a broken server_name" do
+      {:ok, pid} = LedAnimationManager.start_link(%{test: TestAnimator})
+      :ok = LedAnimationManager.register_strip(:some_strip, :none)
+
+      config = %{
+        t1: %{
+          type: :test
+        }
+      }
+      response = LedAnimationManager.register_animations(:some_strip, config)
+
+      assert response == {:error, "Animator is wrongly configured"}
+      Process.exit(pid, :normal)
+    end
+  end
+end

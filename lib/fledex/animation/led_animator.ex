@@ -37,12 +37,13 @@ defmodule Fledex.Animation.LedAnimator do
    Both of them can be set by defining an appropriate function and setting and resetting a reference at will
   """
   @behaviour GenServer
+  @behaviour Fledex.Animation.BaseAnimation
 
   require Logger
 
+  alias Fledex.Animation.BaseAnimation
   alias Fledex.Leds
   alias Fledex.LedsDriver
-  alias Fledex.Utils.Naming
   alias Fledex.Utils.PubSub
 
   @type ledAnimatorConfig :: %{
@@ -64,42 +65,40 @@ defmodule Fledex.Animation.LedAnimator do
     :animator_name => atom
   }
   ### client side
+  @impl BaseAnimation
   @spec start_link(config :: ledAnimatorConfig, strip_name::atom, animator_name::atom) :: GenServer.on_start()
   def start_link(config, strip_name, animator_name) do
     {:ok, _pid} = GenServer.start_link(__MODULE__, {config, strip_name, animator_name},
-                    name: Naming.build_strip_animation_name(strip_name, animator_name))
+                    name: BaseAnimation.build_strip_animation_name(strip_name, animator_name))
   end
 
+  @impl BaseAnimation
   @spec config(atom, atom, ledAnimatorConfig) :: :ok
   def config(strip_name, animator_name, config) do
-    GenServer.cast(Naming.build_strip_animation_name(strip_name, animator_name), {:config, config})
-  end
-  def get_info(strip_name, animator_name) do
-    GenServer.call(Naming.build_strip_animation_name(strip_name, animator_name), :info)
+    GenServer.cast(BaseAnimation.build_strip_animation_name(strip_name, animator_name), {:config, config})
   end
 
+  @impl BaseAnimation
+  @spec get_info(strip_name :: atom, animation_name :: atom) :: {:ok, any}
+  def get_info(strip_name, animator_name) do
+    GenServer.call(BaseAnimation.build_strip_animation_name(strip_name, animator_name), :info)
+  end
+
+  @impl BaseAnimation
   @spec shutdown(atom, atom) :: :ok
   def shutdown(strip_name, animator_name) do
-    GenServer.stop(Naming.build_strip_animation_name(strip_name, animator_name), :normal)
+    GenServer.stop(BaseAnimation.build_strip_animation_name(strip_name, animator_name), :normal)
   end
 
   ### server side
-  @default_leds Leds.leds(30)
-  def default_def_func(_triggers) do
-    @default_leds
-  end
-  def default_send_config_func(_triggers) do
-    %{}
-  end
-
-  @impl true
+  @impl GenServer
   @spec init({ledAnimatorConfig, atom, atom}) :: {:ok, ledAnimatorState, {:continue, :paint_once}}
   def init({init_args, strip_name, animator_name}) do
     state = %{
       triggers: %{},
       type: :animation,
-      def_func: &default_def_func/1,
-      send_config_func: &default_send_config_func/1,
+      def_func: &BaseAnimation.default_def_func/1,
+      send_config_func: &BaseAnimation.default_send_config_func/1,
       strip_name: strip_name,
       animator_name: animator_name
     }
@@ -114,13 +113,13 @@ defmodule Fledex.Animation.LedAnimator do
     {:ok, state, {:continue, :paint_once}}
   end
 
-  @impl true
+  @impl GenServer
   @spec handle_continue(:paint_once, ledAnimatorState) :: {:noreply, ledAnimatorState}
   def handle_continue(:paint_once, state) do
     {:noreply, update_leds(state)}
   end
 
-  @impl true
+  @impl GenServer
   @spec handle_info({:trigger, map}, ledAnimatorState) :: {:noreply, ledAnimatorState}
   def handle_info({:trigger, triggers}, %{strip_name: strip_name} = state)
       when is_map_key(triggers, strip_name) do
@@ -164,14 +163,14 @@ defmodule Fledex.Animation.LedAnimator do
     %{
       type: config[:type] || state.type,
       triggers: Map.merge(state.triggers, config[:triggers] || state[:triggers]),
-      def_func: Map.get(config, :def_func, &default_def_func/1),
-      send_config_func: Map.get(config, :send_config_func, &default_send_config_func/1),
+      def_func: Map.get(config, :def_func, &BaseAnimation.default_def_func/1),
+      send_config_func: Map.get(config, :send_config_func, &BaseAnimation.default_send_config_func/1),
       strip_name: state.strip_name,
       animator_name: state.animator_name
     }
   end
 
-  @impl true
+  @impl GenServer
   @spec handle_cast({:config, ledAnimatorConfig}, ledAnimatorState) :: {:noreply, ledAnimatorState}
   def handle_cast({:config, config}, state) do
     state = update_config(state, config)
@@ -179,13 +178,13 @@ defmodule Fledex.Animation.LedAnimator do
     {:noreply, update_leds(state)}
   end
 
-  @impl true
+  @impl GenServer
   @spec handle_call(:info, {pid, any}, ledAnimatorState) :: {:reply, {:ok, map}, ledAnimatorState}
   def handle_call(:info, _from, state) do
     {:reply, {:ok, state}, state}
   end
 
-  @impl true
+  @impl GenServer
   @spec terminate(reason, state :: ledAnimatorState) :: :ok
   when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(_reason, %{

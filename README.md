@@ -42,7 +42,7 @@ Leds.leds(50)
 ```
 All other LEDs would be set to off
 
-The above approach is rather cumbersome with a lot of LEDs, and would be even more difficult if you want to animate it. Thus, instead of managing the LED strip yourself, you should use the FLedex DSL.
+The above approach is rather cumbersome with a lot of LEDs, and would be even more difficult if you want to animate it. Thus, instead of managing the LED strip yourself, you should use the Fledex DSL.
 
 Take a look at the [Livebook examples](README.md#livebook) on how to use the DSL
 

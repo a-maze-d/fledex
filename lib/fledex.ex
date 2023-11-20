@@ -19,12 +19,16 @@ defmodule Fledex do
   ```
   """
 
+  alias Fledex.Animation.BaseAnimation
+  alias Fledex.Animation.LedAnimationManager
+  alias Fledex.Animation.LedAnimator
+
   # configuration for the different macros/functions that can be used to configure our strip
   # this is also used to configure our LedAnimationManager to resolve the type to a module
   @config %{
-    animation: Fledex.Animation.LedAnimator,
-    static: Fledex.Animation.LedAnimator,
-    component: Fledex.Animation.LedAnimator # This is not the correct one yet
+    animation: LedAnimator,
+    static: LedAnimator,
+    component: LedAnimator # This is not the correct one yet
   }
   @config_keys Map.keys @config
 
@@ -43,7 +47,7 @@ defmodule Fledex do
       import Fledex.Color.Names
       # let's start our animation manager. The manager makes sure only one will be started
       if not Keyword.get(opts, :dont_start, false) do
-        Fledex.Animation.LedAnimationManager.start_link(fledex_config())
+        LedAnimationManager.start_link(fledex_config())
       end
     end
   end
@@ -55,7 +59,7 @@ defmodule Fledex do
   """
   defmacro animation(name, options \\ [], do: block) do
     def_func_ast = {:fn, [], block}
-    send_config = options[:send_config]  || &Fledex.Animation.LedAnimator.default_send_config_func/1
+    send_config = options[:send_config]  || &BaseAnimation.default_send_config_func/1
     # Logger.warning(inspect block)
     quote do
       {
@@ -77,7 +81,7 @@ defmodule Fledex do
   """
   defmacro static(name, options \\ [], do: block) do
     def_func_ast = {:fn, [], [{:->, [], [[{:_triggers, [], Elixir}], block]}]}
-    send_config = options[:send_config]  || &Fledex.Animation.LedAnimator.default_send_config_func/1
+    send_config = options[:send_config]  || &BaseAnimation.default_send_config_func/1
     quote do
       {
         unquote(name),
@@ -109,8 +113,8 @@ defmodule Fledex do
     quote do
       strip_name = unquote(strip_name)
       strip_options = unquote(strip_options)
-      Fledex.Animation.LedAnimationManager.register_strip(strip_name, strip_options)
-      Fledex.Animation.LedAnimationManager.register_animations(strip_name, Map.new(unquote(configs_ast)))
+      LedAnimationManager.register_strip(strip_name, strip_options)
+      LedAnimationManager.register_animations(strip_name, Map.new(unquote(configs_ast)))
     end
       # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end

@@ -3,9 +3,9 @@ defmodule Fledex.Animation.LedAnimationManager do
 
   require Logger
 
+  alias Fledex.Animation.BaseAnimation
   alias Fledex.Animation.LedAnimator
   alias Fledex.LedsDriver
-  alias Fledex.Utils.Naming
 
   @type ledAnimationManagerState :: %{
     config: map(),
@@ -64,6 +64,8 @@ defmodule Fledex.Animation.LedAnimationManager do
   end
   def handle_call({:register_animations, strip_name, configs}, _pid, state) do
     {:reply, :ok, register_animations(strip_name, configs, state)}
+  rescue
+    RuntimeError -> {:reply, {:error, "Animator is wrongly configured"}, state}
   end
   def handle_call({:unregister_strip, strip_name}, _pid, state) when is_atom(strip_name) do
     {:reply, :ok, unregister_strip(strip_name, state)}
@@ -109,7 +111,7 @@ defmodule Fledex.Animation.LedAnimationManager do
 
   defp shutdown_animators(strip_name, dropped_animations) do
     Enum.each(dropped_animations, fn animation_name ->
-      GenServer.stop(Naming.build_strip_animation_name(strip_name, animation_name), :normal)
+      GenServer.stop(BaseAnimation.build_strip_animation_name(strip_name, animation_name), :normal)
     end)
   end
 
@@ -123,10 +125,23 @@ defmodule Fledex.Animation.LedAnimationManager do
   end
 
   defp create_animators(strip_name, created_animations, type_config) do
-    Enum.each(created_animations, fn {animator_name, config} ->
+    Enum.each(created_animations, fn {animation_name, config} ->
       type = config[:type] || :animation
       module_name = type_config[type] || LedAnimator
-      module_name.start_link(config, strip_name, animator_name)
+      {:ok, pid} = module_name.start_link(config, strip_name, animation_name)
+      server_name = BaseAnimation.build_strip_animation_name(strip_name, animation_name)
+      case Process.info(pid, :registered_name) do
+        {:registered_name, ^server_name} -> :ok
+        # we could register the name if it does not exist and we could unregister and reregister
+        # the process if it hav the wrong name, but that's not gonna end well. It' better to
+        # throw this back immediately.
+        # nil ->
+          # Process.register(pid, server_name)
+        # {:registered_name, other_name} ->
+          # Process.unregister(other_name)
+          # Process.register(pid, server_name)
+        _anything -> raise RuntimeError, message: "The animator is not registered under the expected name"
+      end
     end)
   end
 

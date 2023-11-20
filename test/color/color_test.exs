@@ -1,4 +1,4 @@
-defmodule Fledex.ColorTest do
+defmodule Fledex.Color.ColorTest do
   use ExUnit.Case, async: true
 
   alias Fledex.Color.Conversion.Approximate

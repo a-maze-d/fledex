@@ -4,10 +4,10 @@ defmodule Fledex.Animation.LedAnimatorTest do
   import ExUnit.CaptureLog
   require Logger
 
+  alias Fledex.Animation.BaseAnimation
   alias Fledex.Animation.LedAnimator
   alias Fledex.Leds
   alias Fledex.LedsDriver
-  alias Fledex.Utils.Naming
 
   def default_def_func(_triggers) do
     Leds.leds(30)
@@ -49,15 +49,12 @@ defmodule Fledex.Animation.LedAnimatorTest do
         type: :animation
       }
 
-      {:ok, state, {:continue, :paint_once}} = Fledex.Animation.LedAnimator.init({init_args, :test_strip, :test_animator})
+      {:ok, state, {:continue, :paint_once}} = LedAnimator.init({init_args, :test_strip, :test_animator})
       assert state == init_args
-    end
-    test "ensure correct naming" do
-      assert Naming.build_strip_animation_name(:testA, :testB) == :testA_testB
     end
     test "default funcs" do
       init_args = %{}
-      {:ok, state, {:continue, :paint_once}} = Fledex.Animation.LedAnimator.init({init_args, :test_strip, :test_animator})
+      {:ok, state, {:continue, :paint_once}} = LedAnimator.init({init_args, :test_strip, :test_animator})
       assert Leds.leds(30) == state.def_func.(%{test_strip: 10})
       assert %{} == state.send_config_func.(%{test_strip: 10})
 
@@ -219,7 +216,7 @@ defmodule Fledex.Animation.LedAnimatorTest do
       animation_name = :animation_testB
       {:ok, pid} = LedAnimator.start_link(%{type: :static}, strip_name, animation_name)
       assert Process.alive?(pid)
-      GenServer.stop(Naming.build_strip_animation_name(strip_name, animation_name), :normal)
+      GenServer.stop(BaseAnimation.build_strip_animation_name(strip_name, animation_name), :normal)
       assert not Process.alive?(pid)
       GenServer.stop(driver, :normal)
     end
