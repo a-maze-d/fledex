@@ -1,10 +1,10 @@
-defmodule Fledex.LedAnimatorTest do
+defmodule Fledex.Animation.LedAnimatorTest do
   use ExUnit.Case
 
   import ExUnit.CaptureLog
   require Logger
 
-  alias Fledex.LedAnimator
+  alias Fledex.Animation.LedAnimator
   alias Fledex.Leds
   alias Fledex.LedsDriver
   alias Fledex.Utils.Naming
@@ -49,7 +49,7 @@ defmodule Fledex.LedAnimatorTest do
         type: :animation
       }
 
-      {:ok, state, {:continue, :paint_once}} = Fledex.LedAnimator.init({init_args, :test_strip, :test_animator})
+      {:ok, state, {:continue, :paint_once}} = Fledex.Animation.LedAnimator.init({init_args, :test_strip, :test_animator})
       assert state == init_args
     end
     test "ensure correct naming" do
@@ -57,7 +57,7 @@ defmodule Fledex.LedAnimatorTest do
     end
     test "default funcs" do
       init_args = %{}
-      {:ok, state, {:continue, :paint_once}} = Fledex.LedAnimator.init({init_args, :test_strip, :test_animator})
+      {:ok, state, {:continue, :paint_once}} = Fledex.Animation.LedAnimator.init({init_args, :test_strip, :test_animator})
       assert Leds.leds(30) == state.def_func.(%{test_strip: 10})
       assert %{} == state.send_config_func.(%{test_strip: 10})
 

@@ -6,7 +6,7 @@ Mix.install([
 ])
 
 # we define a couple of aliases to not have to type that much
-alias Fledex.LedAnimationManager
+alias Fledex.Animation.LedAnimationManager
 alias Fledex.Leds
 alias Fledex.LedsDriver
 alias Fledex.LedStripDriver.KinoDriver

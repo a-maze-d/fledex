@@ -1,9 +1,9 @@
-defmodule Fledex.LedAnimationManager do
+defmodule Fledex.Animation.LedAnimationManager do
   @behaviour GenServer
 
   require Logger
 
-  alias Fledex.LedAnimator
+  alias Fledex.Animation.LedAnimator
   alias Fledex.LedsDriver
   alias Fledex.Utils.Naming
 

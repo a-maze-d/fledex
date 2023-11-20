@@ -3,8 +3,8 @@ defmodule Fledex.Test do
 
   require Logger
 
-  alias Fledex.LedAnimationManager
-  alias Fledex.LedAnimator
+  alias Fledex.Animation.LedAnimationManager
+  alias Fledex.Animation.LedAnimator
 
   @server_name :john
   describe "test macros" do

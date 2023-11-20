@@ -1,7 +1,7 @@
-defmodule Fledex.LedAnimationManagerTest do
+defmodule Fledex.Animation.LedAnimationManagerTest do
   use ExUnit.Case
 
-  alias Fledex.LedAnimationManager
+  alias Fledex.Animation.LedAnimationManager
 
   @strip_name :test_strip
   setup do

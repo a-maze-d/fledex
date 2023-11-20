@@ -1,4 +1,4 @@
-defmodule Fledex.LedAnimator do
+defmodule Fledex.Animation.LedAnimator do
   @moduledoc """
   The client often wants to run some animations. This can of course be done by repeatedly updating the `Leds` definitions and calling
   `Leds.send()` to send it to the driver.

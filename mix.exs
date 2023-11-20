@@ -106,10 +106,9 @@ defmodule Fledex.MixProject do
           Fledex.LedsDriver,
           Fledex.Leds,
           Fledex.Leds.Functions,
-          Fledex.Application,
-          Fledex.LedAnimationManager,
-          Fledex.LedAnimator
+          Fledex.Application
         ],
+        "Animation": ~r/Fledex.Animation/,
         "Utils": ~r/Fledex.Utils/,
         "Drivers": ~r/Fledex.LedStripDriver/,
         "Color": ~r/Fledex.Color/,
