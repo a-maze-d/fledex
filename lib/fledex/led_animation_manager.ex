@@ -119,9 +119,9 @@ defmodule Fledex.LedAnimationManager do
       # Logger.info("creating: #{strip_name}-#{animator_name}")
         nil -> LedAnimator.start_link(config, strip_name, animator_name)
         :animation -> LedAnimator.start_link(config, strip_name, animator_name)
+        :static -> LedAnimator.start_link(config, strip_name, animator_name)
         # :component ->
-        # :static -> LedAnimator.start_link(config, strip_name, animator_name)
-      end
+        end
     end)
   end
 

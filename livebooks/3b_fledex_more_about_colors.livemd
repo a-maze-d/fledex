@@ -6,6 +6,10 @@ Mix.install([
 ])
 ```
 
+## Colors and different drivers
+
+Different drivers have different color characteristics. Therefore you might have to adjust the colors when migrating from one output to another. Some drivers allow some color correction to try to adjust for those issues (see also the 'Color Correction' section.
+
 ## Color Information
 
 Fledex has an extensive set of predefined colors from [Wikipedia](https://en.wikipedia.org/wiki/List_of_colors:_A%E2%80%93F). You can retrieve those names by calling
@@ -28,7 +32,7 @@ Here a list of all the colors:
 
 ```elixir
 Kino.DataTable.new(Fledex.Color.Names.colors(),
-  keys: [:name, :rgb, :hex, :hsv, :hsl],
+  keys: [:descriptive_name, :name, :rgb, :hex, :hsv, :hsl, :source],
   sorting_enabled: true
 )
 ```
@@ -47,5 +51,6 @@ You can also retrieve the information from a specific color, like `:almond` in t
   * `:source`: Information where the color comes from, see Wikipedia for more details
 * `info/1` and `info/2`: They are convenience functions when you only have an atom as the color name. They map to the functions, thus `info(:almond)` is equal to `almond()` and `info(:almond, what)` is equal to `almond(what)`.
 
-## Color Conversions
-More info the follow
+## Color Correction
+
+More info to follow

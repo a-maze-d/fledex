@@ -3,7 +3,7 @@
 ```elixir
 Mix.install([
   {:fledex, "~>0.2"},
-  {:jason, "~>1.2"},
+  {:jason, "~>1.2"}
 ])
 
 # we define a couple of aliases to not have to type that much
@@ -145,8 +145,8 @@ Fledex.Utils.PubSub.broadcast(:fledex, "trigger", {:trigger, %{temperature: -15.
 Before we can start with the weather data, we need to make sure that we can make http client calls (also over https) and therefore we start the two services.
 
 ```elixir
-:ok = :inets.start()
-:ok = :ssl.start()
+:inets.start()
+:ssl.start()
 ```
 
 Now we can make the actual call. We do want to make this call in regular intervals (every 15 min), parse the response and publish the temperature through pubsub. To do this we create a small server. We start it with our URL (note, the parsing in the server is URL specific, so you can't simply change it to another site) and with our 15min refresh interval (specified in ms).
@@ -158,7 +158,14 @@ defmodule CallUrlPeriodic do
   use GenServer
 
   def start_link(url, interval_ms) do
-    GenServer.start_link(__MODULE__, %{url: url, interval_ms: interval_ms})
+    pid = Process.whereis(__MODULE__)
+
+    if pid == nil do
+      GenServer.start_link(__MODULE__, %{url: url, interval_ms: interval_ms}, name: __MODULE__)
+    else
+      # server is already running. We could reconfigure it, but we don't do this here.
+      {:ok, pid}
+    end
   end
 
   @impl true
@@ -190,5 +197,6 @@ end
   )
 ```
 
-# Annotations
+## Annotations
+
 * To decode wmo codes: https://www.nodc.noaa.gov/archive/arc0021/0002199/1.1/data/0-data/HTML/WMO-CODE/WMO4677.HTM

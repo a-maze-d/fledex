@@ -16,11 +16,13 @@ defmodule Fledex.LedAnimatorTest do
   end
   # some logging versions to test the workflow
   def logging_def_func(triggers) do
-    Logger.info("creating led definition, #{triggers.test_strip}")
+    counter = triggers[:test_strip] || "undefined"
+    Logger.info("creating led definition, #{counter}")
     Leds.leds(30)
   end
   def logging_send_config_func(triggers) do
-    Logger.info("creating send config, #{triggers.test_strip}")
+    counter = triggers[:test_strip] || "undefined"
+    Logger.info("creating send config, #{counter}")
     %{namespace: "test#{ExUnit.configuration()[:seed]}"}
   end
 
@@ -46,13 +48,13 @@ defmodule Fledex.LedAnimatorTest do
         type: :animation
       }
 
-      {:ok, state} = Fledex.LedAnimator.init({init_args, :test_strip, :test_animator})
+      {:ok, state, {:continue, :paint_once}} = Fledex.LedAnimator.init({init_args, :test_strip, :test_animator})
       assert state == init_args
     end
 
     test "default funcs" do
       init_args = %{}
-      {:ok, state} = Fledex.LedAnimator.init({init_args, :test_strip, :test_animator})
+      {:ok, state, {:continue, :paint_once}} = Fledex.LedAnimator.init({init_args, :test_strip, :test_animator})
       assert Leds.leds(30) == state.def_func.(%{test_strip: 10})
       assert %{} == state.send_config_func.(%{test_strip: 10})
 
@@ -60,7 +62,7 @@ defmodule Fledex.LedAnimatorTest do
     test "config applied correctly (none_set)" do
       init_args = %{}
 
-      {:ok, state} = LedAnimator.init({init_args, :test_strip, :test_animator})
+      {:ok, state, {:continue, :paint_once}} = LedAnimator.init({init_args, :test_strip, :test_animator})
       assert state.def_func != nil
       assert state.send_config_func != nil
       assert state.strip_name == :test_strip
@@ -116,6 +118,8 @@ defmodule Fledex.LedAnimatorTest do
 
     def count_and_assert(line, acc) do
       case line do
+        {_, 0} ->
+          acc
         {"send", trigger} ->
           if acc.send == 0 and acc.led == 0 do
             # this happens when we are not yet fully set up. Thus we ignore the first one
@@ -135,8 +139,10 @@ defmodule Fledex.LedAnimatorTest do
     end
 
     def extract_keyword(line) do
-      result = Regex.named_captures(~r/.*creating\s(?<word>\S+).*, (?<trigger>\d*)/, line)
-      {trigger, _rest} = Integer.parse(result["trigger"] || "0")
+      result = Regex.named_captures(~r/.*creating\s(?<word>\S+).*, (?<trigger>\d*)?/, line)
+      trigger = result["trigger"]
+      trigger = if trigger == "", do: "0", else: trigger
+      {trigger, _rest} = Integer.parse(trigger)
       {result["word"], trigger}
     end
 
@@ -168,13 +174,13 @@ defmodule Fledex.LedAnimatorTest do
         def_func: fn (triggers) ->
           assert length(Map.keys(triggers)) == 2
           assert triggers.something == "abc"
-          assert triggers[strip_name] == 11
+          assert triggers[strip_name] == 10
           {Leds.leds(0), Map.put_new(triggers, :test1, 4)}
         end,
         send_config_func: fn (triggers) ->
           assert length(Map.keys(triggers)) == 3
           assert triggers.something == "abc"
-          assert triggers[strip_name] == 11
+          assert triggers[strip_name] == 10
           assert triggers.test1 == 4
           {%{}, Map.put_new(triggers, :test2, 7)}
         end,
@@ -188,7 +194,7 @@ defmodule Fledex.LedAnimatorTest do
       {:noreply, state} = LedAnimator.handle_info({:trigger, Map.put_new(%{}, strip_name, 11)}, state)
       assert length(Map.keys(state.triggers)) == 4
       assert state.triggers.something == "abc"
-      assert state.triggers[strip_name] == 11
+      assert state.triggers[strip_name] == 10
       assert state.triggers.test1 == 4
       assert state.triggers.test2 == 7
     end

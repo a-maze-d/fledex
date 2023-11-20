@@ -134,8 +134,8 @@ defmodule Fledex.Test do
       # the function actually does contain it
       assert configs.sten.svenson.def_func.(%{}) == leds(5)
 
-      info = LedAnimator.get_info(:sten, :svenson)
-      assert info.triggers == %{}, # there should not be any triggers, since we are static
+      {:ok, info} = LedAnimator.get_info(:sten, :svenson)
+      assert info.triggers == %{}  # there should not be any triggers, since we are static
       assert info.type == :static
     end
   end

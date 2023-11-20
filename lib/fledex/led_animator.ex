@@ -96,7 +96,7 @@ defmodule Fledex.LedAnimator do
   end
 
   @impl true
-  @spec init({ledAnimatorConfig, atom, atom}) :: {:ok, ledAnimatorState}
+  @spec init({ledAnimatorConfig, atom, atom}) :: {:ok, ledAnimatorState, {:continue, :paint_once}}
   def init({init_args, strip_name, animator_name}) do
     state = %{
       triggers: %{},
@@ -111,45 +111,50 @@ defmodule Fledex.LedAnimator do
     :ok= LedsDriver.define_namespace(state.strip_name, state.animator_name)
     case state.type do
       :animation -> :ok = PubSub.subscribe(:fledex, "trigger")
-      # :static -> we don't subscribe because we paint only once
+      :static -> :ok # we don't subscribe because we paint only once
     end
 
-    {:ok, state}
+    {:ok, state, {:continue, :paint_once}}
+  end
+
+  @impl true
+  @spec handle_continue(:paint_once, ledAnimatorState) :: {:noreply, ledAnimatorState}
+  def handle_continue(:paint_once, state) do
+    {:noreply, update_leds(state)}
   end
 
   @impl true
   @spec handle_info({:trigger, map}, ledAnimatorState) :: {:noreply, ledAnimatorState}
-  def handle_info({:trigger, triggers}, %{
-    strip_name: strip_name,
-    animator_name: animator_name,
-    def_func: def_func,
-    send_config_func: send_config_func
-  } = state) when is_map_key(triggers, strip_name) do
+  def handle_info({:trigger, triggers}, %{strip_name: strip_name} = state)
+      when is_map_key(triggers, strip_name) do
     # Logger.info("#{strip_name}, #{animator_name}")
     # we only want to trigger the led update if we have a trigger from the driver (=strip_name as key)
     # otherwise we collect the triggers. Now it's time to merge previously collected triggers in
-    triggers = Map.merge(state.triggers, triggers)
-
-    # we can get two different responses, with or without triggers, we make sure our result contains the triggers
-    {leds, triggers} = def_func.(triggers) |> get_with_triggers(triggers)
-    # independent on the configs say we want to ensure we use the correct namespace (animator_name)
-    # and server_name (strip_name). Therefore we inject it
-    leds = Leds.set_driver_info(leds, animator_name, strip_name)
-    {config, triggers} = send_config_func.(triggers) |> get_with_triggers(triggers)
-    Leds.send(leds, config)
-    # Logger.info("trigger #{inspect triggers}")
-
-    {:noreply, %{state | triggers: triggers}}
+    %{state | triggers: Map.merge(state.triggers, triggers)}
+    {:noreply, update_leds(state)}
   end
-  # the response can be with or without trigger, we ensure that it's always with a trigger, in the worst case
-  # with the original triggers.
   def handle_info({:trigger, triggers}, state) do
     # if the trigger is not from the driver (=strip_name as key) we only want to collect
     # the triggers for when we want an update of the leds
-
     {:noreply, %{state | triggers: Map.merge(state.triggers, triggers)}}
   end
-
+  defp update_leds(%{
+    strip_name: strip_name,
+    animator_name: animator_name,
+    def_func: def_func,
+    send_config_func: send_config_func,
+    triggers: triggers} = state) do
+      # we can get two different responses, with or without triggers, we make sure our result contains the triggers
+      {leds, triggers} = def_func.(triggers) |> get_with_triggers(triggers)
+      # independent on the configs say we want to ensure we use the correct namespace (animator_name)
+      # and server_name (strip_name). Therefore we inject it
+      leds = Leds.set_driver_info(leds, animator_name, strip_name)
+      {config, triggers} = send_config_func.(triggers) |> get_with_triggers(triggers)
+      Leds.send(leds, config)
+      %{state | triggers: triggers}
+  end
+  # the response can be with or without trigger, we ensure that it's always with a trigger, in the worst case
+  # with the original triggers.
   defp get_with_triggers(response, orig_triggers) do
     case response do
       {something, triggers} -> {something, triggers}
@@ -174,7 +179,7 @@ defmodule Fledex.LedAnimator do
   def handle_cast({:config, config}, state) do
     state = update_config(state, config)
 
-    {:noreply, state}
+    {:noreply, update_leds(state)}
   end
 
   @impl true
@@ -188,9 +193,13 @@ defmodule Fledex.LedAnimator do
   when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(_reason, %{
     strip_name: strip_name,
-    animator_name: animator_name
+    animator_name: animator_name,
+    type: type
   } = _state) do
-    PubSub.unsubscribe(:fledex, "trigger")
+    case type do
+      :animation -> PubSub.unsubscribe(:fledex, "trigger")
+      :static -> :ok # nothing to do, since we haven't been subscribed
+    end
     LedsDriver.drop_namespace(strip_name, animator_name)
   end
 end

@@ -19,9 +19,9 @@ defmodule Fledex.Leds do
   }
 
   @func_ids %{
-    rainbow: &Fledex.Leds.rainbow/2,
-    gradient: &Fledex.Leds.gradient/2,
-    repeat: &Fledex.Leds.repeat/2
+    rainbow: &Fledex.Leds.do_rainbow/2,
+    gradient: &Fledex.Leds.do_gradient/2,
+    repeat: &Fledex.Leds.do_repeat/2
   }
 
   # @spec new() :: t
@@ -81,8 +81,8 @@ defmodule Fledex.Leds do
     %__MODULE__{leds | opts: opts}
   end
 
-  @spec rainbow(t, map) :: t
-  def rainbow(leds, config) do
+  @spec do_rainbow(t, map) :: t
+  def do_rainbow(leds, config) do
     num_leds = config[:num_leds] || leds.count
     initial_hue = config[:initial_hue] || 0
     reversed = if config[:reversed], do: config[:reversed], else: false
@@ -102,8 +102,8 @@ defmodule Fledex.Leds do
     end) |>  Map.new
   end
 
-  @spec gradient(t, map) :: t
-  def gradient(leds, %{start_color: start_color, end_color: end_color} = config) do
+  @spec do_gradient(t, map) :: t
+  def do_gradient(leds, %{start_color: start_color, end_color: end_color} = config) do
     num_leds = config[:num_leds] || leds.count
     offset = config[:offset] || 0
 
@@ -115,12 +115,12 @@ defmodule Fledex.Leds do
 
     put_in(leds.leds, Map.merge(leds.leds, led_values))
   end
-  def gradient(_leds, _config) do
+  def do_gradient(_leds, _config) do
     raise ArgumentError, message: "You need to specify at least a start_color and end_color"
   end
 
-  @spec repeat(t, %{amount: integer}) :: t
-  def repeat(
+  @spec do_repeat(t, %{amount: integer}) :: t
+  def do_repeat(
     %__MODULE__{
       count: count,
       leds: leds,
@@ -162,6 +162,11 @@ defmodule Fledex.Leds do
     end
     led = led |> __MODULE__.func(:repeat, %{amount: repeat})
     __MODULE__.light(leds, led, offset)
+  end
+
+  @spec repeat(t, pos_integer) :: t
+  def repeat(leds, amount) do
+    func(leds, :repeat, %{amount: amount})
   end
 
   @spec func(t, atom, map) :: t

@@ -5,7 +5,7 @@
 # hardware but on a normal livebook, This makes it easier to stay up-to-date and experiment
 # We start to define our fledex library, directly linking to the latest version on github
 Mix.install([
-  {:fledex, "~>0.2"}
+  {:fledex, path: "/home/maze/Documents/code/fledex"}
 ])
 ```
 
@@ -19,6 +19,8 @@ We now define our animations with our DSL with the following steps:
 use Fledex
 ```
 
+## The clock
+
 * We define a new strip with a name (`:clock`), and configure it (we use the `:kino` default driver for display). This will internally create a new `LedsDriver` server (if it's not already running) that will control the strip. Its server name will be identical to the `led_strip` name.
 * Then within this strip we define several `animation`s that correspond to an animation (and will use internally the `LedAnimator`). Each animaation is identified by its own name (`:help`, `:hour`, `:minute`, `:seconds`)
 * Within each animation we define a function that will repeatedly be executed
@@ -28,14 +30,14 @@ It is also possble to define some other configurations (like the `send_config_fu
 
 ```elixir
 led_strip :clock, :kino do
-  animation :nelp do
-    _triggers -> leds(5) |> light(:ash_gray) |> func(:repeat, %{amount: 12})
+  static :help do
+    leds(5) |> light(davy_s_grey()) |> repeat(12)
   end
 
   animation :hour do
     _triggers ->
       %{hour: hour, minute: _minute, second: _second} = Time.utc_now() |> Time.add(1, :hour)
-      leds(24) |> light(:blue, hour + 1)
+      leds(24) |> light(blue(), hour + 1)
   end
 
   animation :minute do
@@ -52,7 +54,7 @@ led_strip :clock, :kino do
 end
 ```
 
-In our example we first define an "animation" (that doesn't really anymate since it's static). It is used to make it easier to read the time by having a dash every 5 steps. This is a repetitive task and therefore we define it only once and then make use of the `:repeat` function (and repeat it 12 times).
+In our example we first define a static animation (one that doesn't animate). This animation does not get any triggers and will only be called once during the initalization (since it's static. Notice that this function gets no argument). It is used to make it easier to read the time by having a dash every 5 steps. This is a repetitive task and therefore we define it only once and then make use of the `repeat/2` function (and repeat it 12 times).
 
 For all other animations we make a call to the system time (`Time.utc_now()`) and therefore don't require the `_trigger` information. We shift the result to the right timezone (we add 1 hour, for UTC+1)
 We parse the result, depending on the animation into the different aspects of interest (`hour`, `minute`, `second`).
@@ -61,6 +63,68 @@ We then define a sequence of `Leds` of the right length (`24` for `hour`s, and `
 
 Note: in the clock example we defined a static sequence of `Leds` and offsetted it. This requires the definition of a `send_config_func`. We will look on how to do it with the DSL as a next step.
 
+## The weather app
+
+We now implement the [weather app](./5_fledex_weather_example.livemd) (indicating the temperature) we implemented in chapter 5.
+
 ```elixir
-Kino.DataTable.new(Fledex.Color.Names.colors())
+led_strip :weather, :kino do
+  animation :temperature do
+    triggers ->
+      temp = triggers[:temperature] || 100
+      temp = round(temp)
+
+      temp =
+        if temp == 100 do
+          100
+        else
+          temp = min(temp, 40)
+          max(temp, -20)
+        end
+
+      {leds, offset} =
+        case temp do
+          temp when temp == 100 ->
+            {leds(61)
+             |> light(:blue, 1, 20)
+             |> light(:may_green)
+             |> light(:red, 22, 40), 1}
+
+          temp when temp < 0 ->
+            {leds(1) |> light(:blue) |> func(:repeat, %{amount: -temp}), 21 + temp}
+
+          temp when temp == 0 ->
+            {leds(1) |> light(:may_green), 21}
+
+          temp when temp > 0 ->
+            {leds(1) |> light(:red) |> repeat(temp), 22}
+        end
+
+      leds(61) |> light(leds, offset)
+  end
+
+  static :help do
+    # we allow temperatures down to -20C and up to +40C
+    negative_scale =
+      leds(5)
+      |> light(davy_s_grey())
+      |> repeat(4)
+
+    positive_scale =
+      leds(5)
+      |> light(davy_s_grey(), 5)
+      |> repeat(8)
+
+    leds(61)
+    |> light(negative_scale)
+    |> light(davy_s_grey())
+    |> light(positive_scale)
+  end
+end
+```
+
+This time we don't implement the connection to the weather API, but we only fake it.
+
+```elixir
+Fledex.Utils.PubSub.broadcast(:fledex, "trigger", {:trigger, %{temperature: 17.2}})
 ```
