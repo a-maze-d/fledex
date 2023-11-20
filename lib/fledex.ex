@@ -116,5 +116,4 @@ defmodule Fledex do
   end
 
   # TODO: Add a component
-  # TODO: Add a static definition (that does not animate)
 end
