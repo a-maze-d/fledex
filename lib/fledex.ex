@@ -19,12 +19,20 @@ defmodule Fledex do
   ```
   """
 
+  # configuration for the different macros/functions that can be used to configure our strip
+  # this is also used to configure our LedAnimationManager to resolve the type to a module
+  @config %{
+    animation: Fledex.LedAnimator,
+    static: Fledex.LedAnimator,
+    component: Fledex.LedAnimator # This is not the correct one yet
+  }
+  @config_keys Map.keys @config
+
   @doc """
-  This function should not be used. It's only here for tests and might be removed
-  any any point in time. It only returns `:ok`
+  This function returns the currently configured macros/functions that can be used in a fledex led_strip
   """
-  def fledex_loaded do
-    :ok
+  def fledex_config do
+    @config
   end
 
   defmacro __using__(opts) do
@@ -35,7 +43,7 @@ defmodule Fledex do
       import Fledex.Color.Names
       # let's start our animation manager. The manager makes sure only one will be started
       if not Keyword.get(opts, :dont_start, false) do
-        Fledex.LedAnimationManager.start_link()
+        Fledex.LedAnimationManager.start_link(fledex_config())
       end
     end
   end
@@ -93,9 +101,7 @@ defmodule Fledex do
   defmacro led_strip(strip_name, strip_options \\ :kino, do: block) do
     # Logger.error(inspect block)
     {_ast, configs_ast} = Macro.prewalk(block, [], fn
-       {:animation, meta, children}, acc -> {{:animation, meta, children}, [{:animation, meta, children} | acc]}
-       {:component, meta, children}, acc -> {{:component, meta, children}, [{:component, meta, children} | acc]}
-       {:static, meta, children}, acc -> {{:static, meta, children}, [{:static, meta, children} | acc]}
+       {type, meta, children}, acc when type in @config_keys -> {{type, meta, children}, [{type, meta, children} | acc]}
        other, acc -> {other, acc}
     end)
     # Logger.error(inspect configs_ast)

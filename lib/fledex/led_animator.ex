@@ -42,6 +42,7 @@ defmodule Fledex.LedAnimator do
 
   alias Fledex.Leds
   alias Fledex.LedsDriver
+  alias Fledex.Utils.Naming
   alias Fledex.Utils.PubSub
 
   @type ledAnimatorConfig :: %{
@@ -66,24 +67,20 @@ defmodule Fledex.LedAnimator do
   @spec start_link(config :: ledAnimatorConfig, strip_name::atom, animator_name::atom) :: GenServer.on_start()
   def start_link(config, strip_name, animator_name) do
     {:ok, _pid} = GenServer.start_link(__MODULE__, {config, strip_name, animator_name},
-                    name: build_server_name(strip_name, animator_name))
-  end
-
-  defp build_server_name(strip_name, animator_name) do
-    String.to_atom("#{strip_name}_#{animator_name}")
+                    name: Naming.build_strip_animation_name(strip_name, animator_name))
   end
 
   @spec config(atom, atom, ledAnimatorConfig) :: :ok
   def config(strip_name, animator_name, config) do
-    GenServer.cast(build_server_name(strip_name, animator_name), {:config, config})
+    GenServer.cast(Naming.build_strip_animation_name(strip_name, animator_name), {:config, config})
   end
   def get_info(strip_name, animator_name) do
-    GenServer.call(build_server_name(strip_name, animator_name), :info)
+    GenServer.call(Naming.build_strip_animation_name(strip_name, animator_name), :info)
   end
 
   @spec shutdown(atom, atom) :: :ok
   def shutdown(strip_name, animator_name) do
-    GenServer.stop(build_server_name(strip_name, animator_name), :normal)
+    GenServer.stop(Naming.build_strip_animation_name(strip_name, animator_name), :normal)
   end
 
   ### server side

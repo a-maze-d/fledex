@@ -5,14 +5,19 @@ defmodule Fledex.LedAnimationManager do
 
   alias Fledex.LedAnimator
   alias Fledex.LedsDriver
+  alias Fledex.Utils.Naming
 
+  @type ledAnimationManagerState :: %{
+    config: map(),
+    animations: map()
+  }
   ### client side
-  def start_link do
+  def start_link(type_config \\ %{}) do
     # we should only have a single server running. Therefore we check whether need to do something
     # or if the server is already running
     pid = GenServer.whereis(__MODULE__)
     if pid == nil do
-      GenServer.start_link(__MODULE__, %{}, name: __MODULE__)
+      GenServer.start_link(__MODULE__, type_config, name: __MODULE__)
     else
       {:ok, pid}
     end
@@ -36,8 +41,11 @@ defmodule Fledex.LedAnimationManager do
 
   ### server side
   @impl true
-  def init(_init_args) do
-    state = %{}
+  def init(type_config) do
+    state = %{
+      type_config: type_config,
+      animations: %{}
+    }
     {:ok, state}
   end
 
@@ -62,8 +70,8 @@ defmodule Fledex.LedAnimationManager do
   end
   def handle_call({:info, strip_name}, _from, state) do
     return_value = case strip_name do
-      :all -> state
-      other -> state[other]
+      :all -> state.animations
+      other -> state.animations[other]
     end
     {:reply, {:ok, return_value}, state}
   end
@@ -71,7 +79,7 @@ defmodule Fledex.LedAnimationManager do
   defp register_strip(strip_name, driver_config, state) do
     # Logger.info("registering led_strip: #{strip_name}")
     {:ok, _pid} = LedsDriver.start_link(strip_name, driver_config)
-    Map.put_new(state, strip_name, nil)
+    %{state | animations: Map.put_new(state.animations, strip_name, nil)}
   end
   defp unregister_strip(strip_name, state) do
     # Logger.info("unregistering led_strip_ #{strip_name}")
@@ -79,7 +87,7 @@ defmodule Fledex.LedAnimationManager do
     animation_names = Map.keys(map)
     shutdown_animators(strip_name, animation_names)
     GenServer.stop(strip_name)
-    Map.drop(state, [strip_name])
+    %{state | animations: Map.drop(state.animations, [strip_name])}
   end
   defp register_animations(strip_name, configs, state) do
     # Logger.info("defining config for #{strip_name}, animations: #{inspect Map.keys(configs)}")
@@ -88,40 +96,37 @@ defmodule Fledex.LedAnimationManager do
     # we check the current state and drop any animator we didn't receive
     # we update every animator we did receive
     # and we create any new animator
-    {dropped_animations, present_animations} = filter_animations(Map.get(state, strip_name), configs)
+    {dropped_animations, present_animations} = filter_animations(Map.get(state.animations, strip_name), configs)
     {existing_animations, created_animations} = Map.split(configs, present_animations)
 
     # Logger.info("#{inspect dropped}, #{inspect present}")
     shutdown_animators(strip_name, dropped_animations)
-    update_animators(strip_name, existing_animations)
-    create_animators(strip_name, created_animations)
+    update_animators(strip_name, existing_animations, state.type_config)
+    create_animators(strip_name, created_animations, state.type_config)
 
-    Map.put(state, strip_name, configs)
+    %{state | animations: Map.put(state.animations, strip_name, configs)}
   end
 
   defp shutdown_animators(strip_name, dropped_animations) do
-    Enum.each(dropped_animations, fn animator_name ->
-      # Logger.info("shutting down: #{animator_name}")
-      LedAnimator.shutdown(strip_name, animator_name)
+    Enum.each(dropped_animations, fn animation_name ->
+      GenServer.stop(Naming.build_strip_animation_name(strip_name, animation_name), :normal)
     end)
   end
 
-  defp update_animators(strip_name, present_animations) do
-    Enum.each(present_animations, fn {animator_name, value} ->
+  defp update_animators(strip_name, present_animations, type_config) do
+    Enum.each(present_animations, fn {animation_name, config} ->
       # Logger.info("updating: #{animator_name}")
-      LedAnimator.config(strip_name, animator_name, value)
+      type = config[:type] || :animation
+      module_name = type_config[type] || LedAnimator
+      module_name.config(strip_name, animation_name, config)
     end)
   end
 
-  defp create_animators(strip_name, created_animations) do
+  defp create_animators(strip_name, created_animations, type_config) do
     Enum.each(created_animations, fn {animator_name, config} ->
-      case config[:type] do
-      # Logger.info("creating: #{strip_name}-#{animator_name}")
-        nil -> LedAnimator.start_link(config, strip_name, animator_name)
-        :animation -> LedAnimator.start_link(config, strip_name, animator_name)
-        :static -> LedAnimator.start_link(config, strip_name, animator_name)
-        # :component ->
-        end
+      type = config[:type] || :animation
+      module_name = type_config[type] || LedAnimator
+      module_name.start_link(config, strip_name, animator_name)
     end)
   end
 
@@ -148,7 +153,7 @@ defmodule Fledex.LedAnimationManager do
 
   @impl true
   def terminate(_reason, state) do
-    strip_names = Map.keys(state)
+    strip_names = Map.keys(state.animations)
     Enum.reduce(strip_names, state, fn strip_name, state ->
       unregister_strip(strip_name, state)
     end)

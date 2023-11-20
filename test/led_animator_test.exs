@@ -7,6 +7,7 @@ defmodule Fledex.LedAnimatorTest do
   alias Fledex.LedAnimator
   alias Fledex.Leds
   alias Fledex.LedsDriver
+  alias Fledex.Utils.Naming
 
   def default_def_func(_triggers) do
     Leds.leds(30)
@@ -51,7 +52,9 @@ defmodule Fledex.LedAnimatorTest do
       {:ok, state, {:continue, :paint_once}} = Fledex.LedAnimator.init({init_args, :test_strip, :test_animator})
       assert state == init_args
     end
-
+    test "ensure correct naming" do
+      assert Naming.build_strip_animation_name(:testA, :testB) == :testA_testB
+    end
     test "default funcs" do
       init_args = %{}
       {:ok, state, {:continue, :paint_once}} = Fledex.LedAnimator.init({init_args, :test_strip, :test_animator})
@@ -197,6 +200,28 @@ defmodule Fledex.LedAnimatorTest do
       assert state.triggers[strip_name] == 10
       assert state.triggers.test1 == 4
       assert state.triggers.test2 == 7
+    end
+  end
+  describe "test shutdown" do
+    test "through client API" do
+      strip_name = :shutdown_testA
+      {:ok, driver} = LedsDriver.start_link(strip_name, :none)
+      animation_name = :animation_testA
+      {:ok, pid} = LedAnimator.start_link(%{}, strip_name, animation_name)
+      assert Process.alive?(pid)
+      LedAnimator.shutdown(strip_name, animation_name)
+      assert not Process.alive?(pid)
+      GenServer.stop(driver, :normal)
+    end
+    test "through GenServer API" do
+      strip_name = :shutdown_testB
+      {:ok, driver} = LedsDriver.start_link(strip_name, :none)
+      animation_name = :animation_testB
+      {:ok, pid} = LedAnimator.start_link(%{type: :static}, strip_name, animation_name)
+      assert Process.alive?(pid)
+      GenServer.stop(Naming.build_strip_animation_name(strip_name, animation_name), :normal)
+      assert not Process.alive?(pid)
+      GenServer.stop(driver, :normal)
     end
   end
 end

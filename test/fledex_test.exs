@@ -10,7 +10,7 @@ defmodule Fledex.Test do
   describe "test macros" do
     test "fledex loaded" do
       use Fledex, dont_start: true
-      assert fledex_loaded() != nil
+      assert fledex_config() != nil
     end
     test "use macro" do
       # we start the server
@@ -19,7 +19,7 @@ defmodule Fledex.Test do
       assert GenServer.whereis(LedAnimationManager) != nil
 
       # and check that both Fledex and Fledex.Leds are imported
-      assert :erlang.fun_info(&fledex_loaded/0) # from Fledex
+      assert :erlang.fun_info(&fledex_config/0) # from Fledex
       assert :erlang.fun_info(&leds/1) # from Fledex.Leds
     end
     test "use macro without server" do
@@ -29,7 +29,7 @@ defmodule Fledex.Test do
       assert GenServer.whereis(LedAnimationManager) == nil
 
       # and check that both Fledex and Fledex.Leds are imported
-      assert :erlang.fun_info(&fledex_loaded/0) # from Fledex
+      assert :erlang.fun_info(&fledex_config/0) # from Fledex
       assert :erlang.fun_info(&leds/1)          # from Fledex.Leds
       assert :erlang.fun_info(&red/0)           # from Fledex.Color.Names
 
