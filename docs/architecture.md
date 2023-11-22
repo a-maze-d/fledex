@@ -17,7 +17,7 @@ Currently there are 4 drivers available:
 * `NullDriver` is a driver that acts similar to `/dev/null`, i.e. doesn't do anyting with the data. This can be very convenient for running some tests.
 
 # The Leds
-The `Leds` is an easy way to define a set of Leds. This module provides the possibility to specify individual leds by integer/name/rgb-values, by a generator function (like `:rainbow`, or `:gradient`), or by combining various `Leds` definitions into a single definition.
+The `Leds` is an easy way to define a set of Leds. This module provides the possibility to specify individual leds by integer/name/rgb-values, by a generator function (like `rainbow/2`, or `gradient/2`), or by combining various `Leds` definitions into a single definition.
 
 The `Leds` are not bound to a specific led strip (and namespace), but can be send to one by calling the `send()` function with the appropriate parameters. For convenience it's possible to bind it already during creation time to a specific led strip and namespace.
 

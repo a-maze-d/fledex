@@ -3,10 +3,11 @@ defmodule Fledex.Leds do
 
   import Bitwise
 
+  alias Fledex.Color.Functions
   alias Fledex.Color.Names
   alias Fledex.Color.Types
   alias Fledex.Color.Utils
-  alias Fledex.Leds.Functions
+  alias Fledex.Leds
   alias Fledex.LedsDriver
 
   @enforce_keys [:count, :leds, :opts]
@@ -16,12 +17,6 @@ defmodule Fledex.Leds do
     leds: map,
     opts: map,
     meta: map
-  }
-
-  @func_ids %{
-    rainbow: &Fledex.Leds.do_rainbow/2,
-    gradient: &Fledex.Leds.do_gradient/2,
-    repeat: &Fledex.Leds.do_repeat/2
   }
 
   # @spec new() :: t
@@ -81,12 +76,12 @@ defmodule Fledex.Leds do
     %__MODULE__{leds | opts: opts}
   end
 
-  @spec do_rainbow(t, map) :: t
-  def do_rainbow(leds, config) do
-    num_leds = config[:num_leds] || leds.count
-    initial_hue = config[:initial_hue] || 0
-    reversed = if config[:reversed], do: config[:reversed], else: false
-    offset = config[:offset] || 0
+  @spec rainbow(t, map) :: t
+  def rainbow(%Leds{} = leds, opts \\ %{}) do
+    num_leds = Map.get(opts, :num_leds, leds.count)
+    reversed = Map.get(opts, :reversed, false)
+    offset = Map.get(opts, :offset, 0)
+    initial_hue = Map.get(opts, :initial_hue, 0)
 
     led_values = Functions.create_rainbow_circular_rgb(num_leds, initial_hue, reversed)
       |> convert_to_leds_structure(offset)
@@ -102,10 +97,9 @@ defmodule Fledex.Leds do
     end) |>  Map.new
   end
 
-  @spec do_gradient(t, map) :: t
-  def do_gradient(leds, %{start_color: start_color, end_color: end_color} = config) do
-    num_leds = config[:num_leds] || leds.count
-    offset = config[:offset] || 0
+  def gradient(leds, start_color, end_color, opts \\ []) do
+    num_leds = opts[:num_leds] || leds.count
+    offset = opts[:offset] || 0
 
     start_color = Utils.convert_to_subpixels(start_color)
     end_color = Utils.convert_to_subpixels(end_color)
@@ -115,19 +109,16 @@ defmodule Fledex.Leds do
 
     put_in(leds.leds, Map.merge(leds.leds, led_values))
   end
-  def do_gradient(_leds, _config) do
-    raise ArgumentError, message: "You need to specify at least a start_color and end_color"
-  end
 
-  @spec do_repeat(t, %{amount: integer}) :: t
-  def do_repeat(
+  @spec repeat(t, integer) :: t
+  def repeat(
     %__MODULE__{
       count: count,
       leds: leds,
       opts: opts,
       meta: meta
     },
-    %{amount: amount}
+    amount
   ) when amount > 1 do
     index = meta[:index]  || 1
     new_index = (amount - 1) * count + index
@@ -160,19 +151,8 @@ defmodule Fledex.Leds do
       led when is_atom(led) -> __MODULE__.leds(1) |> __MODULE__.light(led)
       led when is_struct(led) -> led
     end
-    led = led |> __MODULE__.func(:repeat, %{amount: repeat})
+    led = led |> __MODULE__.repeat(repeat)
     __MODULE__.light(leds, led, offset)
-  end
-
-  @spec repeat(t, pos_integer) :: t
-  def repeat(leds, amount) do
-    func(leds, :repeat, %{amount: amount})
-  end
-
-  @spec func(t, atom, map) :: t
-  def func(leds, func_id, config \\ %{}) do
-    func = @func_ids[func_id]
-    func.(leds, config)
   end
 
   @spec do_update(t, (Types.colorint | Types.rgb | atom)) :: t

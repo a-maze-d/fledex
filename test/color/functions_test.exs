@@ -1,4 +1,4 @@
-defmodule Fledex.Leds.FunctionsTest do
+defmodule Fledex.Color.FunctionsTest do
   use ExUnit.Case, async: true
 
   import Fledex.Color.Correction.Color
@@ -8,7 +8,7 @@ defmodule Fledex.Leds.FunctionsTest do
 
   alias Fledex.Color.Conversion.Rainbow
   alias Fledex.Color.Correction
-  alias Fledex.Leds.Functions
+  alias Fledex.Color.Functions
 
   doctest Functions
 

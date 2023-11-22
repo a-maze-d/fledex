@@ -91,7 +91,7 @@ led_strip :weather, :kino do
              |> light(:red, 22, 40), 1}
 
           temp when temp < 0 ->
-            {leds(1) |> light(:blue) |> func(:repeat, %{amount: -temp}), 21 + temp}
+            {leds(1) |> light(:blue) |> repeat(temp), 21 + temp}
 
           temp when temp == 0 ->
             {leds(1) |> light(:may_green), 21}

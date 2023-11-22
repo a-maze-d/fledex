@@ -32,7 +32,10 @@ Note that the functions get in a map (here called triggers) that can contain ser
 
 ```elixir
 defmodule HelperFunctions do
-  @rainbow Leds.leds(50) |> Leds.func(:rainbow, num_leds: 50, reversed: true)
+  @rainbow Leds.leds(50) |> Leds.rainbow(%{
+    num_leds: 50, 
+    reversed: true
+  })
   def rainbow(_triggers) do
     @rainbow
   end

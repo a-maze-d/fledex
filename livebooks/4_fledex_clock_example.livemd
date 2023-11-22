@@ -72,7 +72,7 @@ LedAnimationManager.register_animations(:clock, %{
     def_func: fn _triggers ->
       Leds.leds(5)
       |> Leds.light(:ash_gray)
-      |> Leds.func(:repeat, %{amount: 12})
+      |> Leds.repeat(12)
     end
   }
 })

@@ -78,6 +78,33 @@ defmodule Fledex.Animation.LedAnimatorTest do
       assert state.triggers.new_strip == 10
     end
   end
+  describe "client API" do
+    test "config" do
+      init_args = %{
+        def_func: &default_def_func/1,
+        send_config_func: &default_send_config_func/1,
+        strip_name: :test_strip,
+        animator_name: :test_animator,
+        triggers: %{},
+        type: :animation
+      }
+      assert map_size(init_args.triggers) == 0
+      {:ok, state, {:continue, :paint_once}} = LedAnimator.init({init_args, :test_strip, :test_animator})
+      assert map_size(init_args.triggers) == 0
+
+      new_config = %{triggers: %{abc: 10}}
+      {:noreply, state} = LedAnimator.handle_cast({:config, new_config}, state)
+
+      assert state.def_func == init_args.def_func
+      assert state.send_config_func == init_args.send_config_func
+      assert state.strip_name == init_args.strip_name
+      assert state.animator_name == init_args.animator_name
+      assert state.triggers != init_args.triggers
+      assert map_size(state.triggers) == 1
+      assert state.triggers.abc == 10
+      assert state.type == init_args.type
+    end
+  end
   describe "test workflow" do
     # what is important is to check whether our def and send functions are called
     # repeatedly. and that our trigger is incrementing properly.

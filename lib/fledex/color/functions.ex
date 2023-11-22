@@ -1,4 +1,4 @@
-defmodule Fledex.Leds.Functions do
+defmodule Fledex.Color.Functions do
   import Bitwise
 
   alias Fledex.Color.Conversion

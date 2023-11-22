@@ -96,7 +96,7 @@ defmodule Helpers do
       }
 
       Leds.leds(50)
-      |> Leds.func(:rainbow, config)
+      |> Leds.rainbow(config)
       |> Leds.send(%{namespace: namespace, offset: index})
 
       # before sending the next update we sleep a bit
@@ -106,14 +106,8 @@ defmodule Helpers do
 
   def gradient(namespace) do
     Enum.each(0..10000, fn index ->
-      config = %{
-        num_leds: 50,
-        start_color: 0xFF0000,
-        end_color: 0x0000FF
-      }
-
       Leds.leds(50)
-      |> Leds.func(:gradient, config)
+      |> Leds.gradient(0xff0000, 0x0000ff, %{num_leds: 50})
       |> Leds.send(%{namespace: namespace, offset: index, rotate_left: true})
 
       # before sending the next update we sleep a bit

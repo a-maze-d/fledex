@@ -98,13 +98,13 @@ LedAnimationManager.register_animations(:weather, %{
              |> Leds.light(:red, 22, 40), 1}
 
           temp when temp < 0 ->
-            {Leds.leds(1) |> Leds.light(:blue) |> Leds.func(:repeat, %{amount: -temp}), 21 + temp}
+            {Leds.leds(1) |> Leds.light(:blue) |> Leds.repeat(temp), 21 + temp}
 
           temp when temp == 0 ->
             {Leds.leds(1) |> Leds.light(:may_green), 21}
 
           temp when temp > 0 ->
-            {Leds.leds(1) |> Leds.light(:red) |> Leds.func(:repeat, %{amount: temp}), 22}
+            {Leds.leds(1) |> Leds.light(:red) |> Leds.repeat(temp), 22}
         end
 
       Leds.leds(61) |> Leds.light(leds, offset)
@@ -116,12 +116,12 @@ LedAnimationManager.register_animations(:weather, %{
       negative_scale =
         Leds.leds(5)
         |> Leds.light(:ash_gray)
-        |> Leds.func(:repeat, %{amount: 4})
+        |> Leds.repeat(4)
 
       positive_scale =
         Leds.leds(5)
         |> Leds.light(:ash_gray, 5)
-        |> Leds.func(:repeat, %{amount: 8})
+        |> Leds.repeat(8)
 
       Leds.leds(61)
       |> Leds.light(negative_scale)

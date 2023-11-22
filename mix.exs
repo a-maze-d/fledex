@@ -105,7 +105,6 @@ defmodule Fledex.MixProject do
           Fledex,
           Fledex.LedsDriver,
           Fledex.Leds,
-          Fledex.Leds.Functions,
           Fledex.Application
         ],
         "Animation": ~r/Fledex.Animation/,

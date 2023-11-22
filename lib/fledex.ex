@@ -13,7 +13,7 @@ defmodule Fledex do
         }
 
         leds(50)
-          |> func(:rainbow, config)
+          |> rainbow(config)
       end
     end
   ```

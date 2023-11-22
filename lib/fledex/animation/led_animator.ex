@@ -163,10 +163,10 @@ defmodule Fledex.Animation.LedAnimator do
     %{
       type: config[:type] || state.type,
       triggers: Map.merge(state.triggers, config[:triggers] || state[:triggers]),
-      def_func: Map.get(config, :def_func, &BaseAnimation.default_def_func/1),
-      send_config_func: Map.get(config, :send_config_func, &BaseAnimation.default_send_config_func/1),
-      strip_name: state.strip_name,
-      animator_name: state.animator_name
+      def_func: Map.get(config, :def_func, state[:def_func] || &BaseAnimation.default_def_func/1),
+      send_config_func: Map.get(config, :send_config_func, state[:send_config_func] || &BaseAnimation.default_send_config_func/1),
+      strip_name: state.strip_name, # not to be updated
+      animator_name: state.animator_name # not to be updated
     }
   end
 

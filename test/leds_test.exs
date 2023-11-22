@@ -61,7 +61,7 @@ defmodule Fledex.LedsTest do
 
     test "setting leds in sequence" do
       leds = Leds.leds(10)
-        |> Leds.func(:rainbow)
+        |> Leds.rainbow()
 
       Enum.each(leds.leds, fn led ->
         assert led != nil
@@ -202,7 +202,7 @@ defmodule Fledex.LedsTest do
       }
 
       list = Leds.leds(20)
-      |> Leds.func(:rainbow, config)
+      |> Leds.rainbow(config)
       |> Leds.to_list()
 
       assert length(list) == 20
@@ -231,13 +231,8 @@ defmodule Fledex.LedsTest do
     end
 
     test "gradient" do
-      config = %{
-        start_color: 0xFF0000,
-        end_color: 0x0000FF
-      }
-
       list = Leds.leds(20)
-      |> Leds.func(:gradient, config)
+      |> Leds.gradient(0xff0000, 0x0000ff)
       |> Leds.to_list()
 
       assert length(list) == 20
@@ -265,20 +260,6 @@ defmodule Fledex.LedsTest do
       ]
     end
     test "repeat" do
-      leds = Leds.leds(3) |> Leds.light(:red) |> Leds.light(:red) |> Leds.light(:red) |> Leds.func(:repeat, %{amount: 3})
-      assert leds.count == 9
-      assert Leds.get_light(leds, 1) == 0xff0000
-      assert Leds.get_light(leds, 2) == 0xff0000
-      assert Leds.get_light(leds, 3) == 0xff0000
-      assert Leds.get_light(leds, 4) == 0xff0000
-      assert Leds.get_light(leds, 5) == 0xff0000
-      assert Leds.get_light(leds, 6) == 0xff0000
-      assert Leds.get_light(leds, 7) == 0xff0000
-      assert Leds.get_light(leds, 8) == 0xff0000
-      assert Leds.get_light(leds, 9) == 0xff0000
-      assert leds.meta.index == 10
-    end
-    test "repeat function" do
       leds = Leds.leds(3) |> Leds.light(:red) |> Leds.light(:red) |> Leds.light(:red) |> Leds.repeat(3)
       assert leds.count == 9
       assert Leds.get_light(leds, 1) == 0xff0000
@@ -291,7 +272,6 @@ defmodule Fledex.LedsTest do
       assert Leds.get_light(leds, 8) == 0xff0000
       assert Leds.get_light(leds, 9) == 0xff0000
       assert leds.meta.index == 10
-
     end
     test "repeat with different input types" do
       leds = Leds.leds(10, %{
@@ -329,17 +309,17 @@ defmodule Fledex.LedsTest do
         Leds.light(Leds.leds(2), :red, -1)
       end
     end
-    test "gradient with missing config parameters" do
-      assert_raise ArgumentError, ~r/start_color and end_color/, fn ->
-        Leds.do_gradient(Leds.leds(10), %{})
-      end
-      assert_raise ArgumentError, ~r/start_color and end_color/, fn ->
-        Leds.do_gradient(Leds.leds(10), %{start_color: :red})
-      end
-      assert_raise ArgumentError, ~r/start_color and end_color/, fn ->
-        Leds.do_gradient(Leds.leds(10), %{end_color: :red})
-      end
-    end
+    # test "gradient with missing config parameters" do
+    #   assert_raise ArgumentError, ~r/start_color and end_color/, fn ->
+    #     Leds.gradient(Leds.leds(10), %{})
+    #   end
+    #   assert_raise ArgumentError, ~r/start_color and end_color/, fn ->
+    #     Leds.do_gradient(Leds.leds(10), %{start_color: :red})
+    #   end
+    #   assert_raise ArgumentError, ~r/start_color and end_color/, fn ->
+    #     Leds.do_gradient(Leds.leds(10), %{end_color: :red})
+    #   end
+    # end
     test "wrong structure" do
       assert_raise ArgumentError, ~r/unknown data/, fn ->
         Leds.light(%{}, :red, 1)
