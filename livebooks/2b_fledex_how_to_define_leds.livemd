@@ -48,7 +48,7 @@ Fledex.Color.KinoRender.new([my_color3, my_color4])
 ```
 
 The next most convenient way is to defined a color through its name (see `Fledex.Color.Names`). 
-We will look at this in more detail in a [later chapter](./3b_more_about_colors.livemd)
+We will look at this in more detail in a [later chapter](./3b_fledex_more_about_colors.livemd)
 
 ```elixir
 alias Fledex.Color.Names
