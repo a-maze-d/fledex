@@ -51,7 +51,7 @@ defmodule Fledex.Color.Utils do
   def nscale8(color, rgb, video) do
     split_into_subpixels(color)
       |> nscale8(rgb, video)
-      |> combine_subpixels()
+      |> to_colorint()
   end
 
   @doc """
@@ -109,19 +109,20 @@ defmodule Fledex.Color.Utils do
   @doc """
   This function combines the subpixels to a single (color) integer value
   """
-  @spec combine_subpixels(Types.rgb) :: Types.colorint
-  def combine_subpixels({r, g, b}) do
+  # TODO: make more generic to accept more color types
+  @spec to_colorint(Types.rgb) :: Types.colorint
+  def to_colorint({r, g, b}) do
     (r<<<16) + (g<<<8) + b
   end
 
   @doc """
   This function splits a single (color) integer value into it's rgb components
   """
-  @spec convert_to_subpixels((Types.colorint | atom | Types.rgb | %{rgb: Types.rgb} | %{rgb: Types.colorint})) :: Types.rgb
-  def convert_to_subpixels(rgb) do
+  @spec to_rgb((Types.colorint | atom | Types.rgb | %{rgb: Types.rgb} | %{rgb: Types.colorint})) :: Types.rgb
+  def to_rgb(rgb) do
     case rgb do
       %{rgb: {r, g, b}} -> {r, g, b}
-      %{rgb: x} when is_integer(x) -> convert_to_subpixels(x)
+      %{rgb: x} when is_integer(x) -> to_rgb(x)
       x when is_atom(x) -> apply(Names, x, [:rgb])
       x when is_integer(x) -> split_into_subpixels(x)
       x -> x

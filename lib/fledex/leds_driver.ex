@@ -343,7 +343,7 @@ defmodule Fledex.LedsDriver do
     elems
     |> Enum.map(fn elem -> Utils.split_into_subpixels(elem) end)
     |> apply_merge_strategy(merge_strategy)
-    |> Utils.combine_subpixels()
+    |> Utils.to_colorint()
   end
 
   @spec apply_merge_strategy(list(Types.colorint()), atom) ::

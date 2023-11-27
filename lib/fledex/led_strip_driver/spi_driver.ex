@@ -48,7 +48,7 @@ defmodule Fledex.LedStripDriver.SpiDriver do
     binary = leds
       |> Correction.apply_rgb_correction(config.color_correction)
       |> Enum.reduce(<<>>, fn led, acc ->
-        {r, g, b} = Utils.convert_to_subpixels(led)
+        {r, g, b} = Utils.to_rgb(led)
         acc <> <<r, g, b>>
       end)
       response = Circuits.SPI.transfer(config.ref, binary)

@@ -118,6 +118,11 @@ defmodule Fledex.Color.ColorTest do
       import Fledex.Color.Names
       assert 14_235_678 == vermilion2()
     end
+    test "color name guard" do
+      import Fledex.Color.Names, only: [is_color_name: 1]
+      assert is_color_name(:vermilion2) == true
+      assert is_color_name(:non_existing) == false
+    end
   end
   describe "test color corrections" do
     test "color" do
@@ -181,25 +186,25 @@ defmodule Fledex.Color.ColorTest do
     # #19CB97 	0.099 	0.795 	0.591 	162.4° 	163.4° 	0.696 	0.620 	0.795 	0.447 	0.495 	0.564 	0.875 	0.779 	0.800
     # #362698 	0.211 	0.149 	0.597 	248.3° 	247.3° 	0.448 	0.420 	0.597 	0.373 	0.319 	0.219 	0.750 	0.601 	0.533
     # #7E7EB8 	0.495 	0.493 	0.721 	240.5° 	240.4° 	0.228 	0.227 	0.721 	0.607 	0.570 	0.520 	0.316 	0.290 	0.135
-    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0xffffff)) == {0, 0, 255}
-    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0x808080)) == {0, 0, 181}
-    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0x000000)) == {0, 0, 0}
-    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0xff0000)) == {0, 255, 255}
-    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0xbfbf00)) == {63, 255, 255}
-    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0x008000)) == {96, 255, 181}
-    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0x80ffff)) == {195, 74, 255}
-    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0x8080ff)) == {195, 74, 255}
-    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0xbf40bf)) == {0, 127, 255}
-    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0xa0a424)) == {71, 159, 255}
-    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0x411bea)) == {182, 172, 255}
-    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0x1eac41)) == {116, 168, 255}
-    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0xf0c80e)) == {43, 196, 255}
-    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0xb430e5)) == {248, 145, 255}
-    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0xed7651)) == {32, 111, 255}
-    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0xfef888)) == {55, 69, 255}
-    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0x19c897)) == {147, 175, 255}
-    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0x362698)) == {172, 157, 252}
-    assert Approximate.rgb2hsv(Utils.convert_to_subpixels(0x7e7eb8)) == {160, 76, 255}
+    assert Approximate.rgb2hsv(Utils.to_rgb(0xffffff)) == {0, 0, 255}
+    assert Approximate.rgb2hsv(Utils.to_rgb(0x808080)) == {0, 0, 181}
+    assert Approximate.rgb2hsv(Utils.to_rgb(0x000000)) == {0, 0, 0}
+    assert Approximate.rgb2hsv(Utils.to_rgb(0xff0000)) == {0, 255, 255}
+    assert Approximate.rgb2hsv(Utils.to_rgb(0xbfbf00)) == {63, 255, 255}
+    assert Approximate.rgb2hsv(Utils.to_rgb(0x008000)) == {96, 255, 181}
+    assert Approximate.rgb2hsv(Utils.to_rgb(0x80ffff)) == {195, 74, 255}
+    assert Approximate.rgb2hsv(Utils.to_rgb(0x8080ff)) == {195, 74, 255}
+    assert Approximate.rgb2hsv(Utils.to_rgb(0xbf40bf)) == {0, 127, 255}
+    assert Approximate.rgb2hsv(Utils.to_rgb(0xa0a424)) == {71, 159, 255}
+    assert Approximate.rgb2hsv(Utils.to_rgb(0x411bea)) == {182, 172, 255}
+    assert Approximate.rgb2hsv(Utils.to_rgb(0x1eac41)) == {116, 168, 255}
+    assert Approximate.rgb2hsv(Utils.to_rgb(0xf0c80e)) == {43, 196, 255}
+    assert Approximate.rgb2hsv(Utils.to_rgb(0xb430e5)) == {248, 145, 255}
+    assert Approximate.rgb2hsv(Utils.to_rgb(0xed7651)) == {32, 111, 255}
+    assert Approximate.rgb2hsv(Utils.to_rgb(0xfef888)) == {55, 69, 255}
+    assert Approximate.rgb2hsv(Utils.to_rgb(0x19c897)) == {147, 175, 255}
+    assert Approximate.rgb2hsv(Utils.to_rgb(0x362698)) == {172, 157, 252}
+    assert Approximate.rgb2hsv(Utils.to_rgb(0x7e7eb8)) == {160, 76, 255}
     end
   end
 end

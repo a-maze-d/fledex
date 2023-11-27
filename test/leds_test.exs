@@ -61,6 +61,17 @@ defmodule Fledex.LedsTest do
 
     test "setting leds in sequence" do
       leds = Leds.leds(10)
+        |> Leds.light(:red)
+        |> Leds.light({0, 0xff, 0})
+        |> Leds.light(0xff)
+
+      assert Leds.get_light(leds, 1) == 0xff0000
+      assert Leds.get_light(leds, 2) == 0x00ff00
+      assert Leds.get_light(leds, 3) == 0x0000ff
+
+    end
+    test "setting leds with a function" do
+      leds = Leds.leds(10)
         |> Leds.rainbow()
 
       Enum.each(leds.leds, fn led ->
@@ -143,7 +154,7 @@ defmodule Fledex.LedsTest do
         |> Leds.light(:light_salmon)
         |> Leds.light(:red)
         |> Leds.light(:green)
-        |> Leds.light(:lime_web_x11_green_)
+        |> Leds.light(:lime_web_x11_green)
         |> Leds.light(:blue)
 
         assert Leds.get_light(leds, 1) == 0xFFA07A
@@ -273,6 +284,19 @@ defmodule Fledex.LedsTest do
       assert Leds.get_light(leds, 9) == 0xff0000
       assert leds.meta.index == 10
     end
+    test "light with repeat" do
+      leds = Leds.leds(3) |> Leds.light(:red, 2, 3)
+      assert Leds.size(leds) == 3
+      assert Leds.get_light(leds, 1) == 0x000000
+      assert Leds.get_light(leds, 2) == 0xff0000
+      assert Leds.get_light(leds, 3) == 0xff0000
+    assert_raise ArgumentError, fn ->
+        Leds.leds(3) |> Leds.light(:red, 1, 1)
+      end
+      assert_raise ArgumentError, fn ->
+        Leds.leds(3) |> Leds.light(:red, -1, 2)
+      end
+    end
     test "repeat with different input types" do
       leds = Leds.leds(10, %{
         1 => 0xff0000,
@@ -358,6 +382,36 @@ defmodule Fledex.LedsTestSync do
       assert String.match?(log, ~r/warning/)
       assert String.match?(log, ~r/You should start it/)
       assert String.match?(log, ~r/namespace hasn't been defined/)
+    end
+  end
+end
+
+defmodule Fledex.LedsTestKino do
+  use Kino.LivebookCase, async: true
+  alias Fledex.Leds
+
+  describe "render test" do
+    test "output" do
+      Leds.leds(3)
+        |> Leds.light(0xff0000)
+        |> Leds.light(0x00ff00)
+        |> Leds.light(0x0000ff)
+        |> Kino.render()
+
+      assert_output(%{
+        labels: ["Leds", "Raw"],
+        outputs: [%{
+          type: :markdown,
+          text: ~s(<span style="color: #FF0000">█</span><span style="color: #00FF00">█</span><span style="color: #0000FF">█</span>),
+          chunk: false
+        },
+        %{
+          type: :terminal_text,
+          text: ~s(%Fledex.Leds{\n  \e[34mcount:\e[0m \e[34m3\e[0m,\n  \e[34mleds:\e[0m %{\e[34m1\e[0m => \e[34m16711680\e[0m, \e[34m2\e[0m => \e[34m65280\e[0m, \e[34m3\e[0m => \e[34m255\e[0m},\n  \e[34mopts:\e[0m %{\e[34mnamespace:\e[0m \e[35mnil\e[0m, \e[34mserver_name:\e[0m \e[35mnil\e[0m},\n  \e[34mmeta:\e[0m %{\e[34mindex:\e[0m \e[34m4\e[0m}\n}),
+          chunk: false
+        }],
+        type: :tabs
+      })
     end
   end
 end

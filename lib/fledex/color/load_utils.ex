@@ -28,17 +28,14 @@ defmodule Fledex.Color.LoadUtils do
 
   defp convert_to_atom(name) do
     name
-    |> String.trim()
     |> String.normalize(:nfd)
-    |> String.replace(~r/[^a-zA-Z0-9_]/, "_")
-    |> String.replace(~r/__+/, "_")
+    |> String.replace(~r/[^a-zA-Z0-9]/, " ")
+    |> String.trim()
+    |> String.replace(~r/\s+/, "_")
     |> String.downcase(:ascii)
-    |> remove_trailing_underscore()
     |> String.to_atom()
   end
 
-  # defp remove_trailing_underscore(<<name, "_">>), do: name
-  defp remove_trailing_underscore(name), do: name
   defp clean_and_convert(hex_string) do
     hex_string = String.replace(hex_string, "#", "")
     {hex_int, _} = Integer.parse(hex_string, 16)

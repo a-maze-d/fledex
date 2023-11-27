@@ -11,7 +11,7 @@ defmodule Fledex.Leds do
   alias Fledex.LedsDriver
 
   @enforce_keys [:count, :leds, :opts]
-  defstruct count: 0, leds: %{}, opts: %{}, meta: %{index: 1} #, fill: :none
+  defstruct count: 0, leds: %{}, opts: %{}, meta: %{index: 1}
   @type t :: %__MODULE__{
     count: integer,
     leds: map,
@@ -19,31 +19,6 @@ defmodule Fledex.Leds do
     meta: map
   }
 
-  # @spec new() :: t
-  # def new do
-  #   new(0)
-  # end
-  # @spec new(integer) :: t
-  # def new(count) do
-  #   new(count, %{server_name: nil, namespace: nil})
-  # end
-  # @spec new(integer, map) :: t
-  # def new(count, opts) do
-  #   new(count, %{}, opts)
-  # end
-  # @spec new(integer, map, map) :: t
-  # def new(count, leds, opts) do
-  #   new(count, leds, opts, %{index: 1})
-  # end
-  # @spec new(integer, map, map, map) :: t
-  # def new(count, leds, opts, meta) do
-  #   %__MODULE__{
-  #     count: count,
-  #     leds: leds,
-  #     opts: opts,
-  #     meta: meta
-  #   }
-  # end
   @spec leds() :: t
   def leds do
     leds(0)
@@ -70,6 +45,10 @@ defmodule Fledex.Leds do
     }
   end
 
+  @spec size(t) :: pos_integer
+  def size(%Leds{count: count} = _leds) do
+    count
+  end
   @spec set_driver_info(t, namespace :: atom, server_name :: atom) :: t
   def set_driver_info(%{opts: opts} = leds, namespace, server_name \\  Fledex.LedsDriver) do
     opts = %{opts | server_name: server_name, namespace: namespace}
@@ -101,8 +80,8 @@ defmodule Fledex.Leds do
     num_leds = opts[:num_leds] || leds.count
     offset = opts[:offset] || 0
 
-    start_color = Utils.convert_to_subpixels(start_color)
-    end_color = Utils.convert_to_subpixels(end_color)
+    start_color = Utils.to_rgb(start_color)
+    end_color = Utils.to_rgb(end_color)
 
     led_values = Functions.create_gradient_rgb(num_leds, start_color, end_color)
       |> convert_to_leds_structure(offset)
@@ -145,14 +124,20 @@ defmodule Fledex.Leds do
    raise ArgumentError, message: "the offset needs to be > 0 (found: #{offset})"
   end
   @spec light(t, (Types.colorint | t | atom), pos_integer, pos_integer) :: t
-  def light(leds, led, offset, repeat) do
+  def light(leds, led, offset, repeat) when offset > 0 and repeat > 1 do
+    # convert led to a LEDs struct
     led = case led do
       led when is_integer(led) -> __MODULE__.leds(1) |> __MODULE__.light(led)
       led when is_atom(led) -> __MODULE__.leds(1) |> __MODULE__.light(led)
-      led when is_struct(led) -> led
+      %Leds{} = led -> led
     end
+    # repeat the sequence
     led = led |> __MODULE__.repeat(repeat)
+    # merge in the sequence at the coorect offset
     __MODULE__.light(leds, led, offset)
+  end
+  def light(_leds, _led, offset, repeat) do
+   raise ArgumentError, message: "the offset needs to be > 0 (found: #{offset}) and repeat > 1 (found: #{repeat})"
   end
 
   @spec do_update(t, (Types.colorint | Types.rgb | atom)) :: t
@@ -186,6 +171,11 @@ defmodule Fledex.Leds do
     color_int = apply(Names, atom, [:hex])
     do_update(leds, color_int, offset)
   end
+  @spec do_update(t, Types.rgb, pos_integer) :: t
+  defp do_update(leds, {_r, _g, _b} = rgb, offset) do
+    color_int = Utils.to_colorint(rgb)
+    do_update(leds, color_int, offset)
+  end
   defp do_update(leds, led, offset) do
     raise ArgumentError, message: "unknown data #{inspect leds}, #{inspect led}, #{inspect offset}"
   end
@@ -209,6 +199,21 @@ defmodule Fledex.Leds do
     Enum.reduce(1..count, [], fn index, acc ->
       acc ++ [get_light(leds, index)]
     end)
+  end
+
+  @base16 16
+  @block <<"\u2588">>
+  @spec to_markdown(Fledex.Leds.t, map) :: String.t
+  def to_markdown(leds, _config \\ %{}) do
+    leds
+      |> Fledex.Leds.to_list()
+    # |> Correction.apply_rgb_correction(config.color_correction)
+      |> Enum.reduce(<<>>, fn value, acc ->
+        hex = value
+          |> Integer.to_string(@base16)
+          |> String.pad_leading(6, "0")
+        acc <> "<span style=\"color: ##{hex}\">" <> @block <> "</span>"
+      end)
   end
 
   @spec send(t, map) :: :ok | {:error, String}
@@ -251,5 +256,21 @@ defmodule Fledex.Leds do
     offset = rem(offset, count)
     offset = if rotate_left, do: offset, else: count-offset
     Enum.slide(vals, 0..rem(offset-1 + count, count), count)
+  end
+
+  defimpl Kino.Render, for: Fledex.Leds do
+    alias Fledex.Leds
+
+    @impl true
+    @spec to_livebook(Fledex.Leds.t) :: map()
+    def to_livebook(leds) do
+      md_kino = Kino.Markdown.new(Leds.to_markdown(leds))
+      i_kino = Kino.Inspect.new(leds)
+      kino = Kino.Layout.tabs(
+        Leds: md_kino,
+        Raw: i_kino
+      )
+      Kino.Render.to_livebook(kino)
+    end
   end
 end

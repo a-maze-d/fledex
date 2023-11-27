@@ -91,6 +91,7 @@ defmodule Fledex.MixProject do
         "livebooks/README.md",
         "livebooks/1_first_steps_with_an_led_strip.livemd",
         "livebooks/2_fledex_first_steps.livemd",
+        "livebooks/2b_fledex_how_to_define_leds.livemd",
         "livebooks/3_fledex_animations.livemd",
         "livebooks/3b_fledex_more_about_colors.livemd",
         "livebooks/4_fledex_clock_example.livemd",

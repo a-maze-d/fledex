@@ -5,7 +5,7 @@ as really done. Here the outstanding tasks that I can think of.
 # Tasks
 - [ ] Documentation
   - [ ] Finish the dsl livebook example (mostly done, but the send_config part is not done yet) (v0.3)
-  - [ ] Create another livebook (2b) that looks at the different aspects of the Leds module and how to work with it
+  - [x] Create another livebook (2b) that looks at the different aspects of the Leds module and how to work with it (v0.3)
   - [ ] Add proper API/module documentation (at least for the most important modules) (v0.3)
     - [ ] Fledex
     - [ ] Fledex.Leds
@@ -15,7 +15,9 @@ as really done. Here the outstanding tasks that I can think of.
     - [ ] Fledex.Animation.LedAnimator
     - [ ] Fledex.LedsDriver
   - [ ] Add type specs (at least for the most important modules) (v0.3)
-  - [ ] Improve hexdocs (add livebooks, create cheatsheet) (v0.3)
+  - [ ] Improve hexdocs
+    - [x] add livebooks (v0.3)
+    - [ ] create cheatsheet (v0.3)
   - [ ] Add documentation on how to connect the LED strip to a RaspberryPi Zero (with and without level shifter).This could be part of the first example (v0.3 & v0.4)
   - [ ] Add installation instructions (v0.4)
 - [ ] Create a dsl (domain specific language) to (finally) easily program strips

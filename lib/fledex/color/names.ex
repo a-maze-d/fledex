@@ -59,6 +59,12 @@ defmodule Fledex.Color.Names do
   @colors colors
   @color_names Enum.map(@colors, fn %{name: name} = _colorinfo -> name end)
 
+  quote do
+    @type t :: unquote_splicing(@color_names)
+  end
+
+  defguard is_color_name(atom) when atom in @color_names
+
   @doc """
   Get all the data about the predefined colors
   """

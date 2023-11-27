@@ -1,0 +1,201 @@
+# 2b Fledex: How to define LEDs
+
+```elixir
+Mix.install(
+  [
+    {:fledex, path: "/home/maze/Documents/code/fledex"}
+  ],
+  # necessary to enable the nicer rendering
+  consolidate_protocols: false
+)
+```
+
+## Intro
+
+The `Fledex.Leds` module allows you to easily define a sequence of LEDs. In this livebook we will look at the following aspects:
+
+* the different color concepts
+* defining individual LEDs (in sequence and out of sequence)
+* merging LED sequences
+* repeating an LED sequence
+* defining LEDs though a function (gradient & rainbow)
+* sending leds to a `Fledex.LedsDriver`
+
+## Color concepts
+
+Fledex allows to define colors in many different ways.
+
+One very common one is to work with an integer (as defined in `Types.colorint`) with a representation of the color similar to the [html notation](https://www.w3schools.com/colors/default.asp) It's best to write the color as hexadecimal, since each color has a range from 0 to 255 (i.e gets 2 digits), i.e 0xrrggbb (rr=red, gg=green, bb=blue).
+
+**Example:** <span style="color:#2CAFE4">`0x2cafe4`</span> where red has a value of <span style="color:#2C0000">`0x2c`</span> (44), green of <span style="color:#00AF00">`0xaf`</span> (175), and blue  of <span style="color:#0000E4">`0xe4`</span> (228)
+.This is equivalent to the decimal `2 928 612`.
+
+```elixir
+# we define our own color
+my_color1 = 0x2CAFE4
+my_color2 = 2_928_612
+
+Fledex.Color.KinoRender.new([my_color1, my_color2])
+```
+
+Fledex does also allow to specify an `{r, g, b}` triple (as defined in `Types.rgb`). Each color is again in the 0 to 255 range.
+
+```elixir
+my_color3 = {0x2C, 0xAF, 0xE4}
+my_color4 = {44, 175, 228}
+
+Fledex.Color.KinoRender.new([my_color3, my_color4])
+```
+
+The next most convenient way is to defined a color through its name (see `Fledex.Color.Names`). 
+We will look at this in more detail in a [later chapter](./3b_more_about_colors.livemd)
+
+```elixir
+alias Fledex.Color.Names
+# note, this is a slightly different color compared to the above one, since the exact color 
+# does not exist. "Cerulean (Crayola): {28, 170, 214} is roughly the same color
+my_color5 = :cerulean_crayola
+my_color6 = Names.info(my_color5)
+my_color7 = Names.cerulean_crayola()
+
+Fledex.Color.KinoRender.new([my_color5, my_color6, my_color7])
+```
+
+From the color names you can also get more information, but as mentioned above we'll look at this in a later chapter.
+
+In addition, you might encounter, in some cases, other color encodings like `Type.hsv` or `Typee.hsl`. But they are in general not so important.
+
+## Defining individual Led
+
+In Fledex you define a sequence of LEDs (and their colors) through the `Leds` module.
+You first define the size of the sequence. Let us define a sequence of 30 LEDs (by calling `Leds.leds`):
+
+```elixir
+alias Fledex.Leds
+
+leds = Leds.leds(30)
+```
+
+Each LED in that sequence does not have any color assigned to it and therefore is (by definition) switched off (black).
+
+It is now possble to define individual LEDs in that sequence by simply specifying the color (through `Leds.light()` functions and chaining them together:
+
+```elixir
+leds =
+  leds
+  |> Leds.light(0xFF0000)
+  |> Leds.light(:green)
+  |> Leds.light(255)
+```
+
+As can be seen by calling the `light` function we move an `index` to know which one we defined as last and we can thereby simply define the light one after the next. It should be noted that the leds are one-indexed.
+
+It is possible to define specific LEDs by specifying an offset. Let's extend our leds:
+
+```elixir
+alias Fledex.Color.Names
+
+leds =
+  leds
+  |> Leds.light(:red, 10)
+  |> Leds.light(Names.green())
+  |> Leds.light({0, 0, 0xFF})
+```
+
+As seen, if we specify the offset of `10` and we continue to define colors without offset the next LED in the sequence will be defined (i.e `11`)
+
+At the `Raw` result you can see how the deta is encoded.
+
+<!-- livebook:{"force_markdown":true} -->
+
+```elixir
+%Fledex.Leds{
+  ...
+  leds: %{1 => 16711680, 2 => 65280, 3 => 255, 10 => 16711680, 11 => 65280, 12 => 255},
+  ...
+}
+```
+
+We have a `map` (`%{}`) with the `offset` as key and the color as value.
+
+It is possble to define a color with an invalid offset. i.e. which is outside the allowed range. This is not a problem. The information will be carried around, but will be ignored (take a look at the `Raw` data)
+
+```elixir
+leds =
+  leds
+  |> Leds.light(:green, 40)
+```
+
+## Merging LED sequences
+
+Quite commonly there comes up the need to define an LED sequence as a combination of serveral sequences. This can easily be done by passing `Leds` as if it were a single LED
+
+```elixir
+leds_sub =
+  Leds.leds(2)
+  |> Leds.light(0xFF0000)
+  |> Leds.light(0x00FF00)
+
+leds =
+  Leds.leds(30)
+  |> Leds.light(leds_sub)
+  |> Leds.light(leds_sub, 5)
+```
+
+## Repeating an LED sequence
+
+It is possble to define a sequence of LEDs by repeating it. If you want to have 5 red LEDs you define a single LED and insturct it to be repeated 5 times. This would look like this (note the first 5 is the offset which needs to be specified and the second specifies the repetition factor):
+
+```elixir
+leds =
+  Leds.leds(30)
+  |> Leds.light(:red, 5, 5)
+```
+
+You can also use this to repeat a sub-sequence. This will will repeat the whole subsequence as many times in a row as specified.
+
+```elixir
+leds_sub =
+  Leds.leds(2)
+  |> Leds.light(0xFF0000)
+  |> Leds.light(0x00FF00)
+
+leds =
+  Leds.leds(30)
+  |> Leds.light(leds_sub, 5, 3)
+```
+
+## Definining LEDs through a function
+
+When you want to create a color sequence that is more complex, then this can also be achieved through some definition functions.
+
+If, for example, you want to create a rainbow pattern over 10 LEDs, you can do so by using the `rainbow/2` function.
+
+```elixir
+leds =
+  Leds.leds(30)
+  |> Leds.rainbow()
+```
+
+Another function is the `gradient/3` function that allows a transition from one color to another.
+
+```elixir
+leds =
+  Leds.leds(30)
+  |> Leds.gradient(:red, :blue)
+```
+
+`repeat/2` is another function that will take the already defined sequence (and `Leds` size `x`) and repeats it `y` times. Hence, the returned strip size will be: `size = x * y`.
+
+```elixir
+Leds.leds(10)
+|> Leds.gradient(:red, :blue)
+|> Leds.repeat(3)
+```
+
+## Sending LEDs to a led-strip
+
+Once we have defined our Leds, we can send them to our `LedsDriver`. This is not difficult, but it's such a common task that the Leds module provides the convenience function `send/2`. and some supporting functions (`set_driver_info/3`, `rotate/2`, `to_list/1`).
+
+The send function has a couple of checks that the `LedsDriver` is set up correctly.
+We won't discuss the send function in detail, since we'll work a bit more in other chapters.

@@ -15,7 +15,7 @@ defmodule Fledex.Color.UtilsTest do
   end
   test "combine" do
     led = {0x11, 0x64, 0xC8}
-    assert Utils.combine_subpixels(led) == 0x1164C8
+    assert Utils.to_colorint(led) == 0x1164C8
   end
   test "split into subpixels" do
     pixel = 0xFF7722
@@ -35,13 +35,13 @@ defmodule Fledex.Color.UtilsTest do
 
     assert Utils.nscale8({128, 128, 128}, Utils.frac8(32, 85)) == {49, 49, 49}
     assert Utils.nscale8({128, 128, 128}, Utils.frac8(32, 85), false) == {48, 48, 48}
-    assert Utils.nscale8(Utils.combine_subpixels({128, 128, 128}), Utils.frac8(32, 85)) == 3_223_857
+    assert Utils.nscale8(Utils.to_colorint({128, 128, 128}), Utils.frac8(32, 85)) == 3_223_857
   end
   test "convert to subpixels" do
-    assert Utils.convert_to_subpixels(%{rgb: 0x123456}) == {0x12, 0x34, 0x56}
-    assert Utils.convert_to_subpixels(%{rgb: {0x12, 0x34, 0x56}}) == {0x12, 0x34, 0x56}
-    assert Utils.convert_to_subpixels(:red) == {0xff, 0x00, 0x00}
-    assert Utils.convert_to_subpixels(0x123456) == {0x12, 0x34, 0x56}
-    assert Utils.convert_to_subpixels({0x12, 0x34, 0x56}) == {0x12, 0x34, 0x56}
+    assert Utils.to_rgb(%{rgb: 0x123456}) == {0x12, 0x34, 0x56}
+    assert Utils.to_rgb(%{rgb: {0x12, 0x34, 0x56}}) == {0x12, 0x34, 0x56}
+    assert Utils.to_rgb(:red) == {0xff, 0x00, 0x00}
+    assert Utils.to_rgb(0x123456) == {0x12, 0x34, 0x56}
+    assert Utils.to_rgb({0x12, 0x34, 0x56}) == {0x12, 0x34, 0x56}
   end
 end
