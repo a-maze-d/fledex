@@ -8,7 +8,7 @@ as really done. Here the outstanding tasks that I can think of.
   - [x] Create another livebook (2b) that looks at the different aspects of the Leds module and how to work with it (v0.3)
   - [ ] Add proper API/module documentation (at least for the most important modules) (v0.3)
     - [ ] Fledex
-    - [ ] Fledex.Leds
+    - [x] Fledex.Leds
     - [x] Fledex.Color.Names
     - [ ] Fledex.Animation.BaseAnimator
     - [ ] Fledex.Animation.LedAnimationManager

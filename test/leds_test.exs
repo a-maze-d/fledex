@@ -21,13 +21,46 @@ defmodule Fledex.LedsTest do
       assert leds.opts == %{namespace: nil, server_name: nil}
       assert leds.meta == %{index: 1}
     end
+    test "struct definition with leds (list and map)" do
+      leds = Leds.leds(10, %{1 => 0x00ff00}, %{})
+      assert leds.count == 10
+      assert leds.leds == %{1 => 0x00ff00}
+      assert leds.opts == %{namespace: nil, server_name: nil}
+      assert leds.meta == %{index: 1}
 
+      leds = Leds.leds(10, [{0x00, 0xff, 0x00}], %{})
+      assert leds.count == 10
+      assert leds.leds == %{1 => 0x00ff00}
+      assert leds.opts == %{namespace: nil, server_name: nil}
+      assert leds.meta == %{index: 1}
+    end
+    test "delegates" do
+      assert Leds.leds() === Leds.new()
+      assert Leds.leds(10) === Leds.new(10)
+      assert Leds.leds(10, %{server_name: :test, namespace: :space}) ===
+        Leds.new(10, %{server_name: :test, namespace: :space})
+      assert Leds.leds(10, %{1 => 0xff0000}, %{server_name: :test, namespace: :space}) ===
+        Leds.new(10, %{1 => 0xff0000}, %{server_name: :test, namespace: :space})
+      assert Leds.leds(10, %{1 => 0x00ff00}, %{server_name: :test, namespace: :space}, %{index: 1}) ===
+        Leds.new(10, %{1 => 0x00ff00}, %{server_name: :test, namespace: :space}, %{index: 1})
+    end
     test "setting number of leds" do
       leds = Leds.leds(96)
       assert leds.count == 96
       assert leds.leds == %{}
       assert leds.opts == %{namespace: nil, server_name: nil}
       assert leds.meta == %{index: 1}
+    end
+    test "resetting led count" do
+      offset = 15
+      color = 0x00ff00
+      leds = Leds.leds(10) |> Leds.light(color, offset)
+      assert Leds.count(leds) == 10
+      assert Leds.get_light(leds, offset) == color
+
+      leds = Leds.set_count(leds, 20)
+      assert Leds.count(leds) == 20
+      assert Leds.get_light(leds, offset) == color
     end
 
     test "converting from list to map" do
@@ -148,6 +181,12 @@ defmodule Fledex.LedsTest do
       assert Leds.get_light(leds_all, offset + 1)  == 0x0000FF
       assert Leds.get_light(leds_all, offset + 10) == 0x00FF00
       assert Leds.get_light(leds_all, offset + 11) == 0x0000FF
+    end
+    test "get light" do
+      leds = Leds.leds(10) |> Leds.light(0xff0000, 5) |> Leds.light(0x00ff00, 20)
+      assert Leds.get_light(leds, 1) == 0
+      assert Leds.get_light(leds, 5) == 0xff0000
+      assert Leds.get_light(leds, 20) == 0x00ff00
     end
     test "setting leds by name" do
       leds = Leds.leds(10)
@@ -286,7 +325,7 @@ defmodule Fledex.LedsTest do
     end
     test "light with repeat" do
       leds = Leds.leds(3) |> Leds.light(:red, 2, 3)
-      assert Leds.size(leds) == 3
+      assert Leds.count(leds) == 3
       assert Leds.get_light(leds, 1) == 0x000000
       assert Leds.get_light(leds, 2) == 0xff0000
       assert Leds.get_light(leds, 3) == 0xff0000
@@ -407,7 +446,8 @@ defmodule Fledex.LedsTestKino do
         },
         %{
           type: :terminal_text,
-          text: ~s(%Fledex.Leds{\n  \e[34mcount:\e[0m \e[34m3\e[0m,\n  \e[34mleds:\e[0m %{\e[34m1\e[0m => \e[34m16711680\e[0m, \e[34m2\e[0m => \e[34m65280\e[0m, \e[34m3\e[0m => \e[34m255\e[0m},\n  \e[34mopts:\e[0m %{\e[34mnamespace:\e[0m \e[35mnil\e[0m, \e[34mserver_name:\e[0m \e[35mnil\e[0m},\n  \e[34mmeta:\e[0m %{\e[34mindex:\e[0m \e[34m4\e[0m}\n}),
+          # the field order is not stable :-( Thus we don't compare the actual text
+          # text: ~s(%Fledex.Leds{\n  \e[34mcount:\e[0m \e[34m3\e[0m,\n  \e[34mleds:\e[0m %{\e[34m1\e[0m => \e[34m16711680\e[0m, \e[34m2\e[0m => \e[34m65280\e[0m, \e[34m3\e[0m => \e[34m255\e[0m},\n  \e[34mopts:\e[0m %{\e[34mnamespace:\e[0m \e[35mnil\e[0m, \e[34mserver_name:\e[0m \e[35mnil\e[0m},\n  \e[34mmeta:\e[0m %{\e[34mindex:\e[0m \e[34m4\e[0m}\n}),
           chunk: false
         }],
         type: :tabs

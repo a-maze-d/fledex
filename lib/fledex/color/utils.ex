@@ -109,7 +109,7 @@ defmodule Fledex.Color.Utils do
   @doc """
   This function combines the subpixels to a single (color) integer value
   """
-  # TODO: make more generic to accept more color types
+  # TODO: make more generic to accept more color types (define a protocol)
   @spec to_colorint(Types.rgb) :: Types.colorint
   def to_colorint({r, g, b}) do
     (r<<<16) + (g<<<8) + b
@@ -118,6 +118,7 @@ defmodule Fledex.Color.Utils do
   @doc """
   This function splits a single (color) integer value into it's rgb components
   """
+  # TODO: make more generic to accept more color types (define a protocol)
   @spec to_rgb((Types.colorint | atom | Types.rgb | %{rgb: Types.rgb} | %{rgb: Types.colorint})) :: Types.rgb
   def to_rgb(rgb) do
     case rgb do
