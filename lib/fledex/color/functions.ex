@@ -27,8 +27,7 @@ defmodule Fledex.Color.Functions do
     |> hsv2rgb()
   end
 
-  @spec create_gradient_rgb(pos_integer, Types.rgb, Types.rgb) ::
-          list(Types.rgb)
+  @spec create_gradient_rgb(pos_integer, Types.rgb, Types.rgb) :: list(Types.rgb)
   def create_gradient_rgb(num_leds, {sr, sg, sb} = _start_color, {er, eg, eb} = _end_color) when num_leds > 0 do
     rdist87 = (er - sr) <<< 7
     gdist87 = (eg - sg) <<< 7

@@ -346,8 +346,7 @@ defmodule Fledex.LedsDriver do
     |> Utils.to_colorint()
   end
 
-  @spec apply_merge_strategy(list(Types.colorint()), atom) ::
-          Types.rgb()
+  @spec apply_merge_strategy(list(Types.colorint()), atom) :: Types.rgb()
   def apply_merge_strategy(rgb, merge_strategy) do
     case merge_strategy do
       :avg -> Utils.avg(rgb)

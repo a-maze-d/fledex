@@ -447,7 +447,10 @@ defmodule Fledex.LedsTestKino do
         %{
           type: :terminal_text,
           # the field order is not stable :-( Thus we don't compare the actual text
-          # text: ~s(%Fledex.Leds{\n  \e[34mcount:\e[0m \e[34m3\e[0m,\n  \e[34mleds:\e[0m %{\e[34m1\e[0m => \e[34m16711680\e[0m, \e[34m2\e[0m => \e[34m65280\e[0m, \e[34m3\e[0m => \e[34m255\e[0m},\n  \e[34mopts:\e[0m %{\e[34mnamespace:\e[0m \e[35mnil\e[0m, \e[34mserver_name:\e[0m \e[35mnil\e[0m},\n  \e[34mmeta:\e[0m %{\e[34mindex:\e[0m \e[34m4\e[0m}\n}),
+          # text: ~s(%Fledex.Leds{\n  \e[34mcount:\e[0m \e[34m3\e[0m,\n  \e[34mleds:\e[0m %{\e[34m1\e[0m) <>
+          #       ~s( => \e[34m16711680\e[0m, \e[34m2\e[0m => \e[34m65280\e[0m, \e[34m3\e[0m => \e[34m255\e[0m}) <>
+          #       ~s(,\n  \e[34mopts:\e[0m %{\e[34mnamespace:\e[0m \e[35mnil\e[0m, \e[34mserver_name:\e[0m) <>
+          #       ~s( \e[35mnil\e[0m},\n  \e[34mmeta:\e[0m %{\e[34mindex:\e[0m \e[34m4\e[0m}\n}),
           chunk: false
         }],
         type: :tabs

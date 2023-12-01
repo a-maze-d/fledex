@@ -105,12 +105,14 @@ defmodule Fledex.Color.ColorTest do
       assert 14_235_678 == Names.info(:vermilion2)
       assert 14_235_678 == Names.info(:vermilion2, :hex)
       assert {216, 56, 30} == Names.info(:vermilion2, :rgb)
+      assert :vermilion2 == Names.info(:vermilion2, :name)
       assert {5, 193, 122} == Names.info(:vermilion2, :hsl)
       assert {5, 219, 216} == Names.info(:vermilion2, :hsv)
       assert 828 == Names.info(:vermilion2, :index)
       assert "Vermilion2" == Names.info(:vermilion2, :descriptive_name)
       assert "" == Names.info(:vermilion2, :source)
       assert "Crayola" == Names.info(:absolute_zero, :source)
+      assert nil == Names.info(:non_existing_color_name, :hex)
 
       assert :vermilion2 in Names.names()
     end

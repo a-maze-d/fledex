@@ -15,7 +15,6 @@ defmodule Fledex.Leds do
   require Logger
 
   alias Fledex.Color.Functions
-  alias Fledex.Color.Names
   alias Fledex.Color.Types
   alias Fledex.Color.Utils
   alias Fledex.LedsDriver
@@ -41,8 +40,9 @@ defmodule Fledex.Leds do
   defdelegate new(count, leds, opts, meta), to: Fledex.Leds, as: :leds
 
   @doc """
-  Create a new led sequence of length 0. This is rarely useful.
-  Use the `leds/1` function instead (or change the count by using `set_count/2`)
+  Create a new led sequence of length 0.
+
+  This is rarely useful. Use the `leds/1` function instead (or change the count by using `set_count/2`)
   """
   @spec leds() :: t
   def leds do
@@ -139,8 +139,10 @@ defmodule Fledex.Leds do
     count
   end
   @doc """
-  This function allows to define the server_name and the namespace to which
-  the led sequence will be send to when the `send/2` function is called.
+  Define the server_name and the namespace
+
+  This is used when the led sequence is sent to the `LedsDriver` when the
+  `send/2` function is called.
   """
   @spec set_driver_info(t, namespace :: atom, server_name :: atom) :: t
   def set_driver_info(%{opts: opts} = leds, namespace, server_name \\  Fledex.LedsDriver) do
@@ -148,7 +150,7 @@ defmodule Fledex.Leds do
     %__MODULE__{leds | opts: opts}
   end
   @doc """
-  This function defines a rainbow over the leds. The options that can be specified are:
+  Defines a rainbow over the leds. The options that can be specified are:
 
   *  `:num_leds`: how many leds should be part of the rainbow (by default all leds)
   * `:offset`: as from which led we want to start the  rainbow (default: 0, no offset)
@@ -191,7 +193,8 @@ defmodule Fledex.Leds do
   * `"num_leds`: Over how many leds the transition should happen. (default: all)
   * `:offset`: The offset where to start the gardient at (default: 0)
   """
-  def gradient(leds, start_color, end_color, opts \\ []) do
+  @spec gradient(t, Types.color, Types.color, keyword) :: t
+  def gradient(%__MODULE__{} = leds, start_color, end_color, opts \\ []) do
     num_leds = opts[:num_leds] || leds.count
     offset = opts[:offset] || 0
 
@@ -239,7 +242,7 @@ defmodule Fledex.Leds do
   Note: it is possible to use a sub sequence of leds and they all will be added to
   the sequence.
   """
-  @spec light(t, (Types.colorint | t | atom)) :: t
+  @spec light(t, Types.color | t) :: t
   def light(leds, rgb) do
     do_update(leds, rgb)
   end
@@ -250,7 +253,7 @@ defmodule Fledex.Leds do
   then the led will be stored, but ignored (but see the description
   of `set_count/2`). The same note as for `light/2` applies.
   """
-  @spec light(t, (Types.colorint | t | atom), pos_integer) :: t
+  @spec light(t, Types.color | t, pos_integer) :: t
   def light(leds, led, offset) when offset > 0 do
     do_update(leds, led, offset)
   end
@@ -263,8 +266,8 @@ defmodule Fledex.Leds do
   THe `repeat` needs to be more than 1, otherwise it wouldn't make sense.
   In adition the same note as for `light/2` applies.
   """
-  @spec light(t, (Types.colorint | t | atom), pos_integer, pos_integer) :: t
-  def light(leds, led, offset, repeat) when offset > 0 and repeat > 1 do
+  @spec light(t, Types.color | t, pos_integer, pos_integer) :: t
+  def light(%__MODULE__{} = leds, led, offset, repeat) when offset > 0 and repeat > 1 do
     # convert led to a LEDs struct
     led = case led do
       led when is_integer(led) -> __MODULE__.leds(1) |> __MODULE__.light(led)
@@ -280,22 +283,13 @@ defmodule Fledex.Leds do
    raise ArgumentError, message: "the offset needs to be > 0 (found: #{offset}) and repeat > 1 (found: #{repeat})"
   end
 
-  @spec do_update(t, (Types.colorint | Types.rgb | atom)) :: t
+  @spec do_update(t, Types.color | t) :: t
   defp do_update(%__MODULE__{meta: meta} = leds, rgb) do
     index = meta[:index]  || 1
-    index = if index < 1, do: 1, else: index
+    index = max(index, 1)
     do_update(leds, rgb, index)
   end
-
-  @spec do_update(t, Types.colorint, pos_integer) :: t
-  defp do_update(
-    %__MODULE__{count: count, leds: leds, opts: opts, meta: meta},
-    rgb,
-    offset
-  ) when is_integer(rgb) do
-    __MODULE__.leds(count, Map.put(leds, offset, rgb), opts, %{meta | index: offset + 1})
-  end
-  @spec do_update(t, t, pos_integer) :: t
+  @spec do_update(t, Types.color | t, pos_integer) :: t
   defp do_update(
     %__MODULE__{count: count1, leds: leds1, opts: opts1, meta: meta1},
     %__MODULE__{count: count2, leds: leds2},
@@ -306,20 +300,19 @@ defmodule Fledex.Leds do
     leds = Map.merge(leds1, remapped_new_leds)
     __MODULE__.leds(count1, leds, opts1, %{meta1 | index: offset + count2})
   end
-  @spec do_update(t, atom, pos_integer) :: t
-  defp do_update(leds, atom, offset) when is_atom(atom) do
-    color_int = apply(Names, atom, [:hex])
-    do_update(leds, color_int, offset)
-  end
-  @spec do_update(t, Types.rgb, pos_integer) :: t
-  defp do_update(leds, {_r, _g, _b} = rgb, offset) do
-    color_int = Utils.to_colorint(rgb)
-    do_update(leds, color_int, offset)
+  defp do_update(
+    %__MODULE__{count: count, leds: leds, opts: opts, meta: meta},
+    color,
+    offset
+  ) do
+    color_int = Utils.to_colorint(color)
+    __MODULE__.leds(count, Map.put(leds, offset, color_int), opts, %{meta | index: offset + 1})
   end
   defp do_update(leds, led, offset) do
     raise ArgumentError, message: "unknown data #{inspect leds}, #{inspect led}, #{inspect offset}"
   end
 
+  @spec remap_leds(%{pos_integer => Types.colorint}, pos_integer) :: %{pos_integer => Types.colorint}
   defp remap_leds(leds, offset) do
     Map.new(Enum.map(leds, fn {key, value} ->
       index = offset + key - 1
@@ -344,7 +337,7 @@ defmodule Fledex.Leds do
 
   Note: Only the leds that are inside the `count` will be added to the list.
   """
-  @spec to_list(t) :: list[integer]
+  @spec to_list(t) :: list(Types.colorint)
   def to_list(%__MODULE__{count: count, leds: _leds, opts: _opts, meta: _meta} = leds) when count > 0 do
     Enum.reduce(1..count, [], fn index, acc ->
       acc ++ [get_light(leds, index)]
@@ -360,10 +353,14 @@ defmodule Fledex.Leds do
   Convert the sequence of leds to a markdown representation.
 
   The #{@block} will be used to represent the leds and they will be colored in
-  the appropriate color. The opts are currently not used (but are planned to
-  be used for potential color correction)
+  the appropriate color. It then looks something like this:
+  <span style="color: #ff0000">#{@block}</span>
+  <span style="color: #00ff00">#{@block}</span>
+  <span style="color: #0000ff">#{@block}</span>
+  The opts are currently not used, but are planned to
+  be used for potential color correction (similar to `Fledex.LedStripDriver.KinoDriver`)
   """
-  @spec to_markdown(Fledex.Leds.t, map) :: String.t
+  @spec to_markdown(t, map) :: String.t
   def to_markdown(leds, _opts \\ %{}) do
     leds
       |> Fledex.Leds.to_list()
@@ -461,7 +458,7 @@ defmodule Fledex.Leds do
 
     @doc delegate_to: {Kino.Reader, :to_livebook, 1}
     @impl true
-    @spec to_livebook(Fledex.Leds.t) :: map()
+    @spec to_livebook(Fledex.Leds.t) :: map
     def to_livebook(leds) do
       md_kino = Kino.Markdown.new(Leds.to_markdown(leds))
       i_kino = Kino.Inspect.new(leds)

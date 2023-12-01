@@ -37,7 +37,12 @@ defmodule Fledex.Color.UtilsTest do
     assert Utils.nscale8({128, 128, 128}, Utils.frac8(32, 85), false) == {48, 48, 48}
     assert Utils.nscale8(Utils.to_colorint({128, 128, 128}), Utils.frac8(32, 85)) == 3_223_857
   end
-  test "convert to subpixels" do
+  test "convert to_colorint" do
+    assert Utils.to_colorint(0xffeedd) == 0xffeedd
+    assert Utils.to_colorint({0xff, 0xee, 0xdd}) == 0xffeedd
+    assert Utils.to_colorint(:red) == 0xff0000
+  end
+  test "convert to_rgb" do
     assert Utils.to_rgb(%{rgb: 0x123456}) == {0x12, 0x34, 0x56}
     assert Utils.to_rgb(%{rgb: {0x12, 0x34, 0x56}}) == {0x12, 0x34, 0x56}
     assert Utils.to_rgb(:red) == {0xff, 0x00, 0x00}

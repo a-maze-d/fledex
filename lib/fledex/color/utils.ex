@@ -6,6 +6,8 @@ defmodule Fledex.Color.Utils do
   """
   import Bitwise
 
+  require Fledex.Color.Names
+
   alias Fledex.Color.Names
   alias Fledex.Color.Types
 
@@ -107,26 +109,19 @@ defmodule Fledex.Color.Utils do
   end
 
   @doc """
-  This function combines the subpixels to a single (color) integer value
+  This function converts a color to a single (color) integer value
   """
-  # TODO: make more generic to accept more color types (define a protocol)
-  @spec to_colorint(Types.rgb) :: Types.colorint
-  def to_colorint({r, g, b}) do
-    (r<<<16) + (g<<<8) + b
-  end
+  @spec to_colorint(Types.color) :: Types.colorint
+  def to_colorint({r, g, b} = _color), do: (r<<<16) + (g<<<8) + b
+  def to_colorint(color) when is_integer(color), do: color
+  def to_colorint(color) when Names.is_color_name(color), do: apply(Names, color, [:hex])
 
   @doc """
-  This function splits a single (color) integer value into it's rgb components
+  This function splits a color into it's rgb components
   """
-  # TODO: make more generic to accept more color types (define a protocol)
-  @spec to_rgb((Types.colorint | atom | Types.rgb | %{rgb: Types.rgb} | %{rgb: Types.colorint})) :: Types.rgb
-  def to_rgb(rgb) do
-    case rgb do
-      %{rgb: {r, g, b}} -> {r, g, b}
-      %{rgb: x} when is_integer(x) -> to_rgb(x)
-      x when is_atom(x) -> apply(Names, x, [:rgb])
-      x when is_integer(x) -> split_into_subpixels(x)
-      x -> x
-    end
-  end
+  @spec to_rgb((Types.color | %{rgb: Types.rgb} | %{rgb: Types.colorint})) :: Types.rgb
+  def to_rgb(%{rgb: x} = _color), do: to_rgb(x)
+  def to_rgb({r, g, b} = _color), do: {r, g, b}
+  def to_rgb(color) when Names.is_color_name(color), do: apply(Names, color, [:rgb])
+  def to_rgb(color) when is_integer(color), do: split_into_subpixels(color)
 end

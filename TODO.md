@@ -1,6 +1,5 @@
 # Intro
-Even though this library is published, there are things I still want to do before I consider this
-as really done. Here the outstanding tasks that I can think of.
+Even though this library is published, there are things I still want to do before I consider this as really done. Here the outstanding tasks that I can think of.
 
 # Tasks
 - [ ] Documentation
@@ -15,7 +14,13 @@ as really done. Here the outstanding tasks that I can think of.
     - [ ] Fledex.Animation.LedAnimator
     - [ ] Fledex.LedsDriver
   - [ ] Add type specs (at least for the most important modules) (v0.3)
-  - [ ] Improve hexdocs
+    - [ ] Fledex
+    - [x] Fledex.Leds
+    - [x] Fledex.Color.Names
+    - [ ] Fledex.Animation.BaseAnimator
+    - [ ] Fledex.Animation.LedAnimationManager
+    - [ ] Fledex.Animation.LedAnimator
+    - [ ] Fledex.LedsDriver  - [ ] Improve hexdocs
     - [x] add livebooks (v0.3)
     - [ ] create cheatsheet (v0.3)
   - [ ] Add documentation on how to connect the LED strip to a RaspberryPi Zero (with and without level shifter).This could be part of the first example (v0.3 & v0.4)
@@ -35,6 +40,9 @@ as really done. Here the outstanding tasks that I can think of.
   - [ ] see the project plan that was planned out with my son, we are not quite there yet
   - [ ] Connect everything into a supervision tree (to make it more robust) (v0.4)
   - [ ] Use protocols
+    - [ ] Drivers
+    - [x] Conversions `to_rgb`, `to_colorint` <-- decided against it to allow having simple structures (tuple) instead of (module)structs. Protocols don't seem to work with those.
+    - [ ] ??? animations & components?
 - [ ] LED-component library
   - [ ] Create foundation for a led-component-library that enables defining reusable led components. For example both the clock as well as the weather example have a scale it would be easy to define those as components that would make it easier to defining certain aspects (v0.5)
 - [ ] Increase consumption
