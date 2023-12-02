@@ -41,10 +41,6 @@ defmodule Fledex.Color.Names do
   """
   @type color_props_t :: (:all|:index|:name|:decriptive_name|:hex|:rgb|:hsl|:hsv|:spource)
   @typedoc """
-  The different values that can be returned when interrogating for some named color properties
-  """
-  @type color_vals_t :: Types.color_any() | color_struct_t | String.t
-  @typedoc """
   The structure of a named color with all it's attributes.
   """
   @type color_struct_t :: %{
@@ -57,6 +53,10 @@ defmodule Fledex.Color.Names do
     hsv: Types.hsv,
     source: String.t
   }
+  @typedoc """
+  The different values that can be returned when interrogating for some named color properties
+  """
+  @type color_vals_t :: Types.color_any() | color_struct_t | String.t
 
   defguard is_color_name(atom) when atom in @color_names
 

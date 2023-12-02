@@ -216,6 +216,7 @@ defmodule Fledex.LedDriverTest do
         }
       }
       state = LedsDriver.init_state(init_args, :strip_name)
+        |> LedsDriver.init_driver()
 
       assert capture_io(fn ->
         response = LedsDriver.transfer_data(state)

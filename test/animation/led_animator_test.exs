@@ -44,29 +44,29 @@ defmodule Fledex.Animation.LedAnimatorTest do
         def_func: &default_def_func/1,
         send_config_func: &default_send_config_func/1,
         strip_name: :test_strip,
-        animator_name: :test_animator,
+        animation_name: :test_animation,
         triggers: %{},
         type: :animation
       }
 
-      {:ok, state, {:continue, :paint_once}} = LedAnimator.init({init_args, :test_strip, :test_animator})
+      {:ok, state, {:continue, :paint_once}} = LedAnimator.init({init_args, :test_strip, :test_animation})
       assert state == init_args
     end
     test "default funcs" do
       init_args = %{}
-      {:ok, state, {:continue, :paint_once}} = LedAnimator.init({init_args, :test_strip, :test_animator})
-      assert Leds.leds(30) == state.def_func.(%{test_strip: 10})
+      {:ok, state, {:continue, :paint_once}} = LedAnimator.init({init_args, :test_strip, :test_animation})
+      assert Leds.leds() == state.def_func.(%{test_strip: 10})
       assert %{} == state.send_config_func.(%{test_strip: 10})
 
     end
     test "config applied correctly (none_set)" do
       init_args = %{}
 
-      {:ok, state, {:continue, :paint_once}} = LedAnimator.init({init_args, :test_strip, :test_animator})
+      {:ok, state, {:continue, :paint_once}} = LedAnimator.init({init_args, :test_strip, :test_animation})
       assert state.def_func != nil
       assert state.send_config_func != nil
       assert state.strip_name == :test_strip
-      assert state.animator_name == :test_animator
+      assert state.animation_name == :test_animation
     end
   end
   describe "test triggers" do
@@ -84,12 +84,12 @@ defmodule Fledex.Animation.LedAnimatorTest do
         def_func: &default_def_func/1,
         send_config_func: &default_send_config_func/1,
         strip_name: :test_strip,
-        animator_name: :test_animator,
+        animation_name: :test_animation,
         triggers: %{},
         type: :animation
       }
       assert map_size(init_args.triggers) == 0
-      {:ok, state, {:continue, :paint_once}} = LedAnimator.init({init_args, :test_strip, :test_animator})
+      {:ok, state, {:continue, :paint_once}} = LedAnimator.init({init_args, :test_strip, :test_animation})
       assert map_size(init_args.triggers) == 0
 
       new_config = %{triggers: %{abc: 10}}
@@ -98,7 +98,7 @@ defmodule Fledex.Animation.LedAnimatorTest do
       assert state.def_func == init_args.def_func
       assert state.send_config_func == init_args.send_config_func
       assert state.strip_name == init_args.strip_name
-      assert state.animator_name == init_args.animator_name
+      assert state.animation_name == init_args.animation_name
       assert state.triggers != init_args.triggers
       assert map_size(state.triggers) == 1
       assert state.triggers.abc == 10
@@ -193,10 +193,10 @@ defmodule Fledex.Animation.LedAnimatorTest do
     end
   end
 
-  @animator_name :test_animator
+  @animation_name :test_animation
   describe "trigger" do
     test "trigger as cache", %{strip_name: strip_name}  do
-      :ok = LedsDriver.define_namespace(strip_name, @animator_name)
+      :ok = LedsDriver.define_namespace(strip_name, @animation_name)
       state = %{
         def_func: fn (triggers) ->
           assert length(Map.keys(triggers)) == 2
@@ -212,7 +212,7 @@ defmodule Fledex.Animation.LedAnimatorTest do
           {%{}, Map.put_new(triggers, :test2, 7)}
         end,
         strip_name: :test_strip,
-        animator_name: :test_animator,
+        animation_name: :test_animation,
         triggers: %{
           test_strip: 10,
           something: "abc"
@@ -243,7 +243,7 @@ defmodule Fledex.Animation.LedAnimatorTest do
       animation_name = :animation_testB
       {:ok, pid} = LedAnimator.start_link(%{type: :static}, strip_name, animation_name)
       assert Process.alive?(pid)
-      GenServer.stop(BaseAnimation.build_strip_animation_name(strip_name, animation_name), :normal)
+      GenServer.stop(BaseAnimation.build_animator_name(strip_name, animation_name), :normal)
       assert not Process.alive?(pid)
       GenServer.stop(driver, :normal)
     end

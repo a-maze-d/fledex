@@ -7,7 +7,7 @@ defmodule Fledex.LedsDriver do
   on a single LED strip
   The role the LedsDriver plays is similar to the one a window server  plays on a normal computer
   """
-  @behaviour GenServer
+  use GenServer
 
   require Logger
 
@@ -18,22 +18,19 @@ defmodule Fledex.LedsDriver do
   alias Fledex.LedStripDriver.NullDriver
   alias Fledex.Utils.PubSub
 
-  @type t :: %{
+  @type timer_t :: %{
+    disabled: boolean,
+    counter: pos_integer,
+    update_timeout: pos_integer,
+    update_func: (state_t -> state_t),
+    only_dirty_update: boolean,
+    is_dirty: boolean,
+    ref: reference
+  }
+  @type state_t :: %{
     strip_name: atom,
-    timer: %{
-      disabled: boolean,
-      counter: pos_integer,
-      update_timeout: pos_integer,
-      update_func: (t -> t),
-      only_dirty_update: boolean,
-      is_dirty: boolean,
-      ref: reference
-    },
-    led_strip: %{
-      merge_strategy: atom,
-      driver_modules: module,
-      config: map
-    },
+    timer: timer_t,
+    led_strip: Driver.driver_t,
     namespaces: map
   }
 
@@ -118,33 +115,33 @@ defmodule Fledex.LedsDriver do
   end
 
   # server code
-  @impl true
-  @spec init({map, atom}) :: {:ok, t} | {:stop, String.t()}
+  @impl GenServer
+  @spec init({map, atom}) :: {:ok, state_t}  | {:stop, String.t()}
   def init({init_args, strip_name}) when is_map(init_args) and is_atom(strip_name) do
     state = init_state(init_args, strip_name)
+    state = init_driver(state)
     state = if state[:timer][:disabled] == false, do: start_timer(state), else: state
 
     {:ok, state}
   end
-
   def init(_na) do
     {:stop, "Init args need to be a map"}
   end
-
-  @spec init_state(map, atom) :: t
+  @spec init_driver(state_t) :: state_t
+  def init_driver(state) do
+    %{state | led_strip: Driver.init(state.led_strip)}
+  end
+  @spec init_state(map, atom) :: state_t
   def init_state(init_args, strip_name) when is_map(init_args) and is_atom(strip_name) do
-    state = %{
+    %{
       strip_name: strip_name,
-      timer: init_timer(init_args[:timer]),
-      led_strip: init_led_strip(init_args[:led_strip]),
+      timer: init_timer(init_args[:timer] || %{}),
+      led_strip: init_led_strip(init_args[:led_strip] || %{}),
       namespaces: init_args[:namespaces] || %{}
     }
-
-    Driver.init(init_args, state)
   end
 
-  defp init_led_strip(nil), do: init_led_strip(%{})
-
+  @spec init_led_strip(map) :: Driver.driver_t
   defp init_led_strip(init_args) do
     %{
       merge_strategy: init_args[:merge_strategy] || :avg,
@@ -158,17 +155,16 @@ defmodule Fledex.LedsDriver do
     @default_driver_modules
   end
 
+  @spec define_drivers(atom | [atom]) :: [atom]
   defp define_drivers(driver_modules) when is_list(driver_modules) do
     driver_modules
   end
-
   defp define_drivers(driver_modules) do
     Logger.warning("driver_modules is not a list")
     [driver_modules]
   end
 
-  defp init_timer(nil), do: init_timer(%{})
-
+  @spec init_timer(map) :: timer_t
   defp init_timer(init_args) do
     %{
       disabled: init_args[:disabled] || false,
@@ -181,14 +177,14 @@ defmodule Fledex.LedsDriver do
     }
   end
 
-  @impl true
-  @spec terminate(reason, state :: Fledex.LedDriver.t()) :: :ok
+  @impl GenServer
+  @spec terminate(reason, state_t) :: :ok
         when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(reason, state) do
-    Driver.terminate(reason, state)
+    Driver.terminate(reason, state.led_strip)
   end
 
-  @spec start_timer(t) :: t
+  @spec start_timer(state_t) :: state_t
   defp start_timer(state) do
     update_timeout = state[:timer][:update_timeout]
     update_func = state[:timer][:update_func]
@@ -199,9 +195,9 @@ defmodule Fledex.LedsDriver do
     state
   end
 
-  @impl true
-  @spec handle_call({:define_namespace, atom}, {pid, any}, t) ::
-          {:reply, :ok | {:error, binary}, t}
+  @impl GenServer
+  @spec handle_call({:define_namespace, atom}, {pid, any}, state_t) ::
+          {:reply, :ok | {:error, binary}, state_t}
   def handle_call({:define_namespace, name}, _from, %{namespaces: namespaces} = state) do
     state = put_in(state, [:timer, :is_dirty], true)
 
@@ -211,15 +207,15 @@ defmodule Fledex.LedsDriver do
     end
   end
 
-  @impl true
-  @spec handle_call({:drop_namespace, atom}, {pid, any}, t) :: {:reply, :ok, t}
+  @impl GenServer
+  @spec handle_call({:drop_namespace, atom}, GenServer.from, state_t) :: {:reply, :ok, state_t}
   def handle_call({:drop_namespace, name}, _from, %{namespaces: namespaces} = state) do
     state = put_in(state, [:timer, :is_dirty], true)
     {:reply, :ok, %{state | namespaces: Map.drop(namespaces, [name])}}
   end
 
-  @impl true
-  @spec handle_call({:exist_namespace, atom}, {pid, any}, t) :: {:reply, boolean, t}
+  @impl GenServer
+  @spec handle_call({:exist_namespace, atom}, GenServer.from, state_t) :: {:reply, boolean, state_t}
   def handle_call({:exist_namespace, name}, _from, %{namespaces: namespaces} = state) do
     exists =
       case Map.fetch(namespaces, name) do
@@ -230,9 +226,9 @@ defmodule Fledex.LedsDriver do
     {:reply, exists, state}
   end
 
-  @impl true
-  @spec handle_call({:set_leds, atom, list(Types.colorint())}, {pid, any}, t) ::
-          {:reply, :ok | {:error, String.t()}, t}
+  @impl GenServer
+  @spec handle_call({:set_leds, atom, list(Types.colorint())}, {pid, any}, state_t) ::
+          {:reply, :ok | {:error, String.t()}, state_t}
   def handle_call({:set_leds, name, leds}, _from, %{namespaces: namespaces} = state) do
     state = put_in(state, [:timer, :is_dirty], true)
 
@@ -247,22 +243,22 @@ defmodule Fledex.LedsDriver do
     end
   end
 
-  @impl true
-  @spec handle_call({:change_config, list(atom), any}, {pid, any}, t) :: {:reply, {:ok, any}, t}
+  @impl GenServer
+  @spec handle_call({:change_config, list(atom), any}, {pid, any}, state_t) :: {:reply, {:ok, any}, state_t}
   def handle_call({:change_config, config_path, value}, _from, state) do
     previous_value = get_in(state, config_path)
     state = put_in(state, config_path, value)
     {:reply, {:ok, previous_value}, state}
   end
 
-  @impl true
-  @spec handle_call(:reinit_drivers, {pid, any}, t) :: {:reply, :ok, t}
+  @impl GenServer
+  @spec handle_call(:reinit_drivers, {pid, any}, state_t) :: {:reply, :ok, state_t}
   def handle_call(:reinit_drivers, _from, state) do
-    {:reply, :ok, Driver.reinit(state)}
+    {:reply, :ok, %{state | led_strip: Driver.reinit(state.led_strip)}}
   end
 
-  @impl true
-  @spec handle_info({:update_timeout, (t -> t)}, t) :: {:noreply, t}
+  @impl GenServer
+  @spec handle_info({:update_timeout, (state_t -> state_t)}, state_t) :: {:noreply, state_t}
   def handle_info({:update_timeout, func}, state) do
     # here should now come some processing for now we just increase the counter and reschdule the timer
     state = update_in(state, [:timer, :counter], &(&1 + 1))
@@ -275,7 +271,7 @@ defmodule Fledex.LedsDriver do
     {:noreply, state}
   end
 
-  @spec transfer_data(t) :: t
+  @spec transfer_data(state_t) :: state_t
   def transfer_data(
         %{timer: %{is_dirty: is_dirty, only_dirty_updates: only_dirty_updates}} = state
       )
@@ -288,16 +284,17 @@ defmodule Fledex.LedsDriver do
     #   [:transfer_data],
     #   %{timer_counter: state.timer.counter},
     #   fn ->
-    state =
+    led_strip =
       state.namespaces
       |> merge_namespaces(state.led_strip.merge_strategy)
-      |> Driver.transfer(state)
+      |> Driver.transfer(state.timer.counter, state.led_strip)
+
+    %{state | led_strip: led_strip}
       |> put_in([:timer, :is_dirty], false)
 
     #       {state, %{metadata: "done"}}
     #   end
     # )
-    state
   end
 
   @spec merge_namespaces(map, atom) :: list(Types.colorint())

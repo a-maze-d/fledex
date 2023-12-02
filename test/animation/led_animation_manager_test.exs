@@ -90,7 +90,9 @@ end
 
 defmodule Fledex.Animation.LedAnimationManagerTest2 do
   defmodule TestAnimator do
-    @behaviour Fledex.Animation.BaseAnimation
+    @type config_t :: map
+    @type state_t :: map
+    use Fledex.Animation.BaseAnimation
     def start_link(_config, _strip_name, _animation_name) do
       pid = Process.spawn(fn -> Process.sleep(1_000) end, [:link])
       Process.register(pid, :hello)
@@ -99,8 +101,14 @@ defmodule Fledex.Animation.LedAnimationManagerTest2 do
     def config(_strip_name, _animation_name, _config) do
       :ok
     end
+    def get_info(_strip_name, _animation_name) do
+      :ok
+    end
     def shutdown(_strip_name, _animation_name) do
       :ok
+    end
+    def init(init_arg) do
+      {:ok, init_arg}
     end
   end
 

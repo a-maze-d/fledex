@@ -44,58 +44,49 @@ defmodule Fledex.LedStripDriver.DriverTest do
     alias Fledex.LedStripDriver.DriverTest.TestDriver
     alias Fledex.LedStripDriver.DriverTest.TestDriver2
     test "init" do
-      state = %{
-        led_strip: %{
-          driver_modules: [TestDriver, TestDriver2],
-          config: %{}
-        }
-      }
-      init_args = %{
-        led_strip: %{
-          config: %{
-            Fledex.LedStripDriver.DriverTest.TestDriver => %{
-              a1: 1
-            },
-            Fledex.LedStripDriver.DriverTest.TestDriver2 => %{
-            }
+      led_strip = %{
+        driver_modules: [TestDriver, TestDriver2],
+        config: %{
+          Fledex.LedStripDriver.DriverTest.TestDriver => %{
+            a1: 1
+          },
+          Fledex.LedStripDriver.DriverTest.TestDriver2 => %{
           }
         }
       }
-      state = Driver.init(init_args, state)
+      led_strip = Driver.init(led_strip)
 
-      assert map_size(state[:led_strip][:config]) == 2
-      assert state[:led_strip][:config][TestDriver][:a1] == 1
-      assert state[:led_strip][:config][TestDriver2][:a1] == 0
-      assert state[:led_strip][:config][TestDriver][:a2] == 1
-      assert state[:led_strip][:config][TestDriver2][:a2] == 2
+      assert map_size(led_strip[:config]) == 2
+      assert led_strip[:config][TestDriver][:a1] == 1
+      assert led_strip[:config][TestDriver2][:a1] == 0
+      assert led_strip[:config][TestDriver][:a2] == 1
+      assert led_strip[:config][TestDriver2][:a2] == 2
     end
 
     test "transfer" do
-      state = %{
-        timer: %{counter: 0},
-        led_strip: %{
-          driver_modules: [TestDriver, TestDriver2],
-          config: %{
-            Fledex.LedStripDriver.DriverTest.TestDriver => %{
-              a1: 1,
-              a2: 1
-            },
-            Fledex.LedStripDriver.DriverTest.TestDriver2 => %{
-              a1: 0,
-              a2: 2
-            }
+      counter = 0
+      led_strip = %{
+        driver_modules: [TestDriver, TestDriver2],
+        config: %{
+          Fledex.LedStripDriver.DriverTest.TestDriver => %{
+            a1: 1,
+            a2: 1
+          },
+          Fledex.LedStripDriver.DriverTest.TestDriver2 => %{
+            a1: 0,
+            a2: 2
           }
         }
       }
-      state = Driver.transfer([], state)
+      led_strip = Driver.transfer([], counter, led_strip)
 
-      assert map_size(state[:led_strip][:config]) == 2
-      assert state[:led_strip][:config][TestDriver][:a1] == 1
-      assert state[:led_strip][:config][TestDriver2][:a1] == 0
-      assert state[:led_strip][:config][TestDriver][:a2] == 1
-      assert state[:led_strip][:config][TestDriver2][:a2] == 2
-      assert state[:led_strip][:config][TestDriver][:a3] == nil
-      assert state[:led_strip][:config][TestDriver2][:a3] == 4
+      assert map_size(led_strip[:config]) == 2
+      assert led_strip[:config][TestDriver][:a1] == 1
+      assert led_strip[:config][TestDriver2][:a1] == 0
+      assert led_strip[:config][TestDriver][:a2] == 1
+      assert led_strip[:config][TestDriver2][:a2] == 2
+      assert led_strip[:config][TestDriver][:a3] == nil
+      assert led_strip[:config][TestDriver2][:a3] == 4
     end
   end
 end

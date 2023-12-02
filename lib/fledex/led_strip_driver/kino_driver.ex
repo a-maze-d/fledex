@@ -43,7 +43,8 @@ defmodule Fledex.LedStripDriver.KinoDriver do
   end
 
   @impl true
-  @spec terminate(reason, Fledex.LedDriver.t) :: :ok when reason: :normal | :shutdown | {:shutdown, term()} | term()
+  @spec terminate(reason, map) :: :ok
+    when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(_reason, _state) do
     # nothing needs to be done here
     :ok

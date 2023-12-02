@@ -42,7 +42,7 @@ defmodule Fledex.Color.KinoRender do
     )
   end
 
-  @spec to_markdown(KinoRender.t) :: binary
+  @spec to_markdown(t) :: binary
   def to_markdown(%__MODULE__{} = colors) do
     Leds.to_markdown(to_leds(colors))
   end
@@ -51,6 +51,7 @@ defmodule Fledex.Color.KinoRender do
     alias Fledex.Color.KinoRender
 
     @impl true
+    @spec to_livebook(Fledex.Color.KinoRender.t) :: map
     def to_livebook(%KinoRender{} = colors) do
       md_kino = Kino.Markdown.new(KinoRender.to_markdown(colors))
       i_kino = Kino.Inspect.new(colors)

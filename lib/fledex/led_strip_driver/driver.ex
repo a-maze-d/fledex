@@ -9,41 +9,50 @@ defmodule Fledex.LedStripDriver.Driver do
   @callback terminate(reason, config :: map) :: :ok
     when reason: :normal | :shutdown | {:shutdown, term()} | term()
 
-    @spec init(map, Fledex.LedDriver.t) :: Fledex.LedDriver.t
-    def init(init_args, state) do
-      configs = for module <- state.led_strip.driver_modules do
-        # Logger.trace("Creating driver: #{inspect module}")
-        module_init_args = init_args[:led_strip][:config][module] || %{}
-        config = module.init(module_init_args)
-        {module, config}
-      end
+  @type driver_t :: %{
+    merge_strategy: atom,
+    driver_modules: module,
+    config: %{atom => map}
+  }
 
-      put_in(state.led_strip.config, Enum.into(configs, %{}))
+  @spec init(driver_t) :: driver_t
+  def init(led_strip) do
+    configs = for module <- led_strip.driver_modules do
+      # Logger.trace("Creating driver: #{inspect module}")
+      module_init_args = led_strip[:config][module] || %{}
+      config = module.init(module_init_args)
+      {module, config}
     end
 
-    def reinit(state) do
-      configs = for module <- state.led_strip.driver_modules do
-        module_config = state.led_strip.config[module]
-        config = module.reinit(module_config)
-        {module, config}
-      end
-      put_in(state.led_strip.config, Enum.into(configs, %{}))
+    put_in(led_strip.config, Map.new(configs))
+  end
+
+  @spec reinit(driver_t) :: driver_t
+  def reinit(led_strip) do
+    configs = for module <- led_strip.driver_modules do
+      module_config = led_strip.config[module]
+      config = module.reinit(module_config)
+      {module, config}
+    end
+    put_in(led_strip.config, Map.new(configs))
+  end
+
+  @spec transfer(list(Types.colorint), pos_integer, driver_t) :: driver_t
+  def transfer(leds, counter, led_strip) do
+      configs = for module <- led_strip.driver_modules do
+      {config, _response} = module.transfer(leds, counter, led_strip[:config][module])
+      {module, config}
     end
 
-    @spec transfer(list(Types.colorint), Fledex.LedDriver.t) :: Fledex.LedDriver.t
-    def transfer(leds, state) do
-      configs = for module <- state.led_strip.driver_modules do
-        {config, _response} = module.transfer(leds, state[:timer][:counter], state[:led_strip][:config][module])
-        {module, config}
-      end
+    put_in(led_strip.config, Map.new(configs))
+  end
 
-      put_in(state.led_strip.config, Enum.into(configs, %{}))
+  @spec terminate(reason, driver_t) :: :ok
+        when reason: :normal | :shutdown | {:shutdown, term()} | term()
+  def terminate(reason, led_strip) do
+    for module <- led_strip.driver_modules do
+      module.terminate(reason, led_strip[:config][module])
     end
-
-    def terminate(reason, state) do
-      for module <- state.led_strip.driver_modules do
-        module.terminate(reason, state[:led_strip][:config][module])
-      end
-      :ok
-    end
+    :ok
+  end
 end

@@ -40,7 +40,7 @@ defmodule Fledex.LedStripDriver.SpiDriverTest do
     end
     test "terminate" do
       driver = SpiDriver.init(%{})
-      SpiDriver.terminate(:normal, driver)
+      assert :ok == SpiDriver.terminate(:normal, driver)
     end
   end
 end
