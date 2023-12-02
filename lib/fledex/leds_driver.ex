@@ -25,7 +25,7 @@ defmodule Fledex.LedsDriver do
     update_func: (state_t -> state_t),
     only_dirty_update: boolean,
     is_dirty: boolean,
-    ref: reference
+    ref: reference | nil
   }
   @type state_t :: %{
     strip_name: atom,
@@ -119,8 +119,8 @@ defmodule Fledex.LedsDriver do
   @spec init({map, atom}) :: {:ok, state_t}  | {:stop, String.t()}
   def init({init_args, strip_name}) when is_map(init_args) and is_atom(strip_name) do
     state = init_state(init_args, strip_name)
-    state = init_driver(state)
-    state = if state[:timer][:disabled] == false, do: start_timer(state), else: state
+      |> init_driver()
+      |> start_timer()
 
     {:ok, state}
   end
@@ -150,12 +150,11 @@ defmodule Fledex.LedsDriver do
     }
   end
 
+  @spec define_drivers(nil | module | [module]) :: [module]
   defp define_drivers(nil) do
     # Logger.warning("No driver_modules defined/ #{inspect @default_driver_modules} will be used")
     @default_driver_modules
   end
-
-  @spec define_drivers(atom | [atom]) :: [atom]
   defp define_drivers(driver_modules) when is_list(driver_modules) do
     driver_modules
   end
@@ -165,16 +164,17 @@ defmodule Fledex.LedsDriver do
   end
 
   @spec init_timer(map) :: timer_t
-  defp init_timer(init_args) do
-    %{
-      disabled: init_args[:disabled] || false,
-      counter: init_args[:counter] || 0,
-      update_timeout: init_args[:update_timeout] || @default_update_timeout,
-      update_func: init_args[:update_func] || (&transfer_data/1),
-      only_dirty_update: init_args[:only_dirty_update] || false,
-      is_dirty: init_args[:is_dirty] || false,
+  defp init_timer(init_args) when is_map(init_args) do
+    default = %{
+      disabled: false,
+      counter: 0,
+      update_timeout: @default_update_timeout,
+      update_func: (&transfer_data/1),
+      only_dirty_update: false,
+      is_dirty: false,
       ref: nil,
     }
+    Map.merge(default, init_args)
   end
 
   @impl GenServer
@@ -185,6 +185,7 @@ defmodule Fledex.LedsDriver do
   end
 
   @spec start_timer(state_t) :: state_t
+  defp start_timer(%{timer: %{disabled: true}} = state), do: state
   defp start_timer(state) do
     update_timeout = state[:timer][:update_timeout]
     update_func = state[:timer][:update_func]
@@ -260,12 +261,9 @@ defmodule Fledex.LedsDriver do
   @impl GenServer
   @spec handle_info({:update_timeout, (state_t -> state_t)}, state_t) :: {:noreply, state_t}
   def handle_info({:update_timeout, func}, state) do
-    # here should now come some processing for now we just increase the counter and reschdule the timer
     state = update_in(state, [:timer, :counter], &(&1 + 1))
-    state = start_timer(state)
-
-    # Logger.info "calling #{inspect func}"
-    state = func.(state)
+      |> start_timer()
+      |> func.()
 
     PubSub.broadcast(:fledex, "trigger", {:trigger, Map.put(%{}, state.strip_name , state.timer.counter)})
     {:noreply, state}

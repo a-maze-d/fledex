@@ -11,7 +11,7 @@ defmodule Fledex.LedStripDriver.Driver do
 
   @type driver_t :: %{
     merge_strategy: atom,
-    driver_modules: module,
+    driver_modules: [module],
     config: %{atom => map}
   }
 
