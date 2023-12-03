@@ -1,5 +1,5 @@
-defmodule Fledex.LedStripDriver.LoggerDriver do
-  @behaviour Fledex.LedStripDriver.Driver
+defmodule Fledex.Driver.Impl.LoggerDriver do
+  @behaviour Fledex.Driver.Interface
   require Logger
 
   alias Fledex.Color.Types
@@ -10,7 +10,7 @@ defmodule Fledex.LedStripDriver.LoggerDriver do
   @block <<"\u2588">>
 
   @moduledoc """
-    This is a dummy implementation of the LedStripDriver that dumps
+    This is a dummy implementation of the Driver that dumps
     the binaries to IO. This can be useful if you want to run
     some tests without real hardware.
     The real implementatin probably opens a channel (if not already open)

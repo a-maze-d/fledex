@@ -1,9 +1,9 @@
-defmodule Fledex.LedStripDriver.NullDriver do
-  @behaviour Fledex.LedStripDriver.Driver
+defmodule Fledex.Driver.Impl.NullDriver do
+  @behaviour Fledex.Driver.Interface
 
   alias Fledex.Color.Types
   @moduledoc """
-    This is a dummy implementation of the LedStripDriver that doesn't do
+    This is a dummy implementation of the Driver that doesn't do
     anything (similar to a /dev/null device). This can be useful if you
     want to run some tests without getting any output or sending it to hardware.
   """

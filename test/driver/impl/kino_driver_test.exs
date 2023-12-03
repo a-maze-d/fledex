@@ -1,10 +1,10 @@
-defmodule Fledex.LedStripDriver.KinoDriverTest do
+defmodule Fledex.Driver.Impl.KinoDriverTest do
   use Kino.LivebookCase, async: true
 
   require Logger
 
   alias Fledex.Color.Correction
-  alias Fledex.LedStripDriver.KinoDriver
+  alias Fledex.Driver.Impl.KinoDriver
 
   describe "null driver basic tests" do
     test "default init" do

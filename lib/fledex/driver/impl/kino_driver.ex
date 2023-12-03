@@ -1,5 +1,5 @@
-defmodule Fledex.LedStripDriver.KinoDriver do
-  @behaviour Fledex.LedStripDriver.Driver
+defmodule Fledex.Driver.Impl.KinoDriver do
+  @behaviour Fledex.Driver.Interface
 
   alias Fledex.Color.Correction
   alias Fledex.Color.Types

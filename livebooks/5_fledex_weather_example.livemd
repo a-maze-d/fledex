@@ -10,7 +10,7 @@ Mix.install([
 alias Fledex.Animation.LedAnimationManager
 alias Fledex.Leds
 alias Fledex.LedsDriver
-alias Fledex.LedStripDriver.KinoDriver
+alias Fledex.Driver.Impl.KinoDriver
 alias Fledex.Color.Correction
 alias Fledex.Utils.PubSub
 

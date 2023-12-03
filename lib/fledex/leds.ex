@@ -358,7 +358,7 @@ defmodule Fledex.Leds do
   <span style="color: #00ff00">#{@block}</span>
   <span style="color: #0000ff">#{@block}</span>
   The opts are currently not used, but are planned to
-  be used for potential color correction (similar to `Fledex.LedStripDriver.KinoDriver`)
+  be used for potential color correction (similar to `Fledex.Driver.Impl.KinoDriver`)
   """
   @spec to_markdown(t, map) :: String.t
   def to_markdown(leds, _opts \\ %{}) do

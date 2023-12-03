@@ -1,8 +1,8 @@
-defmodule Fledex.LedStripDriver.SpiDriverTest do
+defmodule Fledex.Driver.Impl.SpiDriverTest do
   use ExUnit.Case
 
   alias Fledex.Color.Correction
-  alias Fledex.LedStripDriver.SpiDriver
+  alias Fledex.Driver.Impl.SpiDriver
 
   describe "test driver basic tests" do
     test "default init" do

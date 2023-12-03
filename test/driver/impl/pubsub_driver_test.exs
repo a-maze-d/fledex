@@ -1,7 +1,7 @@
-defmodule Fledex.LedStripDriver.PubSubDriverTest do
+defmodule Fledex.Driver.Impl.PubSubDriverTest do
   use ExUnit.Case
 
-  alias Fledex.LedStripDriver.PubSubDriver
+  alias Fledex.Driver.Impl.PubSubDriver
   alias Fledex.Utils.PubSub
 
   setup do

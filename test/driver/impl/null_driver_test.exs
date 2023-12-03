@@ -1,7 +1,7 @@
-defmodule Fledex.LedStripDriver.NullDriverTest do
+defmodule Fledex.Driver.Impl.NullDriverTest do
   use ExUnit.Case, async: true
 
-  alias Fledex.LedStripDriver.NullDriver
+  alias Fledex.Driver.Impl.NullDriver
 
   describe "null driver basic tests" do
     test "init" do

@@ -5,9 +5,9 @@ defmodule Fledex.LedDriverTest do
 
   require Logger
 
+  alias Fledex.Driver.Impl.LoggerDriver
+  alias Fledex.Driver.Impl.NullDriver
   alias Fledex.LedsDriver
-  alias Fledex.LedStripDriver.LoggerDriver
-  alias Fledex.LedStripDriver.NullDriver
 
   # doctest LedsDriver
 
@@ -57,7 +57,7 @@ defmodule Fledex.LedDriverTest do
         timer: %{disabled: true},
         led_strip: %{
           merge_strategy: :cap,
-          driver_modules: Fledex.LedStripDriver.NullDriver
+          driver_modules: NullDriver
         }
       }
       {{:ok, _state}, log} = with_log(fn ->
@@ -288,7 +288,7 @@ defmodule Fledex.LedDriverTest do
 end
 
 defmodule Fledex.LedsDriverTest.TestDriver do
-  @behaviour Fledex.LedStripDriver.Driver
+  @behaviour Fledex.Driver.Interface
 
   import ExUnit.Assertions
 

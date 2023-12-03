@@ -14,11 +14,10 @@ defmodule Fledex.LedsDriver do
   alias Fledex.Color.Correction
   alias Fledex.Color.Types
   alias Fledex.Color.Utils
-  alias Fledex.LedStripDriver.Driver
-  alias Fledex.LedStripDriver.NullDriver
+  alias Fledex.Driver.Manager
   alias Fledex.Utils.PubSub
 
-  @type timer_t :: %{
+  @typep timer_t :: %{
     disabled: boolean,
     counter: pos_integer,
     update_timeout: pos_integer,
@@ -27,15 +26,14 @@ defmodule Fledex.LedsDriver do
     is_dirty: boolean,
     ref: reference | nil
   }
-  @type state_t :: %{
+  @typep state_t :: %{
     strip_name: atom,
     timer: timer_t,
-    led_strip: Driver.driver_t,
+    led_strip: Manager.driver_t,
     namespaces: map
   }
 
   @default_update_timeout 50
-  @default_driver_modules [NullDriver]
 
   # client code
   @spec start_link(atom | {:global, any} | {:via, atom, any}, atom | map) ::
@@ -47,9 +45,9 @@ defmodule Fledex.LedsDriver do
       timer: %{only_dirty_update: true},
       led_strip: %{
         merge_strategy: :cap,
-        driver_modules: [Fledex.LedStripDriver.KinoDriver],
+        driver_modules: [Fledex.Driver.Impl.KinoDriver],
         config: %{
-          Fledex.LedStripDriver.KinoDriver => %{
+          Fledex.Driver.Impl.KinoDriver => %{
             update_freq: 1,
             color_correction: Correction.no_color_correction()
           }
@@ -64,9 +62,9 @@ defmodule Fledex.LedsDriver do
       timer: %{only_dirty_update: true},
       led_strip: %{
         merge_strategy: :cap,
-        driver_modules: [Fledex.LedStripDriver.SpiDriver],
+        driver_modules: [Fledex.Driver.Impl.SpiDriver],
         config: %{
-          Fledex.LedStripDriver.SpiDriver => %{
+          Fledex.Driver.Impl.SpiDriver => %{
             color_correction: Correction.define_correction(
               Correction.Color.typical_smd5050(),
               Correction.Temperature.uncorrected_temperature()
@@ -118,51 +116,39 @@ defmodule Fledex.LedsDriver do
   @impl GenServer
   @spec init({map, atom}) :: {:ok, state_t}  | {:stop, String.t()}
   def init({init_args, strip_name}) when is_map(init_args) and is_atom(strip_name) do
-    state = init_state(init_args, strip_name)
-      |> init_driver()
-      |> start_timer()
-
-    {:ok, state}
+    {
+      :ok,
+      init_state(init_args, strip_name)
+        |> init_driver()
+        |> start_timer()
+    }
   end
   def init(_na) do
     {:stop, "Init args need to be a map"}
   end
   @spec init_driver(state_t) :: state_t
   def init_driver(state) do
-    %{state | led_strip: Driver.init(state.led_strip)}
+    %{state | led_strip: Manager.init_drivers(state.led_strip)}
   end
   @spec init_state(map, atom) :: state_t
   def init_state(init_args, strip_name) when is_map(init_args) and is_atom(strip_name) do
     %{
       strip_name: strip_name,
       timer: init_timer(init_args[:timer] || %{}),
-      led_strip: init_led_strip(init_args[:led_strip] || %{}),
+      led_strip: Manager.init_config(init_args[:led_strip] || %{}),
       namespaces: init_args[:namespaces] || %{}
     }
   end
 
-  @spec init_led_strip(map) :: Driver.driver_t
-  defp init_led_strip(init_args) do
-    %{
-      merge_strategy: init_args[:merge_strategy] || :avg,
-      driver_modules: define_drivers(init_args[:driver_modules]),
-      config: init_args[:config] || %{}
-    }
-  end
-
-  @spec define_drivers(nil | module | [module]) :: [module]
-  defp define_drivers(nil) do
-    # Logger.warning("No driver_modules defined/ #{inspect @default_driver_modules} will be used")
-    @default_driver_modules
-  end
-  defp define_drivers(driver_modules) when is_list(driver_modules) do
-    driver_modules
-  end
-  defp define_drivers(driver_modules) do
-    Logger.warning("driver_modules is not a list")
-    [driver_modules]
-  end
-
+  @allowed_keys [
+      :disabled,
+      :counter,
+      :update_timeout,
+      :update_func,
+      :only_dirty_update,
+      :is_dirty,
+      :ref
+    ]
   @spec init_timer(map) :: timer_t
   defp init_timer(init_args) when is_map(init_args) do
     default = %{
@@ -174,6 +160,9 @@ defmodule Fledex.LedsDriver do
       is_dirty: false,
       ref: nil,
     }
+    init_args = Map.filter(init_args, fn {key, _value} ->
+      key in @allowed_keys
+    end)
     Map.merge(default, init_args)
   end
 
@@ -181,7 +170,7 @@ defmodule Fledex.LedsDriver do
   @spec terminate(reason, state_t) :: :ok
         when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(reason, state) do
-    Driver.terminate(reason, state.led_strip)
+    Manager.terminate(reason, state.led_strip)
   end
 
   @spec start_timer(state_t) :: state_t
@@ -255,7 +244,7 @@ defmodule Fledex.LedsDriver do
   @impl GenServer
   @spec handle_call(:reinit_drivers, {pid, any}, state_t) :: {:reply, :ok, state_t}
   def handle_call(:reinit_drivers, _from, state) do
-    {:reply, :ok, %{state | led_strip: Driver.reinit(state.led_strip)}}
+    {:reply, :ok, %{state | led_strip: Manager.reinit(state.led_strip)}}
   end
 
   @impl GenServer
@@ -285,7 +274,7 @@ defmodule Fledex.LedsDriver do
     led_strip =
       state.namespaces
       |> merge_namespaces(state.led_strip.merge_strategy)
-      |> Driver.transfer(state.timer.counter, state.led_strip)
+      |> Manager.transfer(state.timer.counter, state.led_strip)
 
     %{state | led_strip: led_strip}
       |> put_in([:timer, :is_dirty], false)

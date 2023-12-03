@@ -11,8 +11,8 @@ Mix.install([
 # we define a couple of aliases to not have to type that much
 alias Fledex.Leds
 alias Fledex.LedsDriver
-alias Fledex.LedStripDriver.KinoDriver
-alias Fledex.LedStripDriver.SpiDriver
+alias Fledex.Driver.Impl.KinoDriver
+alias Fledex.Driver.Impl.SpiDriver
 alias Fledex.Color.Correction
 
 :ok

@@ -29,7 +29,8 @@ config = %{
 {:ok, pid} = LedsDriver.start_link(config)
 ```
 
-The LedsDriver should have quite reasonable defaults to get you started (a LoggerDriver is used by default)
+The LedsDriver should have quite reasonable defaults to get you started (a `NullDriver` 
+is used by default)
 
 Your interaction with the LedDriver should mainly happen through the Leds module. To set the first 3 LEDs (of a 50 LED strip) to red, green and blue you would do the following (here the [color names](https://www.ditig.com/256-colors-cheat-sheet) are used, but you could have used the hex values `0xFF0000`, `0x00FF00`, and `0x0000FF` too):
 ```elixir

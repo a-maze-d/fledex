@@ -111,7 +111,7 @@ defmodule Fledex.MixProject do
         ],
         "Animation": ~r/Fledex.Animation/,
         "Utils": ~r/Fledex.Utils/,
-        "Drivers": ~r/Fledex.LedStripDriver/,
+        "Driver": ~r/Fledex.Driver/,
         "Color": ~r/Fledex.Color/,
       ],
       groups_for_docs: [

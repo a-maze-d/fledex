@@ -1,5 +1,5 @@
-defmodule Fledex.LedStripDriver.PubSubDriver do
-  @behaviour Fledex.LedStripDriver.Driver
+defmodule Fledex.Driver.Impl.PubSubDriver do
+  @behaviour Fledex.Driver.Interface
 
   alias Fledex.Color.Types
   alias Fledex.Utils.PubSub

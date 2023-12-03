@@ -1,11 +1,11 @@
-defmodule Fledex.LedStripDriver.LoggerDriverTest do
+defmodule Fledex.Driver.Impl.LoggerDriverTest do
   use ExUnit.Case, async: true
 
   import ExUnit.CaptureLog
   import ExUnit.CaptureIO
   require Logger
 
-  alias Fledex.LedStripDriver.LoggerDriver
+  alias Fledex.Driver.Impl.LoggerDriver
 
   describe "init" do
     test "defaults" do

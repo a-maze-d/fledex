@@ -10,9 +10,9 @@ Even though this library is published, there are things I still want to do befor
     - [x] Fledex.Leds
     - [x] Fledex.Color.Names
     - [ ] Fledex.Animation.BaseAnimator
-    - [ ] Fledex.Animation.LedAnimator
+    - [x] Fledex.Animation.LedAnimator
     - [ ] Fledex.Animation.LedAnimationManager
-    - [ ] Fledex.LedsDriver
+    - [x] Fledex.LedsDriver
   - [ ] Add type specs (at least for the most important modules) (v0.3)
     - [ ] Fledex
     - [x] Fledex.Leds
@@ -20,7 +20,7 @@ Even though this library is published, there are things I still want to do befor
     - [x] Fledex.Animation.BaseAnimator
     - [x] Fledex.Animation.LedAnimator
     - [x] Fledex.Animation.LedAnimationManager
-    - [ ] Fledex.LedsDriver
+    - [x] Fledex.LedsDriver
   - [ ] Improve hexdocs
     - [x] add livebooks (v0.3)
     - [ ] create cheatsheet (v0.3)
@@ -31,7 +31,7 @@ Even though this library is published, there are things I still want to do befor
 - [ ] Cleanup
   - [x] Change from `@behaviour` to `use` and make BaseAnimation the base for the animators
         moving the implementations down to the base but allow overides (v0.3)
-  - [ ] Remove dialyzer warnings
+  - [x] Remove dialyzer warnings
   - [ ] Improve the LedsDriver config
   - [ ] Fix flaxy tests (see TODOs) (v0.3)
   - [ ] Perform an extra round of testing on hardware (v0.3)
