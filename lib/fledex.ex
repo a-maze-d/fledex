@@ -5,7 +5,7 @@ defmodule Fledex do
   look something like the following:
   ``` elixir
     use Fledex
-    led_strip :strip_name do
+    led_strip :strip_name, ;kino do
       animation :john do
         config = %{
           num_leds: 50,
@@ -35,10 +35,19 @@ defmodule Fledex do
   @doc """
   This function returns the currently configured macros/functions that can be used in a fledex led_strip
   """
+  @spec fledex_config :: %{atom => module}
   def fledex_config do
     @config
   end
 
+  @doc"""
+  By using this module, the `Fledex` macros are made available.
+
+  This macro does also include the `Fledex.Leds` and the `Fledex.Color.Names` and are
+  therefore available without namespace.
+
+  Take a look at the various [livebook examples](readme-2.html) on how to use the Fledex macros
+  """
   defmacro __using__(opts) do
     quote bind_quoted: [opts: opts] do
       import Fledex
@@ -54,8 +63,9 @@ defmodule Fledex do
 
   @doc """
     This introduces a new `animation` (animation) that will be played over
-    and over again until it is changed. Therefore we we give it a name to
-    know whether it changes
+    and over again until it is changed.
+
+    Therefore we give it a name to know whether it changes
   """
   defmacro animation(name, options \\ [], do: block) do
     def_func_ast = {:fn, [], block}
@@ -75,9 +85,10 @@ defmodule Fledex do
   end
 
   @doc """
-  The static macro is equal to the animation macro, but it will not receive any triggers. Therefore,
-  there will not be any repainting and the `def_func` will not receive any parameter.
-  It will only be painted once at definition time.
+  The static macro is equal to the animation macro, but it will not receive any triggers.
+
+  Therefore, there will not be any repainting and the `def_func` will not receive any
+  parameter. It will only be painted once at definition time.
   """
   defmacro static(name, options \\ [], do: block) do
     def_func_ast = {:fn, [], [{:->, [], [[{:_triggers, [], Elixir}], block]}]}
@@ -94,13 +105,18 @@ defmodule Fledex do
     end
       # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
+  @doc """
+  NOT YET IMPLEMENTED
+  """
   defmacro component(_name, _type, _options \\ []) do
       # TODO: Add a component macro
   end
 
   @doc """
-    This introduces a new led_strip. Probably we only have a single
-    led strip and then the default name (the module name) will be used.
+    This introduces a new led_strip.
+
+    Probably we only have a single led strip and then the default
+    name (the module name) will be used.
   """
   defmacro led_strip(strip_name, strip_options \\ :kino, do: block) do
     # Logger.error(inspect block)
@@ -118,5 +134,4 @@ defmodule Fledex do
     end
       # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
-
 end

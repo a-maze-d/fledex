@@ -5,8 +5,8 @@ Even though this library is published, there are things I still want to do befor
 - [ ] Documentation
   - [ ] Finish the dsl livebook example (mostly done, but the send_config part is not done yet) (v0.3)
   - [x] Create another livebook (2b) that looks at the different aspects of the Leds module and how to work with it (v0.3)
-  - [ ] Add proper API/module documentation (at least for the most important modules) (v0.3)
-    - [ ] Fledex
+  - [x] Add proper API/module documentation (at least for the most important modules) (v0.3)
+    - [x] Fledex
     - [x] Fledex.Leds
     - [x] Fledex.Color.Names
     - [x] Fledex.Animation.BaseAnimator

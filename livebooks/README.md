@@ -48,7 +48,7 @@ This example demonstrates how easy we do things when we can pull the information
 
 **CAUTION:** we repaint the LED strip very frequent and therefore it's nothing you want to do with data that is expensive to retrieve.
 
-# 5. FLEDex: Weather example
+# 5. Fledex: Weather example
 This is an example where we **CANNOT** fetch the information every time we want to paint the strip (which could be serveral times per second), since we are calling a public API. The API would surely block us if we would try to attempt to call it that often.
 
 Therefore we fetch the information at regular intervals, outside of our animation loop. For that we define a small GenServer which makes the API call, and publishes the data via pubsub to then be picked up by the animation loop.
