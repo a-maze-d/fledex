@@ -2,7 +2,7 @@ defmodule Fledex.Driver.Manager do
   require Logger
 
   alias Fledex.Color.Types
-  alias Fledex.Driver.Impl.NullDriver
+  alias Fledex.Driver.Impl.Null
   alias Fledex.Driver.Interface
 
   @typedoc """
@@ -15,7 +15,7 @@ defmodule Fledex.Driver.Manager do
       own configuration. The driver module name is used as key to separate
       the drivers from each other. example:
       ```elixir
-      %{Fledex.Driver.Impl.KinoDriver: %{
+      %{Fledex.Driver.Impl.Kino: %{
         update_freq: 10
       }}
       ```
@@ -82,7 +82,7 @@ defmodule Fledex.Driver.Manager do
     :ok
   end
 
-  @default_driver_modules [NullDriver]
+  @default_driver_modules [Null]
   @spec define_drivers(nil | module | [module]) :: [module]
   defp define_drivers(nil) do
     # Logger.warning("No driver_modules defined/ #{inspect @default_driver_modules} will be used")

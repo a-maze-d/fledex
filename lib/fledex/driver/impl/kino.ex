@@ -1,4 +1,4 @@
-defmodule Fledex.Driver.Impl.KinoDriver do
+defmodule Fledex.Driver.Impl.Kino do
   @behaviour Fledex.Driver.Interface
 
   alias Fledex.Color.Correction

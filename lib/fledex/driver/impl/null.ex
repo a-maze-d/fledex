@@ -1,4 +1,4 @@
-defmodule Fledex.Driver.Impl.NullDriver do
+defmodule Fledex.Driver.Impl.Null do
   @behaviour Fledex.Driver.Interface
 
   alias Fledex.Color.Types

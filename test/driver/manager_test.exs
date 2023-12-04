@@ -2,7 +2,7 @@ defmodule Fledex.Driver.ManagerTest do
   use ExUnit.Case, async: true
   import ExUnit.CaptureLog
 
-  alias Fledex.Driver.Impl.NullDriver
+  alias Fledex.Driver.Impl.Null
   alias Fledex.Driver.Manager
 
   defmodule TestDriver do
@@ -146,7 +146,7 @@ defmodule Fledex.Driver.ManagerTest do
       end)
 
       assert length(led_strip[:driver_modules]) == 1
-      assert led_strip[:driver_modules] == [NullDriver]
+      assert led_strip[:driver_modules] == [Null]
       assert log =~ "TestDriver3 does not implement the function :reinit"
       assert log =~ "with the wrong arity 2 vs 3"
     end

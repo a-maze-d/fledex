@@ -1,14 +1,14 @@
-defmodule Fledex.Driver.Impl.SpiDriverTest do
+defmodule Fledex.Driver.Impl.SpiTest do
   use ExUnit.Case
 
   alias Fledex.Color.Correction
-  alias Fledex.Driver.Impl.SpiDriver
+  alias Fledex.Driver.Impl.Spi
 
   describe "test driver basic tests" do
     test "default init" do
       # we can only test the default device, since only that one has a
       # simulator configured.
-      config = SpiDriver.init(%{})
+      config = Spi.init(%{})
       assert config.dev == "spidev0.0"
       assert config.mode == 0
       assert config.bits_per_word == 8
@@ -29,18 +29,18 @@ defmodule Fledex.Driver.Impl.SpiDriverTest do
         color_correction: Correction.no_color_correction(),
         ref: nil
       }
-      assert config == SpiDriver.reinit(config)
+      assert config == Spi.reinit(config)
     end
     test "transfer" do
-        driver = SpiDriver.init(%{})
+        driver = Spi.init(%{})
         leds = [0xff0000, 0x00ff00, 0x0000ff]
-        {driver_response, response} = SpiDriver.transfer(leds, 0, driver)
+        {driver_response, response} = Spi.transfer(leds, 0, driver)
         assert response == <<255, 0, 0, 0, 255, 0, 0, 0 , 255>>
         assert driver == driver_response
     end
     test "terminate" do
-      driver = SpiDriver.init(%{})
-      assert :ok == SpiDriver.terminate(:normal, driver)
+      driver = Spi.init(%{})
+      assert :ok == Spi.terminate(:normal, driver)
     end
   end
 end

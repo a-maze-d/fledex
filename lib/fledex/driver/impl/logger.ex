@@ -1,4 +1,4 @@
-defmodule Fledex.Driver.Impl.LoggerDriver do
+defmodule Fledex.Driver.Impl.Logger do
   @behaviour Fledex.Driver.Interface
   require Logger
 

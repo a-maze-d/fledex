@@ -23,7 +23,7 @@ Even though this library is published, there are things I still want to do befor
     - [x] Fledex.LedsDriver
   - [ ] Improve hexdocs
     - [x] add livebooks (v0.3)
-    - [ ] create cheatsheet (v0.3)
+    - [ ] create cheatsheet (v0.4)
   - [ ] Add documentation on how to connect the LED strip to a RaspberryPi Zero (with and without level shifter).This could be part of the first example (v0.3 & v0.4)
   - [ ] Add installation instructions (v0.4)
 - [ ] Testing
@@ -37,7 +37,8 @@ Even though this library is published, there are things I still want to do befor
   - [x] Split BaseAnimation into the interface part and the base part (v0.3)
   - [x] Rename the BaseAnimation to take advantage of the namespace. (v0.3)
   - [x] Rename the LedAnimationManager to take advantage of the namespace (v0.3)
-  - [x] Rename the LedAnimator to just Animator
+  - [x] Rename the LedAnimator to just Animator (v0.3)
+  - [x] Rename the specific drivers to not contain Driver in the name (since it's already in the namespace) (v0.3)
   - [ ] Improve the LedsDriver config (v0.4)
   - [ ] Fix flaxy tests (see TODOs) (v0.4)
   - [ ] Perform an extra round of testing on hardware (v0.4)

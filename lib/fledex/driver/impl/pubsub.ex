@@ -1,4 +1,4 @@
-defmodule Fledex.Driver.Impl.PubSubDriver do
+defmodule Fledex.Driver.Impl.PubSub do
   @behaviour Fledex.Driver.Interface
 
   alias Fledex.Color.Types

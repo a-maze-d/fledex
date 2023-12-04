@@ -5,8 +5,8 @@ defmodule Fledex.LedDriverTest do
 
   require Logger
 
-  alias Fledex.Driver.Impl.LoggerDriver
-  alias Fledex.Driver.Impl.NullDriver
+  alias Fledex.Driver.Impl.Logger
+  alias Fledex.Driver.Impl.Null
   alias Fledex.LedsDriver
 
   # doctest LedsDriver
@@ -22,8 +22,8 @@ defmodule Fledex.LedDriverTest do
       assert state.timer.is_dirty == false
       assert state.timer.ref == nil
       assert state.led_strip.merge_strategy == :avg
-      assert state.led_strip.driver_modules == [NullDriver]
-      assert state.led_strip.config == %{NullDriver => %{}}
+      assert state.led_strip.driver_modules == [Null]
+      assert state.led_strip.config == %{Null => %{}}
       assert state.namespaces == %{}
       assert state.strip_name == :strip_name
     end
@@ -43,8 +43,8 @@ defmodule Fledex.LedDriverTest do
       assert state.timer.is_dirty == false
       assert state.timer.ref != nil
       assert state.led_strip.merge_strategy == :avg
-      assert state.led_strip.driver_modules == [NullDriver]
-      assert state.led_strip.config == %{NullDriver => %{}}
+      assert state.led_strip.driver_modules == [Null]
+      assert state.led_strip.config == %{Null => %{}}
       assert state.namespaces == %{}
       assert state.strip_name == :strip_name
       assert_receive {:update_timeout, _update_func}
@@ -57,7 +57,7 @@ defmodule Fledex.LedDriverTest do
         timer: %{disabled: true},
         led_strip: %{
           merge_strategy: :cap,
-          driver_modules: NullDriver
+          driver_modules: Null
         }
       }
       {{:ok, _state}, log} = with_log(fn ->
@@ -207,7 +207,7 @@ defmodule Fledex.LedDriverTest do
       init_args = %{
         timer: %{counter: 0, is_dirty: true},
         led_strip: %{
-          driver_modules: [LoggerDriver],
+          driver_modules: [Logger],
           config: %{update_freq: 1, log_color_code: false}
         },
         namespaces: %{

@@ -1,4 +1,4 @@
-defmodule Fledex.Driver.Impl.SpiDriver do
+defmodule Fledex.Driver.Impl.Spi do
   @behaviour Fledex.Driver.Interface
 
   alias Fledex.Color.Correction

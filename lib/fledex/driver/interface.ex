@@ -6,15 +6,15 @@ defmodule Fledex.Driver.Interface do
     A driver dispatches the "real" hardware. Differen types of
     drivers exist. Currently the following drivers exist:
 
-    * [`NullDriver`](Fledex.Driver.Impl.NullDriver.html): a driver that doesn't do
+    * [`Null`](Fledex.Driver.Impl.Null.html): a driver that doesn't do
         anything. This is the default driver. It's also very practical for tests.
-    * [`LoggerDriver`](Fledex.Driver.Impl.LoggerDriver.html): a driver that logs the
+    * [`Logger`](Fledex.Driver.Impl.Logger.html): a driver that logs the
         led data to the terminal or to the logs
-    * [`KinoDriver`](Fledex.Driver.Impl.KinoDriver.html): a driver that can display
+    * [`Kino`](Fledex.Driver.Impl.Kino.html): a driver that can display
         the LEDs in a [livebook](https://livebook.dev)
-    * [`SpiDriver`](Fledex.Driver.Impl.SpiDriver.html): a driver that can connect
+    * [`Spi`](Fledex.Driver.Impl.Spi.html): a driver that can connect
         to a real LED strip with a WS2801 chip.
-    * [`PubSubDrive`](Fledex.Driver.Impl.PubSubDriver.html): a driver that can transfer
+    * [`PubSub`](Fledex.Driver.Impl.PubSub.html): a driver that can transfer
         the LED data via pubsub. This should also allow the data to be transferred to
         a LED strip connected on another computer.
 
@@ -29,7 +29,7 @@ defmodule Fledex.Driver.Interface do
   @callback init(module_init_args :: map) :: map
   @doc """
   In some cases it is necessary to reinitialize the driver when a new LED strip
-  is defined (see the `Fledex.Driver.Impl.KinoDriver` as an example). The
+  is defined (see the `Fledex.Driver.Impl.Kino` as an example). The
   driver should know whether it needs to do anything or not. If it does not need
   to do anything, then simply return the passed in map, i.e.:
 

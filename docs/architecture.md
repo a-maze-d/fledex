@@ -11,10 +11,10 @@ The `LedsDriver` allows to define serveral namespaces that can have their own le
 The `LedsDriver` does not really know how to talk to the actual hardware, but leaves this to the hardware spectific `Driver`s. It's possible to register several drivers at the same time.
 
 Currently there are 4 drivers available:
-* `SpiDriver` is the main driver for talking to a real [led strip with a ws2801 chip](https://www.amazon.com/s?k=ws2801) over the spi bus
-* `KinoDriver` is a driver that is very convenient when working with a [Livebook](https://livebook.dev/) to emulate an led strip.
-* `LoggerDriver` is a driver that dumps the data to a logger.
-* `NullDriver` is a driver that acts similar to `/dev/null`, i.e. doesn't do anyting with the data. This can be very convenient for running some tests.
+* `Spi` is the main driver for talking to a real [led strip with a ws2801 chip](https://www.amazon.com/s?k=ws2801) over the spi bus
+* `Kino` is a driver that is very convenient when working with a [Livebook](https://livebook.dev/) to emulate an led strip.
+* `Logger` is a driver that dumps the data to a logger.
+* `Null` is a driver that acts similar to `/dev/null`, i.e. doesn't do anyting with the data. This can be very convenient for running some tests.
 
 # The Leds
 The `Leds` is an easy way to define a set of Leds. This module provides the possibility to specify individual leds by integer/name/rgb-values, by a generator function (like `rainbow/2`, or `gradient/2`), or by combining various `Leds` definitions into a single definition.

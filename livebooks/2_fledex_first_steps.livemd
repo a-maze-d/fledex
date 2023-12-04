@@ -11,8 +11,8 @@ Mix.install([
 # we define a couple of aliases to not have to type that much
 alias Fledex.Leds
 alias Fledex.LedsDriver
-alias Fledex.Driver.Impl.KinoDriver
-alias Fledex.Driver.Impl.SpiDriver
+alias Fledex.Driver.Impl.Kino
+alias Fledex.Driver.Impl.Spi
 alias Fledex.Color.Correction
 
 :ok
@@ -32,15 +32,15 @@ is probably a good start to ensure that the library is loaded correctly.
     timer: %{only_dirty_update: false},
     led_strip: %{
       merge_strategy: :cap,
-      # [KinoDriver, SpiDriver],
-      driver_modules: [KinoDriver],
+      # [Kino, Spi],
+      driver_modules: [Kino],
       config: %{
-        KinoDriver => %{
+        Kino => %{
           update_freq: 1,
           color_correction: Fledex.Color.Correction.no_color_correction()
           # frame: frame
         }
-        #        SpiDriver => %{
+        #        Spi => %{
         #          color_correction:
         #            Correction.define_correction(
         #              Correction.Color.typical_smd5050(),

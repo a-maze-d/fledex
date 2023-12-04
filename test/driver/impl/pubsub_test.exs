@@ -1,7 +1,7 @@
-defmodule Fledex.Driver.Impl.PubSubDriverTest do
+defmodule Fledex.Driver.Impl.PubSubTest do
   use ExUnit.Case
 
-  alias Fledex.Driver.Impl.PubSubDriver
+  alias Fledex.Driver.Impl.PubSub, as: Driver
   alias Fledex.Utils.PubSub
 
   setup do
@@ -11,16 +11,16 @@ defmodule Fledex.Driver.Impl.PubSubDriverTest do
 
   describe "test driver basic tests" do
     test "default init" do
-      config = PubSubDriver.init(%{})
+      config = Driver.init(%{})
       assert config.data_name == :pixel_data
     end
     test "reinit" do
       init_config = %{data_name: :pixel_data}
-      assert init_config == PubSubDriver.reinit(init_config)
+      assert init_config == Driver.reinit(init_config)
     end
     test "transfer" do
-      driver = PubSubDriver.init(%{})
-      assert {driver, :ok} == PubSubDriver.transfer(
+      driver = Driver.init(%{})
+      assert {driver, :ok} == Driver.transfer(
         [0xff0000, 0x00ff00, 0x0000ff],
         74,
         driver
@@ -28,8 +28,8 @@ defmodule Fledex.Driver.Impl.PubSubDriverTest do
       assert_receive {:driver, %{pixel_data: [0xff0000, 0x00ff00, 0x0000ff]}}
     end
     test "terminate" do
-      driver = PubSubDriver.init(%{})
-      assert :ok == PubSubDriver.terminate(:normal, driver)
+      driver = Driver.init(%{})
+      assert :ok == Driver.terminate(:normal, driver)
     end
 
   end

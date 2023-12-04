@@ -1,7 +1,7 @@
 defmodule Fledex.LedsDriver do
   @moduledoc """
   This module defines a GenServer that manages the LED strip (be it a real one with the
-  SpiDriver or a virtual one with e.g. the KinoDriver). Usually you only want to start
+  `Fledex.Driver.Impl.Spi` or a virtual one with e.g. the `Fledex.Driver.Impl.Kino`). Usually you only want to start
   one server, even though it is possible to start several.
   The LedsDriver will take several Leds definitions and merge them together to be displayed
   on a single LED strip
@@ -45,9 +45,9 @@ defmodule Fledex.LedsDriver do
       timer: %{only_dirty_update: true},
       led_strip: %{
         merge_strategy: :cap,
-        driver_modules: [Fledex.Driver.Impl.KinoDriver],
+        driver_modules: [Fledex.Driver.Impl.Kino],
         config: %{
-          Fledex.Driver.Impl.KinoDriver => %{
+          Fledex.Driver.Impl.Kino => %{
             update_freq: 1,
             color_correction: Correction.no_color_correction()
           }
@@ -62,9 +62,9 @@ defmodule Fledex.LedsDriver do
       timer: %{only_dirty_update: true},
       led_strip: %{
         merge_strategy: :cap,
-        driver_modules: [Fledex.Driver.Impl.SpiDriver],
+        driver_modules: [Fledex.Driver.Impl.Spi],
         config: %{
-          Fledex.Driver.Impl.SpiDriver => %{
+          Fledex.Driver.Impl.Spi => %{
             color_correction: Correction.define_correction(
               Correction.Color.typical_smd5050(),
               Correction.Temperature.uncorrected_temperature()
