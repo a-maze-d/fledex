@@ -9,20 +9,20 @@ Mix.install([
 ])
 
 # we define a couple of aliases to not have to type that much
-alias Fledex.Animation.LedAnimationManager
+alias Fledex.Animation.Manager
 alias Fledex.Leds
 alias Fledex.LedsDriver
 alias Fledex.Driver.Impl.KinoDriver
 alias Fledex.Color.Correction
 
-{:ok, pid} = LedAnimationManager.start_link()
+{:ok, pid} = Manager.start_link()
 
 :ok
 ```
 
 ## Preparation
 
-To start with, we define a couple of aliases to make our life easier and more importantly, we start our `LedAnimationManager`. We will use it to create animations. The animations are actually maintained by the LedAnimator, but we will interact with it only through the `LedAnimationManager`.
+To start with, we define a couple of aliases to make our life easier and more importantly, we start our `Fledex.Animation.Manager`. We will use it to create animations. The animations are actually maintained by the `Fledex.Animation.Animator`, but we will interact with it only through the `Fledex.Animation.Manager`.
 
 ## Helper functions
 
@@ -48,14 +48,14 @@ end
 
 ## Creating a first animation
 
-Now it's time to define our first animation by using the `LedAnimationManager`. Before we can define our animations we first have to define (and configure) our led strip. The `LedAnimationManager` can manage serveral strips at the same time.
+Now it's time to define our first animation by using the `Fledex.Animation.Manager`. Before we can define our animations we first have to define (and configure) our led strip. The `Fledex.Animation.Manager` can manage serveral strips at the same time.
 
 We call our led strip `:john` (it has to be an atom). In this example we will only use the simple kino driver (and configure it with defaults) and thereby display the result within our livebook.
 
 ```elixir
-LedAnimationManager.register_strip(:john, :kino)
+Manager.register_strip(:john, :kino)
 
-LedAnimationManager.register_animations(:john, %{
+Manager.register_animations(:john, %{
   caine: %{
     def_func: &HelperFunctions.rainbow/1,
     send_config_func: &HelperFunctions.send_config/1
@@ -84,7 +84,7 @@ defmodule HelperFunctions2 do
   end
 end
 
-LedAnimationManager.register_animations(:john, %{
+Manager.register_animations(:john, %{
   caine: %{
     def_func: &HelperFunctions2.red_leds/1,
     send_config_func: &HelperFunctions2.send_config/1
@@ -111,7 +111,7 @@ defmodule HelperFunctions3 do
   end
 end
 
-LedAnimationManager.register_animations(:john, %{
+Manager.register_animations(:john, %{
   caine: %{
     def_func: &HelperFunctions2.red_leds/1,
     send_config_func: &HelperFunctions2.send_config/1
@@ -132,7 +132,7 @@ The advantage of using the anonymous functions is that you don't get any compila
 This allows for a smooth replacement of definitions.
 
 ```elixir
-LedAnimationManager.register_animations(:john, %{
+Manager.register_animations(:john, %{
   caine: %{
     def_func: &HelperFunctions2.red_leds/1,
     send_config_func: &HelperFunctions2.send_config/1

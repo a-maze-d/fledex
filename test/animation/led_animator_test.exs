@@ -1,11 +1,11 @@
-defmodule Fledex.Animation.LedAnimatorTest do
+defmodule Fledex.Animation.AnimatorTest do
   use ExUnit.Case
 
   import ExUnit.CaptureLog
   require Logger
 
-  alias Fledex.Animation.BaseAnimation
-  alias Fledex.Animation.LedAnimator
+  alias Fledex.Animation.Animator
+  alias Fledex.Animation.Interface
   alias Fledex.Leds
   alias Fledex.LedsDriver
 
@@ -49,12 +49,12 @@ defmodule Fledex.Animation.LedAnimatorTest do
         type: :animation
       }
 
-      {:ok, state, {:continue, :paint_once}} = LedAnimator.init({init_args, :test_strip, :test_animation})
+      {:ok, state, {:continue, :paint_once}} = Animator.init({init_args, :test_strip, :test_animation})
       assert state == init_args
     end
     test "default funcs" do
       init_args = %{}
-      {:ok, state, {:continue, :paint_once}} = LedAnimator.init({init_args, :test_strip, :test_animation})
+      {:ok, state, {:continue, :paint_once}} = Animator.init({init_args, :test_strip, :test_animation})
       assert Leds.leds() == state.def_func.(%{test_strip: 10})
       assert %{} == state.send_config_func.(%{test_strip: 10})
 
@@ -62,7 +62,7 @@ defmodule Fledex.Animation.LedAnimatorTest do
     test "config applied correctly (none_set)" do
       init_args = %{}
 
-      {:ok, state, {:continue, :paint_once}} = LedAnimator.init({init_args, :test_strip, :test_animation})
+      {:ok, state, {:continue, :paint_once}} = Animator.init({init_args, :test_strip, :test_animation})
       assert state.def_func != nil
       assert state.send_config_func != nil
       assert state.strip_name == :test_strip
@@ -71,9 +71,9 @@ defmodule Fledex.Animation.LedAnimatorTest do
   end
   describe "test triggers" do
     test "merging triggers" do
-      {:noreply, state} = LedAnimator.handle_info({:trigger, %{test_strip: 10}}, %{triggers: %{}})
+      {:noreply, state} = Animator.handle_info({:trigger, %{test_strip: 10}}, %{triggers: %{}})
       assert state.triggers.test_strip == 10
-      {:noreply, state} = LedAnimator.handle_info({:trigger, %{test_strip: 11, new_strip: 10}}, state)
+      {:noreply, state} = Animator.handle_info({:trigger, %{test_strip: 11, new_strip: 10}}, state)
       assert state.triggers.test_strip == 11
       assert state.triggers.new_strip == 10
     end
@@ -89,11 +89,11 @@ defmodule Fledex.Animation.LedAnimatorTest do
         type: :animation
       }
       assert map_size(init_args.triggers) == 0
-      {:ok, state, {:continue, :paint_once}} = LedAnimator.init({init_args, :test_strip, :test_animation})
+      {:ok, state, {:continue, :paint_once}} = Animator.init({init_args, :test_strip, :test_animation})
       assert map_size(init_args.triggers) == 0
 
       new_config = %{triggers: %{abc: 10}}
-      {:noreply, state} = LedAnimator.handle_cast({:config, new_config}, state)
+      {:noreply, state} = Animator.handle_cast({:config, new_config}, state)
 
       assert state.def_func == init_args.def_func
       assert state.send_config_func == init_args.send_config_func
@@ -179,7 +179,7 @@ defmodule Fledex.Animation.LedAnimatorTest do
         send_config_func: &logging_send_config_func/1,
       }
 
-      {:ok, pid} = LedAnimator.start_link(init_args, strip_name, :test_animator)
+      {:ok, pid} = Animator.start_link(init_args, strip_name, :test_animator)
       pid
     end
 
@@ -218,7 +218,7 @@ defmodule Fledex.Animation.LedAnimatorTest do
           something: "abc"
         }
       }
-      {:noreply, state} = LedAnimator.handle_info({:trigger, Map.put_new(%{}, strip_name, 11)}, state)
+      {:noreply, state} = Animator.handle_info({:trigger, Map.put_new(%{}, strip_name, 11)}, state)
       assert length(Map.keys(state.triggers)) == 4
       assert state.triggers.something == "abc"
       assert state.triggers[strip_name] == 10
@@ -231,9 +231,9 @@ defmodule Fledex.Animation.LedAnimatorTest do
       strip_name = :shutdown_testA
       {:ok, driver} = LedsDriver.start_link(strip_name, :none)
       animation_name = :animation_testA
-      {:ok, pid} = LedAnimator.start_link(%{}, strip_name, animation_name)
+      {:ok, pid} = Animator.start_link(%{}, strip_name, animation_name)
       assert Process.alive?(pid)
-      LedAnimator.shutdown(strip_name, animation_name)
+      Animator.shutdown(strip_name, animation_name)
       assert not Process.alive?(pid)
       GenServer.stop(driver, :normal)
     end
@@ -241,9 +241,9 @@ defmodule Fledex.Animation.LedAnimatorTest do
       strip_name = :shutdown_testB
       {:ok, driver} = LedsDriver.start_link(strip_name, :none)
       animation_name = :animation_testB
-      {:ok, pid} = LedAnimator.start_link(%{type: :static}, strip_name, animation_name)
+      {:ok, pid} = Animator.start_link(%{type: :static}, strip_name, animation_name)
       assert Process.alive?(pid)
-      GenServer.stop(BaseAnimation.build_animator_name(strip_name, animation_name), :normal)
+      GenServer.stop(Interface.build_animator_name(strip_name, animation_name), :normal)
       assert not Process.alive?(pid)
       GenServer.stop(driver, :normal)
     end

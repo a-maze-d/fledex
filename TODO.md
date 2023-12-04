@@ -9,9 +9,9 @@ Even though this library is published, there are things I still want to do befor
     - [ ] Fledex
     - [x] Fledex.Leds
     - [x] Fledex.Color.Names
-    - [ ] Fledex.Animation.BaseAnimator
+    - [x] Fledex.Animation.BaseAnimator
     - [x] Fledex.Animation.LedAnimator
-    - [ ] Fledex.Animation.LedAnimationManager
+    - [x] Fledex.Animation.LedAnimationManager
     - [x] Fledex.LedsDriver
   - [ ] Add type specs (at least for the most important modules) (v0.3)
     - [ ] Fledex
@@ -32,16 +32,22 @@ Even though this library is published, there are things I still want to do befor
   - [x] Change from `@behaviour` to `use` and make BaseAnimation the base for the animators
         moving the implementations down to the base but allow overides (v0.3)
   - [x] Remove dialyzer warnings
-  - [ ] Improve the LedsDriver config
-  - [ ] Fix flaxy tests (see TODOs) (v0.3)
-  - [ ] Perform an extra round of testing on hardware (v0.3)
+  - [x] Big renaming (v0.3)
+  - [ ] Rename `LedsDriver` --> `LedStrip` (v0.3)
+  - [x] Split BaseAnimation into the interface part and the base part (v0.3)
+  - [x] Rename the BaseAnimation to take advantage of the namespace. (v0.3)
+  - [x] Rename the LedAnimationManager to take advantage of the namespace (v0.3)
+  - [x] Rename the LedAnimator to just Animator
+  - [ ] Improve the LedsDriver config (v0.4)
+  - [ ] Fix flaxy tests (see TODOs) (v0.4)
+  - [ ] Perform an extra round of testing on hardware (v0.4)
   - [ ] Enable Telemetry? (v0.5)
   - [ ] Upgrade to a hex released version of circuits_sim as soon as available (v0.?)
 - [ ] Missing functionality
-  - [ ] see the project plan that was planned out with my son, we are not quite there yet
+  - [ ] see the project plan that was planned out with my son, we are not quite there yet (v0.4?)
   - [ ] Connect everything into a supervision tree (to make it more robust) (v0.4)
   - [ ] Use protocols ?
-    - [ ] Drivers
+    - [x] Drivers <-- No, doesn't make sense in this case
     - [x] Conversions `to_rgb`, `to_colorint` <-- decided against it to allow having simple structures (tuple) instead of (module)structs. Protocols don't seem to work with those.
     - [ ] ??? animations & components?
   - [ ] Create a dsl (domain specific language) to (finally) easily program strips
@@ -50,7 +56,7 @@ Even though this library is published, there are things I still want to do befor
     - [ ] Provide examples on how to cluster (v0.3)
     - [ ] Add an example where several nodes are connected to transfer pubsub messages accross nodes (v0.3)
     - [x] Create a driver that outputs through pubsub (on one node) (v0.3) and 
-    - [ ] an animation that consumes those (this allows to connect remote livebooks to a physical led strip) (v0.4)
+    - [ ] an animation that consumes those (this allows to connect remote livebooks to a physical led strip. CAUTION: protect against loops!) (v0.4)
   - [ ] LED-component library
     - [ ] Create foundation for a led-component-library that enables defining reusable led components. For example both the clock as well as the weather example have a scale it would be easy to define those as components that would make it easier to defining certain aspects (v0.5)
 - [ ] Increase consumption

@@ -7,14 +7,14 @@ Mix.install([
 ])
 
 # we define a couple of aliases to not have to type that much
-alias Fledex.Animation.LedAnimationManager
+alias Fledex.Animation.Manager
 alias Fledex.Leds
 alias Fledex.LedsDriver
 alias Fledex.Driver.Impl.KinoDriver
 alias Fledex.Color.Correction
 alias Fledex.Utils.PubSub
 
-{:ok, pid} = LedAnimationManager.start_link()
+{:ok, pid} = Manager.start_link()
 
 :ok
 ```
@@ -61,7 +61,7 @@ Now it's time to prepare our led strip. First we define our strip and we set a v
 
 ```elixir
 # we start with the default configuration
-:ok = LedAnimationManager.register_strip(:weather, :kino)
+:ok = Manager.register_strip(:weather, :kino)
 # and then we modify the timer update frequency to 10 sec
 {:ok, _old_value} = LedsDriver.change_config(:weather, [:timer, :update_timeout], 10_000)
 
@@ -75,7 +75,7 @@ The temperature will be delivered to us as part of the trigger. We'll look at ho
 As and additional bonus, the thermometer is showing the full scale, if no proper measurement is received (arbitrarily high value of 100).
 
 ```elixir
-LedAnimationManager.register_animations(:weather, %{
+Manager.register_animations(:weather, %{
   temperature: %{
     def_func: fn triggers ->
       temp = triggers[:temperature] || 100

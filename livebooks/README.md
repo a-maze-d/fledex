@@ -22,11 +22,19 @@ By changing the definition of our LEDs we can also create some simple animations
 
 This example works still on a very low level, one that we do not want use. 
 
+# 2b. Fledex: How to define LEDs
+In this livebook we take a closer look how we can define sequences of leds. We start with a brief look at how we can define colors, but we'll take a more detailed look at colors
+in __3b. Fledex: More about colors__. Then we'll look at sub-sequences and how to
+generate sequences with functions.
+
 # 3. Fledex: Animations
-In this livebook we look how animations can be defined, this is the next step(s) above the `LedsDriver`. The `LedAnimationManager` is the level that we want to operate on and the following examples will use what we have explored here and will create some concrete examples:
+In this livebook we look how animations can be defined, this is the next step(s) above the `LedsDriver`. The `Fledex.Animation.Manager` is the level that we want to operate on and the following examples will use what we have explored here and will create some concrete examples:
 
 * a clock (using local information) and 
 * a weather indicator (collecting data via the internet)
+
+# 3b. Fledex: More about colors
+Here we talk a bit more about colors and even color corrections
 
 # 4. Fledex: Clock example
 This is the first "meaningful" example that displays the current time on the LED strip. We define 4 "animations" for:

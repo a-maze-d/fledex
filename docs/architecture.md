@@ -22,24 +22,24 @@ The `Leds` is an easy way to define a set of Leds. This module provides the poss
 The `Leds` are not bound to a specific led strip (and namespace), but can be send to one by calling the `send()` function with the appropriate parameters. For convenience it's possible to bind it already during creation time to a specific led strip and namespace.
 
 # The Animations
-To define individual `Leds` is nice, but it would be even nicer, if it would be possible to animate the `Leds`. This is where the LedAnimator comes in. It allows to define `Leds` and vary them through some triggers (like a timer/counter). 
+To define individual `Leds` is nice, but it would be even nicer, if it would be possible to animate the `Leds`. This is where the `Animator` comes in. It allows to define `Leds` and vary them through some triggers (like a timer/counter). 
 It's possible to define this simply through a sequence of `Leds` definitions followed by a `send()` and some `Process.sleep()`, but that approach would have several limitations.
 
-The `LedAnimator` is a `GenServer` that loops through the animation function and allows to modify the animation between loops.
+The `Animator` is a `GenServer` that loops through the animation function and allows to modify the animation between loops.
 
-The various `LedAnimator`s can be managed through a `LedAnimationManager`. It allows to create, redefine, and destroy animations (i.e.`LedAnimator`s) through a single configuration.
+The various `Fledex.Animation.Animator`s can be managed through a `Fledex.Animation.Manager`. It allows to create, redefine, and destroy animations (i.e.`Fledex.Animation.Animator`s) through a single configuration.
 
 # The Fledex DSL
-The ultimate goal is to define a `Fledex` DSL that can configure the `LedAnimationManager` and update annimations on the fly.
+The ultimate goal is to define a `Fledex` DSL that can configure the `Fledex.Animation.Manager` and update annimations on the fly.
 
 In the above diagram an example is shown on how such a DSL might look like. 
 
 # The Triggers
 
-The `LedsDriver` is publishing via `PubSub` an event (a trigger) that gets picked up by the `LedAnimator`s to change their animation. The trigger can not only be created by the driver, but also by external events. The difference is that only the triggers from the driver are used by the `LedAnimator`s to redefine the animation. All other triggers are collected over time and can be used when updating the animation. 
+The `LedsDriver` is publishing via `PubSub` an event (a trigger) that gets picked up by the `Fledex.Animation.Animator`s to change their animation. The trigger can not only be created by the driver, but also by external events. The difference is that only the triggers from the driver are used by the `Fledex.Animation.Animator`s to redefine the animation. All other triggers are collected over time and can be used when updating the animation. 
 
 For example: we want to be able to check the current temperature in regular interval and trigger a re-animation to adjust the "display" depending on the temperature.
 
 # Final Notes
 ## Naming
-The led naming, the namespace naming, and the `LedsDriver` server naming should all be driven by the `Fledex`  DSL. Even though it would be possible to have different names it helps to align them. The `led_strip` name becomes the `LedsDriver` server name. The `animation` name becomes the namespace name and combined with the `led_strip` name the `LedAnimator` server name.
+The led naming, the namespace naming, and the `LedsDriver` server naming should all be driven by the `Fledex`  DSL. Even though it would be possible to have different names it helps to align them. The `led_strip` name becomes the `LedsDriver` server name. The `animation` name becomes the namespace name and combined with the `led_strip` name the `Fledex.Animation.Animator` server name.

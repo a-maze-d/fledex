@@ -1,10 +1,26 @@
-defmodule Fledex.Animation.LedAnimationManager do
+defmodule Fledex.Animation.Manager do
+  @moduledoc """
+  The animation manager manages several animations (and potentially
+  serveral led strips at the same time.
+  Usually you don't start the service yoursel, but it gets automatically
+  started when calling `use Fledex` and gets used by the `Fledex` macros.
+  Thus, you rarely have to interact with it directly.
+
+  The 3 main functions are:
+
+  * `regiseter_strip/2`: to add a new led strip. This will also create
+  the necessary LedsDriver and configure it.
+  * `unregister_strip/1`: this will remove an led strip again
+  * `register_animations/2`: this registers (or reregisters) a set of
+    animations. Any animation that is not part of a reregistration will
+    be dropped.
+  """
   use GenServer
 
   require Logger
 
-  alias Fledex.Animation.BaseAnimation
-  alias Fledex.Animation.LedAnimator
+  alias Fledex.Animation.Animator
+  alias Fledex.Animation.Interface
   alias Fledex.LedsDriver
 
   @typep state_t :: %{
@@ -13,7 +29,13 @@ defmodule Fledex.Animation.LedAnimationManager do
   }
 
   ### client side
-  @spec start_link(map) :: {:ok, pid()}
+  @doc """
+  This starts a new `Fledex.Animation.Manager`. Only a single animation manager will be started
+  even if called serveral times (thus it's save to call it repeatedly).
+  The `type_config` specifies the list of supported animations and their module mapping
+  (see `Fledex.fledex_config/0` for the configurations used by default.)
+  """
+  @spec start_link(%{atom => module}) :: {:ok, pid()}
   def start_link(type_config \\ %{}) do
     # we should only have a single server running. Therefore we check whether need to do something
     # or if the server is already running
@@ -25,24 +47,53 @@ defmodule Fledex.Animation.LedAnimationManager do
     end
   end
 
-  @spec register_strip(atom, atom) :: :ok
+  @doc """
+  Register a new LED strip with the specific `strip_name`. The LED strip
+  needs to be configured, either through a simple atom (for predefined
+  configurations, or through a map with all the configurations (see
+  [`LedsDriver`](Fledex.LedsDriver.html) for details).
+  """
+  @spec register_strip(atom, atom | map) :: :ok
   def register_strip(strip_name, driver_config) do
     # Logger.debug("register strip: #{strip_name}")
     GenServer.call(__MODULE__, {:register_strip, strip_name, driver_config})
   end
 
+  @doc """
+  Unregisters a previously registered led strip. All resources related
+  to the led strip will be freed.
+  """
   @spec unregister_strip(atom) :: :ok
   def unregister_strip(strip_name) do
     # Logger.debug("unregister strip: #{strip_name}")
     GenServer.call(__MODULE__, {:unregister_strip, strip_name})
   end
 
+  @doc """
+  Register a set of animations for a specific led strip. This function can
+  be called as many times as desired to reconfigure the animations.
+  It should be noted that animations were defined before calling this function
+  again, will be stopped if they are not part of the configuration anymore.
+  Newly defined animations will be started.
+
+  Different types of animations exist, see `Fledex.fledex_config/0` for
+  the default configurations that will be used when using `use Fledex`.
+
+  Note: the animation functions might get called quite frequently and
+  therefore any work within them should be kept to a minimum.
+  """
   @spec register_animations(atom, %{atom => map}) :: :ok
   def register_animations(strip_name, configs) do
     # Logger.debug("register animation: #{strip_name}, #{inspect configs}")
     GenServer.call(__MODULE__, {:register_animations, strip_name, configs})
   end
 
+  @doc """
+  In some circumstances it can be useful to get information on what has
+  been configured and this function allows to retrieve this information.
+  The function can either be called with a strip name, or with `:all`
+  (the default) to retrieve all configurations at the same time.
+  """
   @spec get_info(atom) :: map
   def get_info(strip_name \\ :all) do
     GenServer.call(__MODULE__, {:info, strip_name})
@@ -60,7 +111,7 @@ defmodule Fledex.Animation.LedAnimationManager do
   end
 
   @impl GenServer
-  @spec handle_call({:regiseter_strip, atom, map}, GenServer.from, state_t) :: {:reply, :ok, state_t}
+  @spec handle_call({:regiseter_strip, atom, atom | map}, GenServer.from, state_t) :: {:reply, :ok, state_t}
   def handle_call({:register_strip, strip_name, driver_config}, _pid, state) when is_atom(strip_name) do
     pid = Process.whereis(strip_name)
     if pid == nil do
@@ -93,7 +144,7 @@ defmodule Fledex.Animation.LedAnimationManager do
     {:reply, {:ok, return_value}, state}
   end
 
-  @spec register_strip(atom, map, state_t) :: state_t
+  @spec register_strip(atom, atom | map, state_t) :: state_t
   defp register_strip(strip_name, driver_config, state) do
     # Logger.info("registering led_strip: #{strip_name}")
     {:ok, _pid} = LedsDriver.start_link(strip_name, driver_config)
@@ -132,7 +183,7 @@ defmodule Fledex.Animation.LedAnimationManager do
   @spec shutdown_animators(atom, [atom]) :: :ok
   defp shutdown_animators(strip_name, dropped_animations) do
     Enum.each(dropped_animations, fn animation_name ->
-      GenServer.stop(BaseAnimation.build_animator_name(strip_name, animation_name), :normal)
+      GenServer.stop(Interface.build_animator_name(strip_name, animation_name), :normal)
     end)
   end
 
@@ -140,7 +191,7 @@ defmodule Fledex.Animation.LedAnimationManager do
   defp update_animators(strip_name, animations, type_config) do
     Enum.each(animations, fn {animation_name, config} ->
       type = config[:type] || :animation
-      module_name = type_config[type] || LedAnimator
+      module_name = type_config[type] || Animator
       module_name.config(strip_name, animation_name, config)
     end)
   end
@@ -149,13 +200,13 @@ defmodule Fledex.Animation.LedAnimationManager do
   defp create_animators(strip_name, created_animations, type_config) do
     Enum.each(created_animations, fn {animation_name, config} ->
       type = config[:type] || :animation
-      module_name = type_config[type] || LedAnimator
+      module_name = type_config[type] || Animator
       {:ok, pid} = module_name.start_link(config, strip_name, animation_name)
-      server_name = BaseAnimation.build_animator_name(strip_name, animation_name)
+      server_name = Interface.build_animator_name(strip_name, animation_name)
       case Process.info(pid, :registered_name) do
         {:registered_name, ^server_name} -> :ok
         # we could register the name if it does not exist and we could unregister and reregister
-        # the process if it hav the wrong name, but that's not gonna end well. It' better to
+        # the process if it have the wrong name, but that's not gonna end well. It's better to
         # throw this back immediately.
         # nil ->
           # Process.register(pid, server_name)
@@ -189,7 +240,7 @@ defmodule Fledex.Animation.LedAnimationManager do
     {dropped_animations, present_animations}
   end
 
-  @impl true
+  @impl GenServer
   @spec terminate(atom, state_t) :: :ok
   def terminate(_reason, state) do
     strip_names = Map.keys(state.animations)

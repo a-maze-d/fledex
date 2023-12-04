@@ -1,5 +1,6 @@
 defmodule Fledex.Driver.ManagerTest do
   use ExUnit.Case, async: true
+  import ExUnit.CaptureLog
 
   alias Fledex.Driver.Impl.NullDriver
   alias Fledex.Driver.Manager
@@ -49,7 +50,7 @@ defmodule Fledex.Driver.ManagerTest do
         a2: 2
       }
     end
-    def transfer(_leds, _count, config) do
+    def transfer(_leds, config) do
       {Map.put(config, :a3, 4), :ok}
     end
     def terminate(_reason, _config) do
@@ -122,11 +123,14 @@ defmodule Fledex.Driver.ManagerTest do
           }
         }
       }
-      led_strip = Manager.init_config(led_strip)
+      {led_strip, log} = with_log(fn ->
+        Manager.init_config(led_strip)
         |> Manager.init_drivers()
-
+      end)
       assert length(led_strip[:driver_modules]) == 1
       assert led_strip[:driver_modules] == [TestDriver]
+      assert log =~ "TestDriver3 does not implement the function :reinit"
+      assert log =~ "with the wrong arity 2 vs 3"
     end
     test "single non-compliant gets replaced with default" do
       led_strip = %{
@@ -136,11 +140,15 @@ defmodule Fledex.Driver.ManagerTest do
           }
         }
       }
-      led_strip = Manager.init_config(led_strip)
-      led_strip = Manager.init_drivers(led_strip)
+      {led_strip, log} = with_log(fn ->
+        Manager.init_config(led_strip)
+        |> Manager.init_drivers()
+      end)
 
       assert length(led_strip[:driver_modules]) == 1
       assert led_strip[:driver_modules] == [NullDriver]
+      assert log =~ "TestDriver3 does not implement the function :reinit"
+      assert log =~ "with the wrong arity 2 vs 3"
     end
   end
 end

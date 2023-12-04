@@ -3,6 +3,7 @@ defmodule Fledex.Driver.Manager do
 
   alias Fledex.Color.Types
   alias Fledex.Driver.Impl.NullDriver
+  alias Fledex.Driver.Interface
 
   @typedoc """
   The structure to hold the driver related data.
@@ -96,18 +97,20 @@ defmodule Fledex.Driver.Manager do
     define_drivers([driver_modules])
   end
 
-  @required_functions %{
-    terminate: 2,
-    transfer: 3,
-    reinit: 1,
-    init: 1
-  }
-  def validate_driver(driver) when is_atom(driver) do
+  defp validate_driver(driver) when is_atom(driver) do
+    # this is only to do a rough validation to catch the biggest
+    # issues early on.
+    required_functions = Interface.behaviour_info(:callbacks)
     module_functions = driver.__info__(:functions)
-    existing_functions = Enum.map(@required_functions, fn {function, arity} ->
+    existing_functions = Enum.map(required_functions, fn {function, arity} ->
       case Keyword.fetch(module_functions, function) do
-        {:ok, value} -> value == arity
-        :error -> false
+        {:ok, ^arity} -> true
+        {:ok, value} ->
+           Logger.error("The driver #{inspect driver} implements the function #{function} but with the wrong arity #{value} vs #{arity}")
+           false
+        :error ->
+          Logger.error("The driver #{inspect driver} does not implement the function #{inspect function}")
+          false
       end
     end)
     Enum.reduce(existing_functions, true, fn existing, acc -> if existing, do: acc, else: false end)

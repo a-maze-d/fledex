@@ -110,8 +110,9 @@ defmodule Fledex.MixProject do
           Fledex.Application
         ],
         "Animation": ~r/Fledex.Animation/,
-        "Utils": ~r/Fledex.Utils/,
+        "Driver Implementations": ~r/Fledex.Driver.Impl/,
         "Driver": ~r/Fledex.Driver/,
+        "Utils": ~r/Fledex.Utils/,
         "Color": ~r/Fledex.Color/,
       ],
       groups_for_docs: [

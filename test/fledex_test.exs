@@ -3,8 +3,8 @@ defmodule Fledex.Test do
 
   require Logger
 
-  alias Fledex.Animation.LedAnimationManager
-  alias Fledex.Animation.LedAnimator
+  alias Fledex.Animation.Animator
+  alias Fledex.Animation.Manager
 
   @server_name :john
   describe "test macros" do
@@ -14,9 +14,9 @@ defmodule Fledex.Test do
     end
     test "use macro" do
       # we start the server
-      assert GenServer.whereis(LedAnimationManager) == nil
+      assert GenServer.whereis(Manager) == nil
       use Fledex
-      assert GenServer.whereis(LedAnimationManager) != nil
+      assert GenServer.whereis(Manager) != nil
 
       # and check that both Fledex and Fledex.Leds are imported
       assert :erlang.fun_info(&fledex_config/0) # from Fledex
@@ -24,9 +24,9 @@ defmodule Fledex.Test do
     end
     test "use macro without server" do
       # we don't start the server
-      assert GenServer.whereis(LedAnimationManager) == nil
+      assert GenServer.whereis(Manager) == nil
       use Fledex, dont_start: true
-      assert GenServer.whereis(LedAnimationManager) == nil
+      assert GenServer.whereis(Manager) == nil
 
       # and check that both Fledex and Fledex.Leds are imported
       assert :erlang.fun_info(&fledex_config/0) # from Fledex
@@ -39,7 +39,7 @@ defmodule Fledex.Test do
     test "simple led strip macro" do
       # ensure our servers are not started
       assert GenServer.whereis(@server_name) == nil
-      assert GenServer.whereis(LedAnimationManager) == nil
+      assert GenServer.whereis(Manager) == nil
 
       use Fledex
       led_strip @server_name do
@@ -48,13 +48,13 @@ defmodule Fledex.Test do
 
       # did the correct servers get started?
       assert GenServer.whereis(@server_name) != nil
-      assert GenServer.whereis(LedAnimationManager) != nil
+      assert GenServer.whereis(Manager) != nil
 
       # cleanup
-      GenServer.stop(LedAnimationManager)
+      GenServer.stop(Manager)
 
       assert GenServer.whereis(@server_name) == nil
-      assert GenServer.whereis(LedAnimationManager) == nil
+      assert GenServer.whereis(Manager) == nil
     end
 
     test "simple animation macro" do
@@ -74,7 +74,7 @@ defmodule Fledex.Test do
          _triggers -> leds(10)
         end
       end
-      {:ok, configs} = LedAnimationManager.get_info()
+      {:ok, configs} = Manager.get_info()
 
       assert Map.keys(configs) == [:john]
       assert Map.keys(configs.john) == [:merry]
@@ -101,7 +101,7 @@ defmodule Fledex.Test do
         end
       end
 
-      {:ok, configs} = LedAnimationManager.get_info()
+      {:ok, configs} = Manager.get_info()
 
       assert Map.keys(configs) == [:john, :doe]
       assert Map.keys(configs.john) == [:merry, :kate]
@@ -128,13 +128,13 @@ defmodule Fledex.Test do
       end
 
       Process.sleep(500) # give a chance to triggers (even though we shouldn't collect any)
-      {:ok, configs} = LedAnimationManager.get_info()
+      {:ok, configs} = Manager.get_info()
 
       # ensure that the block does not expect any triggers even though
       # the function actually does contain it
       assert configs.sten.svenson.def_func.(%{}) == leds(5)
 
-      {:ok, info} = LedAnimator.get_info(:sten, :svenson)
+      {:ok, info} = Animator.get_info(:sten, :svenson)
       assert info.triggers == %{}  # there should not be any triggers, since we are static
       assert info.type == :static
     end

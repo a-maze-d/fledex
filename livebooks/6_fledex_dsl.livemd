@@ -13,7 +13,7 @@ Mix.install([
 
 We now define our animations with our DSL with the following steps:
 
-* First we have to `use Fledex` in order to import `Fledex`, to load our DSL macros (`led_strip` and `animation`), and to import `Fledex.Leds`. This means we won't write `Leds` in fron of functions. By default this will also start the LedAnimationManager if it's not already running which will take care of all the animation coordinations.
+* First we have to `use Fledex` in order to import `Fledex`, to load our DSL macros (`led_strip` and `animation`), and to import `Fledex.Leds`. This means we won't write `Leds` in fron of functions. By default this will also start the `Fledex.Animation.Manager` if it's not already running which will take care of all the animation coordinations.
 
 ```elixir
 use Fledex
@@ -22,7 +22,7 @@ use Fledex
 ## The clock
 
 * We define a new strip with a name (`:clock`), and configure it (we use the `:kino` default driver for display). This will internally create a new `LedsDriver` server (if it's not already running) that will control the strip. Its server name will be identical to the `led_strip` name.
-* Then within this strip we define several `animation`s that correspond to an animation (and will use internally the `LedAnimator`). Each animaation is identified by its own name (`:help`, `:hour`, `:minute`, `:seconds`)
+* Then within this strip we define several `animation`s that correspond to an animation (and will use internally the `Fledex.Animation.Animator`). Each animaation is identified by its own name (`:help`, `:hour`, `:minute`, `:seconds`)
 * Within each animation we define a function that will repeatedly be executed
 * Inside that function we can define one or several `Leds`, either directly or through an led sequence (like a rainbow function) and animate those leds depending on some trigger data (data that comes into the animation function). An explanation of what we are doing in our example here will be given after the code.
 

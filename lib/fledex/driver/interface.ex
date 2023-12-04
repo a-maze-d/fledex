@@ -1,4 +1,7 @@
 defmodule Fledex.Driver.Interface do
+
+  alias Fledex.Color.Types
+
   @moduledoc """
     A driver dispatches the "real" hardware. Differen types of
     drivers exist. Currently the following drivers exist:

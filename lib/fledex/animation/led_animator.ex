@@ -1,4 +1,4 @@
-defmodule Fledex.Animation.LedAnimator do
+defmodule Fledex.Animation.Animator do
   @moduledoc """
   The client often wants to run some animations. This can of course be done by
   repeatedly updating the `Leds` definitions and calling
@@ -39,13 +39,13 @@ defmodule Fledex.Animation.LedAnimator do
    Both of them can be set by defining an appropriate function and setting and resetting a reference at will
 
    This module does not define any functions on its own, because the interface is defined
-   by `Fledex.Animation.BaseAnimation`.
+   by `Fledex.Animation.Base`.
   """
-  use Fledex.Animation.BaseAnimation
+  use Fledex.Animation.Base
 
   require Logger
 
-  alias Fledex.Animation.BaseAnimation
+  alias Fledex.Animation.Base
   alias Fledex.Leds
   alias Fledex.LedsDriver
   alias Fledex.Utils.PubSub
@@ -75,8 +75,8 @@ defmodule Fledex.Animation.LedAnimator do
     state = %{
       triggers: %{},
       type: :animation,
-      def_func: &BaseAnimation.default_def_func/1,
-      send_config_func: &BaseAnimation.default_send_config_func/1,
+      def_func: &Base.default_def_func/1,
+      send_config_func: &Base.default_send_config_func/1,
       strip_name: strip_name,
       animation_name: animation_name
     }
@@ -144,8 +144,8 @@ defmodule Fledex.Animation.LedAnimator do
     %{
       type: config[:type] || state.type,
       triggers: Map.merge(state.triggers, config[:triggers] || state[:triggers]),
-      def_func: Map.get(config, :def_func, state[:def_func] || &BaseAnimation.default_def_func/1),
-      send_config_func: Map.get(config, :send_config_func, state[:send_config_func] || &BaseAnimation.default_send_config_func/1),
+      def_func: Map.get(config, :def_func, state[:def_func] || &Base.default_def_func/1),
+      send_config_func: Map.get(config, :send_config_func, state[:send_config_func] || &Base.default_send_config_func/1),
       strip_name: state.strip_name, # not to be updated
       animation_name: state.animation_name # not to be updated
     }
