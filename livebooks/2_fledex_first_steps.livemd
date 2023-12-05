@@ -10,7 +10,7 @@ Mix.install([
 
 # we define a couple of aliases to not have to type that much
 alias Fledex.Leds
-alias Fledex.LedsDriver
+alias Fledex.LedStrip
 alias Fledex.Driver.Impl.Kino
 alias Fledex.Driver.Impl.Spi
 alias Fledex.Color.Correction
@@ -28,7 +28,7 @@ is probably a good start to ensure that the library is loaded correctly.
 # frame = Kino.Frame.new() |> Kino.render()
 
 {:ok, pid} =
-  LedsDriver.start_link(%{
+  LedStrip.start_link(%{
     timer: %{only_dirty_update: false},
     led_strip: %{
       merge_strategy: :cap,
@@ -60,30 +60,30 @@ create nice effects like a rainbow.
 defmodule Helpers do
   def red(namespace) do
     Enum.each(1..10, fn _index ->
-      LedsDriver.set_leds(namespace, [0xFF0000, 0x000000, 0x000000, 0x000000, 0x00000])
+      LedStrip.set_leds(namespace, [0xFF0000, 0x000000, 0x000000, 0x000000, 0x00000])
       Process.sleep(600)
-      LedsDriver.set_leds(namespace, [0x000000, 0xFF0000, 0x000000, 0x000000, 0x00000])
+      LedStrip.set_leds(namespace, [0x000000, 0xFF0000, 0x000000, 0x000000, 0x00000])
       Process.sleep(600)
-      LedsDriver.set_leds(namespace, [0x000000, 0x000000, 0xFF0000, 0x000000, 0x00000])
+      LedStrip.set_leds(namespace, [0x000000, 0x000000, 0xFF0000, 0x000000, 0x00000])
       Process.sleep(600)
-      LedsDriver.set_leds(namespace, [0x000000, 0x000000, 0x000000, 0xFF0000, 0x00000])
+      LedStrip.set_leds(namespace, [0x000000, 0x000000, 0x000000, 0xFF0000, 0x00000])
       Process.sleep(600)
-      LedsDriver.set_leds(namespace, [0x000000, 0x000000, 0x000000, 0x000000, 0xFF0000])
+      LedStrip.set_leds(namespace, [0x000000, 0x000000, 0x000000, 0x000000, 0xFF0000])
       Process.sleep(600)
     end)
   end
 
   def blue(namespace) do
     Enum.each(1..10, fn _index ->
-      LedsDriver.set_leds(namespace, [0x000000, 0x000000, 0x000000, 0x000000, 0x0000FF, 0x00FF00])
+      LedStrip.set_leds(namespace, [0x000000, 0x000000, 0x000000, 0x000000, 0x0000FF, 0x00FF00])
       Process.sleep(600)
-      LedsDriver.set_leds(namespace, [0x000000, 0x000000, 0x000000, 0x0000FF, 0x000000, 0x00FF00])
+      LedStrip.set_leds(namespace, [0x000000, 0x000000, 0x000000, 0x0000FF, 0x000000, 0x00FF00])
       Process.sleep(600)
-      LedsDriver.set_leds(namespace, [0x000000, 0x000000, 0x0000FF, 0x000000, 0x000000, 0x00FF00])
+      LedStrip.set_leds(namespace, [0x000000, 0x000000, 0x0000FF, 0x000000, 0x000000, 0x00FF00])
       Process.sleep(600)
-      LedsDriver.set_leds(namespace, [0x000000, 0x0000FF, 0x000000, 0x000000, 0x000000, 0x00FF00])
+      LedStrip.set_leds(namespace, [0x000000, 0x0000FF, 0x000000, 0x000000, 0x000000, 0x00FF00])
       Process.sleep(600)
-      LedsDriver.set_leds(namespace, [0x0000FF, 0x000000, 0x000000, 0x000000, 0x000000, 0x00FF00])
+      LedStrip.set_leds(namespace, [0x0000FF, 0x000000, 0x000000, 0x000000, 0x000000, 0x00FF00])
       Process.sleep(600)
     end)
   end
@@ -120,32 +120,32 @@ end
 Now use the above functions. We can run the functions by spawning a new thread. This allows to also see what happens if another thread works in parallel. Here we create a rainbow effect that will be send with an changing offset so that the rainbow rotates through the LEDs
 
 ```elixir
-LedsDriver.define_namespace(:default)
+LedStrup.define_namespace(:default)
 spawn(fn -> Helpers.rainbow(:default) end)
 ```
 
 Here we create a gradient between red and blue. Also this one we let rotate through
 
 ```elixir
-LedsDriver.define_namespace(:gradient)
+LedStrip.define_namespace(:gradient)
 spawn(fn -> Helpers.gradient(:gradient) end)
 ```
 
 We can drop the namespaces to see what happens
 
 ```elixir
-LedsDriver.drop_namespace(:john)
-LedsDriver.drop_namespace(:jane)
-LedsDriver.drop_namespace(:default)
-LedsDriver.drop_namespace(:gradient)
+LedStrip.drop_namespace(:john)
+LedStrip.drop_namespace(:jane)
+LedStrip.drop_namespace(:default)
+LedStrip.drop_namespace(:gradient)
 ```
 
 This test is running a couple of different ligth definitions in parallel.
 
 ```elixir
-LedsDriver.define_namespace(:john)
-LedsDriver.define_namespace(:jane)
-LedsDriver.define_namespace(:default)
+LedStrip.define_namespace(:john)
+LedStrip.define_namespace(:jane)
+LedStrip.define_namespace(:default)
 
 spawn(fn -> Helpers.blue(:jane) end)
 spawn(fn -> Helpers.red(:john) end)

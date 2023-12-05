@@ -17,7 +17,7 @@ defmodule Fledex.Leds do
   alias Fledex.Color.Functions
   alias Fledex.Color.Types
   alias Fledex.Color.Utils
-  alias Fledex.LedsDriver
+  alias Fledex.LedStrip
 
   @enforce_keys [:count, :leds, :opts]
   defstruct count: 0, leds: %{}, opts: %{}, meta: %{index: 1}
@@ -63,7 +63,8 @@ defmodule Fledex.Leds do
   * `:server_name` and
   * `:namespace`.
 
-  Those are important when you want to send your led sequence to an `LedsDriver`.
+  Those are important when you want to send your led sequence to an
+  `Fledex.LedStrip`.
   You should prefer to use the `set_driver_info/3` function instead.
   """
   @spec leds(integer, map) :: t
@@ -82,7 +83,7 @@ defmodule Fledex.Leds do
   to a map.
 
   Leds that are outside the `count` can be specified, but will be ignored when sent to
-  an `LedsDriver` through the `send/2` function.
+  an `Fledex.LedStrip` through the `send/2` function.
   """
   @spec leds(integer, map, map) :: t
   def leds(count, leds, opts) do
@@ -131,8 +132,9 @@ defmodule Fledex.Leds do
   @doc """
   This function checks how many leds are defined in the led sequence.
 
-  Note: The color of an led outside that range can be defined, but it won't be send to the `LedsDriver`
-  when the `send/2` function is called. See also `set_count/2` for information.
+  Note: The color of an led outside that range can be defined, but it won't be
+  send to the `Fledex.LedStrip` when the `send/2` function is called. See also
+  `set_count/2` for information.
   """
   @spec count(t) :: pos_integer
   def count(%__MODULE__{count: count} = _leds) do
@@ -141,11 +143,11 @@ defmodule Fledex.Leds do
   @doc """
   Define the server_name and the namespace
 
-  This is used when the led sequence is sent to the `LedsDriver` when the
+  This is used when the led sequence is sent to the `Fledex.LedStrip` when the
   `send/2` function is called.
   """
   @spec set_driver_info(t, namespace :: atom, server_name :: atom) :: t
-  def set_driver_info(%{opts: opts} = leds, namespace, server_name \\  Fledex.LedsDriver) do
+  def set_driver_info(%{opts: opts} = leds, namespace, server_name \\  Fledex.LedStrip) do
     opts = %{opts | server_name: server_name, namespace: namespace}
     %__MODULE__{leds | opts: opts}
   end
@@ -374,7 +376,7 @@ defmodule Fledex.Leds do
   end
 
   @doc """
-  Convenience function to send the led sequence to an `Fledex.LedsDriver`.
+  Convenience function to send the led sequence to an `Fledex.LedStrip`.
 
   In order for the function to succeed either `set_driver_info/3` needs to be
   called or the information needs to be passed as part of the opts. The opts can
@@ -383,8 +385,8 @@ defmodule Fledex.Leds do
   * `:offset`: Move the led sequence to the side (see Note below)
   * `:rotate_left`: whether the offset should be appiled toward the right or the left
   * `:server_name`: The name of the server_name to which the led sequence should be send to
-      (default: `Fledex.LedsDriver`)
-  * `:namespace`: The name of the namespace within the LedsDriver (default: `:default`)
+      (default: `Fledex.LedStrip`)
+  * `:namespace`: The name of the namespace within the LedStrip (default: `:default`)
 
   Note: the led sequence will always be applied in it's entirety, and will wrap around.
   Through the `:offset` it is possible to create simple animations by simply counting up
@@ -397,24 +399,24 @@ defmodule Fledex.Leds do
   def send(leds, opts \\ %{}) do
     offset = opts[:offset] || 0
     rotate_left = if opts[:rotate_left] != nil, do: opts[:rotate_left], else: true
-    server_name = leds.opts.server_name || LedsDriver
+    server_name = leds.opts.server_name || LedStrip
     namespace = leds.opts.namespace || :default
     # we probably want to do some validation here and probably
     # want to optimise it a bit
     # a) is the server running?
     if Process.whereis(server_name) == nil do
       Logger.warning("The server #{server_name} wasn't started. You should start it before using this function")
-      {:ok, _pid} = LedsDriver.start_link(server_name, %{})
+      {:ok, _pid} = LedStrip.start_link(server_name, %{})
     end
     # b) Is a namespace defined?
-    exists = LedsDriver.exist_namespace(server_name, namespace)
+    exists = LedStrip.exist_namespace(server_name, namespace)
     if not exists do
       # Logger.error(Exception.format_stacktrace())
       Logger.warning("The namespace hasn't been defined. This should be done before calling this function")
-      :ok = LedsDriver.define_namespace(server_name, namespace)
+      :ok = LedStrip.define_namespace(server_name, namespace)
     end
     vals = rotate(to_list(leds), offset, rotate_left)
-    LedsDriver.set_leds(server_name, namespace, vals)
+    LedStrip.set_leds(server_name, namespace, vals)
   end
 
   @doc """

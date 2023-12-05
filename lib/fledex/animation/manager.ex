@@ -9,7 +9,7 @@ defmodule Fledex.Animation.Manager do
   The 3 main functions are:
 
   * `regiseter_strip/2`: to add a new led strip. This will also create
-  the necessary LedsDriver and configure it.
+  the necessary `Fledex.LedStrip` and configures it.
   * `unregister_strip/1`: this will remove an led strip again
   * `register_animations/2`: this registers (or reregisters) a set of
     animations. Any animation that is not part of a reregistration will
@@ -21,7 +21,7 @@ defmodule Fledex.Animation.Manager do
 
   alias Fledex.Animation.Animator
   alias Fledex.Animation.Interface
-  alias Fledex.LedsDriver
+  alias Fledex.LedStrip
 
   @typep state_t :: %{
     type_config: map(),
@@ -51,7 +51,7 @@ defmodule Fledex.Animation.Manager do
   Register a new LED strip with the specific `strip_name`. The LED strip
   needs to be configured, either through a simple atom (for predefined
   configurations, or through a map with all the configurations (see
-  [`LedsDriver`](Fledex.LedsDriver.html) for details).
+  [`LedStrip`](Fledex.LedStrip.html) for details).
   """
   @spec register_strip(atom, atom | map) :: :ok
   def register_strip(strip_name, driver_config) do
@@ -120,7 +120,7 @@ defmodule Fledex.Animation.Manager do
       # we have a bit of a problem when using the kino driver, since it will not be reinitialized
       # when calling this function again (and thereby we don't get any frame/display).
       # Therefore we add here an extra step to reinitiate the the drivers while registering the strip.
-      :ok = LedsDriver.reinit_drivers(strip_name)
+      :ok = LedStrip.reinit_drivers(strip_name)
       {:reply, :ok, state}
     end
   end
@@ -147,7 +147,7 @@ defmodule Fledex.Animation.Manager do
   @spec register_strip(atom, atom | map, state_t) :: state_t
   defp register_strip(strip_name, driver_config, state) do
     # Logger.info("registering led_strip: #{strip_name}")
-    {:ok, _pid} = LedsDriver.start_link(strip_name, driver_config)
+    {:ok, _pid} = LedStrip.start_link(strip_name, driver_config)
     %{state | animations: Map.put_new(state.animations, strip_name, nil)}
   end
 

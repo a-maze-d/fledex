@@ -69,16 +69,24 @@ defmodule Fledex.MixProject do
   defp deps do
     [
       {:circuits_spi, "~> 2.0"},
-      {:telemetry, "~> 1.2"},
       {:kino, "~>0.11"},
       {:phoenix_pubsub, "~>2.1"},
+      # {:libcluster, "~> 3.3"},
+
+      # observability
+      {:telemetry, "~> 1.2"},
+
+      # testing
       {:circuits_sim, git: "https://github.com/elixir-circuits/circuits_sim/", only: [:dev, :test]},
+
+      # documentation
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+
+      # code quality
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:credo_binary_patterns, "~> 0.2.3", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
-      # {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.18", only: :test},
-      # {:libcluster, "~> 3.3"}
     ]
   end
   defp docs do
@@ -105,7 +113,7 @@ defmodule Fledex.MixProject do
       groups_for_modules: [
         "Core": [
           Fledex,
-          Fledex.LedsDriver,
+          Fledex.LedStrip,
           Fledex.Leds,
           Fledex.Application
         ],

@@ -24,8 +24,9 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Improve hexdocs
     - [x] add livebooks (v0.3)
     - [ ] create cheatsheet (v0.4)
-  - [ ] Add documentation on how to connect the LED strip to a RaspberryPi Zero (with and without level shifter).This could be part of the first example (v0.3 & v0.4)
+  - [ ] Add documentation on how to connect the LED strip to a RaspberryPi Zero (v0.4) 
   - [ ] Add installation instructions (v0.4)
+  - [ ] Add documentation on how to conncet the LED strip to a RPI with a level shifter (v0.7)
 - [ ] Testing
   - [ ] Add more error handling scenarios (v0.4)
 - [ ] Cleanup
@@ -33,7 +34,7 @@ Even though this library is published, there are things I still want to do befor
         moving the implementations down to the base but allow overides (v0.3)
   - [x] Remove dialyzer warnings
   - [x] Big renaming (v0.3)
-  - [ ] Rename `LedsDriver` --> `LedStrip` (v0.3)
+  - [x] Rename `LedsDriver` --> `LedStrip` (v0.3)
   - [x] Split BaseAnimation into the interface part and the base part (v0.3)
   - [x] Rename the BaseAnimation to take advantage of the namespace. (v0.3)
   - [x] Rename the LedAnimationManager to take advantage of the namespace (v0.3)
@@ -54,10 +55,10 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Create a dsl (domain specific language) to (finally) easily program strips
     - [ ] Extend the Fledex macros to allow easy configuration with a config macro (v0.3)
   - [ ] Clustering
-    - [ ] Provide examples on how to cluster (v0.3)
-    - [ ] Add an example where several nodes are connected to transfer pubsub messages accross nodes (v0.3)
     - [x] Create a driver that outputs through pubsub (on one node) (v0.3) and 
-    - [ ] an animation that consumes those (this allows to connect remote livebooks to a physical led strip. CAUTION: protect against loops!) (v0.4)
+    - [ ] create an animation that consumes those (this allows to connect remote livebooks to a physical led strip. CAUTION: protect against loops!) (v0.4)
+    - [ ] Provide examples on how to cluster (v0.4)
+    - [ ] Add an example where several nodes are connected to transfer pubsub messages accross nodes (v0.4)
   - [ ] LED-component library
     - [ ] Create foundation for a led-component-library that enables defining reusable led components. For example both the clock as well as the weather example have a scale it would be easy to define those as components that would make it easier to defining certain aspects (v0.5)
 - [ ] Increase consumption

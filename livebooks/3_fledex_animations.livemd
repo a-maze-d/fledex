@@ -11,7 +11,7 @@ Mix.install([
 # we define a couple of aliases to not have to type that much
 alias Fledex.Animation.Manager
 alias Fledex.Leds
-alias Fledex.LedsDriver
+alias Fledex.LedStrip
 alias Fledex.Driver.Impl.Kino
 alias Fledex.Color.Correction
 
@@ -28,7 +28,11 @@ To start with, we define a couple of aliases to make our life easier and more im
 
 We define a bit of helper functions that we will use when we define our animations. Those helper functions are the actual definitions of how the ledstrip will look.
 
-Note that the functions get in a map (here called triggers) that can contain serveral triggers. It will definitely contain one trigger (caused by the `LedsDriver`) with the name of the led strip. The structure does not need to be used, but can be used in order to change the animation based on the trigger. Here we use the trigger in the send configuration to specify an offset to the leds and thereby create a movement.
+Note that the functions get in a map (here called triggers) that can contain serveral
+triggers. It will definitely contain one trigger (caused by the `Fledex.LedStrip`) with
+the name of the led strip. The structure does not need to be used, but can be used in
+order to change the animation based on the trigger. Here we use the trigger in the send
+configuration to specify an offset to the leds and thereby create a movement.
 
 ```elixir
 defmodule HelperFunctions do

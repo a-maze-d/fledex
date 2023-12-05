@@ -28,7 +28,7 @@ in __3b. Fledex: More about colors__. Then we'll look at sub-sequences and how t
 generate sequences with functions.
 
 # 3. Fledex: Animations
-In this livebook we look how animations can be defined, this is the next step(s) above the `LedsDriver`. The `Fledex.Animation.Manager` is the level that we want to operate on and the following examples will use what we have explored here and will create some concrete examples:
+In this livebook we look how animations can be defined, this is the next step(s) above the `Fledex.LedStrip`. The `Fledex.Animation.Manager` is the level that we want to operate on and the following examples will use what we have explored here and will create some concrete examples:
 
 * a clock (using local information) and 
 * a weather indicator (collecting data via the internet)

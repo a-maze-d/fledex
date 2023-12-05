@@ -19,7 +19,7 @@ The `Fledex.Leds` module allows you to easily define a sequence of LEDs. In this
 * merging LED sequences
 * repeating an LED sequence
 * defining LEDs though a function (gradient & rainbow)
-* sending leds to a `Fledex.LedsDriver`
+* sending leds to a `Fledex.LedStrip`
 
 ## Color concepts
 
@@ -195,7 +195,11 @@ Leds.leds(10)
 
 ## Sending LEDs to a led-strip
 
-Once we have defined our Leds, we can send them to our `LedsDriver`. This is not difficult, but it's such a common task that the Leds module provides the convenience function `send/2`. and some supporting functions (`set_driver_info/3`, `rotate/2`, `to_list/1`).
+Once we have defined our Leds, we can send them to our `Fledex.LedS`. This is not
+difficult, but it's such a common task that the Leds module provides the convenience
+function `send/2`. and some supporting functions (`set_driver_info/3`, `rotate/2`,
+`to_list/1`).
 
-The send function has a couple of checks that the `LedsDriver` is set up correctly.
-We won't discuss the send function in detail, since we'll work a bit more in other chapters.
+The send function has a couple of checks that the `Fledex.LedStrip` is set up correctly.
+We won't discuss the send function in detail, since we'll work a bit more in 
+other chapters.

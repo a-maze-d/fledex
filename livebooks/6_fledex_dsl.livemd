@@ -21,10 +21,18 @@ use Fledex
 
 ## The clock
 
-* We define a new strip with a name (`:clock`), and configure it (we use the `:kino` default driver for display). This will internally create a new `LedsDriver` server (if it's not already running) that will control the strip. Its server name will be identical to the `led_strip` name.
-* Then within this strip we define several `animation`s that correspond to an animation (and will use internally the `Fledex.Animation.Animator`). Each animaation is identified by its own name (`:help`, `:hour`, `:minute`, `:seconds`)
+* We define a new strip with a name (`:clock`), and configure it (we use the `:kino`
+  default driver for display). This will internally create a new `Fledex.LedStrip` 
+  server (if it's not already running) that will control the strip. Its server name will
+  be identical to the `led_strip` name.
+* Then within this strip we define several `animation`s that correspond to an animatio
+  (and will use internally the `Fledex.Animation.Animator`). Each animaation is identified
+  by its own name (`:help`, `:hour`, `:minute`, `:seconds`)
 * Within each animation we define a function that will repeatedly be executed
-* Inside that function we can define one or several `Leds`, either directly or through an led sequence (like a rainbow function) and animate those leds depending on some trigger data (data that comes into the animation function). An explanation of what we are doing in our example here will be given after the code.
+* Inside that function we can define one or several `Leds`, either directly or through 
+  an led sequence (like a rainbow function) and animate those leds depending on some
+  trigger data (data that comes into the animation function). An explanation of what 
+  we are doing in our example here will be given after the code.
 
 It is also possble to define some other configurations (like the `send_config_func` as we have done in the "[Fledex Clock Example](./4_fledex_clock_example.livemd)") but we will look at this a bit later.
 

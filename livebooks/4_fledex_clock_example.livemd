@@ -8,7 +8,7 @@ Mix.install([
 # we define a couple of aliases to not have to type that much
 alias Fledex.Animation.Manager
 alias Fledex.Leds
-alias Fledex.LedsDriver
+alias Fledex.LedStrip
 alias Fledex.Driver.Impl.Kino
 alias Fledex.Color.Correction
 
@@ -28,7 +28,7 @@ But before we get there, we first initiate our led strip and ensure that it upda
 # we start with the default configuration
 :ok = Manager.register_strip(:clock, :kino)
 # and then we modify the timer update frequency to 500ms
-{:ok, _old_value} = LedsDriver.change_config(:clock, [:timer, :update_timeout], 500)
+{:ok, _old_value} = LedStrip.change_config(:clock, [:timer, :update_timeout], 500)
 
 :ok
 ```

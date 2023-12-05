@@ -32,9 +32,9 @@ defmodule Fledex.Animation.Animator do
    * The send config (even though we will have to implement that as a
     function too due to the handling of the index)
 
-   Note: the time is not something that can be specified, since the animator will be triggered by
-   `LedsDriver` in it's update frequency. Thus to implement some wait pattern, the trigger counter (or some
-   other timer logic) should be used
+   Note: the time is not something that can be specified, since the animator will
+   be triggered by `Fledex.LedStrip` in it's update frequency. Thus to implement
+   some wait pattern, the trigger counter (or some other timer logic) should be used
 
    Both of them can be set by defining an appropriate function and setting and resetting a reference at will
 
@@ -47,7 +47,7 @@ defmodule Fledex.Animation.Animator do
 
   alias Fledex.Animation.Base
   alias Fledex.Leds
-  alias Fledex.LedsDriver
+  alias Fledex.LedStrip
   alias Fledex.Utils.PubSub
 
   @type config_t :: %{
@@ -82,7 +82,7 @@ defmodule Fledex.Animation.Animator do
     }
     state = update_config(state, init_args)
 
-    :ok= LedsDriver.define_namespace(state.strip_name, state.animation_name)
+    :ok= LedStrip.define_namespace(state.strip_name, state.animation_name)
     case state.type do
       :animation -> :ok = PubSub.subscribe(:fledex, "trigger")
       :static -> :ok # we don't subscribe because we paint only once
@@ -171,6 +171,6 @@ defmodule Fledex.Animation.Animator do
       :animation -> PubSub.unsubscribe(:fledex, "trigger")
       :static -> :ok # nothing to do, since we haven't been subscribed
     end
-    LedsDriver.drop_namespace(strip_name, animation_name)
+    LedStrip.drop_namespace(strip_name, animation_name)
   end
 end

@@ -7,7 +7,7 @@ defmodule Fledex.Animation.AnimatorTest do
   alias Fledex.Animation.Animator
   alias Fledex.Animation.Interface
   alias Fledex.Leds
-  alias Fledex.LedsDriver
+  alias Fledex.LedStrip
 
   def default_def_func(_triggers) do
     Leds.leds(30)
@@ -31,8 +31,8 @@ defmodule Fledex.Animation.AnimatorTest do
   setup do
     {:ok, pid} = start_supervised(
       %{
-        id: LedsDriver,
-        start: {LedsDriver, :start_link, [@strip_name, :none]}
+        id: LedStrip,
+        start: {LedStrip, :start_link, [@strip_name, :none]}
       })
     %{strip_name: @strip_name,
       pid: pid}
@@ -196,7 +196,7 @@ defmodule Fledex.Animation.AnimatorTest do
   @animation_name :test_animation
   describe "trigger" do
     test "trigger as cache", %{strip_name: strip_name}  do
-      :ok = LedsDriver.define_namespace(strip_name, @animation_name)
+      :ok = LedStrip.define_namespace(strip_name, @animation_name)
       state = %{
         def_func: fn (triggers) ->
           assert length(Map.keys(triggers)) == 2
@@ -229,7 +229,7 @@ defmodule Fledex.Animation.AnimatorTest do
   describe "test shutdown" do
     test "through client API" do
       strip_name = :shutdown_testA
-      {:ok, driver} = LedsDriver.start_link(strip_name, :none)
+      {:ok, driver} = LedStrip.start_link(strip_name, :none)
       animation_name = :animation_testA
       {:ok, pid} = Animator.start_link(%{}, strip_name, animation_name)
       assert Process.alive?(pid)
@@ -239,7 +239,7 @@ defmodule Fledex.Animation.AnimatorTest do
     end
     test "through GenServer API" do
       strip_name = :shutdown_testB
-      {:ok, driver} = LedsDriver.start_link(strip_name, :none)
+      {:ok, driver} = LedStrip.start_link(strip_name, :none)
       animation_name = :animation_testB
       {:ok, pid} = Animator.start_link(%{type: :static}, strip_name, animation_name)
       assert Process.alive?(pid)

@@ -21,7 +21,7 @@ defmodule Fledex.Driver.Interface do
     More Drivers can be created by implementing the simple behaviour
   """
   @doc """
-  The init function will be called after the LedsDriver is initialized as part
+  The init function will be called after the `Fledex.LedStrip` is initialized as part
   of the initialization process. A map of initalization arguments are passed to
   the driver. The driver can decide what to do with them. The returned map is a
   configuration that gets passed to any of the other driver functions.

@@ -1,7 +1,7 @@
 defmodule Fledex.LedsTest do
   use ExUnit.Case, async: true
   alias Fledex.Leds
-  alias Fledex.LedsDriver
+  alias Fledex.LedStrip
 
   doctest Leds
 
@@ -239,7 +239,7 @@ defmodule Fledex.LedsTest do
 
       leds = Leds.leds() |> Leds.set_driver_info(:test_name)
       assert leds.opts.namespace == :test_name
-      assert leds.opts.server_name == LedsDriver
+      assert leds.opts.server_name == LedStrip
 
     end
   end
@@ -405,8 +405,8 @@ defmodule Fledex.LedsTestSync do
   # setup do
   #   {:ok, pid} = start_supervised(
   #     %{
-  #       id: LedsDriver,
-  #       start: {LedsDriver, :start_link, [@strip_name, :none]}
+  #       id: LedStrip,
+  #       start: {LedStrip, :start_link, [@strip_name, :none]}
   #     })
   #   %{strip_name: @strip_name,
   #     pid: pid}
