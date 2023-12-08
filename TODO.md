@@ -3,7 +3,7 @@ Even though this library is published, there are things I still want to do befor
 
 # Tasks
 - [ ] Documentation
-  - [ ] Finish the dsl livebook example (mostly done, but the send_config part is not done yet) (v0.3)
+  - [x] Finish the dsl livebook example (mostly done, but the send_config part is not done yet) (v0.3)
   - [x] Create another livebook (2b) that looks at the different aspects of the Leds module and how to work with it (v0.3)
   - [x] Add proper API/module documentation (at least for the most important modules) (v0.3)
     - [x] Fledex
@@ -46,6 +46,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Enable Telemetry? (v0.5)
   - [ ] Upgrade to a hex released version of circuits_sim as soon as available (v0.?)
 - [ ] Missing functionality
+  - [ ] Improve on the option handling in the fledex macros. Just pass them straight on to the animators
   - [ ] see the project plan that was planned out with my son, we are not quite there yet (v0.4?)
   - [ ] Connect everything into a supervision tree (to make it more robust) (v0.4)
   - [ ] Use protocols ?

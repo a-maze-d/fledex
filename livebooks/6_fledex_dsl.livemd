@@ -68,7 +68,19 @@ We first define a `static` animation (one that doesn't animate). This animation 
 
 For all other animations we make a call to the system time (`Time.utc_now()`) and therefore don't require the `_trigger` information. We shift the result to the right timezone (we add 1 hour, for UTC+1).
 
-We pattern match the result, depending on the animation into `hour`, `minute`, or `second`.
+We pattern match the result, depending on the animation into `hour`, `minute`, or `second`. Note: the code is a bit extra bloated to pattern match it every time into all 3 and to comment out the ones we don't need, but that is just to highlight that we have all 3 elements but we are only interested in one of them.
+
+Exapmle: For the second indicator the following would have been enough:
+
+<!-- livebook:{"force_markdown":true} -->
+
+```elixir
+  animation :second do
+    _triggers ->
+      %{second: second} = Time.utc_now() |> Time.add(1, :hour)
+      leds(60) |> light(:red, second + 1)
+  end
+```
 
 We then define a sequence of `Leds` of the right length (`24` for `hour`, and `60` for `minute` and `second`). We switch-on only a single light in some color at the correct position (with the offset corresponding to `hour`, `minute` or `second`)
 
@@ -76,17 +88,23 @@ Note: in the clock example we defined a static sequence of `Leds` and offsetted 
 
 ## Clock (with send function)
 
-We are now implementing the above example, but demonstrating on how the `:secdon`, `:minute`, and `:hour` indicators can be implemented in exactly the same way as we did in chapter 4, i.e. with a send function that shifts the red marker depending on the time.
+We are now implementing the above example, but demonstrating on how the `:second`, `:minute`, and `:hour` indicators can be implemented in exactly the same way as we did in chapter 4, i.e. with a send function that shifts the red marker depending on the time.
+
+We also take the ocasion to demonstrate on how you can define a second strip, by giving it a new name (`:clock2`). To demonstrate that it's really a new stip this clock here displays the time in UTC (we don't add the extra hour of offset). Look carefully at the blue hour indicator.
+
+Also, the above strip should continue to run and a new strip will appear below the code. Had we called the strip the same as above (i.e. `:clock`), then the above output would have stopped updating and a new one would appear here.
+
+Try it out and modify any of the two animations. They should be fully independent.
 
 ```elixir
-led_strip :clock, :kino do
+led_strip :clock2, :kino do
   static :help do
     leds(5) |> light(davy_s_grey()) |> repeat(12)
   end
 
   animation :hour,
     send_config: fn _triggers ->
-      %{hour: hour, minute: _minute, second: _second} = Time.utc_now() |> Time.add(1, :hour)
+      %{hour: hour, minute: _minute, second: _second} = Time.utc_now()
       %{offset: hour, rotate_left: false}
     end do
     _triggers ->
@@ -95,7 +113,7 @@ led_strip :clock, :kino do
 
   animation :minute,
     send_config: fn _triggers ->
-      %{hour: _hour, minute: minute, second: _second} = Time.utc_now() |> Time.add(1, :hour)
+      %{hour: _hour, minute: minute, second: _second} = Time.utc_now()
       %{offset: minute, rotate_left: false}
     end do
     _triggers ->
@@ -104,7 +122,7 @@ led_strip :clock, :kino do
 
   animation :second,
     send_config: fn _triggers ->
-      %{hour: _hour, minute: _minute, second: second} = Time.utc_now() |> Time.add(1, :hour)
+      %{hour: _hour, minute: _minute, second: second} = Time.utc_now()
       %{offset: second, rotate_left: false}
     end do
     _triggers ->
