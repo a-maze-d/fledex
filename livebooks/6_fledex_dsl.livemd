@@ -26,9 +26,9 @@ use Fledex
   server (if it's not already running) that will control the strip. Its server name will
   be identical to the `led_strip` name.
 * Then within this strip we define several `animation`s that correspond to an animatio
-  (and will use internally the `Fledex.Animation.Animator`). Each animaation is identified
-  by its own name (`:help`, `:hour`, `:minute`, `:seconds`)
-* Within each animation we define a function that will repeatedly be executed
+  (and will use internally the `Fledex.Animation.Animator`). Each animation is identified
+  by its own name (`:help`, `:hour`, `:minute`, `:second`).
+* Within each animation we define a function that will be executed repeatedly.
 * Inside that function we can define one or several `Leds`, either directly or through 
   an led sequence (like a rainbow function) and animate those leds depending on some
   trigger data (data that comes into the animation function). An explanation of what 
@@ -62,14 +62,56 @@ led_strip :clock, :kino do
 end
 ```
 
-In our example we first define a static animation (one that doesn't animate). This animation does not get any triggers and will only be called once during the initalization (since it's static. Notice that this function gets no argument). It is used to make it easier to read the time by having a dash every 5 steps. This is a repetitive task and therefore we define it only once and then make use of the `repeat/2` function (and repeat it 12 times).
+The above code should result in an animation displaying the clock.Now it's time to look at the different animation parts and how they work.
 
-For all other animations we make a call to the system time (`Time.utc_now()`) and therefore don't require the `_trigger` information. We shift the result to the right timezone (we add 1 hour, for UTC+1)
-We parse the result, depending on the animation into the different aspects of interest (`hour`, `minute`, `second`).
+We first define a `static` animation (one that doesn't animate). This animation does not get any triggers and will only be called once during the initalization (since it's static). Notice that this function gets no argument (we don't have the trailing `_triggers ->` part). It is used to make it easier to read the time by having a dash every 5 steps and those do not change over time. The markers are repeating in a regular pattern, so we only define the first one and then repeat it with the `repeat/2` function 12 times.
 
-We then define a sequence of `Leds` of the right length (`24` for `hour`s, and `60` for `minute`s and `second`s). We switch on only a single light in some color at the correct position (with the offset corresponding to `hour`, `minute` or `second`)
+For all other animations we make a call to the system time (`Time.utc_now()`) and therefore don't require the `_trigger` information. We shift the result to the right timezone (we add 1 hour, for UTC+1).
+
+We pattern match the result, depending on the animation into `hour`, `minute`, or `second`.
+
+We then define a sequence of `Leds` of the right length (`24` for `hour`, and `60` for `minute` and `second`). We switch-on only a single light in some color at the correct position (with the offset corresponding to `hour`, `minute` or `second`)
 
 Note: in the clock example we defined a static sequence of `Leds` and offsetted it. This requires the definition of a `send_config_func`. We will look on how to do it with the DSL as a next step.
+
+## Clock (with send function)
+
+We are now implementing the above example, but demonstrating on how the `:secdon`, `:minute`, and `:hour` indicators can be implemented in exactly the same way as we did in chapter 4, i.e. with a send function that shifts the red marker depending on the time.
+
+```elixir
+led_strip :clock, :kino do
+  static :help do
+    leds(5) |> light(davy_s_grey()) |> repeat(12)
+  end
+
+  animation :hour,
+    send_config: fn _triggers ->
+      %{hour: hour, minute: _minute, second: _second} = Time.utc_now() |> Time.add(1, :hour)
+      %{offset: hour, rotate_left: false}
+    end do
+    _triggers ->
+      leds(24) |> light(blue())
+  end
+
+  animation :minute,
+    send_config: fn _triggers ->
+      %{hour: _hour, minute: minute, second: _second} = Time.utc_now() |> Time.add(1, :hour)
+      %{offset: minute, rotate_left: false}
+    end do
+    _triggers ->
+      leds(60) |> light(:may_green)
+  end
+
+  animation :second,
+    send_config: fn _triggers ->
+      %{hour: _hour, minute: _minute, second: second} = Time.utc_now() |> Time.add(1, :hour)
+      %{offset: second, rotate_left: false}
+    end do
+    _triggers ->
+      leds(60) |> light(:red)
+  end
+end
+```
 
 ## The weather app
 

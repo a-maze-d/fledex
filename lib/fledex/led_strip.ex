@@ -1,11 +1,16 @@
 defmodule Fledex.LedStrip do
   @moduledoc """
   This module defines a GenServer that manages the LED strip (be it a real one with the
-  `Fledex.Driver.Impl.Spi` or a virtual one with e.g. the `Fledex.Driver.Impl.Kino`). Usually you only want to start
-  one server, even though it is possible to start several.
-  The LedStrip will take several Leds definitions and merge them together to be displayed
-  on a single LED strip
-  The role the LedStrip plays is similar to the one a window server  plays on a normal computer
+  `Fledex.Driver.Impl.Spi` or a virtual one with e.g. the `Fledex.Driver.Impl.Kino`).
+
+  You would start an `LedStrip` for every led strip you have.
+
+  The `Fledex.LedStrip` will take several `Fledex.Leds` definitions and merge them
+  together to be displayed on a single LED strip.
+
+  The role the LedStrip plays is similar to the one a window server  plays on a normal
+  computer, except that a window server would manage several screens, whereas here each
+  LED strip would get its own.
   """
   use GenServer
 
@@ -81,32 +86,63 @@ defmodule Fledex.LedStrip do
     GenServer.start_link(__MODULE__, {init_args, strip_name}, name: strip_name)
   end
 
+  @doc """
+  Define a new namespace
+  """
   @spec define_namespace(atom, atom) :: :ok | {:error, String.t()}
   def define_namespace(strip_name \\ __MODULE__, namespace) do
     # Logger.info("defining namespace: #{strip_name}-#{namespace}")
     GenServer.call(strip_name, {:define_namespace, namespace})
   end
 
+  @doc """
+  Drop a previously defined namespace.
+  """
   @spec drop_namespace(atom, atom) :: :ok
   def drop_namespace(strip_name \\ __MODULE__, namespace) do
     # Logger.info("dropping namespace: #{strip_name}-#{namespace}")
     GenServer.call(strip_name, {:drop_namespace, namespace})
   end
 
+  @doc """
+  Checks whether the specified namespace already exists
+  """
   @spec exist_namespace(atom, atom) :: boolean
   def exist_namespace(strip_name \\ __MODULE__, namespace) do
+    # TODO: rename to `namespace?`?
     GenServer.call(strip_name, {:exist_namespace, namespace})
   end
 
+  @doc """
+  Sets the leds in a specific strip and namespace.
+
+  Note: repeated calls of this function will result in previously set leds
+  will be overwritten. We are passing a list of leds which means every led
+  will be rewritten, except if we define a 'shorter" led sequence. In that
+  case some leds might retain their previously set value.
+  """
   @spec set_leds(atom, atom, list(pos_integer)) :: :ok | {:error, String.t()}
   def set_leds(strip_name \\ __MODULE__, namespace, leds) do
     GenServer.call(strip_name, {:set_leds, namespace, leds})
   end
 
+  @doc """
+  Change some aspect of a configuration for a specific strip. The configuration
+  will be updated and the old value will be returned.
+
+  Caution: No error checking is performed, so you might end up with a useless
+  configuration
+  """
   @spec change_config(atom, list(atom), any) :: {:ok, any}
   def change_config(strip_name \\ __MODULE__, config_path, value) do
     GenServer.call(strip_name, {:change_config, config_path, value})
   end
+
+  @doc """
+  In some circumstances it might be necessary to reinitialize a driver.
+  Most of the time you don't need to call this. If you do, you will surely
+  know about it :)
+  """
   @spec reinit_drivers(atom) :: :ok
   def reinit_drivers(strip_name \\ __MODULE__) do
     GenServer.call(strip_name, :reinit_drivers)
@@ -126,10 +162,12 @@ defmodule Fledex.LedStrip do
   def init(_na) do
     {:stop, "Init args need to be a map"}
   end
+  @doc false
   @spec init_driver(state_t) :: state_t
   def init_driver(state) do
     %{state | led_strip: Manager.init_drivers(state.led_strip)}
   end
+  @doc false
   @spec init_state(map, atom) :: state_t
   def init_state(init_args, strip_name) when is_map(init_args) and is_atom(strip_name) do
     %{
@@ -149,6 +187,7 @@ defmodule Fledex.LedStrip do
       :is_dirty,
       :ref
     ]
+  @doc false
   @spec init_timer(map) :: timer_t
   defp init_timer(init_args) when is_map(init_args) do
     default = %{
@@ -173,6 +212,7 @@ defmodule Fledex.LedStrip do
     Manager.terminate(reason, state.led_strip)
   end
 
+  @doc false
   @spec start_timer(state_t) :: state_t
   defp start_timer(%{timer: %{disabled: true}} = state), do: state
   defp start_timer(state) do
@@ -258,6 +298,7 @@ defmodule Fledex.LedStrip do
     {:noreply, state}
   end
 
+  @doc false
   @spec transfer_data(state_t) :: state_t
   def transfer_data(
         %{timer: %{is_dirty: is_dirty, only_dirty_updates: only_dirty_updates}} = state
@@ -284,6 +325,7 @@ defmodule Fledex.LedStrip do
     # )
   end
 
+  @doc false
   @spec merge_namespaces(map, atom) :: list(Types.colorint())
   def merge_namespaces(namespaces, merge_strategy) do
     namespaces
@@ -291,6 +333,7 @@ defmodule Fledex.LedStrip do
     |> merge_leds(merge_strategy)
   end
 
+  @doc false
   @spec get_leds(map) :: list(list(Types.colorint()))
   def get_leds(namespaces) do
     Enum.reduce(namespaces, [], fn {_key, value}, acc ->
@@ -298,6 +341,7 @@ defmodule Fledex.LedStrip do
     end)
   end
 
+  @doc false
   @spec merge_leds(list(list(Types.colorint())), atom) :: list(Types.colorint())
   def merge_leds(leds, merge_strategy) do
     leds = match_length(leds)
@@ -307,6 +351,7 @@ defmodule Fledex.LedStrip do
     end)
   end
 
+  @doc false
   @spec match_length(list(list(Types.colorint()))) :: list(list(Types.colorint()))
   def match_length(leds) when leds == [], do: leds
   def match_length(leds) do
@@ -314,14 +359,15 @@ defmodule Fledex.LedStrip do
     Enum.map(leds, fn sequence -> extend(sequence, max_length - length(sequence)) end)
   end
 
+  @doc false
   @spec extend(list(Types.colorint()), pos_integer) :: list(Types.colorint())
   def extend(sequence, 0), do: sequence
-
   def extend(sequence, extra) do
     extra_length = Enum.reduce(1..extra, [], fn _index, acc -> acc ++ [0x000000] end)
     sequence ++ extra_length
   end
 
+  @doc false
   @spec merge_pixels(list(Types.colorint()), atom) :: Types.colorint()
   def merge_pixels(elems, merge_strategy) do
     elems
@@ -330,6 +376,7 @@ defmodule Fledex.LedStrip do
     |> Utils.to_colorint()
   end
 
+  @doc false
   @spec apply_merge_strategy(list(Types.colorint()), atom) :: Types.rgb()
   def apply_merge_strategy(rgb, merge_strategy) do
     case merge_strategy do

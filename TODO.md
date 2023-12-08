@@ -12,9 +12,9 @@ Even though this library is published, there are things I still want to do befor
     - [x] Fledex.Animation.BaseAnimator
     - [x] Fledex.Animation.LedAnimator
     - [x] Fledex.Animation.LedAnimationManager
-    - [x] Fledex.LedsDriver
+    - [x] Fledex.LedStrip
   - [ ] Add type specs (at least for the most important modules) (v0.3)
-    - [ ] Fledex
+    - [ ] Fledex <== This is maybe a tough one.
     - [x] Fledex.Leds
     - [x] Fledex.Color.Names
     - [x] Fledex.Animation.BaseAnimator
@@ -41,7 +41,7 @@ Even though this library is published, there are things I still want to do befor
   - [x] Rename the LedAnimator to just Animator (v0.3)
   - [x] Rename the specific drivers to not contain Driver in the name (since it's already in the namespace) (v0.3)
   - [ ] Improve the LedsDriver config (v0.4)
-  - [ ] Fix flaxy tests (see TODOs) (v0.4)
+  - [ ] Fix flaky tests (see TODOs) (v0.4)
   - [ ] Perform an extra round of testing on hardware (v0.4)
   - [ ] Enable Telemetry? (v0.5)
   - [ ] Upgrade to a hex released version of circuits_sim as soon as available (v0.?)
