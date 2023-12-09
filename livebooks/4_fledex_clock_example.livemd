@@ -22,7 +22,13 @@ alias Fledex.Color.Correction
 The goal of this project is to create a clock that displays its hour, minute and second on the trip. We use the kino driver as output and we limit the amount of leds to a reasonable number.
 Therefore we can't really display every second and every minute. We can get a bit creative in how we display it.
 
-But before we get there, we first initiate our led strip and ensure that it updates with a very low frequency (transferring updates in high frequency is just a waste of energy)
+But before we get there, we first initiate our led strip.
+
+## Preparational steps
+
+First we register a strip (we name it `:clock`) with our `Fledex.Animation.Manager` and we use the default settings for the `:kino` driver.
+
+Then we modify the led strip to update with a very low frequency. Our clock only updates every second and therefore it's unnecessary that we update it more often than that. To avoid any issues due to some runtime delays, we update it twice every second. Thereby the second indicator will never jump an led.
 
 ```elixir
 # we start with the default configuration
@@ -33,8 +39,21 @@ But before we get there, we first initiate our led strip and ensure that it upda
 :ok
 ```
 
+## Defining our clock
+
+We now register our animations for the `:clock` led strip. We define 4 animations. One for the seconds, minutes, and hours and one as help to make it easier to read the lock by having an indicator in every 5 intervals.
+
+Each animation consists of two elements:
+
+* `def_func` this defines a function that will be called to define a sequence of LEDs (how many LEDs and which colors). The function receives a `trigger` (a `map`) that can contain various information, but at least contains a counter with the name of the led strip (i.e. in our case with the name `:counter`). We will use this to define a sequence of the correct length and color the fist led. In this function we don't use the `trigger`
+* `send_config_func` this defines a function that will be called after the LED strip has been defined (see `Fledex.Leds.send/2` for more details and options). We will use this to rotatae the led sequence (dependent on the `trigger` that we also get here as input) in such a way that the colored dot will come to the correct position in the sequence. We also explicitly specify the direction of our rotation. We can rotate to the left or the right.
+
+Note: we get the time by simply making a call to `Time.utc_now/0` and adjusting it to our timezone (UTC+1) (`Time.add/2`). We then extract (through pattern matching) the information we are intersted in (second, minute, hour)
+
+Our `:help` "animation" defines an led sequence of 5 leds (the first one being colored) and repeats that pattern 12 times. This is not a real animation, since we output a static pattern every time.
+
 ```elixir
-Manager.register_animations(:clock, %{
+config = %{
   seconds: %{
     def_func: fn _triggers ->
       Leds.leds(60) |> Leds.light(:red)
@@ -75,5 +94,15 @@ Manager.register_animations(:clock, %{
       |> Leds.repeat(12)
     end
   }
-})
+}
 ```
+
+## Starting our animation
+
+Now that we have defined our configuration we can start our animation, by registering our animations-configuration to our `Fledex.Animation.Manager` by calling `register_animations/2`. That's it!
+
+```elixir
+Manager.register_animations(:clock, config)
+```
+
+If you are searching for your led strip then scoll up. It's displayed where you have registered your led strip with the `Fledex.Animation.Manager`.
