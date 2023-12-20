@@ -77,7 +77,8 @@ defmodule Fledex do
         %{
           type: :animation,
           def_func: unquote(def_func_ast),
-          send_config_func: unquote(send_config)
+          send_config_func: unquote(send_config),
+          effects: []
         }
       }
     end
@@ -99,25 +100,62 @@ defmodule Fledex do
         %{
           type: :static,
           def_func: unquote(def_func_ast),
-          send_config_func: unquote(send_config)
+          send_config_func: unquote(send_config),
+          effects: []
         }
       }
     end
       # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
   @doc """
-  NOT YET IMPLEMENTED
+  NOT YET IMPLEMENTED (thus, those are just some thoughts)
+
+  A component is a pre-defined animation that reacts to some input.
+  We might have a thermometer component that defines the display of
+  a thermometer:
+
+  * input: single value
+  * display is a range (positive, 0, negative)
+  * ...
+
+  The `do: block` should retun the expected parameters for the component.
+  For our thermometer component the parameters might be:
+
+  * the value,
+  * the display colors,
+  * the range of our scale
+
+  Thus, it might look something like the following:
+  ```elixir
+  do
+    %Thermometer{
+      value: 10,
+      negative: :blue,
+      positive: :red,
+      range: -10..30,
+      steps: 1,
+    }
+  end
+  ```
   """
-  defmacro component(_name, _type, _options \\ []) do
+  defmacro component(_name, _type, _options \\ [], do: _block) do
       # TODO: Add a component macro
+  end
+
+  defmacro effect(module, options \\ [], do: block) do
+    quote do
+      {name, config} = unquote(block)
+       {
+        name,
+        %{config | effects: [{unquote(module), unquote(Macro.escape(options))} | config.effects]}
+      }
+    end
+      # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
 
   @doc """
     This introduces a new led_strip.
-
-    Probably we only have a single led strip and then the default
-    name (the module name) will be used.
-  """
+   """
   defmacro led_strip(strip_name, strip_options \\ :kino, do: block) do
     # Logger.error(inspect block)
     {_ast, configs_ast} = Macro.prewalk(block, [], fn

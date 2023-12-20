@@ -139,4 +139,64 @@ defmodule Fledex.Test do
       assert info.type == :static
     end
   end
+  describe "with effects" do
+    test "simple effect" do
+      use Fledex
+      with_effect = effect Fledex.Test do
+        {
+          :name,
+          %{effects: []}
+        }
+      end
+      assert with_effect == {
+        :name,
+        %{effects: [{Fledex.Test, []}]}
+      }
+    end
+    test "effect with options" do
+      use Fledex
+      with_effect = effect Fledex.Test, option: :something do
+        {
+          :name,
+          %{effects: []}
+        }
+      end
+      assert with_effect == {
+        :name,
+        %{effects: [{Fledex.Test, [option: :something]}]}
+      }
+    end
+   test "effect with several options" do
+     use Fledex
+     with_effect = effect Fledex.Test, option1: :something, option2: :something_else do
+       {
+        :name,
+        %{effects: []}
+       }
+     end
+     assert with_effect == {
+      :name,
+      %{effects: [{Fledex.Test, [option1: :something, option2: :something_else]}]}
+     }
+   end
+   test "several nested effects" do
+    use Fledex
+    with_effects =
+      effect Fledex.Test do
+        effect Fledex.Test2 do
+          {
+            :name,
+            %{effects: []}
+          }
+        end
+      end
+    assert with_effects == {
+      :name,
+      %{effects: [
+        {Fledex.Test, []},
+        {Fledex.Test2, []}
+      ]}
+    }
+   end
+  end
 end

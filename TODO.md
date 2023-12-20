@@ -27,6 +27,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Add documentation on how to connect the LED strip to a RaspberryPi Zero (v0.4) 
   - [ ] Add installation instructions (v0.4)
   - [ ] Add documentation on how to conncet the LED strip to a RPI with a level shifter (v0.7)
+        https://electronics.stackexchange.com/questions/82104/single-transistor-level-up-shifter/82112#82112
 - [ ] Testing
   - [ ] Add more error handling scenarios (v0.4)
 - [ ] Cleanup
@@ -40,6 +41,7 @@ Even though this library is published, there are things I still want to do befor
   - [x] Rename the LedAnimationManager to take advantage of the namespace (v0.3)
   - [x] Rename the LedAnimator to just Animator (v0.3)
   - [x] Rename the specific drivers to not contain Driver in the name (since it's already in the namespace) (v0.3)
+  - [ ] Rename the `def-func` and `send_config_func` to make it more natural in the dsl? (v0.3)
   - [ ] Improve the LedsDriver config (v0.4)
   - [ ] Fix flaky tests (see TODOs) (v0.4)
   - [ ] Perform an extra round of testing on hardware (v0.4)

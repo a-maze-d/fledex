@@ -6,6 +6,8 @@ defmodule Fledex.Animation.AnimatorTest do
 
   alias Fledex.Animation.Animator
   alias Fledex.Animation.Interface
+  alias Fledex.Effect.Rotation
+  alias Fledex.Effect.Wanish
   alias Fledex.Leds
   alias Fledex.LedStrip
 
@@ -42,6 +44,7 @@ defmodule Fledex.Animation.AnimatorTest do
     test "config applied correctly (all set)" do
       init_args = %{
         def_func: &default_def_func/1,
+        effects: [],
         send_config_func: &default_send_config_func/1,
         strip_name: :test_strip,
         animation_name: :test_animation,
@@ -204,6 +207,7 @@ defmodule Fledex.Animation.AnimatorTest do
           assert triggers[strip_name] == 10
           {Leds.leds(0), Map.put_new(triggers, :test1, 4)}
         end,
+        effects: [],
         send_config_func: fn (triggers) ->
           assert length(Map.keys(triggers)) == 3
           assert triggers.something == "abc"
@@ -246,6 +250,28 @@ defmodule Fledex.Animation.AnimatorTest do
       GenServer.stop(Interface.build_animator_name(strip_name, animation_name), :normal)
       assert not Process.alive?(pid)
       GenServer.stop(driver, :normal)
+    end
+  end
+  describe "effects" do
+    test "effects applied" do
+      leds = Leds.leds(3, [0xff0000, 0x00ff00, 0x0000ff], %{})
+      effects = [{Rotation, [trigger_name: :counter]}]
+      triggers = %{counter: 1}
+      {returned_leds, returned_triggers} = Animator.apply_effects(leds, effects, triggers)
+      assert returned_triggers == triggers
+      assert Leds.to_list(returned_leds) == [0x00ff00, 0x0000ff, 0xff0000]
+    end
+    test "multi-effects in correct order" do
+      leds = Leds.leds(3, [0xff0000, 0x00ff00, 0x0000ff], %{})
+      effects = [
+        {Rotation, [trigger_name: :counter]},
+        {Wanish, [trigger_name: :counter]}
+      ]
+      triggers = %{counter: 1}
+
+      {returned_leds, returned_triggers} = Animator.apply_effects(leds, effects, triggers)
+      assert returned_triggers == triggers
+      assert Leds.to_list(returned_leds) == [0x000000, 0x0000ff, 0xff0000]
     end
   end
 end

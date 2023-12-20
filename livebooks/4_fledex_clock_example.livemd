@@ -9,8 +9,6 @@ Mix.install([
 alias Fledex.Animation.Manager
 alias Fledex.Leds
 alias Fledex.LedStrip
-alias Fledex.Driver.Impl.Kino
-alias Fledex.Color.Correction
 
 {:ok, pid} = Manager.start_link()
 

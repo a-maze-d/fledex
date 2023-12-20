@@ -23,9 +23,9 @@ defmodule Fledex.Leds do
   defstruct count: 0, leds: %{}, opts: %{}, meta: %{index: 1}
   @type t :: %__MODULE__{
     count: integer,
-    leds: map,
-    opts: map,
-    meta: map
+    leds: %{pos_integer => Types.colorint},
+    opts: %{atom => any},
+    meta: %{atom => any}
   }
 
   @doc delegate_to: {Leds, :leds, 0}
@@ -85,7 +85,7 @@ defmodule Fledex.Leds do
   Leds that are outside the `count` can be specified, but will be ignored when sent to
   an `Fledex.LedStrip` through the `send/2` function.
   """
-  @spec leds(integer, map, map) :: t
+  @spec leds(integer, list(Types.color) | %{integer => Types.color}, map) :: t
   def leds(count, leds, opts) do
     leds(count, leds, opts, %{})
   end
@@ -103,7 +103,7 @@ defmodule Fledex.Leds do
   leds(10) |> light(:red) |> light(:blue)
   ```
   """
-  @spec leds(integer, list(Types.rgb) | %{integer => integer}, map, map) :: t
+  @spec leds(integer, list(Types.color) | %{integer => Types.color}, map, map) :: t
   def leds(count, leds, opts, meta) when is_list(leds) do
     leds(count, convert_to_leds_structure(leds, 0), opts, meta)
   end
@@ -179,7 +179,7 @@ defmodule Fledex.Leds do
   @doc """
   Helper function to convert a list of colors to the correct map structure
   """
-  @spec convert_to_leds_structure(list(Types.rgb), integer) :: map
+  @spec convert_to_leds_structure(list(Types.color), integer) :: map
   def convert_to_leds_structure(rgbs, offset \\ 0) do
     offset_oneindex = offset + 1
     Enum.zip_with(offset_oneindex..(offset_oneindex + length(rgbs)), rgbs, fn(index, rgb) ->

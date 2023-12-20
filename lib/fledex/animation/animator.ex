@@ -64,6 +64,7 @@ defmodule Fledex.Animation.Animator do
     :triggers => map,
     :type => atom,
     :def_func => ((integer) -> Leds.t()),
+    :effects => [{module, keyword}],
     :send_config_func => ((integer) -> map()),
     :strip_name => atom,
     :animation_name => atom
@@ -76,6 +77,7 @@ defmodule Fledex.Animation.Animator do
       triggers: %{},
       type: :animation,
       def_func: &Base.default_def_func/1,
+      effects: [],
       send_config_func: &Base.default_send_config_func/1,
       strip_name: strip_name,
       animation_name: animation_name
@@ -117,10 +119,12 @@ defmodule Fledex.Animation.Animator do
     strip_name: strip_name,
     animation_name: animation_name,
     def_func: def_func,
+    effects: effects,
     send_config_func: send_config_func,
     triggers: triggers} = state) do
       # we can get two different responses, with or without triggers, we make sure our result contains the triggers
       {leds, triggers} = def_func.(triggers) |> get_with_triggers(triggers)
+      {leds, triggers} = apply_effects(leds, effects, triggers)
       # independent on the configs say we want to ensure we use the correct namespace (animation_name)
       # and server_name (strip_name). Therefore we inject it
       leds = Leds.set_driver_info(leds, animation_name, strip_name)
@@ -128,9 +132,18 @@ defmodule Fledex.Animation.Animator do
       Leds.send(leds, config)
       %{state | triggers: triggers}
   end
+
+  @spec apply_effects(Leds.t, [{module, map}], map) :: {Leds.t, map}
+  def apply_effects(leds, effects, triggers) do
+    {led_list, triggers} = Enum.reduce(effects, {Leds.to_list(leds), triggers}, fn {effect, config}, {leds, triggers} ->
+      effect.apply(leds, config, triggers) |> get_with_triggers(triggers)
+    end)
+    {Leds.leds(leds.count, led_list, %{}), triggers}
+  end
+
   # the response can be with or without trigger, we ensure that it's always with a trigger,
   # in the worst case with the original triggers.
-  @spec get_with_triggers(response :: map | {map, map}, map) :: {map, map}
+  @spec get_with_triggers(response :: any | {any, map}, orig_triggers :: map) :: {any, map}
   defp get_with_triggers(response, orig_triggers) do
     case response do
       {something, triggers} -> {something, triggers}
@@ -145,6 +158,7 @@ defmodule Fledex.Animation.Animator do
       type: config[:type] || state.type,
       triggers: Map.merge(state.triggers, config[:triggers] || state[:triggers]),
       def_func: Map.get(config, :def_func, state[:def_func] || &Base.default_def_func/1),
+      effects: config[:effects] || state.effects,
       send_config_func: Map.get(config, :send_config_func, state[:send_config_func] || &Base.default_send_config_func/1),
       strip_name: state.strip_name, # not to be updated
       animation_name: state.animation_name # not to be updated
