@@ -51,102 +51,52 @@ defmodule Fledex.Effect.WanishTest do
     test "with reappear" do
       leds = [0xff0000, 0x00ff00, 0x0000ff]
       reappear_key = :dummy
+      config = [trigger_name: :default, reappear: true, reappear_key: reappear_key]
 
-      triggers = %{default: 1}
-      {returned_leds, triggers} = Wanish.apply(leds, 3, [trigger_name: :default, reappear: true, reappear_key: reappear_key], triggers)
-      assert returned_leds == [0x000000, 0x00ff00, 0x0000ff]
-      assert triggers[reappear_key] == nil
-
-      triggers = %{triggers | default: 2}
-      {returned_leds, triggers} = Wanish.apply(leds, 3, [trigger_name: :default, reappear: true, reappear_key: reappear_key], triggers)
-      assert returned_leds == [0x000000, 0x000000, 0x0000ff]
-      assert triggers[reappear_key] == true
-
-      triggers = %{triggers | default: 3}
-      {returned_leds, triggers} = Wanish.apply(leds, 3, [trigger_name: :default, reappear: true, reappear_key: reappear_key], triggers)
-      assert returned_leds == [0x000000, 0x000000, 0x000000]
-      assert triggers[reappear_key] == true
-
-      triggers = %{triggers | default: 4}
-      {returned_leds, triggers} = Wanish.apply(leds, 3, [trigger_name: :default, reappear: true, reappear_key: reappear_key], triggers)
-      assert returned_leds == [0x000000, 0x000000, 0x0000ff]
-      assert triggers[reappear_key] == true
-
-      triggers = %{triggers | default: 5}
-      {returned_leds, triggers} = Wanish.apply(leds, 3, [trigger_name: :default, reappear: true, reappear_key: reappear_key], triggers)
-      assert returned_leds == [0x000000, 0x00ff00, 0x0000ff]
-      assert triggers[reappear_key] == nil
-
-      triggers = %{triggers | default: 6}
-      {returned_leds, new_triggers} = Wanish.apply(leds, 3, [trigger_name: :default, reappear: true, reappear_key: reappear_key], triggers)
-      assert returned_leds == [0xff0000, 0x00ff00, 0x0000ff]
-      assert new_triggers[reappear_key] == nil
-
-      new_triggers = %{new_triggers | default: 7}
-      {returned_leds, new_triggers} = Wanish.apply(leds, 3, [trigger_name: :default, reappear: true, reappear_key: reappear_key], new_triggers)
-      assert returned_leds == [0x000000, 0x00ff00, 0x0000ff]
-      assert new_triggers[reappear_key] == nil
+      expected_results = [
+        {[0x000000, 0x00ff00, 0x0000ff], nil},
+        {[0x000000, 0x000000, 0x0000ff], true},
+        {[0x000000, 0x000000, 0x000000], true},
+        {[0x000000, 0x000000, 0x0000ff], true},
+        {[0x000000, 0x00ff00, 0x0000ff], nil},
+        {[0xff0000, 0x00ff00, 0x0000ff], nil},
+        {[0x000000, 0x00ff00, 0x0000ff], nil},
+      ]
+      Enum.reduce(expected_results, %{}, fn {expected_result, expected_reappear_key}, triggers ->
+        triggers = Map.update(triggers, :default, 1, fn value -> value + 1 end)
+        {returned_leds, triggers} = Wanish.apply(leds, 3, config, triggers)
+        assert returned_leds == expected_result
+        assert triggers[reappear_key] == expected_reappear_key
+        triggers
+      end)
     end
     test "with reappear and divisor" do
       leds = [0xff0000, 0x00ff00, 0x0000ff]
       reappear_key = :dummy
       config = [trigger_name: :default, divisor: 2, reappear: true, reappear_key: reappear_key]
 
-      triggers = %{default: 1}
-      {returned_leds, triggers} = Wanish.apply(leds, 3, config, triggers)
-      assert returned_leds == [0xff0000, 0x00ff00, 0x0000ff]
-
-      triggers = %{triggers | default: 2}
-      {returned_leds, triggers} = Wanish.apply(leds, 3, config, triggers)
-      assert returned_leds == [0x000000, 0x00ff00, 0x0000ff]
-
-      triggers = %{triggers | default: 3}
-      {returned_leds, triggers} = Wanish.apply(leds, 3, config, triggers)
-      assert returned_leds == [0x000000, 0x00ff00, 0x0000ff]
-
-      triggers = %{triggers | default: 4}
-      {returned_leds, triggers} = Wanish.apply(leds, 3, config, triggers)
-      assert returned_leds == [0x000000, 0x000000, 0x0000ff]
-
-      triggers = %{triggers | default: 5}
-      {returned_leds, triggers} = Wanish.apply(leds, 3, config, triggers)
-      assert returned_leds == [0x000000, 0x000000, 0x0000ff]
-
-      triggers = %{triggers | default: 6}
-      {returned_leds, new_triggers} = Wanish.apply(leds, 3, config, triggers)
-      assert returned_leds == [0x000000, 0x000000, 0x000000]
-
-      new_triggers = %{new_triggers | default: 7}
-      {returned_leds, new_triggers} = Wanish.apply(leds, 3, config, new_triggers)
-      assert returned_leds == [0x000000, 0x000000, 0x000000]
-
-      new_triggers = %{new_triggers | default: 8}
-      {returned_leds, new_triggers} = Wanish.apply(leds, 3, config, new_triggers)
-      assert returned_leds == [0x000000, 0x000000, 0x0000ff]
-
-      new_triggers = %{new_triggers | default: 9}
-      {returned_leds, new_triggers} = Wanish.apply(leds, 3, config, new_triggers)
-      assert returned_leds == [0x000000, 0x000000, 0x0000ff]
-
-      new_triggers = %{new_triggers | default: 10}
-      {returned_leds, new_triggers} = Wanish.apply(leds, 3, config, new_triggers)
-      assert returned_leds == [0x000000, 0x00ff00, 0x0000ff]
-
-      new_triggers = %{new_triggers | default: 11}
-      {returned_leds, new_triggers} = Wanish.apply(leds, 3, config, new_triggers)
-      assert returned_leds == [0x000000, 0x00ff00, 0x0000ff]
-
-      new_triggers = %{new_triggers | default: 12}
-      {returned_leds, new_triggers} = Wanish.apply(leds, 3, config, new_triggers)
-      assert returned_leds == [0xff0000, 0x00ff00, 0x0000ff]
-
-      new_triggers = %{new_triggers | default: 13}
-      {returned_leds, new_triggers} = Wanish.apply(leds, 3, config, new_triggers)
-      assert returned_leds == [0xff0000, 0x00ff00, 0x0000ff]
-
-      new_triggers = %{new_triggers | default: 14}
-      {returned_leds, _new_triggers} = Wanish.apply(leds, 3, config, new_triggers)
-      assert returned_leds == [0x000000, 0x00ff00, 0x0000ff]
+      expected_results = [
+        [0xff0000, 0x00ff00, 0x00ff],
+        [0x000000, 0x00ff00, 0x00ff],
+        [0x000000, 0x00ff00, 0x00ff],
+        [0x000000, 0x000000, 0x00ff],
+        [0x000000, 0x000000, 0x00ff],
+        [0x000000, 0x000000, 0x0000],
+        [0x000000, 0x000000, 0x0000],
+        [0x000000, 0x000000, 0x00ff],
+        [0x000000, 0x000000, 0x00ff],
+        [0x000000, 0x00ff00, 0x00ff],
+        [0x000000, 0x00ff00, 0x00ff],
+        [0xff0000, 0x00ff00, 0x00ff],
+        [0xff0000, 0x00ff00, 0x00ff],
+        [0x000000, 0x00ff00, 0x00ff]
+      ]
+      Enum.reduce(expected_results, %{}, fn expected_result, triggers ->
+        triggers = Map.update(triggers, :default, 1, fn value -> value + 1 end)
+        {returned_leds, triggers} = Wanish.apply(leds, 3, config, triggers)
+        assert returned_leds == expected_result
+        triggers
+      end)
     end
   end
 end

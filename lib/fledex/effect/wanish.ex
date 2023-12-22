@@ -8,7 +8,29 @@ defmodule Fledex.Effect.Wanish do
     do_apply(leds, count, config, trigger_name, triggers)
   end
 
-  defp do_apply(leds, _count, _config, nil, triggers), do: {leds, triggers}
+  # This function is a bit complicated. It calculates how many pixels should be switched off or not
+  # It starts with just getting the appropriate counter, rescaling it and circuling between to the number
+  # of leds. If we also want to reappear, it gets a bit complicated. The following table should help to
+  # understand the algorithm illustrating the case of 3 (=count) leds (* = led on, o = led off).
+  # Note: The actual direction is not determined here.
+  # counter | leds  | counter%count | offset        | direction
+  # -------------------------------------------------------------
+  #   0     | ***   | 0             | 0             | ->
+  #   1     | o**   | 1             | 1             | ->
+  #   2     | oo*   | 2             | 2             | ->
+  #   3     | ooo   | 0             | 3 / count - 0 | <- / ->
+  #   4     | oo*   | 1             | 2 / count - 1 | <-
+  #   5     | o**   | 2             | 1 / count - 2 | <-
+  #   6     | ***   | 0             | 0 / count - 3 | -> / <-
+  #   7     | o**   | 1             | 1             | ->
+  # ...
+  # As can be seen we have two cycles. We can decide on when we indicate the change. We change it
+  # when our offset is 2 (because with an offset of 3 the direction doesn't matter but it's
+  # nice to be aligned with the modulo).
+  # We change back the direction when our offset is at 1 (here again, the direction doesn't matter
+  # in the next round, to align it to the modulo). This becomes a bit more complicated if we have
+  # a divisor, since the same state appears twice. Therefore we take the remainder of the divisor
+  # into consideration  defp do_apply(leds, _count, _config, nil, triggers), do: {leds, triggers}
   defp do_apply(leds, count, config, trigger_name, triggers) do
       left = Keyword.get(config, :direction, :left) != :right
       reappear = Keyword.get(config, :reappear, false)
@@ -33,27 +55,6 @@ defmodule Fledex.Effect.Wanish do
       end
   end
 
-  # This function is a bit complicated. It calculates how many pixels should be switched off or not
-  # It starts with just getting the appropriate counter, rescaling it and circuling between to the number
-  # of leds. If we also want to reappear, it gets a bit complicated. The following table should help to
-  # understand the algorithm illustrating the case of 3 (=count) leds (* = led on, o = led off).
-  # Note: The actual direction is not determined here.
-  # counter | leds  | counter%count | offset        | direction
-  # -------------------------------------------------------------
-  #   0     | ***   | 0             | 0             | ->
-  #   1     | o**   | 1             | 1             | ->
-  #   2     | oo*   | 2             | 2             | ->
-  #   3     | ooo   | 0             | 3 / count - 0 | <- / ->
-  #   4     | oo*   | 1             | 2 / count - 1 | <-
-  #   5     | o**   | 2             | 1 / count - 2 | <-
-  #   6     | ***   | 0             | 0 / count - 3 | -> / <-
-  #   7     | o**   | 1             | 1             | ->
-  # ...
-  # As can be seen we have two cycles. We can decide on when we indicate the change. We change it
-  # when our offset is 2 (because with an offset of 3 the direction doesn't matter but it's
-  # nice to be aligned with the modulo).
-  # We change back the direction when our offset is at 1 (here again, the direction doesn't matter
-  # in the next round, to align it to the modulo)
   defp calculate_offset(count, offset, circulate, reappear, reappear_key, triggers) do
       offset = if circulate, do: rem(offset, count), else: offset
       offset = if reappear and triggers[reappear_key], do: count - offset, else: offset
@@ -65,12 +66,7 @@ defmodule Fledex.Effect.Wanish do
     Map.put(triggers, reappear_key, true)
   end
   defp adjust_triggers(_count, 0, 1, reappear_key, triggers) when is_map_key(triggers, reappear_key) do
-    # {_flag, counter} = triggers[reappear_key]
-    # if counter == divisor do
       Map.drop(triggers, [reappear_key])
-    # else
-    #   Map.put(triggers, reappear_key, {true, counter + 1})
-    # end
   end
   defp adjust_triggers(_count, _remainder, _offset, _reappear_key, triggers) do
     triggers

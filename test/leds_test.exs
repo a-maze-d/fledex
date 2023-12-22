@@ -356,33 +356,12 @@ defmodule Fledex.LedsTest do
       assert leds.leds[9] == 0xff0000
     end
   end
-  # describe "internal functions" do
-  #   test "rotate" do
-  #     vals = [1, 2, 3, 4, 5, 6, 7, 8]
-  #     assert Leds.rotate(vals, 0, true) == [1, 2, 3, 4, 5, 6, 7, 8]
-  #     assert Leds.rotate(vals, 1, true) == [2, 3, 4, 5, 6, 7, 8, 1]
-  #     assert Leds.rotate(vals, 0, false) == [1, 2, 3, 4, 5, 6, 7, 8]
-  #     assert Leds.rotate(vals, 1, false) == [8, 1, 2, 3, 4, 5, 6, 7]
-  #     assert Leds.rotate(vals, 2) == [3, 4, 5, 6, 7, 8, 1, 2]
-  #   end
-  # end
   describe "errors" do
     test "light on negative offset position" do
       assert_raise ArgumentError, ~r/the offset needs to be > 0/, fn ->
         Leds.light(Leds.leds(2), :red, -1)
       end
     end
-    # test "gradient with missing config parameters" do
-    #   assert_raise ArgumentError, ~r/start_color and end_color/, fn ->
-    #     Leds.gradient(Leds.leds(10), %{})
-    #   end
-    #   assert_raise ArgumentError, ~r/start_color and end_color/, fn ->
-    #     Leds.do_gradient(Leds.leds(10), %{start_color: :red})
-    #   end
-    #   assert_raise ArgumentError, ~r/start_color and end_color/, fn ->
-    #     Leds.do_gradient(Leds.leds(10), %{end_color: :red})
-    #   end
-    # end
     test "wrong structure" do
       assert_raise ArgumentError, ~r/unknown data/, fn ->
         Leds.light(%{}, :red, 1)
@@ -400,17 +379,6 @@ defmodule Fledex.LedsTestSync do
   require Logger
 
   alias Fledex.Leds
-
-  # @strip_name :test_strip
-  # setup do
-  #   {:ok, pid} = start_supervised(
-  #     %{
-  #       id: LedStrip,
-  #       start: {LedStrip, :start_link, [@strip_name, :none]}
-  #     })
-  #   %{strip_name: @strip_name,
-  #     pid: pid}
-  # end
 
   describe "send functions" do
     test "correct setup and warnings" do
