@@ -4,8 +4,8 @@ defmodule Fledex.Effect.Rotation do
   alias Fledex.Color.Types
 
   @impl true
-  @spec apply(leds :: list(Types.colorint), config :: keyword, triggers :: map) :: list(Types.colorint)
-  def apply(leds, config, triggers) do
+  @spec apply(leds :: list(Types.colorint), count :: non_neg_integer, config :: keyword, triggers :: map) :: list(Types.colorint)
+  def apply(leds, _count, config, triggers) do
     left = Keyword.get(config, :direction, :left) != :right
     trigger_name = Keyword.get(config, :trigger_name, :default)
     offset = triggers[trigger_name] || 0

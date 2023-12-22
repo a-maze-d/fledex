@@ -105,7 +105,7 @@ defmodule Fledex.Animation.Animator do
       when is_map_key(triggers, strip_name) do
     # we only want to trigger the led update if we have a trigger from the driver (=strip_name as key)
     # otherwise we collect the triggers. Now it's time to merge previously collected triggers in
-    %{state | triggers: Map.merge(state.triggers, triggers)}
+    state = %{state | triggers: Map.merge(state.triggers, triggers)}
     {:noreply, update_leds(state)}
   end
   def handle_info({:trigger, triggers}, state) do
@@ -135,8 +135,9 @@ defmodule Fledex.Animation.Animator do
 
   @spec apply_effects(Leds.t, [{module, map}], map) :: {Leds.t, map}
   def apply_effects(leds, effects, triggers) do
+    count = leds.count
     {led_list, triggers} = Enum.reduce(effects, {Leds.to_list(leds), triggers}, fn {effect, config}, {leds, triggers} ->
-      effect.apply(leds, config, triggers) |> get_with_triggers(triggers)
+      effect.apply(leds, count, config, triggers) |> get_with_triggers(triggers)
     end)
     {Leds.leds(leds.count, led_list, %{}), triggers}
   end

@@ -356,16 +356,16 @@ defmodule Fledex.LedsTest do
       assert leds.leds[9] == 0xff0000
     end
   end
-  describe "internal functions" do
-    test "rotate" do
-      vals = [1, 2, 3, 4, 5, 6, 7, 8]
-      assert Leds.rotate(vals, 0, true) == [1, 2, 3, 4, 5, 6, 7, 8]
-      assert Leds.rotate(vals, 1, true) == [2, 3, 4, 5, 6, 7, 8, 1]
-      assert Leds.rotate(vals, 0, false) == [1, 2, 3, 4, 5, 6, 7, 8]
-      assert Leds.rotate(vals, 1, false) == [8, 1, 2, 3, 4, 5, 6, 7]
-      assert Leds.rotate(vals, 2) == [3, 4, 5, 6, 7, 8, 1, 2]
-    end
-  end
+  # describe "internal functions" do
+  #   test "rotate" do
+  #     vals = [1, 2, 3, 4, 5, 6, 7, 8]
+  #     assert Leds.rotate(vals, 0, true) == [1, 2, 3, 4, 5, 6, 7, 8]
+  #     assert Leds.rotate(vals, 1, true) == [2, 3, 4, 5, 6, 7, 8, 1]
+  #     assert Leds.rotate(vals, 0, false) == [1, 2, 3, 4, 5, 6, 7, 8]
+  #     assert Leds.rotate(vals, 1, false) == [8, 1, 2, 3, 4, 5, 6, 7]
+  #     assert Leds.rotate(vals, 2) == [3, 4, 5, 6, 7, 8, 1, 2]
+  #   end
+  # end
   describe "errors" do
     test "light on negative offset position" do
       assert_raise ArgumentError, ~r/the offset needs to be > 0/, fn ->

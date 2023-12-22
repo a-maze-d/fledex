@@ -28,7 +28,8 @@ defmodule Fledex do
   @config %{
     animation: Animator,
     static: Animator,
-    component: Animator # This is not the correct one yet
+    component: Animator, # This is not the correct one yet
+    effect: Animator # This is not yet correct. It shouldn't appear here at all, but it makes it work for now
   }
   @config_keys Map.keys @config
 
@@ -142,12 +143,36 @@ defmodule Fledex do
       # TODO: Add a component macro
   end
 
+  @doc """
+  Add an effect to an animation
+
+  This macro allows to add an effect to an animation (or even a component
+  (TODO: figure out whether an effect on a static component makes any sense,
+  it would mean that the static component suddenly would need to be animated)
+
+  You simply warp the animation inside a effect block. It's possible to have
+  severeal nested effects. In that case they will all be executed in sequence.
+
+  Example:
+  ```elixir
+  use Fledex
+  alias Fledex.Effect.Wanish
+  led_strip :john, :kino do
+    effect Wanish, trigger_name: :john do
+      animation :test do
+        _triggers ->
+          leds(1) |> light(:red) |> repeat(50)
+      end
+    end
+  end
+  ```
+  """
   defmacro effect(module, options \\ [], do: block) do
     quote do
       {name, config} = unquote(block)
-       {
+      {
         name,
-        %{config | effects: [{unquote(module), unquote(Macro.escape(options))} | config.effects]}
+        %{config | effects: [{unquote(module), unquote(options)} | config.effects]}
       }
     end
       # |> tap(& IO.puts Code.format_string! Macro.to_string &1)

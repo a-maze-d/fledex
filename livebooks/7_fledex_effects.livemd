@@ -1,0 +1,60 @@
+# 7. Fledex: effects
+
+```elixir
+Mix.install([
+  {:fledex, path: "/home/maze/Documents/code/fledex"}
+])
+
+:ok
+```
+
+## Introduction
+
+In this chapter we will look at some effects that we can apply to an animation. Effects are simply applied by wrapping the `animation` marco into an `effect` macro. But before we do so we firs need to load our framework (and we define some aliases that will come in handy a bit later).
+
+```elixir
+alias Fledex.Effect.Rotation
+alias Fledex.Effect.Wanish
+
+use Fledex
+```
+
+You might be wondering what an effect is. It's simply a module with a `@behaviour Fledex.Effect.Interface` implementing the simple `apply/4`. The function takes 4 parameters
+
+* a `list` of `colorint`s, e.g. `[0xff0000, 0x00ff00, 0x0000ff]`
+* a length of the list passed in as first argument. This is to avoid to walk through the list
+* a keyword list with `config`uration paramers. They are the ones you specified in the `effect` macro. As an effect implementer, you can decide what kind of parameters are permitted.
+* a `triggers` map containing the various triggers (like the strip counter, or some other triggers as we have seen in our weather example)
+
+There is already a standard set of effects available all under the `Fledex.Effect` (like the ones we aliased above), but you can create your own effects. by simply implementing the behaviour.
+
+In the following we'll take a closer look at two of the standard effects:
+
+* The Wanish effect
+* The Rotation effect
+
+The latter one we have already encountered under the hood, without realizing it. It provided the functionality of the `send_config_func` to rotate the pixels
+
+## The Wanish effect
+
+The wanish effect makes some leds vanish starting from one end and extending to infity. The effect can be controled through a couple of conig parameters:
+
+* `:trigger_name`: this is the name that will be used as the steering factor for the effect. If nothing is specified the animation will use the `led_strip`name as trigger name (in this case `:john` will be used.)
+* `:divisor`: the trigger might come with a too high frequency and you want to slow down the wanishing effect. The Divisor will slow it down with that factor. (default: 1, i.e. no slow down)
+* `:direction`: the direction specifies whether the wanishing should happen from the start (`:left`) or from the end (`:right`) of the led_strip
+* `:circulate`: indicates whether we want to warp around and redo the wanishing once the first round has finished. In that case the full led sequence will be visible and will wanish again. Note: if you use `:reappear` this will automatically be set.
+* `:reappear`: this will enable the `:circulate` and instead of all leds appearing at the same time, they will first slowly reappear (one by one) and only once they are all visible again will they disappear again. This setting comes with an extra `:reappear_key`, but in most cases you don't need to worry about it, because the default will be just fine.
+* `:switch_on_off_func`: There is also a possibility to control when you want the effect to be switched on or off, but this is outside the scope of this description.
+
+Here is an example on shuch an effect on a simple led sequence
+
+```elixir
+led_strip :john, :kino do
+  effect Wanish, trigger_name: :john, divisor: 2, direction: :left, reappear: true do
+    animation :test do
+      _triggers ->
+        leds(50) |> rainbow()
+    end
+  end
+end
+```

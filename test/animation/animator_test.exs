@@ -204,14 +204,14 @@ defmodule Fledex.Animation.AnimatorTest do
         def_func: fn (triggers) ->
           assert length(Map.keys(triggers)) == 2
           assert triggers.something == "abc"
-          assert triggers[strip_name] == 10
+          assert triggers[strip_name] == 11
           {Leds.leds(0), Map.put_new(triggers, :test1, 4)}
         end,
         effects: [],
         send_config_func: fn (triggers) ->
           assert length(Map.keys(triggers)) == 3
           assert triggers.something == "abc"
-          assert triggers[strip_name] == 10
+          assert triggers[strip_name] == 11
           assert triggers.test1 == 4
           {%{}, Map.put_new(triggers, :test2, 7)}
         end,
@@ -225,7 +225,7 @@ defmodule Fledex.Animation.AnimatorTest do
       {:noreply, state} = Animator.handle_info({:trigger, Map.put_new(%{}, strip_name, 11)}, state)
       assert length(Map.keys(state.triggers)) == 4
       assert state.triggers.something == "abc"
-      assert state.triggers[strip_name] == 10
+      assert state.triggers[strip_name] == 11
       assert state.triggers.test1 == 4
       assert state.triggers.test2 == 7
     end

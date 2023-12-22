@@ -17,6 +17,7 @@ defmodule Fledex.Leds do
   alias Fledex.Color.Functions
   alias Fledex.Color.Types
   alias Fledex.Color.Utils
+  alias Fledex.Effect.Rotation
   alias Fledex.LedStrip
 
   @enforce_keys [:count, :leds, :opts]
@@ -415,7 +416,7 @@ defmodule Fledex.Leds do
       Logger.warning("The namespace hasn't been defined. This should be done before calling this function")
       :ok = LedStrip.define_namespace(server_name, namespace)
     end
-    vals = rotate(to_list(leds), offset, rotate_left)
+    vals = Rotation.rotate(to_list(leds), offset, rotate_left)
     LedStrip.set_leds(server_name, namespace, vals)
   end
 
@@ -430,20 +431,20 @@ defmodule Fledex.Leds do
     end
   end
 
-  @doc """
-  Helper function mainy intended for internal use to rotate the sequence of values by an `offset`.
+  # @doc """
+  # Helper function mainy intended for internal use to rotate the sequence of values by an `offset`.
 
-  The rotation can happen with the offset to the left or to the right.
-  """
-  @spec rotate(list(Types.colorint), pos_integer, boolean) :: list(Types.colorint)
-  def rotate(vals, offset, rotate_left \\ true)
-  def rotate(vals, 0, _rotate_left), do: vals
-  def rotate(vals, offset, rotate_left) do
-    count = Enum.count(vals)
-    offset = rem(offset, count)
-    offset = if rotate_left, do: offset, else: count-offset
-    Enum.slide(vals, 0..rem(offset-1 + count, count), count)
-  end
+  # The rotation can happen with the offset to the left or to the right.
+  # """
+  # @spec rotate(list(Types.colorint), pos_integer, boolean) :: list(Types.colorint)
+  # def rotate(vals, offset, rotate_left \\ true)
+  # def rotate(vals, 0, _rotate_left), do: vals
+  # def rotate(vals, offset, rotate_left) do
+  #   count = Enum.count(vals)
+  #   offset = rem(offset, count)
+  #   offset = if rotate_left, do: offset, else: count-offset
+  #   Enum.slide(vals, 0..rem(offset-1 + count, count), count)
+  # end
 
   defimpl Kino.Render, for: Fledex.Leds do
     @moduledoc """

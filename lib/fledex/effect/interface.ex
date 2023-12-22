@@ -20,7 +20,8 @@ defmodule Fledex.Effect.Interface do
   The function can either return a list of LEDs (color integers) or a tuple with the first
   part being the LEDs and the second being a modified triggers map. This allows to retain
   some state between applying the filter in consecutive calls.
+  The `count` is the amount of LEDs in the list (to avoid that we have to traverse it unnecessarily)
   """
-  @callback apply(leds :: [Types.colorint], config :: keyword, triggers :: map)
+  @callback apply(leds :: [Types.colorint], count :: non_neg_integer, config :: keyword, triggers :: map)
       :: list(Types.colorint) | {list(Types.colorint), map}
 end
