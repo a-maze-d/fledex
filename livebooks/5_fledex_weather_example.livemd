@@ -2,7 +2,7 @@
 
 ```elixir
 Mix.install([
-  {:fledex, "~>0.2"},
+  {:fledex, "~>0.3"},
   {:jason, "~>1.2"}
 ])
 

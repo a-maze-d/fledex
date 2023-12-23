@@ -2,7 +2,7 @@
 
 ```elixir
 Mix.install([
-  {:fledex, path: "/home/maze/Documents/code/fledex"}
+  {:fledex, "~>0.3"}
 ])
 
 # we define a couple of aliases to not have to type that much

@@ -2,7 +2,7 @@
 
 ```elixir
 Mix.install([
-  {:circuits_spi, "~> 2.0-pre.0"}
+  {:circuits_spi, "~> 2.0"}
 ])
 ```
 

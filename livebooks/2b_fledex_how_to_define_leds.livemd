@@ -3,7 +3,7 @@
 ```elixir
 Mix.install(
   [
-    {:fledex, path: "/home/maze/Documents/code/fledex"}
+    {:fledex, "~>0.3"}
   ],
   # necessary to enable the nicer rendering
   consolidate_protocols: false
