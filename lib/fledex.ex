@@ -49,6 +49,7 @@ defmodule Fledex do
 
   Take a look at the various [livebook examples](readme-2.html) on how to use the Fledex macros
   """
+  @spec __using__(keyword) :: Macro.t
   defmacro __using__(opts) do
     quote bind_quoted: [opts: opts] do
       import Fledex
@@ -68,8 +69,13 @@ defmodule Fledex do
 
     Therefore we give it a name to know whether it changes
   """
+  @spec animation(atom, keyword, Macro.t) :: Macro.t
   defmacro animation(name, options \\ [], do: block) do
-    def_func_ast = {:fn, [], block}
+    def_func_ast = case block do
+      [{:->, _, _}] = block -> {:fn, [], block}
+      block -> {:fn, [], [{:->, [], [[{:_triggers, [], Elixir}], block]}]}
+    end
+    # def_func_ast = {:fn, [], block}
     send_config = options[:send_config]  || &Base.default_send_config_func/1
     # Logger.warning(inspect block)
     quote do
@@ -92,6 +98,7 @@ defmodule Fledex do
   Therefore, there will not be any repainting and the `def_func` will not receive any
   parameter. It will only be painted once at definition time.
   """
+  @spec static(atom, keyword, Macro.t) :: Macro.t
   defmacro static(name, options \\ [], do: block) do
     def_func_ast = {:fn, [], [{:->, [], [[{:_triggers, [], Elixir}], block]}]}
     send_config = options[:send_config]  || &Base.default_send_config_func/1
@@ -139,6 +146,7 @@ defmodule Fledex do
   end
   ```
   """
+  @spec component(atom, module, keyword, Macro.t) :: Macro.t
   defmacro component(_name, _type, _options \\ [], do: _block) do
       # TODO: Add a component macro
   end
@@ -167,6 +175,7 @@ defmodule Fledex do
   end
   ```
   """
+  @spec effect(module, keyword, Macro.t) :: Macro.t
   defmacro effect(module, options \\ [], do: block) do
     quote do
       {name, config} = unquote(block)
@@ -181,6 +190,7 @@ defmodule Fledex do
   @doc """
     This introduces a new led_strip.
    """
+   @spec led_strip(atom, atom | keyword, Macro.t) :: Macro.t
   defmacro led_strip(strip_name, strip_options \\ :kino, do: block) do
     # Logger.error(inspect block)
     {_ast, configs_ast} = Macro.prewalk(block, [], fn

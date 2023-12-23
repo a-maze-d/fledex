@@ -14,8 +14,8 @@ Even though this library is published, there are things I still want to do befor
     - [x] Fledex.Animation.LedAnimator
     - [x] Fledex.Animation.LedAnimationManager
     - [x] Fledex.LedStrip
-  - [ ] Add type specs (at least for the most important modules) (v0.3)
-    - [ ] Fledex <== This is maybe a tough one.
+  - [x] Add type specs (at least for the most important modules) (v0.3)
+    - [x] Fledex <== This is maybe a tough one.
     - [x] Fledex.Leds
     - [x] Fledex.Color.Names
     - [x] Fledex.Animation.BaseAnimator
@@ -50,8 +50,8 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Enable Telemetry? (v0.5)
   - [ ] Upgrade to a hex released version of circuits_sim as soon as available (v0.?)
 - [ ] Missing functionality
-  - [ ] set the effect trigger in the animator to the strip name if not set
-  - [ ] Improve on the option handling in the fledex macros. Just pass them straight on to the animators
+  - [x] set the effect trigger in the animator to the strip name if not set
+  - [x] Improve on the option handling in the fledex macros. Just pass them straight on to the animators
   - [ ] see the project plan that was planned out with my son, we are not quite there yet (v0.4?)
   - [ ] Connect everything into a supervision tree (to make it more robust) (v0.4)
   - [ ] Use protocols ?
@@ -60,7 +60,18 @@ Even though this library is published, there are things I still want to do befor
     - [ ] ??? animations & components?
   - [ ] Create a dsl (domain specific language) to (finally) easily program strips
     - [x] Extend the Fledex macros with an effect marco (v0.3)
-    - [ ] Extend the Fledex macros to allow easy configuration with a config macro (v0.3)
+    - [ ] Extend the Fledex macros to allow easy configuration with a config macro (v0.4)
+    - [ ] Allow several animations behind a single effect (v0.4), i.e.:
+    ```elixir
+    effect Rotation do
+      animation :first_animation do
+        # something
+      end
+      animation :second_animation do
+        # something else
+      end
+    end
+    ```
   - [ ] Clustering
     - [x] Create a driver that outputs through pubsub (on one node) (v0.3) and 
     - [ ] create an animation that consumes those (this allows to connect remote livebooks to a physical led strip. CAUTION: protect against loops!) (v0.4)

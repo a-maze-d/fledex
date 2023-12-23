@@ -81,6 +81,20 @@ defmodule Fledex.Test do
       assert configs.john.merry.def_func.(%{}) == leds(10)
       assert configs.john.merry.send_config_func.(%{}) == %{}
     end
+    test "simple animation macro (with led_strip) withoutout trigger" do
+      use Fledex
+      led_strip :john, :none do
+        animation :merry do
+         leds(10)
+        end
+      end
+      {:ok, configs} = Manager.get_info()
+
+      assert Map.keys(configs) == [:john]
+      assert Map.keys(configs.john) == [:merry]
+      assert configs.john.merry.def_func.(%{}) == leds(10)
+      assert configs.john.merry.send_config_func.(%{}) == %{}
+    end
 
     test "complex scenario" do
       use Fledex

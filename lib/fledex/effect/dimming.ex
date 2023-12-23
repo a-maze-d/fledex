@@ -8,8 +8,8 @@ defmodule Fledex.Effect.Dimming do
     trigger_name = config[:trigger_name] || :default
     divisor = config[:divisor] || 1
     step = triggers[trigger_name] || 0
-    step = rem(step, 255)
     step = trunc(step / divisor)
+    step = rem(step, 255)
 
     Enum.map(leds, fn led ->
       led

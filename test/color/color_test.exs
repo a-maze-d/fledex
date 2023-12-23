@@ -14,6 +14,8 @@ defmodule Fledex.Color.ColorTest do
   alias Fledex.Color.Names
   alias Fledex.Color.Utils
 
+  alias Fledex.Leds
+
   describe "color correction tests" do
     test "no_color_correction" do
       assert Correction.define_correction(
@@ -124,6 +126,17 @@ defmodule Fledex.Color.ColorTest do
       import Fledex.Color.Names, only: [is_color_name: 1]
       assert is_color_name(:vermilion2) == true
       assert is_color_name(:non_existing) == false
+    end
+    test "Leds addition" do
+      leds = Leds.leds(3) |> Names.red |> Names.green |> Names.blue
+      assert Leds.get_light(leds, 1) == 0xff0000
+      assert Leds.get_light(leds, 2) == 0x00ff00
+      assert Leds.get_light(leds, 3) == 0x0000ff
+
+      leds = Leds.leds(3) |> Names.blue(3) |> Names.green(2) |> Names.red(1)
+      assert Leds.get_light(leds, 1) == 0xff0000
+      assert Leds.get_light(leds, 2) == 0x00ff00
+      assert Leds.get_light(leds, 3) == 0x0000ff
     end
   end
   describe "test color corrections" do
