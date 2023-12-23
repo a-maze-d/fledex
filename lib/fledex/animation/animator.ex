@@ -53,6 +53,7 @@ defmodule Fledex.Animation.Animator do
   @type config_t :: %{
       optional(:type) => atom,
       optional(:def_func) => (map -> Leds.t),
+      optional(:effects) => [{module, keyword}],
       optional(:send_config_func) => (map -> map),
       optional(:counter) => integer,
       optional(:timer_ref) => reference | nil,
@@ -159,11 +160,19 @@ defmodule Fledex.Animation.Animator do
       type: config[:type] || state.type,
       triggers: Map.merge(state.triggers, config[:triggers] || state[:triggers]),
       def_func: Map.get(config, :def_func, state[:def_func] || &Base.default_def_func/1),
-      effects: config[:effects] || state.effects,
+      effects: update_effects(state.effects, config[:effects], state.strip_name),
       send_config_func: Map.get(config, :send_config_func, state[:send_config_func] || &Base.default_send_config_func/1),
       strip_name: state.strip_name, # not to be updated
       animation_name: state.animation_name # not to be updated
     }
+  end
+
+  @spec update_effects(current_effects :: [{module, keyword}], new_effects :: [{module, keyword}], strip_name :: atom) :: [{module, keyword}]
+  defp update_effects(current_effects, new_effects, strip_name) do
+    effects = new_effects || current_effects
+    Enum.map(effects, fn {module, configs} ->
+      {module, Keyword.put_new(configs, :trigger_name, strip_name)}
+    end)
   end
 
   @impl GenServer

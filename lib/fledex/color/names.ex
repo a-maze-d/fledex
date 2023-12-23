@@ -23,6 +23,7 @@ defmodule Fledex.Color.Names do
 
   alias Fledex.Color.LoadUtils
   alias Fledex.Color.Types
+  alias Fledex.Leds
 
   colors = LoadUtils.load_color_file(@external_resource)
 
@@ -108,5 +109,9 @@ defmodule Fledex.Color.Names do
     def unquote(name)(:hsl), do: unquote(Macro.escape(color)).hsl
     def unquote(name)(:descriptive_name), do: unquote(Macro.escape(color)).descriptive_name
     def unquote(name)(:source), do: unquote(Macro.escape(color)).source
+    @spec unquote(name)(Leds.t) :: Leds.t
+    def unquote(name)(leds), do: leds |> Leds.light(unquote(Macro.escape(color)).hex)
+    @spec unquote(name)(Leds.t, offset :: non_neg_integer) :: Leds.t
+    def unquote(name)(leds, offset), do: leds |> Leds.light(unquote(Macro.escape(color)).hex, offset)
   end
 end

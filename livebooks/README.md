@@ -57,3 +57,8 @@ Therefore we fetch the information at regular intervals, outside of our animatio
 In this example we will look at the Fledex DSL that removes a lot of the boilerplate and therefore makes the definition of an LED strip even easier. Under the hood it uses the same principles as the ones we have encountered in the examples 3-5.
 
 In this example we will reimplement the Clock, but this time with our DSL.
+
+# 7. Fledex: Effects
+In this chapter we take a look at the effect functionality. An animation can be "spiced" with an effect. This also exists as part of the Fledex DSL.
+
+We won't look at all possible effects, but at some examples. It is quite easy to create your own effect and we'll take a look on how to do that.

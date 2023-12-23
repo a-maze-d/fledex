@@ -5,6 +5,7 @@ Even though this library is published, there are things I still want to do befor
 - [ ] Documentation
   - [x] Finish the dsl livebook example (mostly done, but the send_config part is not done yet) (v0.3)
   - [x] Create another livebook (2b) that looks at the different aspects of the Leds module and how to work with it (v0.3)
+  - [x] Create another livebook (7) for effects
   - [x] Add proper API/module documentation (at least for the most important modules) (v0.3)
     - [x] Fledex
     - [x] Fledex.Leds
@@ -41,13 +42,15 @@ Even though this library is published, there are things I still want to do befor
   - [x] Rename the LedAnimationManager to take advantage of the namespace (v0.3)
   - [x] Rename the LedAnimator to just Animator (v0.3)
   - [x] Rename the specific drivers to not contain Driver in the name (since it's already in the namespace) (v0.3)
-  - [ ] Rename the `def-func` and `send_config_func` to make it more natural in the dsl? (v0.3)
+  - [x] Rename the `def-func` and `send_config_func` to make it more natural in the dsl? (v0.3) <-- The send_config_func has been deprecated in favor of an effects interface
+  - [ ] Improve the Fledex configuration. The fledex_config/0 function feels very wrong (rethink the animator split up. Also effects raise the questions whether static "animations" should really be so static, since the effect would have any real effect on them) (v0.3 or v0.4)
   - [ ] Improve the LedsDriver config (v0.4)
   - [ ] Fix flaky tests (see TODOs) (v0.4)
   - [ ] Perform an extra round of testing on hardware (v0.4)
   - [ ] Enable Telemetry? (v0.5)
   - [ ] Upgrade to a hex released version of circuits_sim as soon as available (v0.?)
 - [ ] Missing functionality
+  - [ ] set the effect trigger in the animator to the strip name if not set
   - [ ] Improve on the option handling in the fledex macros. Just pass them straight on to the animators
   - [ ] see the project plan that was planned out with my son, we are not quite there yet (v0.4?)
   - [ ] Connect everything into a supervision tree (to make it more robust) (v0.4)
@@ -56,6 +59,7 @@ Even though this library is published, there are things I still want to do befor
     - [x] Conversions `to_rgb`, `to_colorint` <-- decided against it to allow having simple structures (tuple) instead of (module)structs. Protocols don't seem to work with those.
     - [ ] ??? animations & components?
   - [ ] Create a dsl (domain specific language) to (finally) easily program strips
+    - [x] Extend the Fledex macros with an effect marco (v0.3)
     - [ ] Extend the Fledex macros to allow easy configuration with a config macro (v0.3)
   - [ ] Clustering
     - [x] Create a driver that outputs through pubsub (on one node) (v0.3) and 

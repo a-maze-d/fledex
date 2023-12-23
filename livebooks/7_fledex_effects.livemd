@@ -19,14 +19,7 @@ alias Fledex.Effect.Wanish
 use Fledex
 ```
 
-You might be wondering what an effect is. It's simply a module with a `@behaviour Fledex.Effect.Interface` implementing the simple `apply/4`. The function takes 4 parameters
-
-* a `list` of `colorint`s, e.g. `[0xff0000, 0x00ff00, 0x0000ff]`
-* a length of the list passed in as first argument. This is to avoid to walk through the list
-* a keyword list with `config`uration paramers. They are the ones you specified in the `effect` macro. As an effect implementer, you can decide what kind of parameters are permitted.
-* a `triggers` map containing the various triggers (like the strip counter, or some other triggers as we have seen in our weather example)
-
-There is already a standard set of effects available all under the `Fledex.Effect` (like the ones we aliased above), but you can create your own effects. by simply implementing the behaviour.
+There is already a standard set of effects available all under the `Fledex.Effect` (like the ones we aliased above), but you can create your own effects. by simply implementing the behaviour `Fledex.Effect.Interface`. We'll take a look on how to do this below.
 
 In the following we'll take a closer look at two of the standard effects:
 
@@ -39,22 +32,139 @@ The latter one we have already encountered under the hood, without realizing it.
 
 The wanish effect makes some leds vanish starting from one end and extending to infity. The effect can be controled through a couple of conig parameters:
 
-* `:trigger_name`: this is the name that will be used as the steering factor for the effect. If nothing is specified the animation will use the `led_strip`name as trigger name (in this case `:john` will be used.)
+* `:trigger_name`: this is the name that will be used as the steering factor for the effect. If nothing is specified the animation will use the `led_strip`name as trigger name (in this case `:john` will be used, so we don't need to specify it).
 * `:divisor`: the trigger might come with a too high frequency and you want to slow down the wanishing effect. The Divisor will slow it down with that factor. (default: 1, i.e. no slow down)
 * `:direction`: the direction specifies whether the wanishing should happen from the start (`:left`) or from the end (`:right`) of the led_strip
 * `:circulate`: indicates whether we want to warp around and redo the wanishing once the first round has finished. In that case the full led sequence will be visible and will wanish again. Note: if you use `:reappear` this will automatically be set.
 * `:reappear`: this will enable the `:circulate` and instead of all leds appearing at the same time, they will first slowly reappear (one by one) and only once they are all visible again will they disappear again. This setting comes with an extra `:reappear_key`, but in most cases you don't need to worry about it, because the default will be just fine.
 * `:switch_on_off_func`: There is also a possibility to control when you want the effect to be switched on or off, but this is outside the scope of this description.
 
-Here is an example on shuch an effect on a simple led sequence
+Here is an example on such an effect on a simple led sequence
 
 ```elixir
 led_strip :john, :kino do
-  effect Wanish, trigger_name: :john, divisor: 2, direction: :left, reappear: true do
+  effect Wanish, divisor: 2, direction: :right, reappear: true do
     animation :test do
       _triggers ->
-        leds(50) |> rainbow()
+        leds(50) |> rainbow
     end
   end
 end
+```
+
+## The Rotation effect
+
+As mentioned above, we have used the functionality of the rotation effect already. It is only a very simple version and it can't be combined with other effects. Therefore let's look at the rotation once more, this time as an effect.
+
+The available configuration parameters are:
+
+* `:trigger_name`: This is again the trigger that will drive the animation. If nothing is specified, the `Fledex.Animation.Animator` will set the `led_strip` name as the default. Therefore you rarely have to set it manually.
+* `:direction`: The rotation can be applied into two directions: `:left` (default) and `:right`
+* `:divisor`: As before this allows to slow down the animation, by not updating it on every trigger event.
+
+Let's see how this looks if we rely on the default values:
+
+```elixir
+led_strip :rotation, :kino do
+  effect Rotation do
+    animation :rainbow do
+      _triggers -> leds(50) |> rainbow
+    end
+  end
+end
+```
+
+## Combining effects
+
+It is possble to combine several effects. The order of the effects can be imporant, so make sure you apply them in the correct order.
+
+Let's try it out by combining our rotation and wanishing effect on a rainbow color spectrum.
+
+<!-- livebook:{"break_markdown":true} -->
+
+
+
+```elixir
+led_strip :rotation_and_wanish, :kino do
+  effect Rotation do
+    effect Wanish, divisor: 4, direction: :right, reappear: true do
+      animation :rainbow do
+        _triggers -> leds(50) |> rainbow
+      end
+    end
+  end
+end
+```
+
+## BYOE: Bring Your Own Effect
+
+It is maybe nice to use pre-exisiting effects, but it's much more exciting to create your own effect. In this example we are looking on how to do that.
+
+You might be wondering what an effect is. It's simply a module with a `@behaviour Fledex.Effect.Interface` implementing the simple `apply/4` function. The function takes 4 parameters
+
+* a `list` of `colorint`s, e.g. `[0xff0000, 0x00ff00, 0x0000ff]`
+* a length of the list passed in as first argument. This is to avoid to walk through the list to figure this out.
+* a keyword list with `config`uration parameters. They are the ones you specified in the `effect` macro. As an effect implementer, you can decide what kind of parameters are permitted. There is one parameter that will be populated by the `Fledex.Animation.Animator` if it's not specified, which is the `:trigger_name`. It is the trigger that drives your effect.
+* a `triggers` map containing the various triggers (like the strip counter, or some other triggers as we have seen in our weather example)
+
+Let's start to define our own module and the function. The simplest implementation is to simply return the leds array.
+
+```elixir
+defmodule LivebookEffect1 do
+  @behaviour Fledex.Effect.Interface
+
+  @impl true
+  @spec apply(
+          leds :: [Types.colorint()],
+          count :: non_neg_integer,
+          config :: keyword,
+          triggers :: map
+        ) ::
+          list(Types.colorint()) | {list(Types.colorint()), map}
+  def apply(leds, _count, _config, _triggers) do
+    leds
+  end
+end
+```
+
+This is of course not very exciting, since effect has no effect and is thereby useless. But it's a good starting point.
+
+From the `@spec` we can see that we have two alternative return values, either just the leds or a tuple with leds and a map. The map is the trigger map, that can be used to carry state between different execution rounds. In this example we won't make use of this though.
+
+Now let's create a new effect. What about going crazy and to randomize the leds?
+
+This is very easy to accomplish, we only need to call the `Enum.shuffle/1` function.
+
+```elixir
+defmodule LivebookEffect2 do
+  @behaviour Fledex.Effect.Interface
+
+  @impl true
+  @spec apply(
+          leds :: [Types.colorint()],
+          count :: non_neg_integer,
+          config :: keyword,
+          triggers :: map
+        ) ::
+          list(Types.colorint()) | {list(Types.colorint()), map}
+  def apply(leds, _count, _config, _triggers) do
+    Enum.shuffle(leds)
+  end
+end
+```
+
+That's it already, now we can already use our own effect as we have used an effect above. Let's see how crazy this looks.
+
+```elixir
+led_strip :merry, :kino do
+  effect LivebookEffect2 do
+    animation :xmas do
+      _triggers -> leds(50) |> rainbow
+    end
+  end
+end
+```
+
+```elixir
+
 ```

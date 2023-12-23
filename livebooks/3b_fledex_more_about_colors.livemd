@@ -51,6 +51,26 @@ You can also retrieve the information from a specific color, like `:almond` in t
   * `:source`: Information where the color comes from, see Wikipedia for more details
 * `info/1` and `info/2`: They are convenience functions when you only have an atom as the color name. They map to the functions, thus `info(:almond)` is equal to `almond()` and `info(:almond, what)` is equal to `almond(what)`.
 
+In addition each color can also be used directly in an `Leds` sequence since it provides to convenience functions:
+
+* `almond(leds)` which takes an `Leds` sequence and adds the `:almond` color to it (at the next position). This is equivalent to:
+  ```elixir
+  leds |> Leds.light(almond(:hex))
+  ```
+* `almond(leds, offset)` which takes an `Leds` sequence and an offset to specify where the led should be positioned. This is equivalent to:
+  ```elixir
+  leds |> Leds.light(almond(:hex), offset)
+  ```
+
+This allows for a very natural way to define an led sequence. especially if we import the `Fledex.Leds` and `Fledex.Color.Names` modules.
+
+```elixir
+import Fledex.Leds
+import Fledex.Color.Names
+
+leds(5) |> almond |> red |> green |> blue(5)
+```
+
 ## Color Correction
 
 More info to follow

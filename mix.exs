@@ -105,7 +105,8 @@ defmodule Fledex.MixProject do
         "livebooks/3b_fledex_more_about_colors.livemd",
         "livebooks/4_fledex_clock_example.livemd",
         "livebooks/5_fledex_weather_example.livemd",
-        "livebooks/6_fledex_dsl.livemd"
+        "livebooks/6_fledex_dsl.livemd",
+        "livebooks/7_fledex_effects.livemd"
       ],
       groups_for_extras: [
         "LiveBooks": ~r/livebooks/
