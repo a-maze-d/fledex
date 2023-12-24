@@ -51,3 +51,17 @@ You can find some [livebooks](livebooks/README.md) files that show you how to us
 
 ## Known Limitations
 If you want to run this library in nerves-livebook, you currently have to compile your own livebook with the library included in your `mix.exs` file, since you can't add any libraries that are not already bundled.
+
+## Contributing
+Contributions of any kind are very much welcome
+
+* raising issues, 
+* raising PR (see also [this](CLA.md) doc), 
+* reporting security vulnerabilities (see also [this](SECURITY.md) doc), 
+* suggesting improvements to documentation incl. reporting typos, 
+* raising feature requests,
+* ... 
+
+Before doing so please make sure to also read through the [CONTRIBUTING](CONTRIBUTING.md) document and ensure to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+If you need any assistance, feel free to send an email to fledex at reik.org

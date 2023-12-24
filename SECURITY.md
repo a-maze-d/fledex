@@ -9,4 +9,4 @@ Currently only the latest version is supported
 ## Reporting a Vulnerability
 
 If you think you found a vulnerability and want to report it, then send an
-email to fledex@reik.org
+email to fledex at reik.org
