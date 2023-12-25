@@ -137,7 +137,7 @@ defmodule Fledex.Animation.Animator do
   @spec apply_effects(Leds.t, [{module, map}], map) :: {Leds.t, map}
   def apply_effects(leds, effects, triggers) do
     count = leds.count
-    {led_list, triggers} = Enum.reduce(effects, {Leds.to_list(leds), triggers}, fn {effect, config}, {leds, triggers} ->
+    {led_list, triggers} = Enum.reduce(Enum.reverse(effects), {Leds.to_list(leds), triggers}, fn {effect, config}, {leds, triggers} ->
       effect.apply(leds, count, config, triggers) |> get_with_triggers(triggers)
     end)
     {Leds.leds(leds.count, led_list, %{}), triggers}
@@ -167,7 +167,7 @@ defmodule Fledex.Animation.Animator do
     }
   end
 
-  @spec update_effects(current_effects :: [{module, keyword}], new_effects :: [{module, keyword}], strip_name :: atom) :: [{module, keyword}]
+  @spec update_effects([{module, keyword}], [{module, keyword}], atom) :: [{module, keyword}]
   defp update_effects(current_effects, new_effects, strip_name) do
     effects = new_effects || current_effects
     Enum.map(effects, fn {module, configs} ->

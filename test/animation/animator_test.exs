@@ -271,7 +271,7 @@ defmodule Fledex.Animation.AnimatorTest do
 
       {returned_leds, returned_triggers} = Animator.apply_effects(leds, effects, triggers)
       assert returned_triggers == triggers
-      assert Leds.to_list(returned_leds) == [0x000000, 0x0000ff, 0xff0000]
+      assert Leds.to_list(returned_leds) == [0x00ff00, 0x0000ff, 0x000000]
     end
   end
 end
