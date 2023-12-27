@@ -177,7 +177,6 @@ defmodule Fledex.Animation.Animator do
     %{
       type: config[:type] || state.type,
       triggers: Map.merge(state.triggers, config[:triggers] || state[:triggers]),
-      # TODO: remove the state[:def_func] it shouldn't be necessary
       def_func: Map.get(config, :def_func, &Base.default_def_func/1),
       options: update_options(config[:options], config[:send_config_func]),
       effects: update_effects(state.effects, config[:effects], state.strip_name),

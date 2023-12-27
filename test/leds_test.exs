@@ -330,7 +330,7 @@ defmodule Fledex.LedsTest do
       assert Leds.get_light(leds, 2) == 0xff0000
       assert Leds.get_light(leds, 3) == 0xff0000
     assert_raise ArgumentError, fn ->
-        Leds.leds(3) |> Leds.light(:red, 1, 1)
+        Leds.leds(3) |> Leds.light(:red, 1, 0)
       end
       assert_raise ArgumentError, fn ->
         Leds.leds(3) |> Leds.light(:red, -1, 2)

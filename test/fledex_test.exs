@@ -148,8 +148,8 @@ defmodule Fledex.Test do
       assert info.type == :static
     end
   end
-  describe "with effects" do
-    test "simple effect" do
+  describe "effects" do
+    test "simple" do
       use Fledex
       with_effect = effect Fledex.Test do
         {
@@ -162,7 +162,7 @@ defmodule Fledex.Test do
         %{effects: [{Fledex.Test, []}]}
       }
     end
-    test "effect with options" do
+    test "ith options" do
       use Fledex
       with_effect = effect Fledex.Test, option: :something do
         {
@@ -175,37 +175,60 @@ defmodule Fledex.Test do
         %{effects: [{Fledex.Test, [option: :something]}]}
       }
     end
-   test "effect with several options" do
-     use Fledex
-     with_effect = effect Fledex.Test, option1: :something, option2: :something_else do
-       {
+    test "with several options" do
+      use Fledex
+      with_effect = effect Fledex.Test, option1: :something, option2: :something_else do
+        {
+          :name,
+          %{effects: []}
+        }
+      end
+      assert with_effect == {
         :name,
-        %{effects: []}
-       }
-     end
-     assert with_effect == {
-      :name,
-      %{effects: [{Fledex.Test, [option1: :something, option2: :something_else]}]}
-     }
-   end
-   test "several nested effects" do
-    use Fledex
-    with_effects =
-      effect Fledex.Test do
-        effect Fledex.Test2 do
-          {
-            :name,
-            %{effects: []}
+        %{effects: [{Fledex.Test, [option1: :something, option2: :something_else]}]}
+      }
+    end
+    test "several nested" do
+      use Fledex
+      with_effects =
+        effect Fledex.Test do
+          effect Fledex.Test2 do
+            {
+              :name,
+              %{effects: []}
+            }
+          end
+        end
+      assert with_effects == {
+        :name,
+        %{effects: [
+          {Fledex.Test, []},
+          {Fledex.Test2, []}
+        ]}
+      }
+    end
+  end
+  describe "component" do
+    test "simple" do
+      defmodule Test do
+        @behaviour Fledex.Component.Interface
+
+        @impl true
+        def configure(options) do
+          %{
+            type: :animation,
+            def_func: fn _triggers, _options -> Leds.led(30) end,
+            options: options,
+            effects: []
           }
         end
       end
-    assert with_effects == {
-      :name,
-      %{effects: [
-        {Fledex.Test, []},
-        {Fledex.Test2, []}
-      ]}
-    }
-   end
+      use Fledex
+      {name, config} = component :name, Test, option1: 123, option2: "abc", option3: :atom1, option4: %{test1: "123"}
+
+      assert name == :name
+      assert config.options == [option1: 123, option2: "abc", option3: :atom1, option4: %{test1: "123"}]
+    end
+
   end
 end

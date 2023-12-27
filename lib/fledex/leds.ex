@@ -226,7 +226,7 @@ defmodule Fledex.Leds do
       meta: meta
     },
     amount
-  ) when amount > 1 do
+  ) when amount >= 1 do
     index = meta[:index]  || 1
     new_index = (amount - 1) * count + index
     new_count = count * amount
@@ -270,7 +270,7 @@ defmodule Fledex.Leds do
   In adition the same note as for `light/2` applies.
   """
   @spec light(t, Types.color | t, pos_integer, pos_integer) :: t
-  def light(%__MODULE__{} = leds, led, offset, repeat) when offset > 0 and repeat > 1 do
+  def light(%__MODULE__{} = leds, led, offset, repeat) when offset > 0 and repeat >= 1 do
     # convert led to a LEDs struct
     led = case led do
       led when is_integer(led) -> __MODULE__.leds(1) |> __MODULE__.light(led)
@@ -283,7 +283,7 @@ defmodule Fledex.Leds do
     __MODULE__.light(leds, led, offset)
   end
   def light(_leds, _led, offset, repeat) do
-   raise ArgumentError, message: "the offset needs to be > 0 (found: #{offset}) and repeat > 1 (found: #{repeat})"
+   raise ArgumentError, message: "the offset needs to be > 0 (found: #{offset}) and repeat >= 1 (found: #{repeat})"
   end
 
   @spec do_update(t, Types.color | t) :: t

@@ -69,6 +69,29 @@ defmodule Fledex.Animation.AnimatorTest do
       assert state.strip_name == :test_strip
       assert state.animation_name == :test_animation
     end
+    test "update leds (with arity 2)", %{strip_name: strip_name} do
+      animation_name = :arity
+      state = %{
+        strip_name: strip_name,
+        animation_name: animation_name,
+        def_func: fn triggers, options ->
+          assert Keyword.has_key?(options, :coffee)
+          assert Keyword.fetch!(options, :coffee) == :filter
+          assert Map.has_key?(triggers, strip_name)
+          assert Map.fetch!(triggers, strip_name) == 215
+          Leds.leds(10)
+        end,
+        options: [coffee: :filter],
+        effects: [],
+        triggers: %{strip_name => 214}
+      }
+      triggers = %{
+        strip_name=> 215
+      }
+      LedStrip.define_namespace(strip_name, animation_name)
+      {:noreply, _new_state} = Animator.handle_info({:trigger, triggers}, state)
+
+    end
   end
   describe "test triggers" do
     test "merging triggers" do

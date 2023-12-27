@@ -1,0 +1,49 @@
+# 8. Fledex: Component
+
+```elixir
+Mix.install([
+  {:fledex, path: "/home/maze/Documents/code/fledex"}
+])
+```
+
+## The Weather (with component)
+
+```elixir
+use Fledex
+```
+
+```elixir
+alias Fledex.Component.Thermometer
+
+led_strip :john, :kino do
+  static :help do
+    # we allow temperatures down to -20C and up to +40C
+    negative_scale =
+      leds(5)
+      |> light(davy_s_grey())
+      |> repeat(4)
+
+    positive_scale =
+      leds(5)
+      |> light(davy_s_grey(), 5)
+      |> repeat(8)
+
+    leds(61)
+    |> light(negative_scale)
+    |> light(davy_s_grey())
+    |> light(positive_scale)
+  end
+
+  component(:thermo, Fledex.Component.Thermometer,
+    range: -20..40,
+    trigger: :temperature,
+    negative: :blue,
+    null: :may_green,
+    positive: :red
+  )
+end
+```
+
+```elixir
+Fledex.Utils.PubSub.broadcast(:fledex, "trigger", {:trigger, %{temperature: 17.2}})
+```

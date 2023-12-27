@@ -99,15 +99,12 @@ defmodule Fledex do
       [{:->, _, _}] = block -> {:fn, [], block}
       block -> {:fn, [], [{:->, [], [[{:_triggers, [], Elixir}], block]}]}
     end
-    # send_config = options[:send_config]  || &Base.default_send_config_func/1
-    # Logger.warning(inspect block)
     quote do
       {
        unquote(name),
         %{
           type: :animation,
           def_func: unquote(def_func_ast),
-          # send_config_func: unquote(send_config),
           options: unquote(options),
           effects: []
         }
@@ -125,14 +122,12 @@ defmodule Fledex do
   @spec static(atom, keyword | nil, Macro.t) :: Macro.t
   defmacro static(name, options \\ nil, do: block) do
     def_func_ast = {:fn, [], [{:->, [], [[{:_triggers, [], Elixir}], block]}]}
-    # send_config = options[:send_config]  || &Base.default_send_config_func/1
     quote do
       {
         unquote(name),
         %{
           type: :static,
           def_func: unquote(def_func_ast),
-          # send_config_func: unquote(send_config),
           options: unquote(options),
           effects: []
         }
@@ -140,9 +135,8 @@ defmodule Fledex do
     end
       # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
-  @doc """
-  NOT YET IMPLEMENTED (thus, those are just some thoughts)
 
+  @doc """
   A component is a pre-defined animation that reacts to some input.
   We might have a thermometer component that defines the display of
   a thermometer:
@@ -151,57 +145,39 @@ defmodule Fledex do
   * display is a range (positive, 0, negative)
   * ...
 
-  The `do: block` should retun the expected parameters for the component.
-  For our thermometer component the parameters might be:
+  A component does not have a `do ... end` block, since it defines it's
+  own animation, and it's only controlled through some parameters that
+  can be passed as options like:
 
   * the value,
   * the display colors,
   * the range of our scale
 
-  Thus, it might look something like the following:
+  Thus, our component would look like the following:
   ```elixir
-  do
-    %Thermometer{
-      value: 10,
+    alias Fledex.Component.Thermometer
+    component :thermo, Thermometer,
+      range: -20..40,
+      trigger: :temperature,
       negative: :blue,
-      positive: :red,
-      range: -10..30,
-      steps: 1,
-    }
-  end
+      null: :may_green,
+      positive: :red
   ```
-  Why not simply like this?
-  ```elixir
-  component Thermometer,
-    value: 10
-    negative: blue,
-    positive: red,
-    range: -10..30,
-    steps: 1
+  It is up to each component to define their own set of mandatory and optional
+  parameters.
   """
-  # @spec component(atom, module, keyword, Macro.t) :: Macro.t
+  @spec component(atom, module, keyword) :: Macro.t
   defmacro component(name, module, opts) do
-    # TODO: Add a component macro
-    # opts =  Macro.prewalk(opts, &Macro.expand(&1, __CALLER__)) # &expand_alias(&1, __CALLER__))
-    # IO.puts(inspect opts)
-
-    # {opts, _binding}  = Code.eval_quoted(opts)
-
     config = quote do
       unquote(module).configure(unquote(opts))
     end
-    # quote do
-    #   {
-    #     unquote(name),
-    #     unquote(config)
-    #   }
-    # end
     quote do
       {
         unquote(name),
         unquote(config)
       }
     end
+      # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
 
   @doc """
