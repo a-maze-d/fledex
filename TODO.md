@@ -12,7 +12,7 @@ Even though this library is published, there are things I still want to do befor
 - [ ] Testing
   - [ ] Add more error handling scenarios (v0.4)
 - [ ] Cleanup
-  - [ ] add Copyright comment into every file (make reuse green)
+  - [ ] add Copyright comment into every file (make reuse green) (v0.4)
   - [ ] Improve the Fledex configuration. The fledex_config/0 function feels very wrong (rethink the animator split up. Also effects raise the questions whether static "animations" should really be so static, since the effect would have any real effect on them) (v0.4)
   - [ ] Improve the LedsDriver config (v0.4)
   - [ ] Fix flaky tests (see TODOs) (v0.4)

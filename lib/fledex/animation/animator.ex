@@ -53,6 +53,7 @@ defmodule Fledex.Animation.Animator do
   @type config_t :: %{
       optional(:type) => atom,
       optional(:def_func) => (map -> Leds.t),
+      optional(:options) => keyword | nil,
       optional(:effects) => [{module, keyword}],
       optional(:send_config_func) => (map -> map),
       optional(:counter) => integer,
@@ -65,8 +66,8 @@ defmodule Fledex.Animation.Animator do
     :triggers => map,
     :type => atom,
     :def_func => ((integer) -> Leds.t()),
+    :options => keyword | nil,
     :effects => [{module, keyword}],
-    :send_config_func => ((integer) -> map()),
     :strip_name => atom,
     :animation_name => atom
   }
@@ -78,8 +79,8 @@ defmodule Fledex.Animation.Animator do
       triggers: %{},
       type: :animation,
       def_func: &Base.default_def_func/1,
+      options: [send_config: &Base.default_send_config_func/1],
       effects: [],
-      send_config_func: &Base.default_send_config_func/1,
       strip_name: strip_name,
       animation_name: animation_name
     }
@@ -120,11 +121,23 @@ defmodule Fledex.Animation.Animator do
     strip_name: strip_name,
     animation_name: animation_name,
     def_func: def_func,
+    options: options,
     effects: effects,
-    send_config_func: send_config_func,
+    # send_config_func: send_config_func,
     triggers: triggers} = state) do
+      # IO.puts("Update_Leds1: Key: #{Keyword.has_key?(options, :send_config_func)}")
+      send_config_func = options[:send_config] || &Base.default_send_config_func/1
+      # IO.puts("Options: #{inspect options}")
+      # this is for compatibility reasons. if only a send_config_func is defined
+      # in the options list, then no options are defined. In that case we need to define
+      # the options as being nil to call the def_func/1 instead of the def_func/2 function
+      options = if options != nil and length(options) == 1 and Keyword.has_key?(options, :send_config) do
+        nil
+      else
+        options
+      end
       # we can get two different responses, with or without triggers, we make sure our result contains the triggers
-      {leds, triggers} = def_func.(triggers) |> get_with_triggers(triggers)
+      {leds, triggers} = call_def_func(def_func, triggers, options) |> get_with_triggers(triggers)
       {leds, triggers} = apply_effects(leds, effects, triggers)
       # independent on the configs say we want to ensure we use the correct namespace (animation_name)
       # and server_name (strip_name). Therefore we inject it
@@ -133,6 +146,11 @@ defmodule Fledex.Animation.Animator do
       Leds.send(leds, config)
       %{state | triggers: triggers}
   end
+
+  @spec call_def_func(fun, %{atom: any}, keyword) :: Leds.t | {Leds.t, %{atom: any}}
+  defp call_def_func(def_func, triggers, options)
+  defp call_def_func(def_func, triggers, nil), do: def_func.(triggers)
+  defp call_def_func(def_func, triggers, options), do: def_func.(triggers, options)
 
   @spec apply_effects(Leds.t, [{module, map}], map) :: {Leds.t, map}
   def apply_effects(leds, effects, triggers) do
@@ -159,12 +177,19 @@ defmodule Fledex.Animation.Animator do
     %{
       type: config[:type] || state.type,
       triggers: Map.merge(state.triggers, config[:triggers] || state[:triggers]),
-      def_func: Map.get(config, :def_func, state[:def_func] || &Base.default_def_func/1),
+      # TODO: remove the state[:def_func] it shouldn't be necessary
+      def_func: Map.get(config, :def_func, &Base.default_def_func/1),
+      options: update_options(config[:options], config[:send_config_func]),
       effects: update_effects(state.effects, config[:effects], state.strip_name),
-      send_config_func: Map.get(config, :send_config_func, state[:send_config_func] || &Base.default_send_config_func/1),
       strip_name: state.strip_name, # not to be updated
       animation_name: state.animation_name # not to be updated
     }
+  end
+
+  @spec update_options(keyword | nil, fun | nil) :: keyword
+  def update_options(options, nil), do: options
+  def update_options(options, send_config_func) do
+    Keyword.put(options || [], :send_config, send_config_func)
   end
 
   @spec update_effects([{module, keyword}], [{module, keyword}], atom) :: [{module, keyword}]

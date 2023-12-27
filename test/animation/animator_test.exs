@@ -45,11 +45,11 @@ defmodule Fledex.Animation.AnimatorTest do
       init_args = %{
         def_func: &default_def_func/1,
         effects: [],
-        send_config_func: &default_send_config_func/1,
         strip_name: :test_strip,
         animation_name: :test_animation,
         triggers: %{},
-        type: :animation
+        type: :animation,
+        options: [send_config_func: &default_send_config_func/1]
       }
 
       {:ok, state, {:continue, :paint_once}} = Animator.init({init_args, :test_strip, :test_animation})
@@ -59,15 +59,13 @@ defmodule Fledex.Animation.AnimatorTest do
       init_args = %{}
       {:ok, state, {:continue, :paint_once}} = Animator.init({init_args, :test_strip, :test_animation})
       assert Leds.leds() == state.def_func.(%{test_strip: 10})
-      assert %{} == state.send_config_func.(%{test_strip: 10})
-
+      # assert %{} == state.send_config_func.(%{test_strip: 10})
     end
     test "config applied correctly (none_set)" do
       init_args = %{}
 
       {:ok, state, {:continue, :paint_once}} = Animator.init({init_args, :test_strip, :test_animation})
       assert state.def_func != nil
-      assert state.send_config_func != nil
       assert state.strip_name == :test_strip
       assert state.animation_name == :test_animation
     end
@@ -94,12 +92,12 @@ defmodule Fledex.Animation.AnimatorTest do
       assert map_size(init_args.triggers) == 0
       {:ok, state, {:continue, :paint_once}} = Animator.init({init_args, :test_strip, :test_animation})
       assert map_size(init_args.triggers) == 0
+      assert Keyword.has_key?(state.options, :send_config)
 
       new_config = %{triggers: %{abc: 10}}
       {:noreply, state} = Animator.handle_cast({:config, new_config}, state)
 
-      assert state.def_func == init_args.def_func
-      assert state.send_config_func == init_args.send_config_func
+      assert state.def_func != init_args.def_func
       assert state.strip_name == init_args.strip_name
       assert state.animation_name == init_args.animation_name
       assert state.triggers != init_args.triggers
@@ -179,7 +177,7 @@ defmodule Fledex.Animation.AnimatorTest do
     def start_server(strip_name) do
       init_args = %{
         def_func: &logging_def_func/1,
-        send_config_func: &logging_send_config_func/1,
+        options: [send_config: &logging_send_config_func/1]
       }
 
       {:ok, pid} = Animator.start_link(init_args, strip_name, :test_animator)
@@ -207,14 +205,16 @@ defmodule Fledex.Animation.AnimatorTest do
           assert triggers[strip_name] == 11
           {Leds.leds(0), Map.put_new(triggers, :test1, 4)}
         end,
+        options: [
+          send_config: fn (triggers) ->
+            assert length(Map.keys(triggers)) == 3
+            assert triggers.something == "abc"
+            assert triggers[strip_name] == 11
+            assert triggers.test1 == 4
+            {%{}, Map.put_new(triggers, :test2, 7)}
+          end
+        ],
         effects: [],
-        send_config_func: fn (triggers) ->
-          assert length(Map.keys(triggers)) == 3
-          assert triggers.something == "abc"
-          assert triggers[strip_name] == 11
-          assert triggers.test1 == 4
-          {%{}, Map.put_new(triggers, :test2, 7)}
-        end,
         strip_name: :test_strip,
         animation_name: :test_animation,
         triggers: %{

@@ -20,7 +20,6 @@ defmodule Fledex do
   """
 
   alias Fledex.Animation.Animator
-  alias Fledex.Animation.Base
   alias Fledex.Animation.Manager
 
   # configuration for the different macros/functions that can be used to configure our strip
@@ -67,16 +66,40 @@ defmodule Fledex do
     This introduces a new `animation` (animation) that will be played over
     and over again until it is changed.
 
-    Therefore we give it a name to know whether it changes
+    Therefore we give it a name to know whether it changes. The `do ... end` block
+    needs to define a function. This function receives a trigger as argument, but
+    you have two possbilities to implement it.
+
+    * Either you pattern match on the triggers, e.g. something like the following:
+    ```elixir
+    led_strip :strip, :kino do
+      animation :name do
+        %{strip: counter} ->
+          do_something_with_the_counter(counter)
+        triggers ->
+          # During init it can happen that the strip trigger is not available yet
+          do_something_during init_phase(triggers)
+      end
+    end
+    ```
+    * Or, if you don't require the trigger, you can specify it without a trigger, e.g.
+    ```elixir
+    led_strip :strip, :kino do
+      animation :name do
+        do_something_without_a_trigger()
+      end
+    end
+    ```
   """
-  @spec animation(atom, keyword, Macro.t) :: Macro.t
-  defmacro animation(name, options \\ [], do: block) do
+  @spec animation(atom, keyword | nil, Macro.t) :: Macro.t
+  defmacro animation(name, options \\ nil, do: block) do
+    # decide on whether the user pattern matched or didn't specify an
+    # argument at all
     def_func_ast = case block do
       [{:->, _, _}] = block -> {:fn, [], block}
       block -> {:fn, [], [{:->, [], [[{:_triggers, [], Elixir}], block]}]}
     end
-    # def_func_ast = {:fn, [], block}
-    send_config = options[:send_config]  || &Base.default_send_config_func/1
+    # send_config = options[:send_config]  || &Base.default_send_config_func/1
     # Logger.warning(inspect block)
     quote do
       {
@@ -84,7 +107,8 @@ defmodule Fledex do
         %{
           type: :animation,
           def_func: unquote(def_func_ast),
-          send_config_func: unquote(send_config),
+          # send_config_func: unquote(send_config),
+          options: unquote(options),
           effects: []
         }
       }
@@ -98,17 +122,18 @@ defmodule Fledex do
   Therefore, there will not be any repainting and the `def_func` will not receive any
   parameter. It will only be painted once at definition time.
   """
-  @spec static(atom, keyword, Macro.t) :: Macro.t
-  defmacro static(name, options \\ [], do: block) do
+  @spec static(atom, keyword | nil, Macro.t) :: Macro.t
+  defmacro static(name, options \\ nil, do: block) do
     def_func_ast = {:fn, [], [{:->, [], [[{:_triggers, [], Elixir}], block]}]}
-    send_config = options[:send_config]  || &Base.default_send_config_func/1
+    # send_config = options[:send_config]  || &Base.default_send_config_func/1
     quote do
       {
         unquote(name),
         %{
           type: :static,
           def_func: unquote(def_func_ast),
-          send_config_func: unquote(send_config),
+          # send_config_func: unquote(send_config),
+          options: unquote(options),
           effects: []
         }
       }
@@ -145,10 +170,38 @@ defmodule Fledex do
     }
   end
   ```
+  Why not simply like this?
+  ```elixir
+  component Thermometer,
+    value: 10
+    negative: blue,
+    positive: red,
+    range: -10..30,
+    steps: 1
   """
-  @spec component(atom, module, keyword, Macro.t) :: Macro.t
-  defmacro component(_name, _type, _options \\ [], do: _block) do
-      # TODO: Add a component macro
+  # @spec component(atom, module, keyword, Macro.t) :: Macro.t
+  defmacro component(name, module, opts) do
+    # TODO: Add a component macro
+    # opts =  Macro.prewalk(opts, &Macro.expand(&1, __CALLER__)) # &expand_alias(&1, __CALLER__))
+    # IO.puts(inspect opts)
+
+    # {opts, _binding}  = Code.eval_quoted(opts)
+
+    config = quote do
+      unquote(module).configure(unquote(opts))
+    end
+    # quote do
+    #   {
+    #     unquote(name),
+    #     unquote(config)
+    #   }
+    # end
+    quote do
+      {
+        unquote(name),
+        unquote(config)
+      }
+    end
   end
 
   @doc """
@@ -189,8 +242,8 @@ defmodule Fledex do
 
   @doc """
     This introduces a new led_strip.
-   """
-   @spec led_strip(atom, atom | keyword, Macro.t) :: Macro.t
+  """
+  @spec led_strip(atom, atom | keyword, Macro.t) :: Macro.t
   defmacro led_strip(strip_name, strip_options \\ :kino, do: block) do
     # Logger.error(inspect block)
     {_ast, configs_ast} = Macro.prewalk(block, [], fn

@@ -62,9 +62,8 @@ defmodule Fledex.Test do
       config = animation :merry do
         _triggers -> leds(10)
       end
-      assert {:merry, %{def_func: def_func, send_config_func: send_config_func}} = config
+      assert {:merry, %{def_func: def_func}} = config
       assert def_func.(%{}) == leds(10)
-      assert send_config_func.(%{}) == %{}
     end
 
     test "simple animation macro (with led_strip)" do
@@ -79,7 +78,7 @@ defmodule Fledex.Test do
       assert Map.keys(configs) == [:john]
       assert Map.keys(configs.john) == [:merry]
       assert configs.john.merry.def_func.(%{}) == leds(10)
-      assert configs.john.merry.send_config_func.(%{}) == %{}
+      # assert configs.john.merry.send_config_func.(%{}) == %{}
     end
     test "simple animation macro (with led_strip) withoutout trigger" do
       use Fledex
@@ -93,7 +92,7 @@ defmodule Fledex.Test do
       assert Map.keys(configs) == [:john]
       assert Map.keys(configs.john) == [:merry]
       assert configs.john.merry.def_func.(%{}) == leds(10)
-      assert configs.john.merry.send_config_func.(%{}) == %{}
+      # assert configs.john.merry.send_config_func.(%{}) == %{}
     end
 
     test "complex scenario" do
@@ -121,13 +120,9 @@ defmodule Fledex.Test do
       assert Map.keys(configs.john) == [:merry, :kate]
       assert configs.john.merry.def_func.(%{}) == leds(10)
       assert configs.john.kate.def_func.(%{}) == leds(11)
-      assert configs.john.merry.send_config_func.(%{}) == %{}
-      assert configs.john.kate.send_config_func.(%{}) == %{}
       assert Map.keys(configs.doe) == [:caine, :smith]
       assert configs.doe.caine.def_func.(%{}) == leds(1)
       assert configs.doe.smith.def_func.(%{}) == leds(2)
-      assert configs.doe.caine.send_config_func.(%{}) == %{}
-      assert configs.doe.smith.send_config_func.(%{}) == %{}
    end
   end
   # static animations are internally animations, but they don't
