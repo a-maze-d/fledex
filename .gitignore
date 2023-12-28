@@ -1,3 +1,7 @@
+# Copyright 2023, Matthias Reik <fledex@reik.org>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # The directory Mix will write compiled artifacts to.
 /_build/
 
@@ -28,4 +32,4 @@ fledex-*.tar
 # some private livebooks not to be shared externally
 /livebooks_private/
 
-docs/.$architecture.drawio.bkp
+/docs/.$architecture.drawio.bkp
