@@ -1,9 +1,3 @@
-<!--
-Copyright 2023, Matthias Reik <fledex@reik.org>
-
-SPDX-License-Identifier: Apache-2.0
--->
-
 ---
 name: Feature request
 about: Suggest an idea for this project
@@ -12,6 +6,11 @@ labels: ''
 assignees: ''
 
 ---
+<!--
+Copyright 2023, Matthias Reik <fledex@reik.org>
+
+SPDX-License-Identifier: Apache-2.0
+-->
 
 **Is your feature request related to a problem? Please describe.**
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]

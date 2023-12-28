@@ -18,7 +18,7 @@ Even though this library is published, there are things I still want to do befor
 - [ ] Testing
   - [ ] Add more error handling scenarios (v0.4)
 - [ ] Cleanup
-  - [ ] add Copyright comment into every file (make reuse green) (v0.4)
+  - [x] add Copyright comment into every file (make reuse green) (v0.4)
   - [ ] Improve the Fledex configuration. The fledex_config/0 function feels very wrong (rethink the animator split up. Also effects raise the questions whether static "animations" should really be so static, since the effect would have any real effect on them) (v0.4)
   - [ ] Improve the LedsDriver config (v0.4)
   - [ ] Fix flaky tests (see TODOs) (v0.4)
@@ -29,8 +29,8 @@ Even though this library is published, there are things I still want to do befor
   - [ ] see the project plan that was planned out with my son, we are not quite there yet (v0.4?)
   - [ ] Add the possibility to clear the LEDs when initializing the LedsDriver
   - [ ] Connect everything into a supervision tree (to make it more robust) (v0.4)
-  - [ ] Use protocols ?
-    - [ ] ??? animations & components?
+  - [c] Use protocols ?
+    - [c] ??? animations & components? <-- no, only behaviour
   - [ ] Create a dsl (domain specific language) to (finally) easily program strips
     - [ ] Extend the Fledex macros to allow easy configuration with a config macro (v0.4)
     - [ ] Allow several animations behind a single effect (v0.4), i.e.:
@@ -53,5 +53,6 @@ Even though this library is published, there are things I still want to do befor
 - [ ] Increase consumption
   - [ ] Use in school project (v0.4)
   - [ ] Talk on meetups? (v0.5 or v0.6)
+  - [ ] Migrate outstanding TODOs to github
   - [ ] Publish/announce on Elixirforum (v0.5 or v0.6)
   - [ ] Get the library into nerves-livebook (v0.7)

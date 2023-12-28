@@ -1,9 +1,3 @@
-<!--
-Copyright 2023, Matthias Reik <fledex@reik.org>
-
-SPDX-License-Identifier: Apache-2.0
--->
-
 ---
 name: Bug report
 about: Create a report to help us improve
@@ -12,6 +6,11 @@ labels: ''
 assignees: ''
 
 ---
+<!--
+Copyright 2023, Matthias Reik <fledex@reik.org>
+
+SPDX-License-Identifier: Apache-2.0
+-->
 
 **Describe the bug**
 A clear and concise description of what the bug is.
