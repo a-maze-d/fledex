@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 # Fledex
+[![Hex.pm](https://img.shields.io/hexpm/l/fledex "License")](https://github.com/a-maze-d/fledex/blob/main/LICENSES/Apache-2.0.txt)
 [![Hex version](https://img.shields.io/hexpm/v/fledex.svg?color=0000ff "Hex version")](https://hex.pm/packages/fledex)
 [![API docs](https://img.shields.io/hexpm/v/fledex.svg?label=hexdocs&color=0000ff "API docs")](https://hexdocs.pm/fledex)
 [![ElixirCI](https://github.com/a-maze-d/fledex/actions/workflows/elixir.yml/badge.svg "ElixirCI")](https://github.com/a-maze-d/fledex/actions/workflows/elixir.yml)
