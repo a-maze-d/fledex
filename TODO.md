@@ -1,3 +1,9 @@
+<!--
+Copyright 2023, Matthias Reik <fledex@reik.org>
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # Intro
 Even though this library is published, there are things I still want to do before I consider this as really done. Here the outstanding tasks that I can think of.
 

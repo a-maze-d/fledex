@@ -1,3 +1,7 @@
+# Copyright 2023, Matthias Reik <fledex@reik.org>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 defmodule Fledex.Color.KinoRender do
   import Fledex.Color.Names, only: [is_color_name: 1]
   alias Fledex.Color.Types

@@ -1,3 +1,9 @@
+<!--
+Copyright 2023, Matthias Reik <fledex@reik.org>
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # Introduction
 This is the initial project plan developed with my son. Since I speak German
 with him, it's written in German.

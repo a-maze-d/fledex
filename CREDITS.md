@@ -1,3 +1,9 @@
+<!--
+Copyright 2023, Matthias Reik <fledex@reik.org>
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # Contributors
 Url: [CONTRIBUTORS.md](CONTRIBUTORS.md)
 THe first thank goes of course to all those that are contributing to this library, not only directly but also indirectly.

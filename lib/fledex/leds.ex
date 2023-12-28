@@ -1,3 +1,7 @@
+# Copyright 2023, Matthias Reik <fledex@reik.org>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 defmodule Fledex.Leds do
   @moduledoc """
   This module allows to define a sequence of Leds. You first create the new sequence of leds

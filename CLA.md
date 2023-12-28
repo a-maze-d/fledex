@@ -1,3 +1,9 @@
+<!--
+Copyright 2023, Matthias Reik <fledex@reik.org>
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 ## Fiduciary License Agreement 2.0
 
 based on the

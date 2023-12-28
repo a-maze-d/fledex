@@ -1,3 +1,7 @@
+# Copyright 2023, Matthias Reik <fledex@reik.org>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 defmodule Fledex.Color.Types do
   @type rgb :: {red :: 0..255, green :: 0..255, blue :: 0..255}
   @type hsv :: {hue :: 0..255, saturation :: 0..255, value :: 0..255}

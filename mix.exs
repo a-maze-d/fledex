@@ -1,3 +1,7 @@
+# Copyright 2023, Matthias Reik <fledex@reik.org>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 defmodule Fledex.MixProject do
   use Mix.Project
 

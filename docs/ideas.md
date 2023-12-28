@@ -1,3 +1,9 @@
+<!--
+Copyright 2023, Matthias Reik <fledex@reik.org>
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 Some collected ideas on how to make this library easy to use.
 The idea of the library is to easily program a LED strip (like WS2801), to create different effects and to easily change the effects on the fly (similar to [sonic pi](https://sonic-pi.net))
 

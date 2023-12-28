@@ -1,3 +1,7 @@
+# Copyright 2023, Matthias Reik <fledex@reik.org>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 defmodule Fledex.Effect.Interface do
   @moduledoc """
   This module defines the interface for an LED effect. Effects can be used in Animations.

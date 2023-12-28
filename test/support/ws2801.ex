@@ -1,3 +1,7 @@
+# Copyright 2023, Matthias Reik <fledex@reik.org>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 defmodule Fledex.Test.CircuitsSim.Device.WS2801 do
   alias CircuitsSim.SPI.SPIServer
 

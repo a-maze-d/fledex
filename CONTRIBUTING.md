@@ -1,3 +1,9 @@
+<!--
+Copyright 2023, Matthias Reik <fledex@reik.org>
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # Introduction
 Contributions to this library are very welcome. I do reserve the right to decide on what will (and will not) be added to the library. Thus, before doing any bigger changes you might want to ask for feedback.
 

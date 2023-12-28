@@ -1,3 +1,7 @@
+# Copyright 2023, Matthias Reik <fledex@reik.org>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 defmodule Fledex.Component.Interface do
   @moduledoc """
   This interface needs to be implemente by a compoenent. It should be noted

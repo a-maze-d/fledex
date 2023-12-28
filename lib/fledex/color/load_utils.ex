@@ -1,3 +1,7 @@
+# Copyright 2023, Matthias Reik <fledex@reik.org>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 defmodule Fledex.Color.LoadUtils do
   def names_file, do: "#{Path.dirname(__DIR__)}/color/names.csv"
   def load_color_file(names_file) do

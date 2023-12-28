@@ -1,3 +1,9 @@
+<!--
+Copyright 2023, Matthias Reik <fledex@reik.org>
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # Intro
 This is a description of the livebooks in this folder. The examples are structured in such a way that we slowly walk up the abstraction stack. From very low level to a high level language. If are not interested in the technical details, the motivations, and the decisions then you probably want to only look livebook [#1](livebooks/README.md#1-first-steps-with-an-led-strip) (to set up your LED strip correctly) and [#6](livebooks/README.md#6-fledex-dsl) (to define your animations). Only the whole set will give you, however, a good overview.
 

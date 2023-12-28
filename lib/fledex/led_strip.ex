@@ -1,3 +1,7 @@
+# Copyright 2023, Matthias Reik <fledex@reik.org>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 defmodule Fledex.LedStrip do
   @moduledoc """
   This module defines a GenServer that manages the LED strip (be it a real one with the

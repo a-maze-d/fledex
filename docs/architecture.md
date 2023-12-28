@@ -1,3 +1,9 @@
+<!--
+Copyright 2023, Matthias Reik <fledex@reik.org>
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # Overview
 This document gives a rough overview over the architecture of Fledex. We first will 
 look at the low level aspects (the different drivers) and then work our way up the 

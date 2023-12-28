@@ -1,3 +1,7 @@
+# Copyright 2023, Matthias Reik <fledex@reik.org>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 defmodule Fledex.Color.Conversion.Spectrum do
   alias Fledex.Color.Conversion.Raw
   alias Fledex.Color.Types
