@@ -8,7 +8,7 @@ defmodule Fledex.Component.Interface do
   that a component is always an animation.
   """
 
-  alias Fledex.Leds
+  alias Fledex.Animation.Animator
 
   @doc """
   This function will be called during initialization of a component. The various
@@ -22,10 +22,5 @@ defmodule Fledex.Component.Interface do
   It's however up to you to decide on how you want to implement the component, you
   probably can even use a macro to actually define your `def_func`.
   """
-  @callback configure(keyword) :: %{
-    type: :animation,
-    def_func: (%{atom => any}, keyword() -> Leds.t | {Leds.t | %{atom => any}}),
-    options: keyword,
-    effects: [{module, keyword}]
-  }
+  @callback configure(atom, keyword) :: %{atom => Animator.config_t()}
 end

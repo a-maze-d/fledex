@@ -420,7 +420,8 @@ defmodule Fledex.Leds do
       Logger.warning("The namespace hasn't been defined. This should be done before calling this function")
       :ok = LedStrip.define_namespace(server_name, namespace)
     end
-    vals = Rotation.rotate(to_list(leds), offset, rotate_left)
+    offset = if leds.count == 0, do: 0, else: rem(offset, leds.count)
+    vals = Rotation.rotate(to_list(leds), leds.count, offset, rotate_left)
     LedStrip.set_leds(server_name, namespace, vals)
   end
 

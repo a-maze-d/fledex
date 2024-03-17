@@ -371,6 +371,9 @@ defmodule Fledex.LedsTest do
         Leds.light(%{}, :red, 1)
       end
     end
+    test "out-of-range" do
+      assert Leds.leds(1) |> Leds.light({300, 0, 0}) |> Leds.get_light(1) == 0xff0000
+    end
   end
 end
 

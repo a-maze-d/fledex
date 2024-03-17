@@ -6,17 +6,20 @@ defmodule Fledex.Effect.Rotation do
   @behaviour Fledex.Effect.Interface
 
   alias Fledex.Color.Types
+  alias Fledex.Effect.Interface
 
   @impl true
   @spec apply(leds :: list(Types.colorint), count :: non_neg_integer, config :: keyword, triggers :: map)
-      :: list(Types.colorint)
-  def apply(leds, _count, config, triggers) do
+      :: {list(Types.colorint), map, Interface.effect_state_t}
+  def apply(leds, count, config, triggers) do
     left = Keyword.get(config, :direction, :left) != :right
     trigger_name = Keyword.get(config, :trigger_name, :default)
     offset = triggers[trigger_name] || 0
     divisor = Keyword.get(config, :divisor, 1)
     offset = trunc(offset / divisor)
-    rotate(leds, offset, left)
+    remainder = rem(offset, count)
+    effect_state = if offset == 0 and remainder == 0, do: :stop_start, else: :progress
+    {rotate(leds, count, remainder, left), triggers, effect_state}
   end
 
   @doc """
@@ -24,11 +27,9 @@ defmodule Fledex.Effect.Rotation do
 
   The rotation can happen with the offset to the left or to the right.
   """
-  @spec rotate(list(Types.colorint), pos_integer, boolean) :: list(Types.colorint)
-  def rotate(vals, 0, _rotate_left), do: vals
-  def rotate(vals, offset, rotate_left) do
-    count = Enum.count(vals)
-    offset = rem(offset, count)
+  @spec rotate(list(Types.colorint), non_neg_integer, pos_integer, boolean) :: list(Types.colorint)
+  def rotate(vals, _count, 0, _rotate_left), do: vals
+  def rotate(vals, count, offset, rotate_left) do
     offset = if rotate_left, do: offset, else: count - offset
     Enum.slide(vals, 0..rem(offset - 1 + count, count), count)
   end

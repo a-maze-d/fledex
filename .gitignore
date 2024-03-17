@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -31,4 +31,7 @@ fledex-*.tar
 
 # some private livebooks not to be shared externally
 /livebooks_private/
+
+# backup files
+/docs/*.bkp
 

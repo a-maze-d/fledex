@@ -160,7 +160,8 @@ defmodule Fledex.Animation.Animator do
   def apply_effects(leds, effects, triggers) do
     count = leds.count
     {led_list, triggers} = Enum.reduce(Enum.reverse(effects), {Leds.to_list(leds), triggers}, fn {effect, config}, {leds, triggers} ->
-      effect.apply(leds, count, config, triggers) |> get_with_triggers(triggers)
+      {leds, triggers, _effect_state} = effect.apply(leds, count, config, triggers)
+      {leds, triggers}
     end)
     {Leds.leds(leds.count, led_list, %{}), triggers}
   end

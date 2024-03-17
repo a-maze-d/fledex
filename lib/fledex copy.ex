@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-defmodule Fledex do
+defmodule Fledex2 do
   @moduledoc """
   This module should provide some simple macros that allow to define the
   led strip and to update it. The code you would write (in livebook) would
@@ -22,9 +22,9 @@ defmodule Fledex do
     end
   ```
   """
+  require Logger
 
-  alias Fledex.Animation.Animator
-  alias Fledex.Animation.Manager
+  alias Fledex.Utils.Dsl
 
   # configuration for the different macros/functions that can be used to configure our strip
   # this is also used to configure our Manager to resolve the type to a module
@@ -34,7 +34,7 @@ defmodule Fledex do
     component: Animator, # This is not the correct one yet
     effect: Animator # This is not yet correct. It shouldn't appear here at all, but it makes it work for now
   }
-  @config_keys Map.keys @config
+  # @config_keys Map.keys @config
 
   @doc """
   This function returns the currently configured macros/functions that can be used in a fledex led_strip
@@ -55,14 +55,13 @@ defmodule Fledex do
   @spec __using__(keyword) :: Macro.t
   defmacro __using__(opts) do
     quote bind_quoted: [opts: opts] do
-      import Fledex
+      import Fledex2
       # import also the Leds and the color name definitions so no namespace are required
       import Fledex.Leds
       import Fledex.Color.Names
-      # let's start our animation manager. The manager makes sure only one will be started
-      if not Keyword.get(opts, :dont_start, false) do
-        Manager.start_link(fledex_config())
-      end
+
+      alias Fledex.Utils.Dsl
+      Dsl.init(opts)
     end
   end
 
@@ -95,7 +94,7 @@ defmodule Fledex do
     end
     ```
   """
-  @spec animation(atom, keyword | nil, Macro.t) :: {atom, Animator.config_t()}
+  @spec animation(atom, keyword | nil, do: Macro.t) :: Macro.t
   defmacro animation(name, options \\ nil, do: block) do
     # decide on whether the user pattern matched or didn't specify an
     # argument at all
@@ -107,15 +106,12 @@ defmodule Fledex do
       block -> {:fn, [], [{:->, [], [[{:_triggers, [], Elixir}], block]}]}
     end
     quote do
-      {
-       unquote(name),
-        %{
-          type: :animation,
-          def_func: unquote(def_func_ast),
-          options: unquote(options),
-          effects: []
-        }
-      }
+      Dsl.create_config(
+        unquote(name),
+        :animation,
+        unquote(def_func_ast),
+        unquote(options)
+      )
     end
     #  |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
@@ -128,7 +124,7 @@ defmodule Fledex do
   Therefore, there will not be any repainting and the `def_func` will not receive any
   parameter. It will only be painted once at definition time.
   """
-  @spec static(atom, keyword | nil, Macro.t) :: {atom, Animator.config_t()}
+  @spec static(atom, keyword | nil, Macro.t) :: Macro.t
   defmacro static(name, options \\ nil, do: block) do
     # even the static function gets an argument, we create it, because
     # we don't expect one to be provided
@@ -137,15 +133,12 @@ defmodule Fledex do
       block -> {:fn, [], [{:->, [], [[{:_triggers, [], Elixir}], block]}]}
     end
     quote do
-      {
+      Dsl.create_config(
         unquote(name),
-        %{
-          type: :static,
-          def_func: unquote(def_func_ast),
-          options: unquote(options),
-          effects: []
-        }
-      }
+        :static,
+        unquote(def_func_ast),
+        unquote(options)
+      )
     end
       # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
@@ -180,18 +173,12 @@ defmodule Fledex do
   It is up to each component to define their own set of mandatory and optional
   parameters.
   """
-  @spec component(atom, module, keyword) :: {atom, Animator.config_t()}
+  @spec component(atom, module, keyword) :: Macro.t
   defmacro component(name, module, opts) do
-    config = quote do
-      unquote(module).configure(unquote(opts))
-    end
     quote do
-      {
-        unquote(name),
-        unquote(config)
-      }
+      Dsl.create_config(unquote(name), unquote(module), unquote(opts))
     end
-      # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
+      #  |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
 
   @doc """
@@ -218,58 +205,72 @@ defmodule Fledex do
   end
   ```
   """
-  @spec effect(module, keyword, [{atom, Animator.config_t()}]) :: [{atom, Animator.config_t()}]
+  @spec effect(module, keyword, Macro.t) :: Macro.t
   defmacro effect(module, options \\ [], do: block) do
-
-    {_ast, configs_ast} = Macro.prewalk(block, [], fn
-       {type, meta, children}, acc when type in @config_keys ->
-        # dbg({type, meta, children, acc})
-        {nil, [{type, meta, children} | acc]}
-       list, acc when is_list(list) ->
-        # dbg({list, acc})
-        {nil, list ++ acc}
-       other, acc ->
-        # dbg({other, acc})
-        {other, acc}
-    end)
-    # dbg(configs_ast)
+    configs_ast = Dsl.extract_configs(block)
     quote do
-      unquote(configs_ast)
-        |> Enum.map(fn {name, config} ->
-          {
-            name,
-            %{config | effects: [{unquote(module), unquote(options)} | config.effects]}
-          }
-        end)
+      Dsl.apply_effect(unquote(module), unquote(options), unquote(configs_ast))
     end
-      # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
+      #  |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
 
   @doc """
     This introduces a new led_strip.
   """
-  @spec led_strip(atom, atom | keyword, Macro.t) :: Macro.t
+  @spec led_strip(atom, atom | keyword, Macro.t) :: Macro.t | map()
   defmacro led_strip(strip_name, strip_options \\ :kino, do: block) do
-    # Logger.error(inspect block)
-    {_ast, configs_ast} = Macro.prewalk(block, [], fn
-      {type, meta, children}, acc when type in @config_keys ->
-        # dbg({type, meta, children, acc})
-        {nil, [{type, meta, children} | acc]}
-       list, acc when is_list(list) ->
-        # dbg({list, acc})
-        {nil, list ++ acc}
-       other, acc ->
-        # dbg({other, acc})
-        {other, acc}
-    end)
-    # Logger.error(inspect configs_ast)
+    configs_ast = Dsl.extract_configs(block)
 
     quote do
-      strip_name = unquote(strip_name)
-      strip_options = unquote(strip_options)
-      Manager.register_strip(strip_name, strip_options)
-      Manager.register_animations(strip_name, Map.new(unquote(configs_ast)))
-    end
+      Dsl.configure_strip(
+        unquote(strip_name),
+        unquote(strip_options),
+        unquote(configs_ast)
+      )
+      end
       # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
+  end
+end
+
+defmodule Fledex2.T do
+  def t1 do
+    use Fledex2
+    alias Fledex.Effect.Dimming
+
+    effect Rotation do
+      animation :john do
+        _triggers -> leds(10)
+      end
+      animation :mary do
+        _triggers -> leds(20)
+      end
+    end
+  end
+  def t2 do
+    use Fledex2
+    alias Fledex.Effect.Dimming
+    alias Fledex.Effect.Rotation
+
+    effect Rotation, [] do
+      effect Dimming do
+        animation :john do
+          _triggers -> leds(10)
+        end
+      end
+      animation :mary do
+        _triggers -> leds(20)
+      end
+    end
+  end
+  def t3 do
+    use Fledex2
+    led_strip :strip, :debug do
+      animation :john3 do
+        leds(10)
+      end
+      animation :mary2 do
+        leds(20)
+      end
+    end
   end
 end
