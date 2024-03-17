@@ -100,7 +100,13 @@ defmodule Fledex.MixProject do
       main: "readme-1",
       extras: [
         "README.md",
+        "SECURITY.md",
+        "CLA.md",
+        "CONTRIBUTING.md",
+        "CONTRIBUTORS.md",
+        "CODE_OF_CONDUCT.md",
         "docs/architecture.md",
+        "docs/hardware.md",
         "livebooks/README.md",
         "livebooks/1_first_steps_with_an_led_strip.livemd",
         "livebooks/2_fledex_first_steps.livemd",
@@ -110,10 +116,18 @@ defmodule Fledex.MixProject do
         "livebooks/4_fledex_clock_example.livemd",
         "livebooks/5_fledex_weather_example.livemd",
         "livebooks/6_fledex_dsl.livemd",
-        "livebooks/7_fledex_effects.livemd"
+        "livebooks/7_fledex_effects.livemd",
+        "livebooks/8_fledex_component.livemd"
       ],
       groups_for_extras: [
-        "LiveBooks": ~r/livebooks/
+        "LiveBooks": ~r/livebooks/,
+        "Other Project Info": [
+          "SECURITY.md",
+          "CLA.md",
+          "CONTRIBUTING.md",
+          "CODE_OF_CONDUCT.md",
+          "CONTRIBUTORS.md",
+         ]
       ],
       groups_for_modules: [
         "Core": [
@@ -136,14 +150,22 @@ defmodule Fledex.MixProject do
   defp aliases do
     [
       docs: ["docs", &copy_doc_images/1],
-      test: ["coveralls.html"]
+      test: ["coveralls.html"],
+      reuse: [&run_reuse/1]
     ]
   end
+  defp run_reuse(_) do
+    {response, _exit_status} = System.cmd("pipx", ["run", "reuse", "lint"])
+    IO.puts(response)
+  end
   defp copy_doc_images(_) do
-    File.cp(
-      "docs/architecture.drawio.png",
-      "doc/architecture.drawio.png",
-      on_conflict: fn (_source, _destination) -> true end
-    )
+    images = [
+      {"docs/architecture.drawio.svg", "doc/architecture.drawio.svg"},
+      {"docs/hardware.drawio.svg", "doc/hardware.drawio.svg"},
+      {"docs/hardware-Page-2.drawio.svg", "doc/hardware-Page-2.drawio.svg"}
+    ]
+    Enum.each(images, fn {from, to} ->
+      File.cp(from, to, on_conflict: fn (_source, _destination) -> true end)
+    end)
   end
 end

@@ -68,3 +68,9 @@ In this example we will reimplement the Clock, but this time with our DSL.
 In this chapter we take a look at the effect functionality. An animation can be "spiced" with an effect. This also exists as part of the Fledex DSL.
 
 We won't look at all possible effects, but at some examples. It is quite easy to create your own effect and we'll take a look on how to do that.
+
+# 8. Fledex: Component
+In this chapter we will take a look on how to create reusable components. This way you don't have to redefine certain animations
+
+> [!NOTE]
+> The functionality is still very much in fluctuation.
