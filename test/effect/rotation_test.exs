@@ -14,7 +14,7 @@ defmodule Fledex.Effect.RotationTest do
 
       returned_leds = Rotation.apply(leds, 3, [], triggers)
 
-      assert returned_leds == [0x00ff00, 0x0000ff, 0xff0000]
+      assert returned_leds == {[0x00ff00, 0x0000ff, 0xff0000], triggers, :progress}
     end
     test "with trigger name" do
       leds = [0xff0000, 0x00ff00, 0x0000ff]
@@ -22,7 +22,7 @@ defmodule Fledex.Effect.RotationTest do
 
       returned_leds = Rotation.apply(leds, 3, [trigger_name: :counter], triggers)
 
-      assert returned_leds == [0x00ff00, 0x0000ff, 0xff0000]
+      assert returned_leds == {[0x00ff00, 0x0000ff, 0xff0000], triggers, :progress}
     end
     test "with right direction" do
       leds = [0xff0000, 0x00ff00, 0x0000ff]
@@ -30,7 +30,7 @@ defmodule Fledex.Effect.RotationTest do
 
       returned_leds = Rotation.apply(leds, 3, [direction: :right], triggers)
 
-      assert returned_leds == [0x0000ff, 0xff0000, 0x00ff00]
+      assert returned_leds == {[0x0000ff, 0xff0000, 0x00ff00], triggers, :progress}
     end
     test "with divisor" do
       leds = [0xff0000, 0x00ff00, 0x0000ff]
@@ -38,12 +38,12 @@ defmodule Fledex.Effect.RotationTest do
 
       returned_leds = Rotation.apply(leds, 3, [divisor: 2], triggers)
 
-      assert returned_leds == [0xff0000, 0x00ff00, 0x0000ff]
+      assert returned_leds == {[0xff0000, 0x00ff00, 0x0000ff], triggers, :stop_start}
 
       triggers = %{default: 2}
       returned_leds = Rotation.apply(leds, 3, [divisor: 2], triggers)
 
-      assert returned_leds == [0x00ff00, 0x0000ff, 0xff0000]
+      assert returned_leds == {[0x00ff00, 0x0000ff, 0xff0000], triggers, :progress}
     end
   end
 end

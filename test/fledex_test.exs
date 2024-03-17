@@ -22,9 +22,10 @@ defmodule Fledex.Test do
       use Fledex
       assert GenServer.whereis(Manager) != nil
 
-      # and check that both Fledex and Fledex.Leds are imported
+      # and check that both Fledex, Fledex.Leds and Fledex.Color.Names are imported
       assert :erlang.fun_info(&fledex_config/0) # from Fledex
       assert :erlang.fun_info(&leds/1) # from Fledex.Leds
+      assert :erlang.fun_info(&red/1) # from Fledex.Color.Names
     end
     test "use macro without server" do
       # we don't start the server

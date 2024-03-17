@@ -95,12 +95,15 @@ defmodule Fledex do
     end
     ```
   """
-  @spec animation(atom, keyword | nil, Macro.t) :: Macro.t
+  @spec animation(atom, keyword | nil, Macro.t) :: {atom, Animator.config_t()}
   defmacro animation(name, options \\ nil, do: block) do
     # decide on whether the user pattern matched or didn't specify an
     # argument at all
     def_func_ast = case block do
+      # argument matched, create only an anonymous function around it
       [{:->, _, _}] = block -> {:fn, [], block}
+      # argument didn't match, create an argument
+      # then create an anonymous function around it
       block -> {:fn, [], [{:->, [], [[{:_triggers, [], Elixir}], block]}]}
     end
     quote do
@@ -114,18 +117,25 @@ defmodule Fledex do
         }
       }
     end
-      # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
+    #  |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
 
+  # TODO: decide on whether there is a point to have a static version. it could
+  #       simply delegate to animation.
   @doc """
   The static macro is equal to the animation macro, but it will not receive any triggers.
 
   Therefore, there will not be any repainting and the `def_func` will not receive any
   parameter. It will only be painted once at definition time.
   """
-  @spec static(atom, keyword | nil, Macro.t) :: Macro.t
+  @spec static(atom, keyword | nil, Macro.t) :: {atom, Animator.config_t()}
   defmacro static(name, options \\ nil, do: block) do
-    def_func_ast = {:fn, [], [{:->, [], [[{:_triggers, [], Elixir}], block]}]}
+    # even the static function gets an argument, we create it, because
+    # we don't expect one to be provided
+    def_func_ast = case block do
+      [{:->, _, _}] -> raise ArgumentError, "A static function does not take an argument"
+      block -> {:fn, [], [{:->, [], [[{:_triggers, [], Elixir}], block]}]}
+    end
     quote do
       {
         unquote(name),
@@ -170,7 +180,7 @@ defmodule Fledex do
   It is up to each component to define their own set of mandatory and optional
   parameters.
   """
-  @spec component(atom, module, keyword) :: Macro.t
+  @spec component(atom, module, keyword) :: {atom, Animator.config_t()}
   defmacro component(name, module, opts) do
     config = quote do
       unquote(module).configure(unquote(opts))
@@ -208,14 +218,29 @@ defmodule Fledex do
   end
   ```
   """
-  @spec effect(module, keyword, Macro.t) :: Macro.t
+  @spec effect(module, keyword, [{atom, Animator.config_t()}]) :: [{atom, Animator.config_t()}]
   defmacro effect(module, options \\ [], do: block) do
+
+    {_ast, configs_ast} = Macro.prewalk(block, [], fn
+       {type, meta, children}, acc when type in @config_keys ->
+        # dbg({type, meta, children, acc})
+        {nil, [{type, meta, children} | acc]}
+       list, acc when is_list(list) ->
+        # dbg({list, acc})
+        {nil, list ++ acc}
+       other, acc ->
+        # dbg({other, acc})
+        {other, acc}
+    end)
+    # dbg(configs_ast)
     quote do
-      {name, config} = unquote(block)
-      {
-        name,
-        %{config | effects: [{unquote(module), unquote(options)} | config.effects]}
-      }
+      unquote(configs_ast)
+        |> Enum.map(fn {name, config} ->
+          {
+            name,
+            %{config | effects: [{unquote(module), unquote(options)} | config.effects]}
+          }
+        end)
     end
       # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
@@ -227,8 +252,15 @@ defmodule Fledex do
   defmacro led_strip(strip_name, strip_options \\ :kino, do: block) do
     # Logger.error(inspect block)
     {_ast, configs_ast} = Macro.prewalk(block, [], fn
-       {type, meta, children}, acc when type in @config_keys -> {{type, meta, children}, [{type, meta, children} | acc]}
-       other, acc -> {other, acc}
+      {type, meta, children}, acc when type in @config_keys ->
+        # dbg({type, meta, children, acc})
+        {nil, [{type, meta, children} | acc]}
+       list, acc when is_list(list) ->
+        # dbg({list, acc})
+        {nil, list ++ acc}
+       other, acc ->
+        # dbg({other, acc})
+        {other, acc}
     end)
     # Logger.error(inspect configs_ast)
 
