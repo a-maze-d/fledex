@@ -5,7 +5,7 @@
 defmodule Fledex.MixProject do
   use Mix.Project
 
-  @version "0.3.1"
+  @version "0.4.0"
   @source_url "https://github.com/a-maze-d/fledex"
   def project do
     [
@@ -81,7 +81,7 @@ defmodule Fledex.MixProject do
       {:telemetry, "~> 1.2"},
 
       # testing
-      {:circuits_sim, git: "https://github.com/elixir-circuits/circuits_sim/", only: [:dev, :test]},
+      {:circuits_sim, "~>0.1.0", only: [:dev, :test]},
 
       # documentation
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},

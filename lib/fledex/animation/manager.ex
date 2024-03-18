@@ -27,6 +27,10 @@ defmodule Fledex.Animation.Manager do
   alias Fledex.Animation.Interface
   alias Fledex.LedStrip
 
+  @type config_t :: %{
+    atom => Animator.config_t()
+  }
+
   @typep state_t :: %{
     type_config: map(),
     animations: map()

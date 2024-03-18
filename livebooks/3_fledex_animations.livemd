@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
 # hardware but on a normal livebook, This makes it easier to stay up-to-date and experiment
 # We start to define our fledex library, directly linking to the latest version on github
 Mix.install([
-  {:fledex, "~>0.3"}
+  {:fledex, "~>0.4"}
 ])
 
 # we define a couple of aliases to not have to type that much
