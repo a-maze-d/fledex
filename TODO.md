@@ -24,7 +24,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Fix flaky tests (see TODOs) (v0.4)
   - [ ] Perform an extra round of testing on hardware (v0.4)
   - [ ] Enable Telemetry? (v0.5)
-  - [ ] Upgrade to a hex released version of circuits_sim as soon as available (v0.?)
+  - [x] Upgrade to a hex released version of circuits_sim as soon as available (v0.?)
 - [ ] Missing functionality
   - [x] see the project plan that was planned out with my son, we are not quite there yet (v0.4)
   - [x] review the ideas.md document to see whether all ideas have been implemented (v0.4)

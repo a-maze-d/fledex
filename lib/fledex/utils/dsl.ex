@@ -83,8 +83,8 @@ defmodule Fledex.Utils.Dsl do
       Manager.start_link(@fledex_config)
     end
   end
-  @spec extract_configs(Macro.t) :: Macro.t
-  def extract_configs(block) do
+  @spec ast_extract_configs(Macro.t) :: Macro.t
+  def ast_extract_configs(block) do
     {_ast, configs_ast} = Macro.prewalk(block, [], fn
       {type, meta, children}, acc when type in @fledex_config_keys ->
         {nil, [{type, meta, children} | acc]}
@@ -94,5 +94,21 @@ defmodule Fledex.Utils.Dsl do
         {other, acc}
     end)
     configs_ast
+  end
+
+  def ast_add_argument_to_func(block) do
+    case block do
+      [{:->, _, _}] -> raise ArgumentError, "No argument expected"
+      block -> ast_add_argument_to_func_if_missing(block)
+    end
+  end
+  def ast_add_argument_to_func_if_missing(block) do
+    case block do
+      # argument matched, create only an anonymous function around it
+      [{:->, _, _}] = block -> {:fn, [], block}
+      # argument didn't match, create an argument
+      # then create an anonymous function around it
+      block -> {:fn, [], [{:->, [], [[{:_triggers, [], Elixir}], block]}]}
+    end
   end
 end

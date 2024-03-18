@@ -98,13 +98,7 @@ defmodule Fledex do
   defmacro animation(name, options \\ nil, do: block) do
     # decide on whether the user pattern matched or didn't specify an
     # argument at all
-    def_func_ast = case block do
-      # argument matched, create only an anonymous function around it
-      [{:->, _, _}] = block -> {:fn, [], block}
-      # argument didn't match, create an argument
-      # then create an anonymous function around it
-      block -> {:fn, [], [{:->, [], [[{:_triggers, [], Elixir}], block]}]}
-    end
+    def_func_ast = Dsl.ast_add_argument_to_func_if_missing(block)
     quote do
       Dsl.create_config(
         unquote(name),
@@ -128,10 +122,7 @@ defmodule Fledex do
   defmacro static(name, options \\ nil, do: block) do
     # even the static function gets an argument, we create it, because
     # we don't expect one to be provided
-    def_func_ast = case block do
-      [{:->, _, _}] -> raise ArgumentError, "A static function does not take an argument"
-      block -> {:fn, [], [{:->, [], [[{:_triggers, [], Elixir}], block]}]}
-    end
+    def_func_ast = Dsl.ast_add_argument_to_func(block)
     quote do
       Dsl.create_config(
         unquote(name),
@@ -153,7 +144,7 @@ defmodule Fledex do
   * ...
 
   A component does not have a `do ... end` block, since it defines it's
-  own animation, and it's only controlled through some parameters that
+  own animation(s), and it's only controlled through some parameters that
   can be passed as options like:
 
   * the value,
@@ -207,7 +198,7 @@ defmodule Fledex do
   """
   # @spec effect(module, keyword, Macro.t) :: Macro.t
   defmacro effect(module, options \\ [], do: block) do
-    configs_ast = Dsl.extract_configs(block)
+    configs_ast = Dsl.ast_extract_configs(block)
     quote do
       Dsl.apply_effect(unquote(module), unquote(options), unquote(configs_ast))
     end
@@ -219,7 +210,7 @@ defmodule Fledex do
   """
   # @spec led_strip(atom, atom | keyword, Macro.t) :: Macro.t | map()
   defmacro led_strip(strip_name, strip_options \\ :kino, do: block) do
-    configs_ast = Dsl.extract_configs(block)
+    configs_ast = Dsl.ast_extract_configs(block)
 
     quote do
       Dsl.configure_strip(
@@ -229,48 +220,5 @@ defmodule Fledex do
       )
       end
       # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
-  end
-end
-
-defmodule Fledex2.T do
-  def t1 do
-    use Fledex
-    alias Fledex.Effect.Dimming
-
-    effect Rotation do
-      animation :john do
-        _triggers -> leds(10)
-      end
-      animation :mary do
-        _triggers -> leds(20)
-      end
-    end
-  end
-  def t2 do
-    use Fledex
-    alias Fledex.Effect.Dimming
-    alias Fledex.Effect.Rotation
-
-    effect Rotation, [] do
-      effect Dimming do
-        animation :john do
-          _triggers -> leds(10)
-        end
-      end
-      animation :mary do
-        _triggers -> leds(20)
-      end
-    end
-  end
-  def t3 do
-    use Fledex
-    led_strip :strip, :debug do
-      animation :john3 do
-        leds(10)
-      end
-      animation :mary2 do
-        leds(20)
-      end
-    end
   end
 end

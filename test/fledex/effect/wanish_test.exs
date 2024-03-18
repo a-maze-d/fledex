@@ -95,5 +95,21 @@ defmodule Fledex.Effect.WanishTest do
         triggers
       end)
     end
+    test "don't run" do
+      leds = [0xff0000, 0x00ff00, 0x0000ff]
+      config = [
+        trigger_name: :default,
+        divisor: 2,
+        reappear: true,
+        reappear_key: :dummy,
+        switch_on_off_func: fn offset, triggers ->
+          {:stop, offset, triggers}
+        end
+      ]
+      {returned_leds, triggers, effect_status} = Wanish.apply(leds, 3, config, %{})
+      assert returned_leds == leds
+      assert triggers == %{}
+      assert effect_status == :diabled
+    end
   end
 end

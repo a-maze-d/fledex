@@ -220,6 +220,72 @@ defmodule Fledex.Test do
       assert Map.has_key?(config, :name)
       assert config.name.options == [option1: 123, option2: "abc", option3: :atom1, option4: %{test1: "123"}]
     end
+  end
+  describe "dsl" do
+    test "effect + double animation" do
+      use Fledex
+      alias Fledex.Effect.Dimming
 
+      config = effect Rotation do
+        animation :john do
+          _triggers -> leds(10)
+        end
+        animation :mary do
+          _triggers -> leds(20)
+        end
+      end
+
+      assert %{
+        john: %{def_func: def_func1, effects: effects1},
+        mary: %{def_func: def_func2, effects: effects2},
+      } = config
+      assert def_func1.(%{}) == leds(10)
+      assert def_func2.(%{}) == leds(20)
+      assert [{Rotation, _options}] = effects1
+      assert [{Rotation, _options}] = effects2
+    end
+
+    test "nested effect, on effect and animation" do
+      use Fledex
+      alias Fledex.Effect.Dimming
+      alias Fledex.Effect.Rotation
+
+      config = effect Rotation, [] do
+        effect Dimming do
+          animation :john do
+            _triggers -> leds(10)
+          end
+        end
+        animation :mary do
+          _triggers -> leds(20)
+        end
+      end
+
+      assert %{
+        john: %{def_func: def_func1, effects: effects1},
+        mary: %{def_func: def_func2, effects: effects2},
+      } = config
+      assert def_func1.(%{}) == leds(10)
+      assert def_func2.(%{}) == leds(20)
+      assert [{Rotation, _options_1}, {Dimming, _options_2}] = effects1
+      assert [{Rotation, _options}] = effects2
+    end
+    test "double animation in strip" do
+      use Fledex
+      config = led_strip :strip, :debug do
+        animation :john do
+          leds(10)
+        end
+        animation :mary do
+          leds(20)
+        end
+      end
+      assert %{
+        john: %{def_func: def_func1, effects: []},
+        mary: %{def_func: def_func2, effects: []},
+      } = config
+      assert def_func1.(%{}) == leds(10)
+      assert def_func2.(%{}) == leds(20)
+    end
   end
 end

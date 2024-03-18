@@ -28,5 +28,23 @@ defmodule Fledex.Utils.DslTest do
       block = %{name: %{}}
       assert Dsl.configure_strip(:name, :debug, block) == block
     end
+    test "ast_add_argument_to_func" do
+      ast_without_arg = quote do
+        :ok
+      end
+      assert {:fn, _a, [{:->, _b, [[{:_triggers, _c, _d}], :ok]}]} = Dsl.ast_add_argument_to_func(ast_without_arg)
+    end
+    test "ast_add_argument_to_func with arg" do
+      ast_with_arg = quote do
+        trigger -> :ok
+      end
+      assert_raise ArgumentError, fn -> Dsl.ast_add_argument_to_func(ast_with_arg) end
+    end
+    test "ast_add_argument_to_func_if_missing" do
+      ast_with_arg = quote do
+        _triggers -> :ok
+      end
+      assert {:fn, _, [{:->, _, [[{:_triggers, _, _}], :ok]}]} = Dsl.ast_add_argument_to_func_if_missing(ast_with_arg)
+    end
   end
 end
