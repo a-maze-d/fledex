@@ -13,7 +13,7 @@ defmodule Fledex.Effect.OffsetTest do
       triggers = %{john: 10}
       new_leds = Offset.apply(leds, 3, config, triggers)
 
-      assert new_leds == [0x000000, 0x000000, 0x000000, 0xff0000, 0x00ff00, 0x0000ff]
+      assert new_leds == {[0x000000, 0x000000, 0x000000, 0xff0000, 0x00ff00, 0x0000ff], triggers, :static}
     end
   end
 end

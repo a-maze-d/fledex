@@ -4,11 +4,11 @@ Copyright 2023, Matthias Reik <fledex@reik.org>
 SPDX-License-Identifier: Apache-2.0
 -->
 
-# 7. Fledex: effects
+# 7. Fledex: Effects
 
 ```elixir
 Mix.install([
-  {:fledex, "~>0.3"}
+  {:fledex, "~>0.4"}
 ])
 
 :ok
@@ -93,7 +93,7 @@ Let's try it out by combining our rotation and wanishing effect on a rainbow col
 ```elixir
 led_strip :rotation_and_wanish, :kino do
   effect Rotation do
-    effect Wanish, divisor: 4, direction: :right, reappear: true do
+    effect Wanish, divisor: 1, direction: :right, reappear: true do
       animation :rainbow do
         _triggers -> leds(50) |> rainbow
       end
@@ -113,7 +113,7 @@ You might be wondering what an effect is. It's simply a module with a `@behaviou
 * a keyword list with `config`uration parameters. They are the ones you specified in the `effect` macro. As an effect implementer, you can decide what kind of parameters are permitted. There is one parameter that will be populated by the `Fledex.Animation.Animator` if it's not specified, which is the `:trigger_name`. It is the trigger that drives your effect.
 * a `triggers` map containing the various triggers (like the strip counter, or some other triggers as we have seen in our weather example)
 
-Let's start to define our own module and the function. The simplest implementation is to simply return the leds array.
+Let's start to define our own module and the function. The simplest implementation is to simply return the leds array, the triggers, and `:static` as state (since nothing is changing over time)
 
 ```elixir
 defmodule LivebookEffect1 do
@@ -125,10 +125,9 @@ defmodule LivebookEffect1 do
           count :: non_neg_integer,
           config :: keyword,
           triggers :: map
-        ) ::
-          list(Types.colorint()) | {list(Types.colorint()), map}
-  def apply(leds, _count, _config, _triggers) do
-    leds
+        ) :: {list(Types.colorint()), map, Fledex.Effect.Interface.effect_state_t()}
+  def apply(leds, _count, _config, triggers) do
+    {leds, triggers, :static}
   end
 end
 ```
@@ -151,10 +150,9 @@ defmodule LivebookEffect2 do
           count :: non_neg_integer,
           config :: keyword,
           triggers :: map
-        ) ::
-          list(Types.colorint()) | {list(Types.colorint()), map}
-  def apply(leds, _count, _config, _triggers) do
-    Enum.shuffle(leds)
+        ) :: {list(Types.colorint()), map, Fledex.Effect.Interface.effect_state_t()}
+  def apply(leds, _count, _config, triggers) do
+    {Enum.shuffle(leds), triggers, :progress}
   end
 end
 ```
@@ -162,15 +160,11 @@ end
 That's it already, now we can already use our own effect as we have used an effect above. Let's see how crazy this looks.
 
 ```elixir
-led_strip :merry, :kino do
+led_strip :xmas, :kino do
   effect LivebookEffect2 do
     animation :xmas do
       _triggers -> leds(50) |> rainbow
     end
   end
 end
-```
-
-```elixir
-
 ```

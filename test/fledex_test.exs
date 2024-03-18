@@ -22,9 +22,10 @@ defmodule Fledex.Test do
       use Fledex
       assert GenServer.whereis(Manager) != nil
 
-      # and check that both Fledex and Fledex.Leds are imported
+      # and check that both Fledex, Fledex.Leds and Fledex.Color.Names are imported
       assert :erlang.fun_info(&fledex_config/0) # from Fledex
       assert :erlang.fun_info(&leds/1) # from Fledex.Leds
+      assert :erlang.fun_info(&red/1) # from Fledex.Color.Names
     end
     test "use macro without server" do
       # we don't start the server
@@ -66,7 +67,7 @@ defmodule Fledex.Test do
       config = animation :merry do
         _triggers -> leds(10)
       end
-      assert {:merry, %{def_func: def_func}} = config
+      assert %{merry: %{def_func: def_func}} = config
       assert def_func.(%{}) == leds(10)
     end
 
@@ -156,60 +157,46 @@ defmodule Fledex.Test do
     test "simple" do
       use Fledex
       with_effect = effect Fledex.Test do
-        {
-          :name,
-          %{effects: []}
-        }
+        animation :name do
+          leds(10)
+        end
       end
-      assert with_effect == {
-        :name,
-        %{effects: [{Fledex.Test, []}]}
-      }
+      assert %{name: %{effects: [{Fledex.Test, []}]}} = with_effect
     end
-    test "ith options" do
+    test "with options" do
       use Fledex
       with_effect = effect Fledex.Test, option: :something do
-        {
-          :name,
-          %{effects: []}
-        }
+        animation :name do
+          leds(10)
+        end
       end
-      assert with_effect == {
-        :name,
-        %{effects: [{Fledex.Test, [option: :something]}]}
-      }
+      assert %{name: %{effects: [{Fledex.Test, [option: :something]}]}} = with_effect
     end
     test "with several options" do
       use Fledex
       with_effect = effect Fledex.Test, option1: :something, option2: :something_else do
-        {
-          :name,
-          %{effects: []}
-        }
+        animation :name do
+          leds(10)
+        end
       end
-      assert with_effect == {
-        :name,
-        %{effects: [{Fledex.Test, [option1: :something, option2: :something_else]}]}
-      }
+      assert %{name: %{effects: [{Fledex.Test, [option1: :something, option2: :something_else]}]}} = with_effect
     end
     test "several nested" do
       use Fledex
       with_effects =
         effect Fledex.Test do
           effect Fledex.Test2 do
-            {
-              :name,
-              %{effects: []}
-            }
+            animation :name do
+              leds(10)
+            end
           end
         end
-      assert with_effects == {
-        :name,
-        %{effects: [
+      assert %{
+        name: %{effects: [
           {Fledex.Test, []},
           {Fledex.Test2, []}
         ]}
-      }
+      } = with_effects
     end
   end
   describe "component" do
@@ -218,20 +205,20 @@ defmodule Fledex.Test do
         @behaviour Fledex.Component.Interface
 
         @impl true
-        def configure(options) do
-          %{
+        def configure(name, options) do
+          %{name => %{
             type: :animation,
             def_func: fn _triggers, _options -> Leds.led(30) end,
             options: options,
             effects: []
-          }
+          }}
         end
       end
       use Fledex
-      {name, config} = component :name, Test, option1: 123, option2: "abc", option3: :atom1, option4: %{test1: "123"}
+      config = component :name, Test, option1: 123, option2: "abc", option3: :atom1, option4: %{test1: "123"}
 
-      assert name == :name
-      assert config.options == [option1: 123, option2: "abc", option3: :atom1, option4: %{test1: "123"}]
+      assert Map.has_key?(config, :name)
+      assert config.name.options == [option1: 123, option2: "abc", option3: :atom1, option4: %{test1: "123"}]
     end
 
   end

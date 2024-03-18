@@ -11,9 +11,9 @@ Even though this library is published, there are things I still want to do befor
 - [ ] Documentation
   - [ ] Improve hexdocs
     - [ ] create cheatsheet (v0.4)
-  - [ ] Add documentation on how to connect the LED strip to a RaspberryPi Zero (v0.4) 
+  - [x] Add documentation on how to connect the LED strip to a RaspberryPi Zero (v0.4) 
   - [ ] Add installation instructions (v0.4)
-  - [ ] Add documentation on how to conncet the LED strip to a RPI with a level shifter (v0.7)
+  - [x] Add documentation on how to conncet the LED strip to a RPI with a level shifter (v0.7)
         https://electronics.stackexchange.com/questions/82104/single-transistor-level-up-shifter/82112#82112
 - [ ] Testing
   - [ ] Add more error handling scenarios (v0.4)
@@ -26,14 +26,19 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Enable Telemetry? (v0.5)
   - [ ] Upgrade to a hex released version of circuits_sim as soon as available (v0.?)
 - [ ] Missing functionality
-  - [ ] see the project plan that was planned out with my son, we are not quite there yet (v0.4?)
-  - [ ] Add the possibility to clear the LEDs when initializing the LedsDriver
+  - [x] see the project plan that was planned out with my son, we are not quite there yet (v0.4)
+  - [x] review the ideas.md document to see whether all ideas have been implemented (v0.4)
+  - [ ] improve on the effect state and component state handling. It's currently possible, but not super smooth and it's also difficult to avoid conflicts between different animations/effect/components
+  - [x] Create a sequencer effect that runs one effect before switching to the next effect. Maybe we  can replace the wanish and reappaer effect with 2 distinct effects this way and each of them being simpler. (v0.4) NOTE: This will not be done. I gave it some more thoughts and instead of a sequencer I will implement support for a coordinator that can control individual animations/effects.
+  - [ ] Create support for a coordinator (that can control individual animations and effects. Effects will have to notify back their state)
+  - [ ] Create support for a cron-manager (that allows running jobs, like the one we have in the weather station example and thereby no need to handcraft anything)
+  - [ ] Add the possibility to clear the LEDs when initializing the LedsDriver (v0.4)
   - [ ] Connect everything into a supervision tree (to make it more robust) (v0.4)
-  - [c] Use protocols ?
-    - [c] ??? animations & components? <-- no, only behaviour
-  - [ ] Create a dsl (domain specific language) to (finally) easily program strips
-    - [ ] Extend the Fledex macros to allow easy configuration with a config macro (v0.4)
-    - [ ] Allow several animations behind a single effect (v0.4), i.e.:
+  - [x] Use protocols ?
+    - [x] ??? animations & components? <-- no, only behaviour
+  - [x] Create a dsl (domain specific language) to (finally) easily program strips
+    - [x] Extend the Fledex macros to allow easy configuration with a config macro (v0.4)
+    - [x] Allow several animations behind a single effect (v0.4), i.e.:
     ```elixir
     effect Rotation do
       animation :first_animation do
@@ -45,14 +50,18 @@ Even though this library is published, there are things I still want to do befor
     end
     ```
   - [ ] Clustering
-    - [ ] create an animation that consumes those (this allows to connect remote livebooks to a physical led strip. CAUTION: protect against loops!) (v0.4)
-    - [ ] Provide examples on how to cluster (v0.4)
-    - [ ] Add an example where several nodes are connected to transfer pubsub messages accross nodes (v0.4)
+    - [ ] create an animation that consumes those (this allows to connect remote livebooks to a physical led strip. CAUTION: protect against loops!) (v0.5)
+    - [ ] Provide examples on how to cluster (v0.5)
+    - [ ] Add an example where several nodes are connected to transfer pubsub messages accross nodes (v0.5)
   - [ ] LED-component library
-    - [ ] Create foundation for a led-component-library that enables defining reusable led components. For example both the clock as well as the weather example have a scale it would be easy to define those as components that would make it easier to defining certain aspects (v0.5)
+    - [x] Create foundation for a led-component-library that enables defining reusable led components. For example both the clock as well as the weather example have a scale it would be easy to define those as components that would make it easier to defining certain aspects (v0.5) Note: this should now be possible, since we have a component macro which simply returns animation configs. The above improvements should help to make this more smooth
 - [ ] Increase consumption
   - [ ] Use in school project (v0.4)
+  - [ ] Design a project logo (v0.5)
+  - [ ] Create a video (v0.5)
   - [ ] Talk on meetups? (v0.5 or v0.6)
-  - [ ] Migrate outstanding TODOs to github
-  - [ ] Publish/announce on Elixirforum (v0.5 or v0.6)
+  - [ ] Migrate outstanding TODOs to github (v0.6?)
+  - [ ] Publish/announce on Elixirforum (v0.6)
   - [ ] Get the library into nerves-livebook (v0.7)
+  - [ ] Design a project logo (v0.5)
+  - [ ] Create a video (v0.5)

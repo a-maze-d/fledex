@@ -153,14 +153,15 @@ defmodule Fledex.Animation.Animator do
 
   @spec call_def_func(fun, %{atom: any}, keyword) :: Leds.t | {Leds.t, %{atom: any}}
   defp call_def_func(def_func, triggers, options)
-  defp call_def_func(def_func, triggers, nil), do: def_func.(triggers)
-  defp call_def_func(def_func, triggers, options), do: def_func.(triggers, options)
+  defp call_def_func(def_func, triggers, _options) when is_function(def_func, 1), do: def_func.(triggers)
+  defp call_def_func(def_func, triggers, options) when is_function(def_func, 2), do: def_func.(triggers, options)
 
   @spec apply_effects(Leds.t, [{module, map}], map) :: {Leds.t, map}
   def apply_effects(leds, effects, triggers) do
     count = leds.count
     {led_list, triggers} = Enum.reduce(Enum.reverse(effects), {Leds.to_list(leds), triggers}, fn {effect, config}, {leds, triggers} ->
-      effect.apply(leds, count, config, triggers) |> get_with_triggers(triggers)
+      {leds, triggers, _effect_state} = effect.apply(leds, count, config, triggers)
+      {leds, triggers}
     end)
     {Leds.leds(leds.count, led_list, %{}), triggers}
   end

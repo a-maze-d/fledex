@@ -112,11 +112,12 @@ defmodule Fledex.Color.Utils do
     end
   end
 
+  @max_value 255
   @doc """
   This function converts a color to a single (color) integer value
   """
   @spec to_colorint(Types.color) :: Types.colorint
-  def to_colorint({r, g, b} = _color), do: (r<<<16) + (g<<<8) + b
+  def to_colorint({r, g, b} = _color), do: (min(r, @max_value) <<< 16) + (min(g, @max_value) <<< 8) + min(b, @max_value)
   def to_colorint(color) when is_integer(color), do: color
   def to_colorint(color) when Names.is_color_name(color), do: apply(Names, color, [:hex])
 

@@ -5,23 +5,25 @@
 defmodule Fledex.Component.Thermometer do
   @behaviour Fledex.Component.Interface
 
+  alias Fledex.Animation.Animator
   alias Fledex.Leds
 
   @impl true
-  @spec configure(keyword) :: %{
-    type: :animation,
-    def_func: (%{atom => any}, keyword() -> Leds.t | {Leds.t | %{atom => any}}),
-    options: keyword,
-    effects: [{module, keyword}]
-  }
-  def configure(options) do
-    %{
-      type: :animation,
-      def_func: &def_func/2,
-      options: options,
-      effects: []
-    }
+  @spec configure(atom, keyword) :: %{atom => Animator.config_t()}
+  def configure(name, options) when is_atom(name) and is_list(options) do
+    case Keyword.keyword?(options) do
+      true -> %{
+        name => %{
+          type: :animation,
+          def_func: &def_func/2,
+          options: options,
+          effects: []
+        }
+      }
+      false -> raise "Options for #{name} need to be a keyword list, but got #{inspect options}"
+    end
   end
+  def configure(name, options), do: raise "Unexpected syntax, got name: #{inspect name}, options: #{inspect options}"
 
   @out_of_range 10_000
   defp def_func(triggers, options) do
