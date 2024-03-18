@@ -72,16 +72,19 @@ defmodule Fledex.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      # {:circuits_i2c, "~> 2.0"},
       {:circuits_spi, "~> 2.0"},
-      {:kino, "~>0.11"},
-      {:phoenix_pubsub, "~>2.1"},
+      # {:circuits_gpio, "~> 2.0"},
+
+      {:kino, "~> 0.11"},
+      {:phoenix_pubsub, "~> 2.1"},
       # {:libcluster, "~> 3.3"},
 
       # observability
       {:telemetry, "~> 1.2"},
 
       # testing
-      {:circuits_sim, "~>0.1.0", only: [:dev, :test]},
+      {:circuits_sim, "~> 0.1.0", only: [:dev, :test]},
 
       # documentation
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
