@@ -94,6 +94,7 @@ defmodule Fledex.MixProject do
       {:credo_binary_patterns, "~> 0.2.3", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.18", only: :test},
+      {:castore, "~> 1.0"}, # required by excoveralls
     ]
   end
   defp docs do
