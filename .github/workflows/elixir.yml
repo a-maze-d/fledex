@@ -42,4 +42,4 @@ jobs:
     - name: Run tests
       run: mix test
     - name: REUSE Compliance Check
-      uses: fsfe/reuse-action@v2
+      uses: fsfe/reuse-action@v3
