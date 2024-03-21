@@ -34,7 +34,9 @@ defmodule Fledex.Animation.Manager do
 
   @typep state_t :: %{
     type_config: map(),
-    animations: map()
+    animations: map(),
+    coordinators: map(),
+    jobs: map(),
   }
 
   # def child_spec(args) do
@@ -108,9 +110,19 @@ defmodule Fledex.Animation.Manager do
   @impl GenServer
   @spec init(map) :: {:ok, state_t}
   def init(type_config) when is_map(type_config) do
+    children = [
+      {DynamicSupervisor, strategy: :one_for_one, name: Manager.LedStrips},
+      {DynamicSupervisor, strategy: :one_for_one, name: Manager.Animations},
+      {DynamicSupervisor, strategy: :one_for_one, name: Manager.Coordinators}
+      # Do we need one for Jobs?
+    ]
+    Supervisor.start_link(children, strategy: :one_for_one)
+
     state = %{
       type_config: type_config,
-      animations: %{}
+      animations: %{},
+      coordinators: %{},
+      jobs: %{}
     }
     {:ok, state}
   end
@@ -165,7 +177,11 @@ defmodule Fledex.Animation.Manager do
   defp register_strip(state, strip_name, driver_config) do
     # Logger.info("registering led_strip: #{strip_name}")
     {:ok, _pid} = LedStrip.start_link(strip_name, driver_config)
-    %{state | animations: Map.put_new(state.animations, strip_name, nil)}
+    %{state |
+      animations: Map.put_new(state.animations, strip_name, nil),
+      coordinators: Map.put_new(state.coordinators, strip_name, nil),
+      jobs: Map.put_new(state.jobs, strip_name, nil)
+    }
   end
 
   @spec unregister_strip(state_t, atom) :: state_t
@@ -175,7 +191,11 @@ defmodule Fledex.Animation.Manager do
     animation_names = Map.keys(map)
     shutdown_animators(strip_name, animation_names)
     GenServer.stop(strip_name)
-    %{state | animations: Map.drop(state.animations, [strip_name])}
+    %{state |
+      animations: Map.drop(state.animations, [strip_name]),
+      coordinators: Map.drop(state.coordinators, [strip_name]),
+      jobs: Map.drop(state.coordinators, [strip_name])
+    }
   end
 
   @spec register_animations(state_t, atom, map) :: state_t
@@ -185,14 +205,13 @@ defmodule Fledex.Animation.Manager do
     # configs is a list of registration structs.
     # we check the current state and drop any animator we didn't receive
     # we update every animator we did receive
-    # and we create any new animator
-    {dropped_animations, present_animations} = filter_animations(Map.get(state.animations, strip_name), configs)
-    {existing_animations, created_animations} = Map.split(configs, present_animations)
+    # and we create any new filter_configanimator
+    {dropped, updated, created} = filter_configs(Map.get(state.animations, strip_name), configs)
 
     # Logger.info("#{inspect dropped}, #{inspect present}")
-    shutdown_animators(strip_name, dropped_animations)
-    update_animators(strip_name, existing_animations, state.type_config)
-    create_animators(strip_name, created_animations, state.type_config)
+    shutdown_animators(strip_name, dropped)
+    update_animators(strip_name, updated, state.type_config)
+    create_animators(strip_name, created, state.type_config)
 
     %{state | animations: Map.put(state.animations, strip_name, configs)}
   end
@@ -234,26 +253,27 @@ defmodule Fledex.Animation.Manager do
     end)
   end
 
-  @spec filter_animations(map, map) :: {[atom], [atom]}
-  defp filter_animations(nil, _new_animations) do
+  @spec filter_configs(map, map) :: {[atom], map, map}
+  defp filter_configs(nil, new_configs) do
     # Logger.info("filter: nil, #{inspect new_animations}")
-    # since we have no animation, none are dropped and none are existing ones
-    {[], []}
+    # since we have no animation, none need to be dropped or updated. All are new
+    {[], %{}, new_configs}
   end
-  defp filter_animations(old_animations, new_animations) do
+  defp filter_configs(old_configs, new_configs) do
     # Logger.info("filter: #{inspect old_animations}, #{inspect new_animations}")
-    {dropped_animations, present_animations} = Enum.reduce(old_animations, {[], []}, fn {key, _value}, {dropped_animations, present_animations} ->
+    {dropped, present} = Enum.reduce(old_configs, {[], []}, fn {key, _value}, {dropped, present} ->
       # Logger.info("filtering: #{key}")
-      if Map.has_key?(new_animations, key) do
+      if Map.has_key?(new_configs, key) do
         # Logger.info("filtering2: #{key} is in configs")
-        {dropped_animations, [key | present_animations]}
+        {dropped, [key | present]}
       else
         # Logger.info("filtering2: #{key} is NOT in configs")
-        {[key | dropped_animations], present_animations}
+        {[key | dropped], present}
       end
     end)
 
-    {dropped_animations, present_animations}
+    {existing, created} = Map.split(new_configs, present)
+    {dropped, existing, created}
   end
 
   defp register_coordinators(state, _strip_name, _coordinators) do
@@ -261,6 +281,7 @@ defmodule Fledex.Animation.Manager do
   end
 
   defp register_jobs(state, _strip_name, _jobs) do
+    # state = %{state | jobs: }
     state
   end
   @impl GenServer
