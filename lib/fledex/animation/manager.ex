@@ -110,13 +110,13 @@ defmodule Fledex.Animation.Manager do
   @impl GenServer
   @spec init(map) :: {:ok, state_t}
   def init(type_config) when is_map(type_config) do
-    children = [
-      {DynamicSupervisor, strategy: :one_for_one, name: Manager.LedStrips},
-      {DynamicSupervisor, strategy: :one_for_one, name: Manager.Animations},
-      {DynamicSupervisor, strategy: :one_for_one, name: Manager.Coordinators}
-      # Do we need one for Jobs?
-    ]
-    Supervisor.start_link(children, strategy: :one_for_one)
+    # children = [
+    #   {DynamicSupervisor, strategy: :one_for_one, name: Manager.LedStrips},
+    #   {DynamicSupervisor, strategy: :one_for_one, name: Manager.Animations},
+    #   {DynamicSupervisor, strategy: :one_for_one, name: Manager.Coordinators}
+    #   # Do we need one for Jobs?
+    # ]
+    # Supervisor.start_link(children, strategy: :one_for_one)
 
     state = %{
       type_config: type_config,
