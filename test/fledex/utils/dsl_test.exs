@@ -44,7 +44,8 @@ defmodule Fledex.Utils.DslTest do
       ast_with_arg = quote do
         _triggers -> :ok
       end
-      assert {:fn, _, [{:->, _, [[{:_triggers, _, _}], :ok]}]} = Dsl.ast_add_argument_to_func_if_missing(ast_with_arg)
+      assert {:fn, _a, [{:->, _b, [[{:_triggers, _c, _d}], :ok]}]} =
+        Dsl.ast_add_argument_to_func_if_missing(ast_with_arg)
     end
   end
 end

@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -110,8 +110,6 @@ defmodule Fledex do
     #  |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
 
-  # TODO: decide on whether there is a point to have a static version. it could
-  #       simply delegate to animation.
   @doc """
   The static macro is equal to the animation macro, but it will not receive any triggers.
 
@@ -206,6 +204,30 @@ defmodule Fledex do
   end
 
   @doc """
+  A job is a [cron job](https://en.wikipedia.org/wiki/Cron) that will trigger in regular
+  intervals (depending on the pattern specified). You can run any function and the most
+  likely event you will trigger is to publish an event to the triggers (see the [weather
+  example livebook](5_fledex_weather_example.livemd)):
+
+  ```elixir
+  Fledex.Utils.PubSub.broadcast(:fledex, "trigger", {:trigger, %{temperature: -15.2}})
+  ```
+  """
+  defmacro job(name, pattern, do: block) do
+    # IO.puts("#{inspect name}, #{inspect pattern}, #{inspect block}")
+    ast_func = Dsl.ast_create_anonymous_func([], block)
+    # ast_func = {:fn, [], block}
+    quote do
+      Dsl.create_job(
+        unquote(name),
+        unquote(pattern),
+        unquote(ast_func)
+      )
+    end
+      # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
+  end
+
+  @doc """
     This introduces a new led_strip.
   """
   # @spec led_strip(atom, atom | keyword, Macro.t) :: Macro.t | map()
@@ -218,7 +240,8 @@ defmodule Fledex do
         unquote(strip_options),
         unquote(configs_ast)
       )
-      end
+    end
       # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
+
 end

@@ -109,7 +109,7 @@ defmodule Fledex.Effect.WanishTest do
       {returned_leds, triggers, effect_status} = Wanish.apply(leds, 3, config, %{})
       assert returned_leds == leds
       assert triggers == %{}
-      assert effect_status == :diabled
+      assert effect_status == :disabled
     end
   end
 end

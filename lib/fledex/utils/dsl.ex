@@ -4,15 +4,25 @@
 
 defmodule Fledex.Utils.Dsl do
   alias Fledex.Animation.Animator
+  alias Fledex.Animation.Coordinator
+  alias Fledex.Animation.Job
   alias Fledex.Animation.Manager
 
   @fledex_config %{
     animation: Animator,
     static: Animator,
-    component: Animator, # This is not the correct one yet
-    effect: Animator # This is not yet correct. It shouldn't appear here at all, but it makes it work for now
+    job: Job,
+    coordinator: Coordinator,
+    # the next 2 are required for the ast manipulation that we need to do
+    component: Animator, # The module is not really correct, but it's not important
+    effect: Animator # The module is not really correct, but it's not important
   }
   @fledex_config_keys Map.keys(@fledex_config)
+
+  @spec fledex_config :: %{atom => module}
+  def fledex_config do
+    @fledex_config
+  end
 
   @spec create_config(atom, atom, (map -> Leds.t), keyword | nil) :: Manager.config_t()
   def create_config(name, type, def_func, options) when
@@ -70,7 +80,7 @@ defmodule Fledex.Utils.Dsl do
       config
     else
       Manager.register_strip(strip_name, strip_options)
-      Manager.register_animations(strip_name, config)
+      Manager.register_config(strip_name, config)
     end
   end
 
@@ -83,6 +93,17 @@ defmodule Fledex.Utils.Dsl do
       Manager.start_link(@fledex_config)
     end
   end
+
+  def create_job(name, pattern, function) do
+    %{
+      name => %{
+        type: :job,
+        pattern: pattern,
+        func: function
+      }
+    }
+  end
+
   @spec ast_extract_configs(Macro.t) :: Macro.t
   def ast_extract_configs(block) do
     {_ast, configs_ast} = Macro.prewalk(block, [], fn
@@ -105,10 +126,21 @@ defmodule Fledex.Utils.Dsl do
   def ast_add_argument_to_func_if_missing(block) do
     case block do
       # argument matched, create only an anonymous function around it
-      [{:->, _, _}] = block -> {:fn, [], block}
+      [{:->, _, _}] = block -> ast_create_anonymous_func(block)
       # argument didn't match, create an argument
       # then create an anonymous function around it
-      block -> {:fn, [], [{:->, [], [[{:_triggers, [], Elixir}], block]}]}
+      block -> ast_create_anonymous_func([:_triggers], block) # [{:->, [], [[{:_triggers, [], Elixir}], block]}])
     end
+  end
+  @spec ast_create_anonymous_func([{:->, list, [[atom] | any]}]) :: {:fn, [], [{:->, list, [[atom] | any]}]}
+  def ast_create_anonymous_func([{:->, _, [args, _body]}] = block) when is_list(args) do
+    {:fn, [], block}
+  end
+  @spec ast_create_anonymous_func([atom], any) :: {:fn, [], [{:->, [], [[atom] | any]}]}
+  def ast_create_anonymous_func(args, block) when is_list(args) do
+    args = Enum.map(args, fn arg ->
+      {arg, [], Elixir}
+    end)
+    {:fn, [], [{:->, [], [args, block]}]}
   end
 end

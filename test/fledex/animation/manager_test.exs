@@ -49,7 +49,6 @@ defmodule Fledex.Animation.ManagerTest do
       {:ok, state} = Manager.get_info()
       assert Map.keys(state) == [strip_name, :strip_name2]
     end
-    # TODO: check this test it seems to be flaky
     test "re-register led_strip", %{strip_name: strip_name} do
       pid = GenServer.whereis(strip_name)
       assert pid != nil
@@ -59,10 +58,10 @@ defmodule Fledex.Animation.ManagerTest do
     end
     test "register animation", %{strip_name: strip_name} do
       config = %{
-        t1: %{},
-        t2: %{}
+        t1: %{type: :animation},
+        t2: %{type: :animation}
       }
-      Manager.register_animations(strip_name, config)
+      Manager.register_config(strip_name, config)
       assert {:ok, config} == Manager.get_info(strip_name)
 
       Enum.each(Map.keys(config), fn key ->
@@ -71,17 +70,17 @@ defmodule Fledex.Animation.ManagerTest do
     end
     test "re-register animation", %{strip_name: strip_name} do
       config = %{
-        t1: %{},
-        t2: %{}
+        t1: %{type: :animation},
+        t2: %{type: :animation}
       }
-      Manager.register_animations(strip_name, config)
+      Manager.register_config(strip_name, config)
       assert GenServer.whereis(String.to_atom("#{strip_name}_#{:t2}")) != nil
 
       config2 = %{
-        t1: %{},
-        t3: %{}
+        t1: %{type: :animation},
+        t3: %{type: :animation}
       }
-      Manager.register_animations(strip_name, config2)
+      Manager.register_config(strip_name, config2)
       assert {:ok, config2} == Manager.get_info(strip_name)
 
       assert GenServer.whereis(String.to_atom("#{strip_name}_#{:t2}")) == nil
@@ -135,7 +134,7 @@ defmodule Fledex.Animation.ManagerTest2 do
           type: :test
         }
       }
-      response = Manager.register_animations(:some_strip, config)
+      response = Manager.register_config(:some_strip, config)
 
       assert response == {:error, "Animator is wrongly configured"}
       Process.exit(pid, :normal)

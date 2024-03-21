@@ -1,5 +1,5 @@
 <!--
-Copyright 2023, Matthias Reik <fledex@reik.org>
+Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -44,10 +44,30 @@ Because of that, it would make sense if an animation would return
 also a list of animation configs
 
 # led strip
-The `led_strip` takes a list of animation structs and creates the led strip configuration
+The `led_strip` takes a list of config structs and creates the led strip configuration
+
+# jobs & coordinators
+It should also be possible to configure jobs and coordinators (on root level), i.e.:
+``` elixir
+use Fledex
+led_strip :john, :none do
+    animation :joe, do
+        leds(10)
+    end
+
+    job :joe_job, "* * * * * *", do
+        :ok
+    end
+
+    coordinator :coord do
+        # we don't know yet how a coordinator will be configured
+    end
+end
+```
+Coordinators and jobs will also return a configuration, but of type `:job` and `:coordinator`.
 
 # Conclusion
 
-1. An animation consists of an animation struct (see above for details)
+1. An animation consists of an config struct (see above for details)
 2. `animation`, `static`, `component` all return a list of animation structs
 3. `effect` takes in a list of animation struts and returns a list of animation structs

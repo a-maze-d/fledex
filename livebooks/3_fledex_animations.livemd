@@ -62,11 +62,14 @@ Now it's time to define our first animation by using the `Fledex.Animation.Manag
 
 We call our led strip `:john` (it has to be an atom). In this example we will only use the simple kino driver (and configure it with defaults) and thereby display the result within our livebook.
 
+We then define an animation configuration that consists of a map with they key being the name of the animation and the value being the configuration of that animation. Each animation configuration needs to specify the `:type` as `:animation`, because (as we will see later) other types exist, and a `:def_func` that defines our animation (potentially with an additional `:send_config_func` as shown here. We'll look at this in more detail in a later section).
+
 ```elixir
 Manager.register_strip(:john, :kino)
 
-Manager.register_animations(:john, %{
+Manager.register_config(:john, %{
   caine: %{
+    type: :animation,
     def_func: &HelperFunctions.rainbow/1,
     send_config_func: &HelperFunctions.send_config/1
   }
@@ -94,8 +97,9 @@ defmodule HelperFunctions2 do
   end
 end
 
-Manager.register_animations(:john, %{
+Manager.register_config(:john, %{
   caine: %{
+    type: :animation,
     def_func: &HelperFunctions2.red_leds/1,
     send_config_func: &HelperFunctions2.send_config/1
   }
@@ -121,12 +125,14 @@ defmodule HelperFunctions3 do
   end
 end
 
-Manager.register_animations(:john, %{
+Manager.register_config(:john, %{
   caine: %{
+    type: :animation,
     def_func: &HelperFunctions2.red_leds/1,
     send_config_func: &HelperFunctions2.send_config/1
   },
   doe: %{
+    type: :animation,
     def_func: &HelperFunctions3.rgb_leds/1,
     send_config_func: &HelperFunctions3.send_config/1
   }
@@ -142,12 +148,14 @@ The advantage of using the anonymous functions is that you don't get any compila
 This allows for a smooth replacement of definitions.
 
 ```elixir
-Manager.register_animations(:john, %{
+Manager.register_config(:john, %{
   caine: %{
+    type: :animation,
     def_func: &HelperFunctions2.red_leds/1,
     send_config_func: &HelperFunctions2.send_config/1
   },
   doe: %{
+    type: :animation,
     def_func: fn _triggers ->
       Leds.leds(50) |> Leds.light(:blue) |> Leds.light(:blue) |> Leds.light(:blue)
     end,

@@ -59,6 +59,7 @@ Our `:help` "animation" defines an led sequence of 5 leds (the first one being c
 ```elixir
 config = %{
   seconds: %{
+    type: :animation,
     def_func: fn _triggers ->
       Leds.leds(60) |> Leds.light(:red)
     end,
@@ -70,6 +71,7 @@ config = %{
     end
   },
   minutes: %{
+    type: :animation,
     def_func: fn _triggers ->
       Leds.leds(60) |> Leds.light(:green)
     end,
@@ -81,6 +83,7 @@ config = %{
     end
   },
   hours: %{
+    type: :animation,
     def_func: fn _triggers ->
       Leds.leds(60) |> Leds.light(:blue)
     end,
@@ -92,6 +95,7 @@ config = %{
     end
   },
   help: %{
+    type: :animation,
     def_func: fn _triggers ->
       Leds.leds(5)
       |> Leds.light(:ash_gray)
@@ -103,10 +107,10 @@ config = %{
 
 ## Starting our animation
 
-Now that we have defined our configuration we can start our animation, by registering our animations-configuration to our `Fledex.Animation.Manager` by calling `register_animations/2`. That's it!
+Now that we have defined our configuration we can start our animation, by registering our animations-configuration to our `Fledex.Animation.Manager` by calling `register_config/2`. That's it!
 
 ```elixir
-Manager.register_animations(:clock, config)
+Manager.register_config(:clock, config)
 ```
 
 If you are searching for your led strip then scoll up. It's displayed where you have registered your led strip with the `Fledex.Animation.Manager`.

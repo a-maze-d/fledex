@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -15,7 +15,7 @@ defmodule Fledex.Animation.Manager do
   * `regiseter_strip/2`: to add a new led strip. This will also create
   the necessary `Fledex.LedStrip` and configures it.
   * `unregister_strip/1`: this will remove an led strip again
-  * `register_animations/2`: this registers (or reregisters) a set of
+  * `register_config/2`: this registers (or reregisters) a set of
     animations. Any animation that is not part of a reregistration will
     be dropped.
   """
@@ -26,6 +26,7 @@ defmodule Fledex.Animation.Manager do
   alias Fledex.Animation.Animator
   alias Fledex.Animation.Interface
   alias Fledex.LedStrip
+  alias Fledex.Utils.Dsl
 
   @type config_t :: %{
     atom => Animator.config_t()
@@ -41,10 +42,10 @@ defmodule Fledex.Animation.Manager do
   This starts a new `Fledex.Animation.Manager`. Only a single animation manager will be started
   even if called serveral times (thus it's save to call it repeatedly).
   The `type_config` specifies the list of supported animations and their module mapping
-  (see `Fledex.fledex_config/0` for the configurations used by default.)
+  (see `Fledex.Utils.Dsl.fledex_config/0` for the configurations used by default.)
   """
   @spec start_link(%{atom => module}) :: {:ok, pid()}
-  def start_link(type_config \\ %{}) do
+  def start_link(type_config \\ Dsl.fledex_config) do
     # we should only have a single server running. Therefore we check whether need to do something
     # or if the server is already running
     pid = GenServer.whereis(__MODULE__)
@@ -84,16 +85,16 @@ defmodule Fledex.Animation.Manager do
   again, will be stopped if they are not part of the configuration anymore.
   Newly defined animations will be started.
 
-  Different types of animations exist, see `Fledex.fledex_config/0` for
+  Different types of configurations exist, see `Fledex.Utils.Dsl.fledex_config/0` for
   the default configurations that will be used when using `use Fledex`.
 
   Note: the animation functions might get called quite frequently and
   therefore any work within them should be kept to a minimum.
   """
-  @spec register_animations(atom, %{atom => map}) :: :ok
-  def register_animations(strip_name, configs) do
+  @spec register_config(atom, %{atom => map}) :: :ok
+  def register_config(strip_name, configs) do
     # Logger.debug("register animation: #{strip_name}, #{inspect configs}")
-    GenServer.call(__MODULE__, {:register_animations, strip_name, configs})
+    GenServer.call(__MODULE__, {:register_config, strip_name, configs})
   end
 
   @doc """
@@ -123,7 +124,7 @@ defmodule Fledex.Animation.Manager do
   def handle_call({:register_strip, strip_name, driver_config}, _pid, state) when is_atom(strip_name) do
     pid = Process.whereis(strip_name)
     if pid == nil do
-      {:reply, :ok, register_strip(strip_name, driver_config, state)}
+      {:reply, :ok, register_strip(state, strip_name, driver_config)}
     else
       # we have a bit of a problem when using the kino driver, since it will not be reinitialized
       # when calling this function again (and thereby we don't get any frame/display).
@@ -132,16 +133,21 @@ defmodule Fledex.Animation.Manager do
       {:reply, :ok, state}
     end
   end
-  @spec handle_call({:register_animation, atom, map}, GenServer.from, state_t) ::
+  @spec handle_call({:register_config, atom, map}, GenServer.from, state_t) ::
     {:reply, :ok, state_t} | {:reply, {:error, String.t}, state_t}
-  def handle_call({:register_animations, strip_name, configs}, _pid, state) do
-    {:reply, :ok, register_animations(strip_name, configs, state)}
+  def handle_call({:register_config, strip_name, configs}, _pid, state) do
+    {animations, coordinators, jobs} = split_config(configs)
+    state = state
+      |> register_animations(strip_name, animations)
+      |> register_coordinators(strip_name, coordinators)
+      |> register_jobs(strip_name, jobs)
+    {:reply, :ok, state}
   rescue
     RuntimeError -> {:reply, {:error, "Animator is wrongly configured"}, state}
   end
   @spec handle_call({:unregister_strip, atom}, GenServer.from, state_t) :: {:reply, :ok, state_t}
   def handle_call({:unregister_strip, strip_name}, _pid, state) when is_atom(strip_name) do
-    {:reply, :ok, unregister_strip(strip_name, state)}
+    {:reply, :ok, unregister_strip(state, strip_name)}
   end
   @spec handle_call({:info, atom}, GenServer.from, state_t) :: {:reply, {:ok, map}, state_t}
   def handle_call({:info, strip_name}, _from, state) do
@@ -152,15 +158,30 @@ defmodule Fledex.Animation.Manager do
     {:reply, {:ok, return_value}, state}
   end
 
-  @spec register_strip(atom, atom | map, state_t) :: state_t
-  defp register_strip(strip_name, driver_config, state) do
+  # we split the animation into the different aspects
+  # animations, coordinators and cronjobs
+  defp split_config(config) do
+    {coordinators, rest} = Map.split_with(config, fn {_key, value} -> value.type == :coordiantor end)
+    {jobs, rest} = Map.split_with(rest, fn {_key, value} -> value.type == :job end)
+    {animations, rest} = Map.split_with(rest, fn {_key, value} -> value.type in [:animation, :static] end)
+    if map_size(rest) != 0 do
+      raise RuntimeError, "An unknown type was encountered #{inspect rest}"
+    end
+    # # animations = Enum.filter(config, fn {_key, value} -> value.type in [:animation, :static] end)
+    # # coordinators = Enum.filter(config, fn {_key, value} -> value.type in [:coordinator] end)
+    # # jobs = Enum.filter(config, fn {_key, value} -> value.type in [:job] end)
+    {animations, coordinators, jobs}
+  end
+
+  @spec register_strip(state_t, atom, atom | map) :: state_t
+  defp register_strip(state, strip_name, driver_config) do
     # Logger.info("registering led_strip: #{strip_name}")
     {:ok, _pid} = LedStrip.start_link(strip_name, driver_config)
     %{state | animations: Map.put_new(state.animations, strip_name, nil)}
   end
 
-  @spec unregister_strip(atom, state_t) :: state_t
-  defp unregister_strip(strip_name, state) do
+  @spec unregister_strip(state_t, atom) :: state_t
+  defp unregister_strip(state, strip_name) do
     # Logger.info("unregistering led_strip_ #{strip_name}")
     map = state[strip_name] || %{}
     animation_names = Map.keys(map)
@@ -169,8 +190,8 @@ defmodule Fledex.Animation.Manager do
     %{state | animations: Map.drop(state.animations, [strip_name])}
   end
 
-  @spec register_animations(atom, map, state_t) :: state_t
-  defp register_animations(strip_name, configs, state) do
+  @spec register_animations(state_t, atom, map) :: state_t
+  defp register_animations(state, strip_name, configs) do
     # Logger.info("defining config for #{strip_name}, animations: #{inspect Map.keys(configs)}")
 
     # configs is a list of registration structs.
@@ -207,22 +228,21 @@ defmodule Fledex.Animation.Manager do
   @spec create_animators(atom, map, map) :: :ok
   defp create_animators(strip_name, created_animations, type_config) do
     Enum.each(created_animations, fn {animation_name, config} ->
-      type = config[:type] || :animation
-      module_name = type_config[type] || Animator
-      {:ok, pid} = module_name.start_link(config, strip_name, animation_name)
-      server_name = Interface.build_animator_name(strip_name, animation_name)
-      case Process.info(pid, :registered_name) do
-        {:registered_name, ^server_name} -> :ok
-        # we could register the name if it does not exist and we could unregister and reregister
-        # the process if it have the wrong name, but that's not gonna end well. It's better to
-        # throw this back immediately.
-        # nil ->
-          # Process.register(pid, server_name)
-        # {:registered_name, other_name} ->
-          # Process.unregister(other_name)
-          # Process.register(pid, server_name)
-        _anything -> raise RuntimeError, message: "The animator is not registered under the expected name"
-      end
+      module_name = type_config[config.type]
+      {:ok, _pid} = module_name.start_link(config, strip_name, animation_name)
+    #   server_name = Interface.build_animator_name(strip_name, animation_name)
+    #   case Process.info(pid, :registered_name) do
+    #     {:registered_name, ^server_name} -> :ok
+    #     # we could register the name if it does not exist and we could unregister and reregister
+    #     # the process if it have the wrong name, but that's not gonna end well. It's better to
+    #     # throw this back immediately.
+    #     # nil ->
+    #       # Process.register(pid, server_name)
+    #     # {:registered_name, other_name} ->
+    #       # Process.unregister(other_name)
+    #       # Process.register(pid, server_name)
+    #     _anything -> raise RuntimeError, message: "The animator is not registered under the expected name"
+    #   end
     end)
   end
 
@@ -248,12 +268,19 @@ defmodule Fledex.Animation.Manager do
     {dropped_animations, present_animations}
   end
 
+  defp register_coordinators(state, _strip_name, _coordinators) do
+    state
+  end
+
+  defp register_jobs(state, _strip_name, _jobs) do
+    state
+  end
   @impl GenServer
   @spec terminate(atom, state_t) :: :ok
   def terminate(_reason, state) do
     strip_names = Map.keys(state.animations)
     Enum.reduce(strip_names, state, fn strip_name, state ->
-      unregister_strip(strip_name, state)
+      unregister_strip(state, strip_name)
     end)
   end
 end

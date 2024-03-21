@@ -19,16 +19,16 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Add more error handling scenarios (v0.4)
 - [ ] Cleanup
   - [x] add Copyright comment into every file (make reuse green) (v0.4)
-  - [ ] Improve the Fledex configuration. The fledex_config/0 function feels very wrong (rethink the animator split up. Also effects raise the questions whether static "animations" should really be so static, since the effect would have any real effect on them) (v0.4)
+  - [x] Improve the Fledex configuration. The fledex_config/0 function feels very wrong (rethink the animator split up. Also effects raise the questions whether static "animations" should really be so static, since the effect would have any real effect on them) (v0.4) <-- DONE: static is only a convenience, they need to be "animated" too. A Coordinator will be introduced to coordinate animations. The sequencer I added before is likely to disappear again. Also the animation state will probably be implemented through pubsub instead of return value. This allows the coordinator to pick those up. We have to be careful though to only publish state changes. All envisaged changed will be tracked independently.
   - [ ] Improve the LedsDriver config (v0.4)
-  - [ ] Fix flaky tests (see TODOs) (v0.4)
+  - [x] Fix flaky tests (see TODOs) (v0.4) <-- haven't seen any of those anymore
   - [ ] Perform an extra round of testing on hardware (v0.4)
   - [ ] Enable Telemetry? (v0.5)
   - [x] Upgrade to a hex released version of circuits_sim as soon as available (v0.?)
 - [ ] Missing functionality
   - [x] see the project plan that was planned out with my son, we are not quite there yet (v0.4)
   - [x] review the ideas.md document to see whether all ideas have been implemented (v0.4)
-  - [ ] improve on the effect state and component state handling. It's currently possible, but not super smooth and it's also difficult to avoid conflicts between different animations/effect/components
+  - [x] improve on the effect state and component state handling. It's currently possible, but not super smooth and it's also difficult to avoid conflicts between different animations/effect/components <-- see my comment above about rethinking the config. This covers this aspect too.
   - [x] Create a sequencer effect that runs one effect before switching to the next effect. Maybe we  can replace the wanish and reappaer effect with 2 distinct effects this way and each of them being simpler. (v0.4) NOTE: This will not be done. I gave it some more thoughts and instead of a sequencer I will implement support for a coordinator that can control individual animations/effects.
   - [ ] Create support for a coordinator (that can control individual animations and effects. Effects will have to notify back their state)
   - [ ] Create support for a cron-manager (that allows running jobs, like the one we have in the weather station example and thereby no need to handcraft anything)

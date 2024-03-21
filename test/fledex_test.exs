@@ -12,18 +12,14 @@ defmodule Fledex.Test do
 
   @server_name :john
   describe "test macros" do
-    test "fledex loaded" do
-      use Fledex, dont_start: true
-      assert fledex_config() != nil
-    end
     test "use macro" do
       # we start the server
       assert GenServer.whereis(Manager) == nil
       use Fledex
       assert GenServer.whereis(Manager) != nil
 
-      # and check that both Fledex, Fledex.Leds and Fledex.Color.Names are imported
-      assert :erlang.fun_info(&fledex_config/0) # from Fledex
+      # and check that Fledex, Fledex.Leds and Fledex.Color.Names are imported
+      # Testing for Fledex itself is difficult, since it only defines macros.
       assert :erlang.fun_info(&leds/1) # from Fledex.Leds
       assert :erlang.fun_info(&red/1) # from Fledex.Color.Names
     end
@@ -34,20 +30,17 @@ defmodule Fledex.Test do
       assert GenServer.whereis(Manager) == nil
 
       # and check that both Fledex and Fledex.Leds are imported
-      assert :erlang.fun_info(&fledex_config/0) # from Fledex
       assert :erlang.fun_info(&leds/1)          # from Fledex.Leds
       assert :erlang.fun_info(&red/0)           # from Fledex.Color.Names
-
     end
 
-    # TODO: check this test, it seems to be flaky
     test "simple led strip macro" do
       # ensure our servers are not started
       assert GenServer.whereis(@server_name) == nil
       assert GenServer.whereis(Manager) == nil
 
       use Fledex
-      led_strip @server_name do
+      led_strip @server_name, :kino do
         # we don't define here anything
       end
 
@@ -286,6 +279,19 @@ defmodule Fledex.Test do
       } = config
       assert def_func1.(%{}) == leds(10)
       assert def_func2.(%{}) == leds(20)
+    end
+    test "animation with job" do
+      use Fledex
+      config = led_strip :strip, :debug do
+        animation :john do
+          leds(20)
+        end
+        job :john_job, "* * * * * *" do
+          :ok
+        end
+      end
+      # IO.puts("job: #{inspect config}")
+      assert %{john: %{type: :animation}, john_job: %{type: :job, pattern: "* * * * * *"}} = config
     end
   end
 end
