@@ -85,6 +85,21 @@ defmodule Fledex.LedStrip do
 
     start_link(strip_name, config)
   end
+  def start_link(strip_name, :null) do
+    config = %{
+      timer: %{only_dirty_update: true},
+      led_strip: %{
+        merge_strategy: :cap,
+        driver_modules: [Fledex.Driver.Impl.Null],
+        config: %{
+          Fledex.Driver.Impl.Null => %{
+          }
+        }
+      }
+    }
+
+    start_link(strip_name, config)
+  end
   def start_link(strip_name, init_args) when is_map(init_args) do
     # Logger.info(Exception.format_stacktrace())
     GenServer.start_link(__MODULE__, {init_args, strip_name}, name: strip_name)

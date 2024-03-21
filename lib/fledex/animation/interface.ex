@@ -29,12 +29,7 @@ defmodule Fledex.Animation.Interface do
   ```
   """
   @callback config(strip_name :: atom, animation_name :: atom, config :: map) :: :ok
-  @doc """
-  Retrieve infromation about this animation. This is mainly useful when running some
-  tests. By default this function will return the animation state. This is one of the
-  few functions that does not need to be implemented
-  """
-  @callback get_info(strip_name :: atom, animation_name :: atom) :: any
+
   @doc """
   When the animation is no long required, this function should be called. This will
   call (by default) GenServer.stop. The animation can implement the `terminate/2`

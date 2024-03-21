@@ -26,24 +26,6 @@ defmodule Fledex do
 
   alias Fledex.Utils.Dsl
 
-  # configuration for the different macros/functions that can be used to configure our strip
-  # this is also used to configure our Manager to resolve the type to a module
-  @config %{
-    animation: Animator,
-    static: Animator,
-    component: Animator, # This is not the correct one yet
-    effect: Animator # This is not yet correct. It shouldn't appear here at all, but it makes it work for now
-  }
-  # @config_keys Map.keys @config
-
-  @doc """
-  This function returns the currently configured macros/functions that can be used in a fledex led_strip
-  """
-  @spec fledex_config :: %{atom => module}
-  def fledex_config do
-    @config
-  end
-
   @doc"""
   By using this module, the `Fledex` macros are made available.
 

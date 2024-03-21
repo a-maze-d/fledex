@@ -7,8 +7,8 @@ defmodule Fledex.Test do
 
   require Logger
 
-  alias Fledex.Animation.Animator
   alias Fledex.Animation.Manager
+  alias Fledex.ManagerTestUtils
 
   @server_name :john
   describe "test macros" do
@@ -71,25 +71,25 @@ defmodule Fledex.Test do
          _triggers -> leds(10)
         end
       end
-      {:ok, configs} = Manager.get_info()
+      config = ManagerTestUtils.get_manager_config()
 
-      assert Map.keys(configs) == [:john]
-      assert Map.keys(configs.john) == [:merry]
-      assert configs.john.merry.def_func.(%{}) == leds(10)
+      assert Map.keys(config) == [:john]
+      assert Map.keys(config.john) == [:merry]
+      assert config.john.merry.def_func.(%{}) == leds(10)
       # assert configs.john.merry.send_config_func.(%{}) == %{}
     end
     test "simple animation macro (with led_strip) withoutout trigger" do
       use Fledex
-      led_strip :john, :none do
+      led_strip :john, :null do
         animation :merry do
          leds(10)
         end
       end
-      {:ok, configs} = Manager.get_info()
+      config = ManagerTestUtils.get_manager_config()
 
-      assert Map.keys(configs) == [:john]
-      assert Map.keys(configs.john) == [:merry]
-      assert configs.john.merry.def_func.(%{}) == leds(10)
+      assert Map.keys(config) == [:john]
+      assert Map.keys(config.john) == [:merry]
+      assert config.john.merry.def_func.(%{}) == leds(10)
       # assert configs.john.merry.send_config_func.(%{}) == %{}
     end
 
@@ -112,15 +112,15 @@ defmodule Fledex.Test do
         end
       end
 
-      {:ok, configs} = Manager.get_info()
+      config = ManagerTestUtils.get_manager_config()
 
-      assert Map.keys(configs) == [:john, :doe]
-      assert Map.keys(configs.john) == [:merry, :kate]
-      assert configs.john.merry.def_func.(%{}) == leds(10)
-      assert configs.john.kate.def_func.(%{}) == leds(11)
-      assert Map.keys(configs.doe) == [:caine, :smith]
-      assert configs.doe.caine.def_func.(%{}) == leds(1)
-      assert configs.doe.smith.def_func.(%{}) == leds(2)
+      assert Map.keys(config) == [:john, :doe]
+      assert Map.keys(config.john) == [:merry, :kate]
+      assert config.john.merry.def_func.(%{}) == leds(10)
+      assert config.john.kate.def_func.(%{}) == leds(11)
+      assert Map.keys(config.doe) == [:caine, :smith]
+      assert config.doe.caine.def_func.(%{}) == leds(1)
+      assert config.doe.smith.def_func.(%{}) == leds(2)
    end
   end
   # static animations are internally animations, but they don't
@@ -135,15 +135,15 @@ defmodule Fledex.Test do
       end
 
       Process.sleep(500) # give a chance to triggers (even though we shouldn't collect any)
-      {:ok, configs} = Manager.get_info()
+      config = ManagerTestUtils.get_manager_config()
 
       # ensure that the block does not expect any triggers even though
       # the function actually does contain it
-      assert configs.sten.svenson.def_func.(%{}) == leds(5)
+      assert config.sten.svenson.def_func.(%{}) == leds(5)
 
-      {:ok, info} = Animator.get_info(:sten, :svenson)
-      assert info.triggers == %{}  # there should not be any triggers, since we are static
-      assert info.type == :static
+      config = ManagerTestUtils.get_animator_config(:sten, :svenson)
+      assert config.triggers == %{}  # there should not be any triggers, since we are static
+      assert config.type == :static
     end
   end
   describe "effects" do

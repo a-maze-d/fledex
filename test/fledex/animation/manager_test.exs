@@ -6,6 +6,7 @@ defmodule Fledex.Animation.ManagerTest do
   use ExUnit.Case, async: false
 
   alias Fledex.Animation.Manager
+  alias Fledex.ManagerTestUtils
 
   @strip_name :test_strip
   setup do
@@ -14,7 +15,7 @@ defmodule Fledex.Animation.ManagerTest do
         id: Manager,
         start: {Manager, :start_link, []}
       })
-    Manager.register_strip(@strip_name, :none)
+    Manager.register_strip(@strip_name, :null)
     %{pid: pid, strip_name: @strip_name}
   end
 
@@ -26,28 +27,28 @@ defmodule Fledex.Animation.ManagerTest do
   end
   describe "client functions" do
     test "register/unregister led_strip", %{strip_name: strip_name} do
-      {:ok, state} = Manager.get_info()
-      assert Map.keys(state) == [strip_name]
+      config = ManagerTestUtils.get_manager_config()
+      assert Map.keys(config) == [strip_name]
       assert GenServer.whereis(strip_name) != nil
 
       Manager.unregister_strip(strip_name)
-      {:ok, state} = Manager.get_info()
-      assert Map.keys(state) == []
+      config = ManagerTestUtils.get_manager_config()
+      assert Map.keys(config) == []
       assert GenServer.whereis(strip_name) == nil
 
       Manager.register_strip(strip_name, :none)
-      {:ok, state} = Manager.get_info()
-      assert Map.keys(state) == [strip_name]
+      config = ManagerTestUtils.get_manager_config()
+      assert Map.keys(config) == [strip_name]
       assert GenServer.whereis(strip_name) != nil
     end
     test "register/unregister 2 led_strips", %{strip_name: strip_name} do
-      {:ok, state} = Manager.get_info()
-      assert Map.keys(state) == [strip_name]
+      config = ManagerTestUtils.get_manager_config()
+      assert Map.keys(config) == [strip_name]
 
       Manager.register_strip(:strip_name2, :none)
 
-      {:ok, state} = Manager.get_info()
-      assert Map.keys(state) == [strip_name, :strip_name2]
+      config = ManagerTestUtils.get_manager_config()
+      assert Map.keys(config) == [strip_name, :strip_name2]
     end
     test "re-register led_strip", %{strip_name: strip_name} do
       pid = GenServer.whereis(strip_name)
@@ -62,7 +63,7 @@ defmodule Fledex.Animation.ManagerTest do
         t2: %{type: :animation}
       }
       Manager.register_config(strip_name, config)
-      assert {:ok, config} == Manager.get_info(strip_name)
+      assert config == ManagerTestUtils.get_manager_config(strip_name)
 
       Enum.each(Map.keys(config), fn key ->
        assert GenServer.whereis(String.to_atom("#{strip_name}_#{key}")) != nil
@@ -81,7 +82,7 @@ defmodule Fledex.Animation.ManagerTest do
         t3: %{type: :animation}
       }
       Manager.register_config(strip_name, config2)
-      assert {:ok, config2} == Manager.get_info(strip_name)
+      assert config2 == ManagerTestUtils.get_manager_config(strip_name)
 
       assert GenServer.whereis(String.to_atom("#{strip_name}_#{:t2}")) == nil
       Enum.each(Map.keys(config2), fn key ->
@@ -104,10 +105,6 @@ defmodule Fledex.Animation.ManagerTest2 do
     end
     @impl true
     def config(_strip_name, _animation_name, _config) do
-      :ok
-    end
-    @impl true
-    def get_info(_strip_name, _animation_name) do
       :ok
     end
     @impl true

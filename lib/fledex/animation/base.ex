@@ -30,18 +30,12 @@ defmodule Fledex.Animation.Base do
       end
 
       @doc false
-      @spec get_info(strip_name :: atom, animation_name :: atom) :: {:ok, any}
-      def get_info(strip_name, animation_name) do
-        GenServer.call(Interface.build_animator_name(strip_name, animation_name), :info)
-      end
-
-      @doc false
       @spec shutdown(atom, atom) :: :ok
       def shutdown(strip_name, animation_name) do
         GenServer.stop(Interface.build_animator_name(strip_name, animation_name), :normal)
       end
 
-      defoverridable start_link: 3, config: 3, get_info: 2, shutdown: 2
+      defoverridable start_link: 3, config: 3, shutdown: 2
 
       # server side
       @impl GenServer

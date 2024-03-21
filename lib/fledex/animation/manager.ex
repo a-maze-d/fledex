@@ -37,6 +37,13 @@ defmodule Fledex.Animation.Manager do
     animations: map()
   }
 
+  # def child_spec(args) do
+  #   %{
+  #     id: Manager,
+  #     start: {Manager, :start_link, [args]}
+  #   }
+  # end
+
   ### client side
   @doc """
   This starts a new `Fledex.Animation.Manager`. Only a single animation manager will be started
@@ -97,17 +104,6 @@ defmodule Fledex.Animation.Manager do
     GenServer.call(__MODULE__, {:register_config, strip_name, configs})
   end
 
-  @doc """
-  In some circumstances it can be useful to get information on what has
-  been configured and this function allows to retrieve this information.
-  The function can either be called with a strip name, or with `:all`
-  (the default) to retrieve all configurations at the same time.
-  """
-  @spec get_info(atom) :: map
-  def get_info(strip_name \\ :all) do
-    GenServer.call(__MODULE__, {:info, strip_name})
-  end
-
   ### server side
   @impl GenServer
   @spec init(map) :: {:ok, state_t}
@@ -148,14 +144,6 @@ defmodule Fledex.Animation.Manager do
   @spec handle_call({:unregister_strip, atom}, GenServer.from, state_t) :: {:reply, :ok, state_t}
   def handle_call({:unregister_strip, strip_name}, _pid, state) when is_atom(strip_name) do
     {:reply, :ok, unregister_strip(state, strip_name)}
-  end
-  @spec handle_call({:info, atom}, GenServer.from, state_t) :: {:reply, {:ok, map}, state_t}
-  def handle_call({:info, strip_name}, _from, state) do
-    return_value = case strip_name do
-      :all -> state.animations
-      other -> state.animations[other]
-    end
-    {:reply, {:ok, return_value}, state}
   end
 
   # we split the animation into the different aspects
