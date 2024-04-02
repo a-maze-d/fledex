@@ -26,10 +26,6 @@ jobs:
       matrix:
         otp: [26.0]
         elixir: [1.15.7]
-    env:
-      MIX_ENV: test
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -52,9 +48,11 @@ jobs:
       run: |
         mix deps.get
         mix compile
-    - name: Run tests
-      run: mix coveralls.github
     - name: REUSE Compliance Check
       uses: fsfe/reuse-action@v3
-    - name: Upload coverage to Coveralls
+    - name: Run tests
       run: mix coveralls.github
+      env:
+        MIX_ENV: test
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
