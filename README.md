@@ -10,7 +10,6 @@ SPDX-License-Identifier: Apache-2.0
 [![API docs](https://img.shields.io/hexpm/v/fledex.svg?label=hexdocs&color=0000ff "API docs")](https://hexdocs.pm/fledex)
 [![ElixirCI](https://github.com/a-maze-d/fledex/actions/workflows/elixir.yml/badge.svg "ElixirCI")](https://github.com/a-maze-d/fledex/actions/workflows/elixir.yml)
 [![REUSE status](https://api.reuse.software/badge/github.com/a-maze-d/fledex)](https://api.reuse.software/info/github.com/a-maze-d/fledex)
-[![Build Status](https://github.com/a-maze-d/fledex/workflows/Elixir%20CI/badge.svg)](https://github.com/a-maze-d/fledex/actions/workflows/elixir.yml)
 [![Coverage Status](https://coveralls.io/repos/github/a-maze-d/fledex/badge.svg?branch=main)](https://coveralls.io/github/a-maze-d/fledex?branch=main)
 
 
