@@ -159,7 +159,7 @@ defmodule Fledex.MixProject do
   defp aliases do
     [
       docs: ["docs", &copy_doc_images/1],
-      test: ["coveralls.html"],
+      # test: ["coveralls.html"],
       reuse: [&run_reuse/1]
     ]
   end
