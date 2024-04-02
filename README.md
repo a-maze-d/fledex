@@ -61,6 +61,14 @@ Take a look at the [Livebook examples](README.md#livebook) on how to use the DSL
 ## Livebook
 You can find some [livebooks](livebooks/README.md) files that show you how to use the library in a notebook (with and without hardware). You should be able to do most of your development on a computer (emulating the LED strip with a `Fledex.Driver.Impl.Kino`) before adjusting it to the real hardware (with the `Fledex.Driver.Impl.Spi`). On real hardware you can even run it with serveral drivers at the same time.
 
+## Further Docs
+you can find some further documentation in the `docs` folder about:
+
+* An Overview over the [Architecture](docs/architecture.md)
+* How to setup and connect real [Hardware](docs/hardware.md)
+* You might find in the folder also some temporary documenation with some thoughts, but I delete them again, once they have fulfilled their purpose, except for: 
+* A bit of history with the [Project Plan](docs/project_plan.md) as created with my son
+
 ## Known Limitations
 If you want to run this library in nerves-livebook, you currently have to compile your own livebook with the library included in your `mix.exs` file, since you can't add any libraries that are not already bundled.
 
