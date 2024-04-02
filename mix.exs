@@ -79,7 +79,7 @@ defmodule Fledex.MixProject do
       {:kino, "~> 0.11"},
       {:phoenix_pubsub, "~> 2.1"},
       # {:libcluster, "~> 3.3"},
-      # {:quantum, {:ok, "~> 3.0"},
+      {:quantum, "~> 3.0"},
 
       # observability
       {:telemetry, "~> 1.2"},

@@ -20,19 +20,19 @@ defmodule Fledex.Animation.Base do
       @spec start_link(config :: config_t, strip_name::atom, animation_name::atom) :: GenServer.on_start()
       def start_link(config, strip_name, animation_name) do
         {:ok, _pid} = GenServer.start_link(__MODULE__, {config, strip_name, animation_name},
-                        name: Interface.build_animator_name(strip_name, animation_name))
+                        name: Interface.build_name(strip_name, :animation, animation_name))
       end
 
       @doc false
       @spec config(atom, atom, config_t) :: :ok
       def config(strip_name, animation_name, config) do
-        GenServer.cast(Interface.build_animator_name(strip_name, animation_name), {:config, config})
+        GenServer.cast(Interface.build_name(strip_name, :animation, animation_name), {:config, config})
       end
 
       @doc false
       @spec shutdown(atom, atom) :: :ok
       def shutdown(strip_name, animation_name) do
-        GenServer.stop(Interface.build_animator_name(strip_name, animation_name), :normal)
+        GenServer.stop(Interface.build_name(strip_name, :animation, animation_name), :normal)
       end
 
       defoverridable start_link: 3, config: 3, shutdown: 2

@@ -11,7 +11,7 @@ defmodule Fledex.Animation.BaseTest do
 
   describe "util functions" do
     test "ensure correct naming" do
-      assert Interface.build_animator_name(:testA, :testB) == :testA_testB
+      assert Interface.build_name(:testA, :animation, :testB) == :"Elixir.testA.animation.testB"
     end
     test "default_def_func" do
       assert Base.default_def_func(%{}) == Leds.leds()

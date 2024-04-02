@@ -66,7 +66,7 @@ defmodule Fledex.Animation.ManagerTest do
       assert config == ManagerTestUtils.get_manager_config(strip_name)
 
       Enum.each(Map.keys(config), fn key ->
-       assert GenServer.whereis(String.to_atom("#{strip_name}_#{key}")) != nil
+       assert GenServer.whereis(String.to_atom("Elixir.#{strip_name}.#{:animation}.#{key}")) != nil
       end)
     end
     test "re-register animation", %{strip_name: strip_name} do
@@ -75,7 +75,7 @@ defmodule Fledex.Animation.ManagerTest do
         t2: %{type: :animation}
       }
       Manager.register_config(strip_name, config)
-      assert GenServer.whereis(String.to_atom("#{strip_name}_#{:t2}")) != nil
+      assert GenServer.whereis(String.to_atom("Elixir.#{strip_name}.#{:animation}.#{:t2}")) != nil
 
       config2 = %{
         t1: %{type: :animation},
@@ -84,9 +84,9 @@ defmodule Fledex.Animation.ManagerTest do
       Manager.register_config(strip_name, config2)
       assert config2 == ManagerTestUtils.get_manager_config(strip_name)
 
-      assert GenServer.whereis(String.to_atom("#{strip_name}_#{:t2}")) == nil
+      assert GenServer.whereis(String.to_atom("Elixir.#{strip_name}.#{:animation}.#{:t2}")) == nil
       Enum.each(Map.keys(config2), fn key ->
-       assert GenServer.whereis(String.to_atom("#{strip_name}_#{key}")) != nil
+       assert GenServer.whereis(String.to_atom("Elixir.#{strip_name}.#{:animation}.#{key}")) != nil
       end)
     end
   end

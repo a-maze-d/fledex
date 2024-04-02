@@ -166,6 +166,11 @@ defmodule Fledex.LedStrip do
     GenServer.call(strip_name, :reinit_drivers)
   end
 
+  @spec stop(GenServer.server()) :: :ok
+  def stop(strip_name \\ __MODULE__) do
+    GenServer.stop(strip_name)
+  end
+
   # server code
   @impl GenServer
   @spec init({map, atom}) :: {:ok, state_t}  | {:stop, String.t()}

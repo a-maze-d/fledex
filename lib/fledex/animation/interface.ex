@@ -46,9 +46,9 @@ defmodule Fledex.Animation.Interface do
   It is the responsibility of the Animator to set the servername correctly. The
   `Fledex.Animation.Base` is doing this by default.
   """
-  @spec build_animator_name(atom, atom) :: atom
-  def build_animator_name(strip_name, animation_name)
+  @spec build_name(atom, (:animation | :job | :coordinator), atom) :: atom
+  def build_name(strip_name, type, animation_name)
     when is_atom(strip_name) and is_atom(animation_name) do
-    String.to_atom("#{strip_name}_#{animation_name}")
+    Module.concat(Module.concat(strip_name, type), animation_name)
   end
 end

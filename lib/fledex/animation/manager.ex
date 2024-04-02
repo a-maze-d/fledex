@@ -113,7 +113,8 @@ defmodule Fledex.Animation.Manager do
     # children = [
     #   {DynamicSupervisor, strategy: :one_for_one, name: Manager.LedStrips},
     #   {DynamicSupervisor, strategy: :one_for_one, name: Manager.Animations},
-    #   {DynamicSupervisor, strategy: :one_for_one, name: Manager.Coordinators}
+    #   {DynamicSupervisor, strategy: :one_for_one, name: Manager.Coordinators},
+    #   Job
     #   # Do we need one for Jobs?
     # ]
     # Supervisor.start_link(children, strategy: :one_for_one)
@@ -187,10 +188,11 @@ defmodule Fledex.Animation.Manager do
   @spec unregister_strip(state_t, atom) :: state_t
   defp unregister_strip(state, strip_name) do
     # Logger.info("unregistering led_strip_ #{strip_name}")
-    map = state[strip_name] || %{}
-    animation_names = Map.keys(map)
-    shutdown_animators(strip_name, animation_names)
-    GenServer.stop(strip_name)
+    shutdown_coordinators(strip_name,Map.keys(state.coordinators[strip_name] || %{}))
+    shutdown_jobs(strip_name, Map.keys(state.jobs[strip_name] || %{}))
+    shutdown_animators(strip_name, Map.keys(state.animations[strip_name] || %{}))
+    LedStrip.stop(strip_name)
+
     %{state |
       animations: Map.drop(state.animations, [strip_name]),
       coordinators: Map.drop(state.coordinators, [strip_name]),
@@ -219,7 +221,7 @@ defmodule Fledex.Animation.Manager do
   @spec shutdown_animators(atom, [atom]) :: :ok
   defp shutdown_animators(strip_name, dropped_animations) do
     Enum.each(dropped_animations, fn animation_name ->
-      GenServer.stop(Interface.build_animator_name(strip_name, animation_name), :normal)
+      GenServer.stop(Interface.build_name(strip_name, :animation, animation_name), :normal)
     end)
   end
 
@@ -237,7 +239,7 @@ defmodule Fledex.Animation.Manager do
     Enum.each(created_animations, fn {animation_name, config} ->
       module_name = type_config[config.type]
       {:ok, _pid} = module_name.start_link(config, strip_name, animation_name)
-    #   server_name = Interface.build_animator_name(strip_name, animation_name)
+    #   server_name = Interface.build_name(strip_name, :animation, animation_name)
     #   case Process.info(pid, :registered_name) do
     #     {:registered_name, ^server_name} -> :ok
     #     # we could register the name if it does not exist and we could unregister and reregister
@@ -280,10 +282,19 @@ defmodule Fledex.Animation.Manager do
     state
   end
 
+  defp shutdown_coordinators(_strip_name, _coordinator_names) do
+
+  end
+
   defp register_jobs(state, _strip_name, _jobs) do
     # state = %{state | jobs: }
     state
   end
+
+  defp shutdown_jobs(_strip_name, _job_names) do
+
+  end
+
   @impl GenServer
   @spec terminate(atom, state_t) :: :ok
   def terminate(_reason, state) do
