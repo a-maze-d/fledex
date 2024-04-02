@@ -24,6 +24,10 @@ jobs:
     name: Build and test
     runs-on: ubuntu-latest
 
+    env:
+      MIX_ENV: test
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
     - uses: actions/checkout@v4
     - name: Set up Elixir
@@ -44,4 +48,4 @@ jobs:
     - name: REUSE Compliance Check
       uses: fsfe/reuse-action@v3
     - name: Upload coverage to Coveralls
-      uses: coverallsapp/github-action@v2
+      run: mix coveralls.github
