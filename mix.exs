@@ -25,7 +25,9 @@ defmodule Fledex.MixProject do
       test_coverage: [
         tool: ExCoveralls,
         ignore_modules: [
-          Fledex.Test.CircuitsSim.Device.WS2801
+          Fledex.Test.CircuitsSim.Device.WS2801,
+          Fledex.Effect.Sequencer,
+          Fledex.Component.Thermometer
         ],
       ],
       docs: docs(),
@@ -36,7 +38,8 @@ defmodule Fledex.MixProject do
         "coveralls.detail": :test,
         "coveralls.post": :test,
         "coveralls.html": :test,
-        "coveralls.cobertura": :test
+        "coveralls.cobertura": :test,
+        "coveralls.multiple": :test
       ]
     ]
   end
