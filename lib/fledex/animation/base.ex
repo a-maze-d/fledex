@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Animation.Base do
-
   alias Fledex.Animation.Interface
   alias Fledex.Leds
 
@@ -17,16 +16,22 @@ defmodule Fledex.Animation.Base do
 
       # client side
       @doc false
-      @spec start_link(config :: config_t, strip_name::atom, animation_name::atom) :: GenServer.on_start()
+      @spec start_link(config :: config_t, strip_name :: atom, animation_name :: atom) ::
+              GenServer.on_start()
       def start_link(config, strip_name, animation_name) do
-        {:ok, _pid} = GenServer.start_link(__MODULE__, {config, strip_name, animation_name},
-                        name: Interface.build_name(strip_name, :animation, animation_name))
+        {:ok, _pid} =
+          GenServer.start_link(__MODULE__, {config, strip_name, animation_name},
+            name: Interface.build_name(strip_name, :animation, animation_name)
+          )
       end
 
       @doc false
       @spec config(atom, atom, config_t) :: :ok
       def config(strip_name, animation_name, config) do
-        GenServer.cast(Interface.build_name(strip_name, :animation, animation_name), {:config, config})
+        GenServer.cast(
+          Interface.build_name(strip_name, :animation, animation_name),
+          {:config, config}
+        )
       end
 
       @doc false

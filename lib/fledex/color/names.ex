@@ -36,32 +36,34 @@ defmodule Fledex.Color.Names do
   @typedoc """
   The allowed color names
   """
-  @type color_names_t :: unquote(
-    @color_names
-      |> Enum.map_join(" | ", &inspect/1)
-      |> Code.string_to_quoted!()
-  )
+  @type color_names_t ::
+          unquote(
+            @color_names
+            |> Enum.map_join(" | ", &inspect/1)
+            |> Code.string_to_quoted!()
+          )
   @typedoc """
   The different properties that can be interrogated from a named color
   """
-  @type color_props_t :: (:all|:index|:name|:decriptive_name|:hex|:rgb|:hsl|:hsv|:spource)
+  @type color_props_t ::
+          :all | :index | :name | :decriptive_name | :hex | :rgb | :hsl | :hsv | :spource
   @typedoc """
   The structure of a named color with all it's attributes.
   """
   @type color_struct_t :: %{
-    index: integer,
-    name: color_names_t,
-    descriptive_name: String.t,
-    hex: Types.colorint,
-    rgb: Types.rgb,
-    hsl: Types.hsl,
-    hsv: Types.hsv,
-    source: String.t
-  }
+          index: integer,
+          name: color_names_t,
+          descriptive_name: String.t(),
+          hex: Types.colorint(),
+          rgb: Types.rgb(),
+          hsl: Types.hsl(),
+          hsv: Types.hsv(),
+          source: String.t()
+        }
   @typedoc """
   The different values that can be returned when interrogating for some named color properties
   """
-  @type color_vals_t :: Types.color_any() | color_struct_t | String.t
+  @type color_vals_t :: Types.color_any() | color_struct_t | String.t()
 
   defguard is_color_name(atom) when atom in @color_names
 
@@ -80,6 +82,7 @@ defmodule Fledex.Color.Names do
   """
   @spec names :: list(color_names_t)
   def names, do: @color_names
+
   @doc """
   Retrieve information about the color with the given name
   """
@@ -92,9 +95,11 @@ defmodule Fledex.Color.Names do
   for color <- colors do
     name = color.name
     {r, g, b} = color.rgb
-    hex = color.hex
-    |> Integer.to_string(@base16)
-    |> String.pad_leading(6, "0")
+
+    hex =
+      color.hex
+      |> Integer.to_string(@base16)
+      |> String.pad_leading(6, "0")
 
     @doc """
     <div style="width: 25px; height: 25px; display: inline-block; background-color: ##{hex}; border: 1px solid black"></div>
@@ -113,9 +118,10 @@ defmodule Fledex.Color.Names do
     def unquote(name)(:hsl), do: unquote(Macro.escape(color)).hsl
     def unquote(name)(:descriptive_name), do: unquote(Macro.escape(color)).descriptive_name
     def unquote(name)(:source), do: unquote(Macro.escape(color)).source
-    @spec unquote(name)(Leds.t) :: Leds.t
+    @spec unquote(name)(Leds.t()) :: Leds.t()
     def unquote(name)(leds), do: leds |> Leds.light(unquote(Macro.escape(color)).hex)
-    @spec unquote(name)(Leds.t, offset :: non_neg_integer) :: Leds.t
-    def unquote(name)(leds, offset), do: leds |> Leds.light(unquote(Macro.escape(color)).hex, offset)
+    @spec unquote(name)(Leds.t(), offset :: non_neg_integer) :: Leds.t()
+    def unquote(name)(leds, offset),
+      do: leds |> Leds.light(unquote(Macro.escape(color)).hex, offset)
   end
 end

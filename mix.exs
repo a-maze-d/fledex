@@ -12,7 +12,7 @@ defmodule Fledex.MixProject do
       app: :fledex,
       version: @version,
       elixir: "~> 1.14",
-      elixirc_paths: elixirc_paths(Mix.env),
+      elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       description: description(),
       package: package(),
@@ -28,7 +28,7 @@ defmodule Fledex.MixProject do
           Fledex.Test.CircuitsSim.Device.WS2801,
           Fledex.Effect.Sequencer,
           Fledex.Component.Thermometer
-        ],
+        ]
       ],
       docs: docs(),
       aliases: aliases(),
@@ -51,7 +51,7 @@ defmodule Fledex.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger] ++ extra_applications(Mix.env),
+      extra_applications: [:logger] ++ extra_applications(Mix.env()),
       mod: {Fledex.Application, []}
     ]
   end
@@ -64,6 +64,7 @@ defmodule Fledex.MixProject do
   defp description() do
     "A small library to easily control an LED strip with nerves (or nerves-livebook)"
   end
+
   defp package() do
     [
       name: "fledex",
@@ -99,9 +100,14 @@ defmodule Fledex.MixProject do
       {:credo_binary_patterns, "~> 0.2.3", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.18", only: :test},
-      {:castore, "~> 1.0"}, # required by excoveralls
+      # required by excoveralls
+      {:castore, "~> 1.0", only: :test}
+      # we are not a phoenix app, but can still reveal some interesting stuff.
+      # leaving it out by default though
+      # {:sobelow, "~> 0.13", only: [:test, :dev], runtime: false}
     ]
   end
+
   defp docs do
     [
       source_ref: "v#{@version}",
@@ -129,33 +135,34 @@ defmodule Fledex.MixProject do
         "livebooks/8_fledex_component.livemd"
       ],
       groups_for_extras: [
-        "LiveBooks": ~r/livebooks/,
+        LiveBooks: ~r/livebooks/,
         "Other Project Info": [
           "SECURITY.md",
           "CLA.md",
           "CONTRIBUTING.md",
           "CODE_OF_CONDUCT.md",
-          "CONTRIBUTORS.md",
-         ]
+          "CONTRIBUTORS.md"
+        ]
       ],
       groups_for_modules: [
-        "Core": [
+        Core: [
           Fledex,
           Fledex.LedStrip,
           Fledex.Leds,
           Fledex.Application
         ],
-        "Animation": ~r/Fledex.Animation/,
+        Animation: ~r/Fledex.Animation/,
         "Driver Implementations": ~r/Fledex.Driver.Impl/,
-        "Driver": ~r/Fledex.Driver/,
-        "Utils": ~r/Fledex.Utils/,
-        "Color": ~r/Fledex.Color/,
+        Driver: ~r/Fledex.Driver/,
+        Utils: ~r/Fledex.Utils/,
+        Color: ~r/Fledex.Color/
       ],
       groups_for_docs: [
         "Color Names": & &1[:color_name]
       ]
     ]
   end
+
   defp aliases do
     [
       docs: ["docs", &copy_doc_images/1],
@@ -163,18 +170,21 @@ defmodule Fledex.MixProject do
       reuse: [&run_reuse/1]
     ]
   end
+
   defp run_reuse(_) do
     {response, _exit_status} = System.cmd("pipx", ["run", "reuse", "lint"])
     IO.puts(response)
   end
+
   defp copy_doc_images(_) do
     images = [
       {"docs/architecture.drawio.svg", "doc/architecture.drawio.svg"},
       {"docs/hardware.drawio.svg", "doc/hardware.drawio.svg"},
       {"docs/hardware-Page-2.drawio.svg", "doc/hardware-Page-2.drawio.svg"}
     ]
+
     Enum.each(images, fn {from, to} ->
-      File.cp(from, to, on_conflict: fn (_source, _destination) -> true end)
+      File.cp(from, to, on_conflict: fn _source, _destination -> true end)
     end)
   end
 end

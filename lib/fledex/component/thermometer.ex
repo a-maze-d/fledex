@@ -12,18 +12,23 @@ defmodule Fledex.Component.Thermometer do
   @spec configure(atom, keyword) :: %{atom => Animator.config_t()}
   def configure(name, options) when is_atom(name) and is_list(options) do
     case Keyword.keyword?(options) do
-      true -> %{
-        name => %{
-          type: :animation,
-          def_func: &def_func/2,
-          options: options,
-          effects: []
+      true ->
+        %{
+          name => %{
+            type: :animation,
+            def_func: &def_func/2,
+            options: options,
+            effects: []
+          }
         }
-      }
-      false -> raise "Options for #{name} need to be a keyword list, but got #{inspect options}"
+
+      false ->
+        raise "Options for #{name} need to be a keyword list, but got #{inspect(options)}"
     end
   end
-  def configure(name, options), do: raise "Unexpected syntax, got name: #{inspect name}, options: #{inspect options}"
+
+  def configure(name, options),
+    do: raise("Unexpected syntax, got name: #{inspect(name)}, options: #{inspect(options)}")
 
   @out_of_range 10_000
   defp def_func(triggers, options) do
@@ -37,21 +42,23 @@ defmodule Fledex.Component.Thermometer do
     temp = round(temp)
 
     temp =
-      if temp ==  @out_of_range do
+      if temp == @out_of_range do
         temp
       else
         temp = min(temp, range.last)
         max(temp, range.first)
       end
-    {total_leds, neg_in_range, null_in_range, pos_in_range, null_offset, pos_offset} = calculate_metrics(range)
+
+    {total_leds, neg_in_range, null_in_range, pos_in_range, null_offset, pos_offset} =
+      calculate_metrics(range)
 
     {leds, offset} =
       case temp do
         temp when temp == @out_of_range ->
           {Leds.leds(total_leds)
-            |> cond_add(neg_in_range, neg_color, 1, abs(range.first))
-            |> cond_add(null_in_range, null_color, null_offset, 1)
-            |> cond_add(pos_in_range, pos_color, pos_offset, range.last), 1}
+           |> cond_add(neg_in_range, neg_color, 1, abs(range.first))
+           |> cond_add(null_in_range, null_color, null_offset, 1)
+           |> cond_add(pos_in_range, pos_color, pos_offset, range.last), 1}
 
         temp when temp < 0 and temp > range.first ->
           {Leds.leds(1) |> Leds.light(neg_color) |> Leds.repeat(abs(temp)), pos_offset + temp}

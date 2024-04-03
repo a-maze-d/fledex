@@ -22,6 +22,7 @@ defmodule Fledex.Driver.Impl.SpiTest do
       assert config.color_correction == Correction.no_color_correction()
       assert config.ref != nil
     end
+
     test "reinit" do
       config = %{
         dev: "spidev0.0",
@@ -33,15 +34,18 @@ defmodule Fledex.Driver.Impl.SpiTest do
         color_correction: Correction.no_color_correction(),
         ref: nil
       }
+
       assert config == Spi.reinit(config)
     end
+
     test "transfer" do
-        driver = Spi.init(%{})
-        leds = [0xff0000, 0x00ff00, 0x0000ff]
-        {driver_response, response} = Spi.transfer(leds, 0, driver)
-        assert response == <<255, 0, 0, 0, 255, 0, 0, 0 , 255>>
-        assert driver == driver_response
+      driver = Spi.init(%{})
+      leds = [0xFF0000, 0x00FF00, 0x0000FF]
+      {driver_response, response} = Spi.transfer(leds, 0, driver)
+      assert response == <<255, 0, 0, 0, 255, 0, 0, 0, 255>>
+      assert driver == driver_response
     end
+
     test "terminate" do
       driver = Spi.init(%{})
       assert :ok == Spi.terminate(:normal, driver)

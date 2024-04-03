@@ -17,16 +17,20 @@ defmodule Fledex.Driver.ManagerTest do
         a2: 1
       }
     end
+
     def reinit(config) do
       config
     end
+
     def transfer(_leds, _count, config) do
       {config, :ok}
     end
+
     def terminate(_reason, _config) do
       :ok
     end
   end
+
   defmodule TestDriver2 do
     @behaviour Fledex.Driver.Interface
     def init(init_args) do
@@ -35,16 +39,20 @@ defmodule Fledex.Driver.ManagerTest do
         a2: 2
       }
     end
+
     def reinit(config) do
       config
     end
+
     def transfer(_leds, _count, config) do
       {Map.put(config, :a3, 4), :ok}
     end
+
     def terminate(_reason, _config) do
       :ok
     end
   end
+
   defmodule TestDriver3 do
     # note: on purpose we don't inherit from the
     # behaviour.
@@ -54,9 +62,11 @@ defmodule Fledex.Driver.ManagerTest do
         a2: 2
       }
     end
+
     def transfer(_leds, config) do
       {Map.put(config, :a3, 4), :ok}
     end
+
     def terminate(_reason, _config) do
       :ok
     end
@@ -65,6 +75,7 @@ defmodule Fledex.Driver.ManagerTest do
   describe "test multi-module dispatching functions" do
     alias Fledex.Driver.ManagerTest.TestDriver
     alias Fledex.Driver.ManagerTest.TestDriver2
+
     test "init" do
       led_strip = %{
         driver_modules: [TestDriver, TestDriver2],
@@ -72,11 +83,12 @@ defmodule Fledex.Driver.ManagerTest do
           TestDriver => %{
             a1: 1
           },
-          TestDriver2 => %{
-          }
+          TestDriver2 => %{}
         }
       }
-      led_strip = Manager.init_config(led_strip)
+
+      led_strip =
+        Manager.init_config(led_strip)
         |> Manager.init_drivers()
 
       assert map_size(led_strip[:config]) == 2
@@ -88,6 +100,7 @@ defmodule Fledex.Driver.ManagerTest do
 
     test "transfer" do
       counter = 0
+
       led_strip = %{
         driver_modules: [TestDriver, TestDriver2],
         config: %{
@@ -101,6 +114,7 @@ defmodule Fledex.Driver.ManagerTest do
           }
         }
       }
+
       led_strip = Manager.transfer([], counter, led_strip)
 
       assert map_size(led_strip[:config]) == 2
@@ -112,6 +126,7 @@ defmodule Fledex.Driver.ManagerTest do
       assert led_strip[:config][TestDriver2][:a3] == 4
     end
   end
+
   describe "non-compliant module" do
     alias Fledex.Driver.ManagerTest.TestDriver
     alias Fledex.Driver.ManagerTest.TestDriver3
@@ -123,31 +138,35 @@ defmodule Fledex.Driver.ManagerTest do
           TestDriver => %{
             a1: 1
           },
-          TestDriver3 => %{
-          }
+          TestDriver3 => %{}
         }
       }
-      {led_strip, log} = with_log(fn ->
-        Manager.init_config(led_strip)
-        |> Manager.init_drivers()
-      end)
+
+      {led_strip, log} =
+        with_log(fn ->
+          Manager.init_config(led_strip)
+          |> Manager.init_drivers()
+        end)
+
       assert length(led_strip[:driver_modules]) == 1
       assert led_strip[:driver_modules] == [TestDriver]
       assert log =~ "TestDriver3 does not implement the function :reinit"
       assert log =~ "with the wrong arity 2 vs 3"
     end
+
     test "single non-compliant gets replaced with default" do
       led_strip = %{
         driver_modules: [TestDriver3],
         config: %{
-          TestDriver3 => %{
-          }
+          TestDriver3 => %{}
         }
       }
-      {led_strip, log} = with_log(fn ->
-        Manager.init_config(led_strip)
-        |> Manager.init_drivers()
-      end)
+
+      {led_strip, log} =
+        with_log(fn ->
+          Manager.init_config(led_strip)
+          |> Manager.init_drivers()
+        end)
 
       assert length(led_strip[:driver_modules]) == 1
       assert led_strip[:driver_modules] == [Null]

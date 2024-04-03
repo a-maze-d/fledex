@@ -29,15 +29,15 @@ defmodule Fledex.Animation.Manager do
   alias Fledex.Utils.Dsl
 
   @type config_t :: %{
-    atom => Animator.config_t()
-  }
+          atom => Animator.config_t()
+        }
 
   @typep state_t :: %{
-    type_config: map(),
-    animations: map(),
-    coordinators: map(),
-    jobs: map(),
-  }
+           type_config: map(),
+           animations: map(),
+           coordinators: map(),
+           jobs: map()
+         }
 
   # def child_spec(args) do
   #   %{
@@ -54,10 +54,11 @@ defmodule Fledex.Animation.Manager do
   (see `Fledex.Utils.Dsl.fledex_config/0` for the configurations used by default.)
   """
   @spec start_link(%{atom => module}) :: {:ok, pid()}
-  def start_link(type_config \\ Dsl.fledex_config) do
+  def start_link(type_config \\ Dsl.fledex_config()) do
     # we should only have a single server running. Therefore we check whether need to do something
     # or if the server is already running
     pid = GenServer.whereis(__MODULE__)
+
     if pid == nil do
       GenServer.start_link(__MODULE__, type_config, name: __MODULE__)
     else
@@ -125,13 +126,17 @@ defmodule Fledex.Animation.Manager do
       coordinators: %{},
       jobs: %{}
     }
+
     {:ok, state}
   end
 
   @impl GenServer
-  @spec handle_call({:regiseter_strip, atom, atom | map}, GenServer.from, state_t) :: {:reply, :ok, state_t}
-  def handle_call({:register_strip, strip_name, driver_config}, _pid, state) when is_atom(strip_name) do
+  @spec handle_call({:regiseter_strip, atom, atom | map}, GenServer.from(), state_t) ::
+          {:reply, :ok, state_t}
+  def handle_call({:register_strip, strip_name, driver_config}, _pid, state)
+      when is_atom(strip_name) do
     pid = Process.whereis(strip_name)
+
     if pid == nil do
       {:reply, :ok, register_strip(state, strip_name, driver_config)}
     else
@@ -142,19 +147,25 @@ defmodule Fledex.Animation.Manager do
       {:reply, :ok, state}
     end
   end
-  @spec handle_call({:register_config, atom, map}, GenServer.from, state_t) ::
-    {:reply, :ok, state_t} | {:reply, {:error, String.t}, state_t}
+
+  @spec handle_call({:register_config, atom, map}, GenServer.from(), state_t) ::
+          {:reply, :ok, state_t} | {:reply, {:error, String.t()}, state_t}
   def handle_call({:register_config, strip_name, configs}, _pid, state) do
     {animations, coordinators, jobs} = split_config(configs)
-    state = state
+
+    state =
+      state
       |> register_animations(strip_name, animations)
       |> register_coordinators(strip_name, coordinators)
       |> register_jobs(strip_name, jobs)
+
     {:reply, :ok, state}
   rescue
     RuntimeError -> {:reply, {:error, "Animator is wrongly configured"}, state}
   end
-  @spec handle_call({:unregister_strip, atom}, GenServer.from, state_t) :: {:reply, :ok, state_t}
+
+  @spec handle_call({:unregister_strip, atom}, GenServer.from(), state_t) ::
+          {:reply, :ok, state_t}
   def handle_call({:unregister_strip, strip_name}, _pid, state) when is_atom(strip_name) do
     {:reply, :ok, unregister_strip(state, strip_name)}
   end
@@ -162,12 +173,18 @@ defmodule Fledex.Animation.Manager do
   # we split the animation into the different aspects
   # animations, coordinators and cronjobs
   defp split_config(config) do
-    {coordinators, rest} = Map.split_with(config, fn {_key, value} -> value.type == :coordiantor end)
+    {coordinators, rest} =
+      Map.split_with(config, fn {_key, value} -> value.type == :coordiantor end)
+
     {jobs, rest} = Map.split_with(rest, fn {_key, value} -> value.type == :job end)
-    {animations, rest} = Map.split_with(rest, fn {_key, value} -> value.type in [:animation, :static] end)
+
+    {animations, rest} =
+      Map.split_with(rest, fn {_key, value} -> value.type in [:animation, :static] end)
+
     if map_size(rest) != 0 do
-      raise RuntimeError, "An unknown type was encountered #{inspect rest}"
+      raise RuntimeError, "An unknown type was encountered #{inspect(rest)}"
     end
+
     # # animations = Enum.filter(config, fn {_key, value} -> value.type in [:animation, :static] end)
     # # coordinators = Enum.filter(config, fn {_key, value} -> value.type in [:coordinator] end)
     # # jobs = Enum.filter(config, fn {_key, value} -> value.type in [:job] end)
@@ -178,25 +195,28 @@ defmodule Fledex.Animation.Manager do
   defp register_strip(state, strip_name, driver_config) do
     # Logger.info("registering led_strip: #{strip_name}")
     {:ok, _pid} = LedStrip.start_link(strip_name, driver_config)
-    %{state |
-      animations: Map.put_new(state.animations, strip_name, nil),
-      coordinators: Map.put_new(state.coordinators, strip_name, nil),
-      jobs: Map.put_new(state.jobs, strip_name, nil)
+
+    %{
+      state
+      | animations: Map.put_new(state.animations, strip_name, nil),
+        coordinators: Map.put_new(state.coordinators, strip_name, nil),
+        jobs: Map.put_new(state.jobs, strip_name, nil)
     }
   end
 
   @spec unregister_strip(state_t, atom) :: state_t
   defp unregister_strip(state, strip_name) do
     # Logger.info("unregistering led_strip_ #{strip_name}")
-    shutdown_coordinators(strip_name,Map.keys(state.coordinators[strip_name] || %{}))
+    shutdown_coordinators(strip_name, Map.keys(state.coordinators[strip_name] || %{}))
     shutdown_jobs(strip_name, Map.keys(state.jobs[strip_name] || %{}))
     shutdown_animators(strip_name, Map.keys(state.animations[strip_name] || %{}))
     LedStrip.stop(strip_name)
 
-    %{state |
-      animations: Map.drop(state.animations, [strip_name]),
-      coordinators: Map.drop(state.coordinators, [strip_name]),
-      jobs: Map.drop(state.coordinators, [strip_name])
+    %{
+      state
+      | animations: Map.drop(state.animations, [strip_name]),
+        coordinators: Map.drop(state.coordinators, [strip_name]),
+        jobs: Map.drop(state.coordinators, [strip_name])
     }
   end
 
@@ -239,19 +259,19 @@ defmodule Fledex.Animation.Manager do
     Enum.each(created_animations, fn {animation_name, config} ->
       module_name = type_config[config.type]
       {:ok, _pid} = module_name.start_link(config, strip_name, animation_name)
-    #   server_name = Interface.build_name(strip_name, :animation, animation_name)
-    #   case Process.info(pid, :registered_name) do
-    #     {:registered_name, ^server_name} -> :ok
-    #     # we could register the name if it does not exist and we could unregister and reregister
-    #     # the process if it have the wrong name, but that's not gonna end well. It's better to
-    #     # throw this back immediately.
-    #     # nil ->
-    #       # Process.register(pid, server_name)
-    #     # {:registered_name, other_name} ->
-    #       # Process.unregister(other_name)
-    #       # Process.register(pid, server_name)
-    #     _anything -> raise RuntimeError, message: "The animator is not registered under the expected name"
-    #   end
+      #   server_name = Interface.build_name(strip_name, :animation, animation_name)
+      #   case Process.info(pid, :registered_name) do
+      #     {:registered_name, ^server_name} -> :ok
+      #     # we could register the name if it does not exist and we could unregister and reregister
+      #     # the process if it have the wrong name, but that's not gonna end well. It's better to
+      #     # throw this back immediately.
+      #     # nil ->
+      #       # Process.register(pid, server_name)
+      #     # {:registered_name, other_name} ->
+      #       # Process.unregister(other_name)
+      #       # Process.register(pid, server_name)
+      #     _anything -> raise RuntimeError, message: "The animator is not registered under the expected name"
+      #   end
     end)
   end
 
@@ -261,18 +281,20 @@ defmodule Fledex.Animation.Manager do
     # since we have no animation, none need to be dropped or updated. All are new
     {[], %{}, new_configs}
   end
+
   defp filter_configs(old_configs, new_configs) do
     # Logger.info("filter: #{inspect old_animations}, #{inspect new_animations}")
-    {dropped, present} = Enum.reduce(old_configs, {[], []}, fn {key, _value}, {dropped, present} ->
-      # Logger.info("filtering: #{key}")
-      if Map.has_key?(new_configs, key) do
-        # Logger.info("filtering2: #{key} is in configs")
-        {dropped, [key | present]}
-      else
-        # Logger.info("filtering2: #{key} is NOT in configs")
-        {[key | dropped], present}
-      end
-    end)
+    {dropped, present} =
+      Enum.reduce(old_configs, {[], []}, fn {key, _value}, {dropped, present} ->
+        # Logger.info("filtering: #{key}")
+        if Map.has_key?(new_configs, key) do
+          # Logger.info("filtering2: #{key} is in configs")
+          {dropped, [key | present]}
+        else
+          # Logger.info("filtering2: #{key} is NOT in configs")
+          {[key | dropped], present}
+        end
+      end)
 
     {existing, created} = Map.split(new_configs, present)
     {dropped, existing, created}
@@ -283,7 +305,6 @@ defmodule Fledex.Animation.Manager do
   end
 
   defp shutdown_coordinators(_strip_name, _coordinator_names) do
-
   end
 
   defp register_jobs(state, _strip_name, _jobs) do
@@ -292,13 +313,13 @@ defmodule Fledex.Animation.Manager do
   end
 
   defp shutdown_jobs(_strip_name, _job_names) do
-
   end
 
   @impl GenServer
   @spec terminate(atom, state_t) :: :ok
   def terminate(_reason, state) do
     strip_names = Map.keys(state.animations)
+
     Enum.reduce(strip_names, state, fn strip_name, state ->
       unregister_strip(state, strip_name)
     end)

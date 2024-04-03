@@ -55,26 +55,26 @@ defmodule Fledex.Animation.Animator do
   alias Fledex.Utils.PubSub
 
   @type config_t :: %{
-      optional(:type) => atom,
-      optional(:def_func) => (map -> Leds.t),
-      optional(:options) => keyword | nil,
-      optional(:effects) => [{module, keyword}],
-      optional(:send_config_func) => (map -> map),
-      optional(:counter) => integer,
-      optional(:timer_ref) => reference | nil,
-      optional(:strip_name) => atom,
-      optional(:animation_name) => atom
-    }
+          optional(:type) => (:animation | :static | :job | :coordinator),
+          optional(:def_func) => (map -> Leds.t()),
+          optional(:options) => keyword | nil,
+          optional(:effects) => [{module, keyword}],
+          optional(:send_config_func) => (map -> map),
+          optional(:counter) => integer,
+          optional(:timer_ref) => reference | nil,
+          optional(:strip_name) => atom,
+          optional(:animation_name) => atom
+        }
 
   @type state_t :: %{
-    :triggers => map,
-    :type => atom,
-    :def_func => ((integer) -> Leds.t()),
-    :options => keyword | nil,
-    :effects => [{module, keyword}],
-    :strip_name => atom,
-    :animation_name => atom
-  }
+          :triggers => map,
+          :type => atom,
+          :def_func => (integer -> Leds.t()),
+          :options => keyword | nil,
+          :effects => [{module, keyword}],
+          :strip_name => atom,
+          :animation_name => atom
+        }
   ### server side
   @impl GenServer
   @spec init({config_t, atom, atom}) :: {:ok, state_t, {:continue, :paint_once}}
@@ -88,12 +88,15 @@ defmodule Fledex.Animation.Animator do
       strip_name: strip_name,
       animation_name: animation_name
     }
+
     state = update_config(state, init_args)
 
-    :ok= LedStrip.define_namespace(state.strip_name, state.animation_name)
+    :ok = LedStrip.define_namespace(state.strip_name, state.animation_name)
+
     case state.type do
       :animation -> :ok = PubSub.subscribe(:fledex, "trigger")
-      :static -> :ok # we don't subscribe because we paint only once
+      # we don't subscribe because we paint only once
+      :static -> :ok
     end
 
     {:ok, state, {:continue, :paint_once}}
@@ -114,6 +117,7 @@ defmodule Fledex.Animation.Animator do
     state = %{state | triggers: Map.merge(state.triggers, triggers)}
     {:noreply, update_leds(state)}
   end
+
   def handle_info({:trigger, triggers}, state) do
     # if the trigger is not from the driver (=strip_name as key) we only want to collect
     # the triggers for when we want an update of the leds
@@ -121,48 +125,62 @@ defmodule Fledex.Animation.Animator do
   end
 
   @spec update_leds(state_t) :: state_t
-  defp update_leds(%{
-    strip_name: strip_name,
-    animation_name: animation_name,
-    def_func: def_func,
-    options: options,
-    effects: effects,
-    # send_config_func: send_config_func,
-    triggers: triggers} = state) do
-      # IO.puts("Update_Leds1: Key: #{Keyword.has_key?(options, :send_config_func)}")
-      send_config_func = options[:send_config] || &Base.default_send_config_func/1
-      # IO.puts("Options: #{inspect options}")
-      # this is for compatibility reasons. if only a send_config_func is defined
-      # in the options list, then no options are defined. In that case we need to define
-      # the options as being nil to call the def_func/1 instead of the def_func/2 function
-      options = if options != nil and length(options) == 1 and Keyword.has_key?(options, :send_config) do
+  defp update_leds(
+         %{
+           strip_name: strip_name,
+           animation_name: animation_name,
+           def_func: def_func,
+           options: options,
+           effects: effects,
+           # send_config_func: send_config_func,
+           triggers: triggers
+         } = state
+       ) do
+    # IO.puts("Update_Leds1: Key: #{Keyword.has_key?(options, :send_config_func)}")
+    send_config_func = options[:send_config] || (&Base.default_send_config_func/1)
+    # IO.puts("Options: #{inspect options}")
+    # this is for compatibility reasons. if only a send_config_func is defined
+    # in the options list, then no options are defined. In that case we need to define
+    # the options as being nil to call the def_func/1 instead of the def_func/2 function
+    options =
+      if options != nil and length(options) == 1 and Keyword.has_key?(options, :send_config) do
         nil
       else
         options
       end
-      # we can get two different responses, with or without triggers, we make sure our result contains the triggers
-      {leds, triggers} = call_def_func(def_func, triggers, options) |> get_with_triggers(triggers)
-      {leds, triggers} = apply_effects(leds, effects, triggers)
-      # independent on the configs say we want to ensure we use the correct namespace (animation_name)
-      # and server_name (strip_name). Therefore we inject it
-      leds = Leds.set_driver_info(leds, animation_name, strip_name)
-      {config, triggers} = send_config_func.(triggers) |> get_with_triggers(triggers)
-      Leds.send(leds, config)
-      %{state | triggers: triggers}
+
+    # we can get two different responses, with or without triggers, we make sure our result contains the triggers
+    {leds, triggers} = call_def_func(def_func, triggers, options) |> get_with_triggers(triggers)
+    {leds, triggers} = apply_effects(leds, effects, triggers)
+
+    # independent on the configs say we want to ensure we use the correct namespace (animation_name)
+    # and server_name (strip_name). Therefore we inject it
+    leds = Leds.set_driver_info(leds, animation_name, strip_name)
+    {config, triggers} = send_config_func.(triggers) |> get_with_triggers(triggers)
+    Leds.send(leds, config)
+    %{state | triggers: triggers}
   end
 
-  @spec call_def_func(fun, %{atom: any}, keyword) :: Leds.t | {Leds.t, %{atom: any}}
+  @spec call_def_func(fun, %{atom: any}, keyword) :: Leds.t() | {Leds.t(), %{atom: any}}
   defp call_def_func(def_func, triggers, options)
-  defp call_def_func(def_func, triggers, _options) when is_function(def_func, 1), do: def_func.(triggers)
-  defp call_def_func(def_func, triggers, options) when is_function(def_func, 2), do: def_func.(triggers, options)
 
-  @spec apply_effects(Leds.t, [{module, map}], map) :: {Leds.t, map}
+  defp call_def_func(def_func, triggers, _options) when is_function(def_func, 1),
+    do: def_func.(triggers)
+
+  defp call_def_func(def_func, triggers, options) when is_function(def_func, 2),
+    do: def_func.(triggers, options)
+
+  @spec apply_effects(Leds.t(), [{module, map}], map) :: {Leds.t(), map}
   def apply_effects(leds, effects, triggers) do
     count = leds.count
-    {led_list, triggers} = Enum.reduce(Enum.reverse(effects), {Leds.to_list(leds), triggers}, fn {effect, config}, {leds, triggers} ->
-      {leds, triggers, _effect_state} = effect.apply(leds, count, config, triggers)
-      {leds, triggers}
-    end)
+
+    {led_list, triggers} =
+      Enum.reduce(Enum.reverse(effects), {Leds.to_list(leds), triggers}, fn {effect, config},
+                                                                            {leds, triggers} ->
+        {leds, triggers, _effect_state} = effect.apply(leds, count, config, triggers)
+        {leds, triggers}
+      end)
+
     {Leds.leds(leds.count, led_list, %{}), triggers}
   end
 
@@ -185,13 +203,16 @@ defmodule Fledex.Animation.Animator do
       def_func: Map.get(config, :def_func, &Base.default_def_func/1),
       options: update_options(config[:options], config[:send_config_func]),
       effects: update_effects(state.effects, config[:effects], state.strip_name),
-      strip_name: state.strip_name, # not to be updated
-      animation_name: state.animation_name # not to be updated
+      # not to be updated
+      strip_name: state.strip_name,
+      # not to be updated
+      animation_name: state.animation_name
     }
   end
 
   @spec update_options(keyword | nil, fun | nil) :: keyword
   def update_options(options, nil), do: options
+
   def update_options(options, send_config_func) do
     Keyword.put(options || [], :send_config, send_config_func)
   end
@@ -199,6 +220,7 @@ defmodule Fledex.Animation.Animator do
   @spec update_effects([{module, keyword}], [{module, keyword}], atom) :: [{module, keyword}]
   defp update_effects(current_effects, new_effects, strip_name) do
     effects = new_effects || current_effects
+
     Enum.map(effects, fn {module, configs} ->
       {module, Keyword.put_new(configs, :trigger_name, strip_name)}
     end)
@@ -214,16 +236,21 @@ defmodule Fledex.Animation.Animator do
 
   @impl GenServer
   @spec terminate(reason, state :: state_t) :: :ok
-  when reason: :normal | :shutdown | {:shutdown, term()} | term()
-  def terminate(_reason, %{
-    strip_name: strip_name,
-    animation_name: animation_name,
-    type: type
-  } = _state) do
+        when reason: :normal | :shutdown | {:shutdown, term()} | term()
+  def terminate(
+        _reason,
+        %{
+          strip_name: strip_name,
+          animation_name: animation_name,
+          type: type
+        } = _state
+      ) do
     case type do
       :animation -> PubSub.unsubscribe(:fledex, "trigger")
-      :static -> :ok # nothing to do, since we haven't been subscribed
+      # nothing to do, since we haven't been subscribed
+      :static -> :ok
     end
+
     LedStrip.drop_namespace(strip_name, animation_name)
   end
 end

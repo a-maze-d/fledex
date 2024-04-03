@@ -18,15 +18,18 @@ defmodule Fledex.Animation.AnimatorTest do
   def default_def_func(_triggers) do
     Leds.leds(30)
   end
+
   def default_send_config_func(_triggers) do
     %{namespace: "test"}
   end
+
   # some logging versions to test the workflow
   def logging_def_func(triggers) do
     counter = triggers[:test_strip] || "undefined"
     Logger.info("creating led definition, #{counter}")
     Leds.leds(30)
   end
+
   def logging_send_config_func(triggers) do
     counter = triggers[:test_strip] || "undefined"
     Logger.info("creating send config, #{counter}")
@@ -35,13 +38,13 @@ defmodule Fledex.Animation.AnimatorTest do
 
   @strip_name :test_strip
   setup do
-    {:ok, pid} = start_supervised(
-      %{
+    {:ok, pid} =
+      start_supervised(%{
         id: LedStrip,
         start: {LedStrip, :start_link, [@strip_name, :none]}
       })
-    %{strip_name: @strip_name,
-      pid: pid}
+
+    %{strip_name: @strip_name, pid: pid}
   end
 
   describe "init" do
@@ -56,25 +59,36 @@ defmodule Fledex.Animation.AnimatorTest do
         options: [send_config_func: &default_send_config_func/1]
       }
 
-      {:ok, state, {:continue, :paint_once}} = Animator.init({init_args, :test_strip, :test_animation})
+      {:ok, state, {:continue, :paint_once}} =
+        Animator.init({init_args, :test_strip, :test_animation})
+
       assert state == init_args
     end
+
     test "default funcs" do
       init_args = %{}
-      {:ok, state, {:continue, :paint_once}} = Animator.init({init_args, :test_strip, :test_animation})
+
+      {:ok, state, {:continue, :paint_once}} =
+        Animator.init({init_args, :test_strip, :test_animation})
+
       assert Leds.leds() == state.def_func.(%{test_strip: 10})
       # assert %{} == state.send_config_func.(%{test_strip: 10})
     end
+
     test "config applied correctly (none_set)" do
       init_args = %{}
 
-      {:ok, state, {:continue, :paint_once}} = Animator.init({init_args, :test_strip, :test_animation})
+      {:ok, state, {:continue, :paint_once}} =
+        Animator.init({init_args, :test_strip, :test_animation})
+
       assert state.def_func != nil
       assert state.strip_name == :test_strip
       assert state.animation_name == :test_animation
     end
+
     test "update leds (with arity 2)", %{strip_name: strip_name} do
       animation_name = :arity
+
       state = %{
         strip_name: strip_name,
         animation_name: animation_name,
@@ -89,23 +103,29 @@ defmodule Fledex.Animation.AnimatorTest do
         effects: [],
         triggers: %{strip_name => 214}
       }
+
       triggers = %{
-        strip_name=> 215
+        strip_name => 215
       }
+
       LedStrip.define_namespace(strip_name, animation_name)
       {:noreply, _new_state} = Animator.handle_info({:trigger, triggers}, state)
-
     end
   end
+
   describe "test triggers" do
     test "merging triggers" do
       {:noreply, state} = Animator.handle_info({:trigger, %{test_strip: 10}}, %{triggers: %{}})
       assert state.triggers.test_strip == 10
-      {:noreply, state} = Animator.handle_info({:trigger, %{test_strip: 11, new_strip: 10}}, state)
+
+      {:noreply, state} =
+        Animator.handle_info({:trigger, %{test_strip: 11, new_strip: 10}}, state)
+
       assert state.triggers.test_strip == 11
       assert state.triggers.new_strip == 10
     end
   end
+
   describe "client API" do
     test "config" do
       init_args = %{
@@ -116,8 +136,12 @@ defmodule Fledex.Animation.AnimatorTest do
         triggers: %{},
         type: :animation
       }
+
       assert map_size(init_args.triggers) == 0
-      {:ok, state, {:continue, :paint_once}} = Animator.init({init_args, :test_strip, :test_animation})
+
+      {:ok, state, {:continue, :paint_once}} =
+        Animator.init({init_args, :test_strip, :test_animation})
+
       assert map_size(init_args.triggers) == 0
       assert Keyword.has_key?(state.options, :send_config)
 
@@ -133,6 +157,7 @@ defmodule Fledex.Animation.AnimatorTest do
       assert state.type == init_args.type
     end
   end
+
   describe "test workflow" do
     # what is important is to check whether our def and send functions are called
     # repeatedly. and that our trigger is incrementing properly.
@@ -146,7 +171,7 @@ defmodule Fledex.Animation.AnimatorTest do
       capture_log([], fn ->
         run_simple_workflow(strip_name)
       end)
-        |> assert_logs()
+      |> assert_logs()
 
       # ensure our animator did not kill our driver while shutting down
       assert Process.alive?(pid)
@@ -175,6 +200,7 @@ defmodule Fledex.Animation.AnimatorTest do
       case line do
         {_, 0} ->
           acc
+
         {"send", trigger} ->
           if acc.send == 0 and acc.led == 0 do
             # this happens when we are not yet fully set up. Thus we ignore the first one
@@ -185,10 +211,11 @@ defmodule Fledex.Animation.AnimatorTest do
             assert acc.trigger == trigger
             %{acc | send: acc.send + 1}
           end
+
         {"led", trigger} ->
           # IO.puts("#{acc.send}, #{acc.wait}, #{acc.led}: #{line}")
           assert acc.led == acc.send
-          if acc.trigger != 0, do: assert acc.trigger + 1 == trigger
+          if acc.trigger != 0, do: assert(acc.trigger + 1 == trigger)
           %{acc | led: acc.led + 1, trigger: trigger}
       end
     end
@@ -223,17 +250,18 @@ defmodule Fledex.Animation.AnimatorTest do
 
   @animation_name :test_animation
   describe "trigger" do
-    test "trigger as cache", %{strip_name: strip_name}  do
+    test "trigger as cache", %{strip_name: strip_name} do
       :ok = LedStrip.define_namespace(strip_name, @animation_name)
+
       state = %{
-        def_func: fn (triggers) ->
+        def_func: fn triggers ->
           assert length(Map.keys(triggers)) == 2
           assert triggers.something == "abc"
           assert triggers[strip_name] == 11
           {Leds.leds(0), Map.put_new(triggers, :test1, 4)}
         end,
         options: [
-          send_config: fn (triggers) ->
+          send_config: fn triggers ->
             assert length(Map.keys(triggers)) == 3
             assert triggers.something == "abc"
             assert triggers[strip_name] == 11
@@ -249,7 +277,10 @@ defmodule Fledex.Animation.AnimatorTest do
           something: "abc"
         }
       }
-      {:noreply, state} = Animator.handle_info({:trigger, Map.put_new(%{}, strip_name, 11)}, state)
+
+      {:noreply, state} =
+        Animator.handle_info({:trigger, Map.put_new(%{}, strip_name, 11)}, state)
+
       assert length(Map.keys(state.triggers)) == 4
       assert state.triggers.something == "abc"
       assert state.triggers[strip_name] == 11
@@ -257,6 +288,7 @@ defmodule Fledex.Animation.AnimatorTest do
       assert state.triggers.test2 == 7
     end
   end
+
   describe "test shutdown" do
     test "through client API" do
       strip_name = :shutdown_testA
@@ -268,6 +300,7 @@ defmodule Fledex.Animation.AnimatorTest do
       assert not Process.alive?(pid)
       GenServer.stop(driver, :normal)
     end
+
     test "through GenServer API" do
       strip_name = :shutdown_testB
       {:ok, driver} = LedStrip.start_link(strip_name, :none)
@@ -279,26 +312,30 @@ defmodule Fledex.Animation.AnimatorTest do
       GenServer.stop(driver, :normal)
     end
   end
+
   describe "effects" do
     test "effects applied" do
-      leds = Leds.leds(3, [0xff0000, 0x00ff00, 0x0000ff], %{})
+      leds = Leds.leds(3, [0xFF0000, 0x00FF00, 0x0000FF], %{})
       effects = [{Rotation, [trigger_name: :counter]}]
       triggers = %{counter: 1}
       {returned_leds, returned_triggers} = Animator.apply_effects(leds, effects, triggers)
       assert returned_triggers == triggers
-      assert Leds.to_list(returned_leds) == [0x00ff00, 0x0000ff, 0xff0000]
+      assert Leds.to_list(returned_leds) == [0x00FF00, 0x0000FF, 0xFF0000]
     end
+
     test "multi-effects in correct order" do
-      leds = Leds.leds(3, [0xff0000, 0x00ff00, 0x0000ff], %{})
+      leds = Leds.leds(3, [0xFF0000, 0x00FF00, 0x0000FF], %{})
+
       effects = [
         {Rotation, [trigger_name: :counter]},
         {Wanish, [trigger_name: :counter]}
       ]
+
       triggers = %{counter: 1}
 
       {returned_leds, returned_triggers} = Animator.apply_effects(leds, effects, triggers)
       assert returned_triggers == triggers
-      assert Leds.to_list(returned_leds) == [0x00ff00, 0x0000ff, 0x000000]
+      assert Leds.to_list(returned_leds) == [0x00FF00, 0x0000FF, 0x000000]
     end
   end
 end

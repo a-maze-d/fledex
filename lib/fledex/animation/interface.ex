@@ -16,7 +16,8 @@ defmodule Fledex.Animation.Interface do
   Create a new animation (with a given name and configuration) for the led strip
   with the specified name.
   """
-  @callback start_link(config :: any, strip_name :: atom, animation_name :: atom) :: GenServer.on_start()
+  @callback start_link(config :: any, strip_name :: atom, animation_name :: atom) ::
+              GenServer.on_start()
   @doc """
   (Re-)Configure this animation. You will have to implement this function on server side.
   This will look something like the following:
@@ -46,9 +47,9 @@ defmodule Fledex.Animation.Interface do
   It is the responsibility of the Animator to set the servername correctly. The
   `Fledex.Animation.Base` is doing this by default.
   """
-  @spec build_name(atom, (:animation | :job | :coordinator), atom) :: atom
+  @spec build_name(atom, :animation | :job | :coordinator, atom) :: atom
   def build_name(strip_name, type, animation_name)
-    when is_atom(strip_name) and is_atom(animation_name) do
+      when is_atom(strip_name) and is_atom(animation_name) do
     Module.concat(Module.concat(strip_name, type), animation_name)
   end
 end

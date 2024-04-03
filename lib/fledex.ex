@@ -26,7 +26,7 @@ defmodule Fledex do
 
   alias Fledex.Utils.Dsl
 
-  @doc"""
+  @doc """
   By using this module, the `Fledex` macros are made available.
 
   This macro does also include the `Fledex.Leds` and the `Fledex.Color.Names` and are
@@ -34,7 +34,7 @@ defmodule Fledex do
 
   Take a look at the various [livebook examples](readme-2.html) on how to use the Fledex macros
   """
-  @spec __using__(keyword) :: Macro.t
+  @spec __using__(keyword) :: Macro.t()
   defmacro __using__(opts) do
     quote bind_quoted: [opts: opts] do
       import Fledex
@@ -81,6 +81,7 @@ defmodule Fledex do
     # decide on whether the user pattern matched or didn't specify an
     # argument at all
     def_func_ast = Dsl.ast_add_argument_to_func_if_missing(block)
+
     quote do
       Dsl.create_config(
         unquote(name),
@@ -89,6 +90,7 @@ defmodule Fledex do
         unquote(options)
       )
     end
+
     #  |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
 
@@ -103,6 +105,7 @@ defmodule Fledex do
     # even the static function gets an argument, we create it, because
     # we don't expect one to be provided
     def_func_ast = Dsl.ast_add_argument_to_func(block)
+
     quote do
       Dsl.create_config(
         unquote(name),
@@ -111,7 +114,8 @@ defmodule Fledex do
         unquote(options)
       )
     end
-      # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
+
+    # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
 
   @doc """
@@ -149,7 +153,8 @@ defmodule Fledex do
     quote do
       Dsl.create_config(unquote(name), unquote(module), unquote(opts))
     end
-      #  |> tap(& IO.puts Code.format_string! Macro.to_string &1)
+
+    #  |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
 
   @doc """
@@ -179,10 +184,12 @@ defmodule Fledex do
   # @spec effect(module, keyword, Macro.t) :: Macro.t
   defmacro effect(module, options \\ [], do: block) do
     configs_ast = Dsl.ast_extract_configs(block)
+
     quote do
       Dsl.apply_effect(unquote(module), unquote(options), unquote(configs_ast))
     end
-      #  |> tap(& IO.puts Code.format_string! Macro.to_string &1)
+
+    #  |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
 
   @doc """
@@ -206,7 +213,8 @@ defmodule Fledex do
         unquote(ast_func)
       )
     end
-      # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
+
+    # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
 
   @doc """
@@ -223,7 +231,7 @@ defmodule Fledex do
         unquote(configs_ast)
       )
     end
-      # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
-  end
 
+    # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
+  end
 end

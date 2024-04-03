@@ -13,10 +13,12 @@ defmodule Fledex.Animation.BaseTest do
     test "ensure correct naming" do
       assert Interface.build_name(:testA, :animation, :testB) == :"Elixir.testA.animation.testB"
     end
+
     test "default_def_func" do
       assert Base.default_def_func(%{}) == Leds.leds()
       assert Base.default_def_func(%{trigger_name: 10}) == Leds.leds()
     end
+
     test "default_send_func" do
       assert Base.default_send_config_func(%{}) == %{}
       assert Base.default_send_config_func(%{trigger_name: 10}) == %{}

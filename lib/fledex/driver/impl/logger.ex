@@ -32,6 +32,7 @@ defmodule Fledex.Driver.Impl.Logger do
       log_color_code: false,
       terminal: true
     }
+
     Map.merge(default_config, init_module_args)
   end
 
@@ -42,34 +43,39 @@ defmodule Fledex.Driver.Impl.Logger do
   end
 
   @impl true
-  @spec transfer(list(Types.colorint), pos_integer, map) :: {map, any}
+  @spec transfer(list(Types.colorint()), pos_integer, map) :: {map, any}
   def transfer(leds, counter, config) when rem(counter, config.update_freq) == 0 and leds != [] do
-      output = Enum.reduce(leds, <<>>, fn value, acc ->
+    output =
+      Enum.reduce(leds, <<>>, fn value, acc ->
         if config.log_color_code do
           acc <> Integer.to_string(value) <> ","
         else
           acc <> to_ansi_color(value) <> @block
         end
       end)
-      if config.terminal do
-        IO.puts(output <> "\r")
-      else
-        Logger.info(output <> "\r")
-      end
-      {config, :ok}
+
+    if config.terminal do
+      IO.puts(output <> "\r")
+    else
+      Logger.info(output <> "\r")
+    end
+
+    {config, :ok}
   end
+
   def transfer(_leds, _counter, config) do
     {config, :ok}
   end
 
-  @spec to_ansi_color(Types.colorint) :: String.t
+  @spec to_ansi_color(Types.colorint()) :: String.t()
   defp to_ansi_color(value) do
     {r, g, b} = Utils.split_into_subpixels(value)
-    IO.ANSI.color(trunc(r/@divisor), trunc(g/@divisor), trunc(b/@divisor))
+    IO.ANSI.color(trunc(r / @divisor), trunc(g / @divisor), trunc(b / @divisor))
   end
 
   @impl true
-  @spec terminate(reason, map) :: :ok when reason: :normal | :shutdown | {:shutdown, term()} | term()
+  @spec terminate(reason, map) :: :ok
+        when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(_reason, _state) do
     # nothing needs to be done here
     :ok

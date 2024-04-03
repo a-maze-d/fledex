@@ -7,6 +7,7 @@ defmodule Fledex.Utils.Dsl do
   alias Fledex.Animation.Coordinator
   alias Fledex.Animation.Job
   alias Fledex.Animation.Manager
+  alias Fledex.Leds
 
   @fledex_config %{
     animation: Animator,
@@ -14,8 +15,10 @@ defmodule Fledex.Utils.Dsl do
     job: Job,
     coordinator: Coordinator,
     # the next 2 are required for the ast manipulation that we need to do
-    component: Animator, # The module is not really correct, but it's not important
-    effect: Animator # The module is not really correct, but it's not important
+    # The module is not really correct, but it's not important
+    component: Animator,
+    # The module is not really correct, but it's not important
+    effect: Animator
   }
   @fledex_config_keys Map.keys(@fledex_config)
 
@@ -24,13 +27,12 @@ defmodule Fledex.Utils.Dsl do
     @fledex_config
   end
 
-  @spec create_config(atom, atom, (map -> Leds.t), keyword | nil) :: Manager.config_t()
-  def create_config(name, type, def_func, options) when
-    is_atom(name) and is_atom(type) and (is_function(def_func, 1) or is_function(def_func, 2))
-  do
+  @spec create_config(atom, atom, (map -> Leds.t()), keyword | nil) :: Manager.config_t()
+  def create_config(name, type, def_func, options)
+      when is_atom(name) and is_atom(type) and
+             (is_function(def_func, 1) or is_function(def_func, 2)) do
     %{
-      name =>
-      %{
+      name => %{
         type: type,
         def_func: def_func,
         options: options || [],
@@ -38,43 +40,50 @@ defmodule Fledex.Utils.Dsl do
       }
     }
   end
-  @spec create_config(atom, atom, keyword | nil) :: Manager.config_t
+
+  @spec create_config(atom, atom, keyword | nil) :: Manager.config_t()
   def create_config(name, module, opts) do
     module.configure(name, opts)
   end
 
-  @spec apply_effect(atom, keyword, Manager.config_t() | [Manager.config_t()]) :: Manager.config_t()
-  def apply_effect(module, options, block) when
-    is_atom(module) and is_list(options) and is_map(block)
-  do
+  @spec apply_effect(atom, keyword, Manager.config_t() | [Manager.config_t()]) ::
+          Manager.config_t()
+  def apply_effect(module, options, block)
+      when is_atom(module) and is_list(options) and is_map(block) do
     apply_effect(module, options, [block])
   end
-  def apply_effect(module, options, block) when
-    is_atom(module) and is_list(options) and is_list(block)
-  do
+
+  def apply_effect(module, options, block)
+      when is_atom(module) and is_list(options) and is_list(block) do
     block
-      # merge list of configs
-      |> Enum.reduce(%{}, fn config, acc ->
-        Map.merge(acc, config)
-      end)
-      # add effect to each config
-      |> Enum.map(fn {name, config} ->
-        {name, %{config | effects: [{module, options} | config.effects]}}
-      end)
-      # convert back to a map
-      |> Map.new()
-  end
-  def apply_effect(module, options, block) do
-    raise ArgumentError, "Unknown block. I don't know how to apply the effect #{module} with options #{inspect options} on #{inspect block}"
+    # merge list of configs
+    |> Enum.reduce(%{}, fn config, acc ->
+      Map.merge(acc, config)
+    end)
+    # add effect to each config
+    |> Enum.map(fn {name, config} ->
+      {name, %{config | effects: [{module, options} | config.effects]}}
+    end)
+    # convert back to a map
+    |> Map.new()
   end
 
-  @spec configure_strip(atom, atom | keyword, [Manager.config_t] | Manager.config_t) :: :ok | Manager.config_t
+  def apply_effect(module, options, block) do
+    raise ArgumentError,
+          "Unknown block. I don't know how to apply the effect #{module} with options #{inspect(options)} on #{inspect(block)}"
+  end
+
+  @spec configure_strip(atom, atom | keyword, [Manager.config_t()] | Manager.config_t()) ::
+          :ok | Manager.config_t()
   def configure_strip(strip_name, strip_options, config) when is_list(config) do
-    config = Enum.reduce(config, %{}, fn map, acc ->
-      Map.merge(acc, map)
-    end)
+    config =
+      Enum.reduce(config, %{}, fn map, acc ->
+        Map.merge(acc, map)
+      end)
+
     configure_strip(strip_name, strip_options, config)
   end
+
   def configure_strip(strip_name, strip_options, config) do
     if is_atom(strip_options) and strip_options == :debug do
       config
@@ -104,16 +113,19 @@ defmodule Fledex.Utils.Dsl do
     }
   end
 
-  @spec ast_extract_configs(Macro.t) :: Macro.t
+  @spec ast_extract_configs(Macro.t()) :: Macro.t()
   def ast_extract_configs(block) do
-    {_ast, configs_ast} = Macro.prewalk(block, [], fn
-      {type, meta, children}, acc when type in @fledex_config_keys ->
-        {nil, [{type, meta, children} | acc]}
-      # list, acc when is_list(list) ->
-      #   {nil, list ++ acc}
-      other, acc ->
-        {other, acc}
-    end)
+    {_ast, configs_ast} =
+      Macro.prewalk(block, [], fn
+        {type, meta, children}, acc when type in @fledex_config_keys ->
+          {nil, [{type, meta, children} | acc]}
+
+        # list, acc when is_list(list) ->
+        #   {nil, list ++ acc}
+        other, acc ->
+          {other, acc}
+      end)
+
     configs_ast
   end
 
@@ -123,24 +135,31 @@ defmodule Fledex.Utils.Dsl do
       block -> ast_add_argument_to_func_if_missing(block)
     end
   end
+
   def ast_add_argument_to_func_if_missing(block) do
     case block do
       # argument matched, create only an anonymous function around it
       [{:->, _, _}] = block -> ast_create_anonymous_func(block)
       # argument didn't match, create an argument
       # then create an anonymous function around it
-      block -> ast_create_anonymous_func([:_triggers], block) # [{:->, [], [[{:_triggers, [], Elixir}], block]}])
+      # [{:->, [], [[{:_triggers, [], Elixir}], block]}])
+      block -> ast_create_anonymous_func([:_triggers], block)
     end
   end
-  @spec ast_create_anonymous_func([{:->, list, [[atom] | any]}]) :: {:fn, [], [{:->, list, [[atom] | any]}]}
+
+  @spec ast_create_anonymous_func([{:->, list, [[atom] | any]}]) ::
+          {:fn, [], [{:->, list, [[atom] | any]}]}
   def ast_create_anonymous_func([{:->, _, [args, _body]}] = block) when is_list(args) do
     {:fn, [], block}
   end
+
   @spec ast_create_anonymous_func([atom], any) :: {:fn, [], [{:->, [], [[atom] | any]}]}
   def ast_create_anonymous_func(args, block) when is_list(args) do
-    args = Enum.map(args, fn arg ->
-      {arg, [], Elixir}
-    end)
+    args =
+      Enum.map(args, fn arg ->
+        {arg, [], Elixir}
+      end)
+
     {:fn, [], [{:->, [], [args, block]}]}
   end
 end

@@ -18,23 +18,28 @@ defmodule Fledex.Driver.Impl.PubSubTest do
       config = Driver.init(%{})
       assert config.data_name == :pixel_data
     end
+
     test "reinit" do
       init_config = %{data_name: :pixel_data}
       assert init_config == Driver.reinit(init_config)
     end
+
     test "transfer" do
       driver = Driver.init(%{})
-      assert {driver, :ok} == Driver.transfer(
-        [0xff0000, 0x00ff00, 0x0000ff],
-        74,
-        driver
-      )
-      assert_receive {:driver, %{pixel_data: [0xff0000, 0x00ff00, 0x0000ff]}}
+
+      assert {driver, :ok} ==
+               Driver.transfer(
+                 [0xFF0000, 0x00FF00, 0x0000FF],
+                 74,
+                 driver
+               )
+
+      assert_receive {:driver, %{pixel_data: [0xFF0000, 0x00FF00, 0x0000FF]}}
     end
+
     test "terminate" do
       driver = Driver.init(%{})
       assert :ok == Driver.terminate(:normal, driver)
     end
-
   end
 end

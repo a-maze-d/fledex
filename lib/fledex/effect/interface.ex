@@ -43,8 +43,13 @@ defmodule Fledex.Effect.Interface do
   some state between applying the filter in consecutive calls.
   The `count` is the amount of LEDs in the list (to avoid that we have to traverse it unnecessarily)
   """
-  @callback apply(leds :: [Types.colorint], count :: non_neg_integer, config :: keyword, triggers :: map)
-      :: {list(Types.colorint), map, effect_state_t}
+  @callback apply(
+              leds :: [Types.colorint()],
+              count :: non_neg_integer,
+              config :: keyword,
+              triggers :: map
+            ) ::
+              {list(Types.colorint()), map, effect_state_t}
 
   @callback update_config(config :: keyword, updates :: keyword) :: keyword
   @optional_callbacks update_config: 2

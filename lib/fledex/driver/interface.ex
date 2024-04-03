@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Driver.Interface do
-
   alias Fledex.Color.Types
 
   @moduledoc """
@@ -41,7 +40,7 @@ defmodule Fledex.Driver.Interface do
   def reinit(module_config), do: driver_config
   ```
   """
-  @callback reinit(module_config::map) :: map
+  @callback reinit(module_config :: map) :: map
   @doc """
   This is the main function where we transfer the LED information to the "hardware"
   The `leds` is a list of integers, (color codes of the form `0xrrggbb` if written in
@@ -51,12 +50,13 @@ defmodule Fledex.Driver.Interface do
   The `module_config` is the config that got returned by the `init/1` or `reinit/1`
   functions
   """
-  @callback transfer(leds :: list(Types.colorint), counter :: pos_integer, module_config :: map) :: {map, response::any}
+  @callback transfer(leds :: list(Types.colorint()), counter :: pos_integer, module_config :: map) ::
+              {map, response :: any}
 
   @doc """
   THe terminate functions gets called when we dispose of the led strip. This the place
   where the driver can perform some cleanup (e.g.: close some channels)
   """
   @callback terminate(reason, config :: map) :: :ok
-    when reason: :normal | :shutdown | {:shutdown, term()} | term()
+            when reason: :normal | :shutdown | {:shutdown, term()} | term()
 end

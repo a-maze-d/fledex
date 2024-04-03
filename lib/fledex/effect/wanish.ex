@@ -5,9 +5,17 @@
 defmodule Fledex.Effect.Wanish do
   @behaviour Fledex.Effect.Interface
 
+  alias Fledex.Color.Types
+  alias Fledex.Effect.Interface
+
   @impl true
-  @spec apply(leds :: list(Types.colorint), count :: non_neg_integer, config :: keyword, triggers :: map)
-      :: {list(Types.colorint), map, Interface.effect_state_t}
+  @spec apply(
+          leds :: list(Types.colorint()),
+          count :: non_neg_integer,
+          config :: keyword,
+          triggers :: map
+        ) ::
+          {list(Types.colorint()), map, Interface.effect_state_t()}
   def apply(leds, count, config, triggers) do
     trigger_name = Keyword.get(config, :trigger_name)
 
@@ -38,55 +46,64 @@ defmodule Fledex.Effect.Wanish do
   # a divisor, since the same state appears twice. Therefore we take the remainder of the divisor
   # into consideration  defp do_apply(leds, _count, _config, nil, triggers), do: {leds, triggers}
   defp do_apply(leds, count, config, trigger_name, triggers) do
-      left = Keyword.get(config, :direction, :left) != :right
-      reappear = Keyword.get(config, :reappear, false)
-      circulate = Keyword.get(config, :circulate, reappear) # reappear does not make sense without circulate
-      reappear_key = Keyword.get(config, :reappear_key, String.to_atom("#{trigger_name}_reappear"))
+    left = Keyword.get(config, :direction, :left) != :right
+    reappear = Keyword.get(config, :reappear, false)
+    # reappear does not make sense without circulate
+    circulate = Keyword.get(config, :circulate, reappear)
+    reappear_key = Keyword.get(config, :reappear_key, String.to_atom("#{trigger_name}_reappear"))
 
-      divisor = Keyword.get(config, :divisor, 1)
-      offset = triggers[trigger_name] || 0
-      remainder = divisor - (rem(offset, divisor) + 1)
+    divisor = Keyword.get(config, :divisor, 1)
+    offset = triggers[trigger_name] || 0
+    remainder = divisor - (rem(offset, divisor) + 1)
 
-      offset = trunc(offset / divisor)
-      switch_on_off_func = Keyword.get(config, :switch_on_off_func, fn offset, triggers ->
+    offset = trunc(offset / divisor)
+
+    switch_on_off_func =
+      Keyword.get(config, :switch_on_off_func, fn offset, triggers ->
         {:run, offset, triggers}
       end)
-      {task, offset, triggers} = switch_on_off_func.(offset, triggers)
-      if task == :run do
-        offset = calculate_offset(count, offset, circulate, reappear, reappear_key, triggers)
-        triggers = adjust_triggers(count, remainder, offset, reappear_key, triggers)
-        effect_status = if remainder == 0, do: :stop_start, else: :progress
-        {switch_off(leds, offset, left), triggers, effect_status}
-      else
-        {leds, triggers, :disabled}
-      end
+
+    {task, offset, triggers} = switch_on_off_func.(offset, triggers)
+
+    if task == :run do
+      offset = calculate_offset(count, offset, circulate, reappear, reappear_key, triggers)
+      triggers = adjust_triggers(count, remainder, offset, reappear_key, triggers)
+      effect_status = if remainder == 0, do: :stop_start, else: :progress
+      {switch_off(leds, offset, left), triggers, effect_status}
+    else
+      {leds, triggers, :disabled}
+    end
   end
 
   defp calculate_offset(count, offset, circulate, reappear, reappear_key, triggers) do
-      offset = if circulate, do: rem(offset, count), else: offset
-      offset = if reappear and triggers[reappear_key], do: count - offset, else: offset
-      offset
+    offset = if circulate, do: rem(offset, count), else: offset
+    offset = if reappear and triggers[reappear_key], do: count - offset, else: offset
+    offset
   end
 
   defp adjust_triggers(count, remainder, offset, reappear_key, triggers)
+
   defp adjust_triggers(count, 0, offset, reappear_key, triggers) when offset == count - 1 do
     Map.put(triggers, reappear_key, true)
   end
-  defp adjust_triggers(_count, 0, 1, reappear_key, triggers) when is_map_key(triggers, reappear_key) do
-      Map.drop(triggers, [reappear_key])
+
+  defp adjust_triggers(_count, 0, 1, reappear_key, triggers)
+       when is_map_key(triggers, reappear_key) do
+    Map.drop(triggers, [reappear_key])
   end
+
   defp adjust_triggers(_count, _remainder, _offset, _reappear_key, triggers) do
     triggers
   end
 
   defp switch_off(leds, amount, left) do
     leds
-      |> reverse_if_necessary(left)
-      |> Enum.with_index(0)
-      |> Enum.map(fn {led, index} ->
-        if index < amount, do: 0x000000, else: led
-      end)
-      |> reverse_if_necessary(left)
+    |> reverse_if_necessary(left)
+    |> Enum.with_index(0)
+    |> Enum.map(fn {led, index} ->
+      if index < amount, do: 0x000000, else: led
+    end)
+    |> reverse_if_necessary(left)
   end
 
   defp reverse_if_necessary(leds, left)

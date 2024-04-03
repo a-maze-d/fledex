@@ -27,20 +27,20 @@ defmodule Fledex.LedStrip do
   alias Fledex.Utils.PubSub
 
   @typep timer_t :: %{
-    disabled: boolean,
-    counter: pos_integer,
-    update_timeout: pos_integer,
-    update_func: (state_t -> state_t),
-    only_dirty_update: boolean,
-    is_dirty: boolean,
-    ref: reference | nil
-  }
+           disabled: boolean,
+           counter: pos_integer,
+           update_timeout: pos_integer,
+           update_func: (state_t -> state_t),
+           only_dirty_update: boolean,
+           is_dirty: boolean,
+           ref: reference | nil
+         }
   @typep state_t :: %{
-    strip_name: atom,
-    timer: timer_t,
-    led_strip: Manager.driver_t,
-    namespaces: map
-  }
+           strip_name: atom,
+           timer: timer_t,
+           led_strip: Manager.driver_t(),
+           namespaces: map
+         }
 
   @default_update_timeout 50
 
@@ -49,6 +49,7 @@ defmodule Fledex.LedStrip do
           :ignore | {:error, any} | {:ok, pid}
   def start_link(strip_name \\ __MODULE__, config \\ :none)
   def start_link(strip_name, :none), do: start_link(strip_name, %{})
+
   def start_link(strip_name, :kino) do
     config = %{
       timer: %{only_dirty_update: true},
@@ -66,6 +67,7 @@ defmodule Fledex.LedStrip do
 
     start_link(strip_name, config)
   end
+
   def start_link(strip_name, :spi) do
     config = %{
       timer: %{only_dirty_update: true},
@@ -74,10 +76,11 @@ defmodule Fledex.LedStrip do
         driver_modules: [Fledex.Driver.Impl.Spi],
         config: %{
           Fledex.Driver.Impl.Spi => %{
-            color_correction: Correction.define_correction(
-              Correction.Color.typical_smd5050(),
-              Correction.Temperature.uncorrected_temperature()
-            )
+            color_correction:
+              Correction.define_correction(
+                Correction.Color.typical_smd5050(),
+                Correction.Temperature.uncorrected_temperature()
+              )
           }
         }
       }
@@ -85,6 +88,7 @@ defmodule Fledex.LedStrip do
 
     start_link(strip_name, config)
   end
+
   def start_link(strip_name, :null) do
     config = %{
       timer: %{only_dirty_update: true},
@@ -92,14 +96,14 @@ defmodule Fledex.LedStrip do
         merge_strategy: :cap,
         driver_modules: [Fledex.Driver.Impl.Null],
         config: %{
-          Fledex.Driver.Impl.Null => %{
-          }
+          Fledex.Driver.Impl.Null => %{}
         }
       }
     }
 
     start_link(strip_name, config)
   end
+
   def start_link(strip_name, init_args) when is_map(init_args) do
     # Logger.info(Exception.format_stacktrace())
     GenServer.start_link(__MODULE__, {init_args, strip_name}, name: strip_name)
@@ -173,23 +177,26 @@ defmodule Fledex.LedStrip do
 
   # server code
   @impl GenServer
-  @spec init({map, atom}) :: {:ok, state_t}  | {:stop, String.t()}
+  @spec init({map, atom}) :: {:ok, state_t} | {:stop, String.t()}
   def init({init_args, strip_name}) when is_map(init_args) and is_atom(strip_name) do
     {
       :ok,
       init_state(init_args, strip_name)
-        |> init_driver()
-        |> start_timer()
+      |> init_driver()
+      |> start_timer()
     }
   end
+
   def init(_na) do
     {:stop, "Init args need to be a map"}
   end
+
   @doc false
   @spec init_driver(state_t) :: state_t
   def init_driver(state) do
     %{state | led_strip: Manager.init_drivers(state.led_strip)}
   end
+
   @doc false
   @spec init_state(map, atom) :: state_t
   def init_state(init_args, strip_name) when is_map(init_args) and is_atom(strip_name) do
@@ -202,14 +209,14 @@ defmodule Fledex.LedStrip do
   end
 
   @allowed_keys [
-      :disabled,
-      :counter,
-      :update_timeout,
-      :update_func,
-      :only_dirty_update,
-      :is_dirty,
-      :ref
-    ]
+    :disabled,
+    :counter,
+    :update_timeout,
+    :update_func,
+    :only_dirty_update,
+    :is_dirty,
+    :ref
+  ]
   @doc false
   @spec init_timer(map) :: timer_t
   defp init_timer(init_args) when is_map(init_args) do
@@ -217,14 +224,17 @@ defmodule Fledex.LedStrip do
       disabled: false,
       counter: 0,
       update_timeout: @default_update_timeout,
-      update_func: (&transfer_data/1),
+      update_func: &transfer_data/1,
       only_dirty_update: false,
       is_dirty: false,
-      ref: nil,
+      ref: nil
     }
-    init_args = Map.filter(init_args, fn {key, _value} ->
-      key in @allowed_keys
-    end)
+
+    init_args =
+      Map.filter(init_args, fn {key, _value} ->
+        key in @allowed_keys
+      end)
+
     Map.merge(default, init_args)
   end
 
@@ -238,6 +248,7 @@ defmodule Fledex.LedStrip do
   @doc false
   @spec start_timer(state_t) :: state_t
   defp start_timer(%{timer: %{disabled: true}} = state), do: state
+
   defp start_timer(state) do
     update_timeout = state[:timer][:update_timeout]
     update_func = state[:timer][:update_func]
@@ -261,14 +272,15 @@ defmodule Fledex.LedStrip do
   end
 
   @impl GenServer
-  @spec handle_call({:drop_namespace, atom}, GenServer.from, state_t) :: {:reply, :ok, state_t}
+  @spec handle_call({:drop_namespace, atom}, GenServer.from(), state_t) :: {:reply, :ok, state_t}
   def handle_call({:drop_namespace, name}, _from, %{namespaces: namespaces} = state) do
     state = put_in(state, [:timer, :is_dirty], true)
     {:reply, :ok, %{state | namespaces: Map.drop(namespaces, [name])}}
   end
 
   @impl GenServer
-  @spec handle_call({:exist_namespace, atom}, GenServer.from, state_t) :: {:reply, boolean, state_t}
+  @spec handle_call({:exist_namespace, atom}, GenServer.from(), state_t) ::
+          {:reply, boolean, state_t}
   def handle_call({:exist_namespace, name}, _from, %{namespaces: namespaces} = state) do
     exists =
       case Map.fetch(namespaces, name) do
@@ -297,7 +309,8 @@ defmodule Fledex.LedStrip do
   end
 
   @impl GenServer
-  @spec handle_call({:change_config, list(atom), any}, {pid, any}, state_t) :: {:reply, {:ok, any}, state_t}
+  @spec handle_call({:change_config, list(atom), any}, {pid, any}, state_t) ::
+          {:reply, {:ok, any}, state_t}
   def handle_call({:change_config, config_path, value}, _from, state) do
     previous_value = get_in(state, config_path)
     state = put_in(state, config_path, value)
@@ -313,11 +326,17 @@ defmodule Fledex.LedStrip do
   @impl GenServer
   @spec handle_info({:update_timeout, (state_t -> state_t)}, state_t) :: {:noreply, state_t}
   def handle_info({:update_timeout, func}, state) do
-    state = update_in(state, [:timer, :counter], &(&1 + 1))
+    state =
+      update_in(state, [:timer, :counter], &(&1 + 1))
       |> start_timer()
       |> func.()
 
-    PubSub.broadcast(:fledex, "trigger", {:trigger, Map.put(%{}, state.strip_name , state.timer.counter)})
+    PubSub.broadcast(
+      :fledex,
+      "trigger",
+      {:trigger, Map.put(%{}, state.strip_name, state.timer.counter)}
+    )
+
     {:noreply, state}
   end
 
@@ -330,6 +349,7 @@ defmodule Fledex.LedStrip do
     # we shortcut if there is nothing to update and if we are allowed to shortcut
     state
   end
+
   def transfer_data(state) do
     # state = :telemetry.span(
     #   [:transfer_data],
@@ -341,7 +361,7 @@ defmodule Fledex.LedStrip do
       |> Manager.transfer(state.timer.counter, state.led_strip)
 
     %{state | led_strip: led_strip}
-      |> put_in([:timer, :is_dirty], false)
+    |> put_in([:timer, :is_dirty], false)
 
     #       {state, %{metadata: "done"}}
     #   end
@@ -377,6 +397,7 @@ defmodule Fledex.LedStrip do
   @doc false
   @spec match_length(list(list(Types.colorint()))) :: list(list(Types.colorint()))
   def match_length(leds) when leds == [], do: leds
+
   def match_length(leds) do
     max_length = Enum.reduce(leds, 0, fn sequence, acc -> max(acc, length(sequence)) end)
     Enum.map(leds, fn sequence -> extend(sequence, max_length - length(sequence)) end)
@@ -385,6 +406,7 @@ defmodule Fledex.LedStrip do
   @doc false
   @spec extend(list(Types.colorint()), pos_integer) :: list(Types.colorint())
   def extend(sequence, 0), do: sequence
+
   def extend(sequence, extra) do
     extra_length = Enum.reduce(1..extra, [], fn _index, acc -> acc ++ [0x000000] end)
     sequence ++ extra_length

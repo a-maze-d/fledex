@@ -47,15 +47,17 @@ defmodule Fledex.Driver.Impl.Spi do
   end
 
   @impl true
-  @spec transfer(list(Types.colorint), pos_integer, map) :: {map, any}
+  @spec transfer(list(Types.colorint()), pos_integer, map) :: {map, any}
   def transfer(leds, _counter, config) do
-    binary = leds
+    binary =
+      leds
       |> Correction.apply_rgb_correction(config.color_correction)
       |> Enum.reduce(<<>>, fn led, acc ->
         {r, g, b} = Utils.to_rgb(led)
         acc <> <<r, g, b>>
       end)
-      response = Circuits.SPI.transfer(config.ref, binary)
+
+    response = Circuits.SPI.transfer(config.ref, binary)
     {config, response}
   end
 

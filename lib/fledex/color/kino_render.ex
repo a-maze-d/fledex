@@ -11,29 +11,35 @@ defmodule Fledex.Color.KinoRender do
   defguard is_byte(sub_pixel) when is_integer(sub_pixel) and sub_pixel >= 0 and sub_pixel <= 255
 
   defstruct [:colors]
-  @type t :: %__MODULE__{
-    colors: [Types.color]
-  }
 
-  @spec new(Types.color | [Types.color]) :: t
+  @type t :: %__MODULE__{
+          colors: [Types.color()]
+        }
+
+  @spec new(Types.color() | [Types.color()]) :: t
   def new(colors) when is_list(colors) do
     %__MODULE__{colors: colors}
   end
+
   def new(color) when is_integer(color) do
     new([color])
   end
+
   def new({r, g, b} = color) when is_byte(r) and is_byte(g) and is_byte(b) do
     new([color])
   end
+
   def new(color) when is_atom(color) and is_color_name(color) do
     new([color])
   end
 
-  @spec to_leds(t) :: Leds.t
+  @spec to_leds(t) :: Leds.t()
   def to_leds(%__MODULE__{colors: colors}) do
-    colors = Enum.map(colors, fn color ->
-      Utils.to_colorint(Utils.to_rgb(color))
-    end)
+    colors =
+      Enum.map(colors, fn color ->
+        Utils.to_colorint(Utils.to_rgb(color))
+      end)
+
     Leds.leds(
       length(colors),
       Map.new(
@@ -55,14 +61,17 @@ defmodule Fledex.Color.KinoRender do
     alias Fledex.Color.KinoRender
 
     @impl true
-    @spec to_livebook(Fledex.Color.KinoRender.t) :: map
+    @spec to_livebook(Fledex.Color.KinoRender.t()) :: map
     def to_livebook(%KinoRender{} = colors) do
       md_kino = Kino.Markdown.new(KinoRender.to_markdown(colors))
       i_kino = Kino.Inspect.new(colors)
-      kino = Kino.Layout.tabs(
-        Leds: md_kino,
-        Raw: i_kino
-      )
+
+      kino =
+        Kino.Layout.tabs(
+          Leds: md_kino,
+          Raw: i_kino
+        )
+
       Kino.Render.to_livebook(kino)
     end
   end

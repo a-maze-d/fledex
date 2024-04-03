@@ -6,6 +6,7 @@ defmodule Fledex.Driver.Impl.Null do
   @behaviour Fledex.Driver.Interface
 
   alias Fledex.Color.Types
+
   @moduledoc """
     This is a dummy implementation of the Driver that doesn't do
     anything (similar to a /dev/null device). This can be useful if you
@@ -26,13 +27,14 @@ defmodule Fledex.Driver.Impl.Null do
   end
 
   @impl true
-  @spec transfer(list(Types.colorint), pos_integer, map) :: {map, any}
+  @spec transfer(list(Types.colorint()), pos_integer, map) :: {map, any}
   def transfer(_leds, _counter, config) do
     {config, :ok}
   end
 
   @impl true
-  @spec terminate(reason, map) :: :ok when reason: :normal | :shutdown | {:shutdown, term()} | term()
+  @spec terminate(reason, map) :: :ok
+        when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(_reason, _state) do
     # nothing needs to be done here
     :ok
