@@ -63,7 +63,7 @@ The direct connection (especially with short conncetions) will probably work, be
 ## Connection via a Level Shifter
 It is better to use a level shifter to properly translate between the 3.3V signals and the required 5V signals.
 
-We will us the Adafruit TXB0104 Bi-Directional Level shifter. It is a bit overkill, because we neither need to translate in both direction nor do we require 4 signal lines, but it's easy to work with.
+There are [different ways](https://electronics.stackexchange.com/questions/82104/single-transistor-level-up-shifter/82112#82112) on how to level shift. We will us the Adafruit TXB0104 Bi-Directional Level shifter. It is a bit of an overkill, because we neither need to translate in both direction, nor do we require 4 signal lines, but it's easy to work with.
 
 You have to do the following steps:
 

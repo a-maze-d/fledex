@@ -13,7 +13,8 @@ Even though this library is published, there are things I still want to do befor
     - [ ] create cheatsheet (v0.4)
   - [x] Add documentation on how to connect the LED strip to a RaspberryPi Zero (v0.4) 
   - [ ] Add installation instructions (v0.4)
-  - [x] Add documentation on how to conncet the LED strip to a RPI with a level shifter (v0.7)
+  - [ ] Add Branching sections in the livebooks to separate things that don't need to be together (v0.5)
+  - [x] Add documentation on how to connect the LED strip to a RPI with a level shifter (v0.7)
         https://electronics.stackexchange.com/questions/82104/single-transistor-level-up-shifter/82112#82112
 - [ ] Testing
   - [ ] Add more error handling scenarios (v0.4)
