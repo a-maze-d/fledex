@@ -31,8 +31,6 @@ Even though this library is published, there are things I still want to do befor
   - [x] review the ideas.md document to see whether all ideas have been implemented (v0.4)
   - [x] improve on the effect state and component state handling. It's currently possible, but not super smooth and it's also difficult to avoid conflicts between different animations/effect/components <-- see my comment above about rethinking the config. This covers this aspect too.
   - [x] Create a sequencer effect that runs one effect before switching to the next effect. Maybe we  can replace the wanish and reappaer effect with 2 distinct effects this way and each of them being simpler. (v0.4) NOTE: This will not be done. I gave it some more thoughts and instead of a sequencer I will implement support for a coordinator that can control individual animations/effects.
-  - [ ] Create support for a coordinator (that can control individual animations and effects. Effects will have to notify back their state)
-  - [ ] Create support for a cron-manager (that allows running jobs, like the one we have in the weather station example and thereby no need to handcraft anything)
   - [ ] Add the possibility to clear the LEDs when initializing the LedsDriver (v0.4)
   - [ ] Connect everything into a supervision tree (to make it more robust) (v0.4)
   - [x] Use protocols ?
@@ -50,12 +48,14 @@ Even though this library is published, there are things I still want to do befor
       end
     end
     ```
+  - [ ] Create support for a cron-manager (that allows running jobs, like the one we have in the weather station example and thereby no need to handcraft anything) (v0.4)
+  - [ ] Create support for a coordinator (that can control individual animations and effects. Effects will have to notify back their state) (v0.5)
   - [ ] Clustering
     - [ ] create an animation that consumes those (this allows to connect remote livebooks to a physical led strip. CAUTION: protect against loops!) (v0.5)
     - [ ] Provide examples on how to cluster (v0.5)
     - [ ] Add an example where several nodes are connected to transfer pubsub messages accross nodes (v0.5)
-  - [ ] LED-component library
-    - [x] Create foundation for a led-component-library that enables defining reusable led components. For example both the clock as well as the weather example have a scale it would be easy to define those as components that would make it easier to defining certain aspects (v0.5) Note: this should now be possible, since we have a component macro which simply returns animation configs. The above improvements should help to make this more smooth
+  - [x] LED-component library
+    - [x] Create foundation for a led-component-library that enables defining reusable led components. For example both the clock as well as the weather example have a scale it would be easy to define those as components that would make it easier to defining certain aspects (v0.5) Note: this should now be possible, since we have a component macro which simply returns animation configs. The above improvements should help to make this more smooth. Note2: I decided that (apart from some very basic components, I won't add components within this library but rather add them to a new library/repository)
 - [ ] Increase consumption
   - [ ] Use in school project (v0.4)
   - [ ] Design a project logo (v0.5)

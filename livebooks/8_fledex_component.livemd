@@ -8,48 +8,48 @@ SPDX-License-Identifier: Apache-2.0
 
 ```elixir
 Mix.install([
-  {:fledex, "~>0.4"}
+  {:fledex, path: "~>0.4"}
 ])
 ```
 
-## The Weather (with component)
+## The Weather animation (with a component)
 
 ```elixir
 use Fledex
 ```
 
+Instead of defining the complicated logic of the termometer indicator, we use this time a component that has all this logic build in. The component defines our configuration and all we have to do is to specify the mandatory (and if desired optional) parameters.
+
 ```elixir
 alias Fledex.Component.Thermometer
 
 led_strip :john, :kino do
-  static :help do
-    # we allow temperatures down to -20C and up to +40C
-    negative_scale =
-      leds(5)
-      |> light(davy_s_grey())
-      |> repeat(4)
-
-    positive_scale =
-      leds(5)
-      |> light(davy_s_grey(), 5)
-      |> repeat(8)
-
-    leds(61)
-    |> light(negative_scale)
-    |> light(davy_s_grey())
-    |> light(positive_scale)
-  end
-
-  component(:thermo, Fledex.Component.Thermometer,
+  component(:thermo, Thermometer,
     range: -20..40,
     trigger: :temperature,
     negative: :blue,
     null: :may_green,
-    positive: :red
+    positive: :red,
+    marker: :davy_s_grey
   )
 end
 ```
 
+To test our animation we fake again the temperature by simply publishing the desired temperature.
+
 ```elixir
 Fledex.Utils.PubSub.broadcast(:fledex, "trigger", {:trigger, %{temperature: 17.2}})
 ```
+
+## What is a component
+
+The question now is just "what is a component"?
+
+The component is simply a module that implements the `@behaviour Fledex.Component.Interface`. Only a single `configure/2` function is required that returns a `Fledex.Animation.Manager.config_t` structure and thus can define anything you normaly would define through the `animation`, `static`, ... macros.
+
+To get the correct behaviour the component gets 2 parameters:
+
+1. The **name** of the component: Each animation gets it's own name, so does the component. It should be noted that an component can create several animations and the component should make sure to name each of those individually. The termometer has two "animations" the scale and the markers on the scale. The former gets the name of the component and the latter gets the name with `.helper` attached.
+2. a **keyword list of options**: The list of parameters allows us to configure our component. Each component can define their own set of components. Probably a reoccuring parameter is `:trigger_name` wich allows us to configure runtime parameters, but this is by convention only.
+
+As you have seen a component is nothing special but it allows to redefine a reusable structure. A component can be defined and distributed through an external library.
