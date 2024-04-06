@@ -55,7 +55,7 @@ defmodule Fledex.Animation.Animator do
   alias Fledex.Utils.PubSub
 
   @type config_t :: %{
-          optional(:type) => (:animation | :static | :job | :coordinator),
+          optional(:type) => :animation | :static | :job | :coordinator,
           optional(:def_func) => (map -> Leds.t()),
           optional(:options) => keyword | nil,
           optional(:effects) => [{module, keyword}],

@@ -229,7 +229,7 @@ defmodule Fledex do
     `Fledex.Component.Clock` example.
   """
 
-# @spec led_strip(atom, atom | keyword, Macro.t) :: Macro.t | map()
+  # @spec led_strip(atom, atom | keyword, Macro.t) :: Macro.t | map()
   defmacro led_strip(strip_name, strip_options \\ :kino, do: block) do
     configs_ast = Dsl.ast_extract_configs(block)
 

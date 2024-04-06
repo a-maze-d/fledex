@@ -20,6 +20,7 @@ defmodule Fledex.Component.Thermometer do
   # @spec configure(atom, keyword) :: %{atom => Animator.config_t()}
   def configure(name, options) when is_atom(name) and is_list(options) do
     name_helper = String.to_atom("#{name}.helper")
+
     case Keyword.keyword?(options) do
       true ->
         %{

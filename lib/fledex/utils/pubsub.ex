@@ -7,6 +7,7 @@ defmodule Fledex.Utils.PubSub do
   defdelegate subscribe(pubsub, topic), to: Phoenix.PubSub
   defdelegate unsubscribe(pubsub, topic), to: Phoenix.PubSub
   defdelegate broadcast(pubsub, topic, message), to: Phoenix.PubSub
+
   def simple_broadcast(message) when is_map(message) do
     broadcast(:fledex, "trigger", {:trigger, message})
   end

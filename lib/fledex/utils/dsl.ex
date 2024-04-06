@@ -85,12 +85,13 @@ defmodule Fledex.Utils.Dsl do
   end
 
   def configure_strip(_strip_name, :config, config), do: config
+
   def configure_strip(strip_name, strip_options, config) do
     # if is_atom(strip_options) and strip_options == :config do
     #   config
     # else
-      Manager.register_strip(strip_name, strip_options)
-      Manager.register_config(strip_name, config)
+    Manager.register_strip(strip_name, strip_options)
+    Manager.register_config(strip_name, config)
     # end
   end
 

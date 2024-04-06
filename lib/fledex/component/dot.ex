@@ -14,7 +14,9 @@ defmodule Fledex.Component.Dot do
     animation name do
       triggers when is_map(triggers) and is_map_key(triggers, trigger_name) ->
         leds(count) |> light(color, triggers[trigger_name])
-      _triggers -> leds()
+
+      _triggers ->
+        leds()
     end
   end
 end
