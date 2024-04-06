@@ -80,6 +80,7 @@ defmodule Fledex do
   defmacro animation(name, options \\ nil, do: block) do
     # decide on whether the user pattern matched or didn't specify an
     # argument at all
+    # IO.puts(inspect block)
     def_func_ast = Dsl.ast_add_argument_to_func_if_missing(block)
 
     quote do
@@ -149,12 +150,8 @@ defmodule Fledex do
   parameters.
   """
   # @spec component(atom, module, keyword) :: Macro.t
-  defmacro component(name, module, opts) do
-    quote do
-      Dsl.create_config(unquote(name), unquote(module), unquote(opts))
-    end
-
-    #  |> tap(& IO.puts Code.format_string! Macro.to_string &1)
+  def component(name, module, opts) do
+    Dsl.create_config(name, module, opts)
   end
 
   @doc """
@@ -199,7 +196,7 @@ defmodule Fledex do
   example livebook](5_fledex_weather_example.livemd)):
 
   ```elixir
-  Fledex.Utils.PubSub.broadcast(:fledex, "trigger", {:trigger, %{temperature: -15.2}})
+  Fledex.Utils.PubSub.simple_broadcast(%{temperature: -15.2})
   ```
   """
   defmacro job(name, pattern, do: block) do
@@ -219,8 +216,20 @@ defmodule Fledex do
 
   @doc """
     This introduces a new led_strip.
+
+    The `strip_options specifies the driver configuration that should be used.
+    A set of default drivers exist for conenience that can be used like `:spi`, `:kino`, ...
+    (see `Fledex.LedStrip` for details)/
+
+    A special driver `:config` exists that will simply return the converted dsl to the
+    corresponding configuration. This can be very convenient for
+
+    * running tests
+    * implementing components consisting of several animations. Take a look at the
+    `Fledex.Component.Clock` example.
   """
-  # @spec led_strip(atom, atom | keyword, Macro.t) :: Macro.t | map()
+
+# @spec led_strip(atom, atom | keyword, Macro.t) :: Macro.t | map()
   defmacro led_strip(strip_name, strip_options \\ :kino, do: block) do
     configs_ast = Dsl.ast_extract_configs(block)
 

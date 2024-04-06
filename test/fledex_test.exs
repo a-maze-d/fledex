@@ -332,7 +332,7 @@ defmodule Fledex.Test do
       use Fledex
 
       config =
-        led_strip :strip, :debug do
+        led_strip :strip, :config do
           animation :john do
             leds(10)
           end
@@ -355,7 +355,7 @@ defmodule Fledex.Test do
       use Fledex
 
       config =
-        led_strip :strip, :debug do
+        led_strip :strip, :config do
           animation :john do
             leds(20)
           end

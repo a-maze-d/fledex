@@ -8,15 +8,17 @@ SPDX-License-Identifier: Apache-2.0
 
 ```elixir
 Mix.install([
-  {:fledex, path: "~>0.4"}
+  {:fledex, "~>0.4"}
 ])
 ```
 
-## The Weather animation (with a component)
+## Setup
 
 ```elixir
 use Fledex
 ```
+
+## The Weather animation (with a component)
 
 Instead of defining the complicated logic of the termometer indicator, we use this time a component that has all this logic build in. The component defines our configuration and all we have to do is to specify the mandatory (and if desired optional) parameters.
 
@@ -35,11 +37,11 @@ led_strip :john, :kino do
 end
 ```
 
-To test our animation we fake again the temperature by simply publishing the desired temperature.
-
 ```elixir
 Fledex.Utils.PubSub.broadcast(:fledex, "trigger", {:trigger, %{temperature: 17.2}})
 ```
+
+To test our animation we fake again the temperature by simply publishing the desired temperature.
 
 ## What is a component
 
@@ -53,3 +55,81 @@ To get the correct behaviour the component gets 2 parameters:
 2. a **keyword list of options**: The list of parameters allows us to configure our component. Each component can define their own set of components. Probably a reoccuring parameter is `:trigger_name` wich allows us to configure runtime parameters, but this is by convention only.
 
 As you have seen a component is nothing special but it allows to redefine a reusable structure. A component can be defined and distributed through an external library.
+
+## Netsted components
+
+We now take a slightly different approach for creating our component. As we have seen above a component is simply a configuration and the dsl is simply an easier way to write a config. Thus, we can reuse one within the other.
+
+```elixir
+alias Fledex.Component.Dot
+
+led_strip :nested_components, :kino do
+  component(:minute, Dot, color: :red, count: 60, trigger_name: :minute)
+  component(:hour, Dot, color: :blue, count: 24, trigger_name: :hour)
+
+  static :helper do
+    leds(5) |> light(:davy_s_grey, 5) |> repeat(12)
+  end
+end
+```
+
+```elixir
+Fledex.Utils.PubSub.simple_broadcast(%{hour: 17, minute: 34})
+```
+
+The interesting thing in the `Fledex.Component.Dot` component is that it actually defines the component by using the `Fledex.animation/3` macro. The code looks like the following
+
+<!-- livebook:{"force_markdown":true} -->
+
+```elixir
+  def configure(name, options) when is_atom(name) and is_list(options) do
+    use Fledex
+    # ... here comes some option extraction stuff
+    animation name do
+      triggers when is_map(triggers) and is_map_key(triggers, trigger_name) ->
+        leds(count) |> light(color, triggers[trigger_name])
+      _ -> leds()
+    end
+  end
+
+```
+
+## The clock component
+
+The `Fledex.Component.Clock` component is an interesting one, because it defines several animations and even a static pattern. For that it uses the special `led_strip` driver `:config` that simply returns the config instead of delegating to the `Fledex.Animation.Manager`.
+
+Each animation requires its own unique name and this is accomplished with a small utility function that combines the strip name (the one we get in) and an additional fraction.
+
+<!-- livebook:{"force_markdown":true} -->
+
+```elixir
+  def configure(name, options) do
+    # ... here comes some option extraction stuff 
+    use Fledex
+    led_strip name, :config do
+      component :minute, Dot, color: minute_color, count: 60, trigger_name: create_name(trigger_name, :minute)
+      component :hour, Dot, color: hour_color, count: 24, trigger_name: create_name(trigger_name, :hour)
+      static create_name(trigger_name, :helper) do
+        leds(5) |> light(helper_color, 5) |> repeat(12)
+      end
+    end
+  end
+
+```
+
+As you can see it defines, more or less, the same animations as our example above. Thus, instead of us defining the different animations, the component is doing this for us.
+To use the component, we now simply have to use the clock and pass in the necessary options, and that's it!
+
+```elixir
+alias Fledex.Component.Clock
+
+led_strip :nested_components2, :kino do
+  component(:clock, Clock, trigger_name: :clock)
+end
+```
+
+And to see the correct time, we now we only need to publish the appropriate time. When we do so we shouldn't forget that the animations are reacting to the sub-name triggers and therefore we need to use `:clock_hour` and `:clock_minute` as triggers.
+
+```elixir
+Fledex.Utils.PubSub.simple_broadcast(%{clock_hour: 17, clock_minute: 34})
+```

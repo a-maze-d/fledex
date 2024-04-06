@@ -84,13 +84,14 @@ defmodule Fledex.Utils.Dsl do
     configure_strip(strip_name, strip_options, config)
   end
 
+  def configure_strip(_strip_name, :config, config), do: config
   def configure_strip(strip_name, strip_options, config) do
-    if is_atom(strip_options) and strip_options == :debug do
-      config
-    else
+    # if is_atom(strip_options) and strip_options == :config do
+    #   config
+    # else
       Manager.register_strip(strip_name, strip_options)
       Manager.register_config(strip_name, config)
-    end
+    # end
   end
 
   @spec init(keyword) :: :ok | {:ok, pid()}
@@ -139,7 +140,7 @@ defmodule Fledex.Utils.Dsl do
   def ast_add_argument_to_func_if_missing(block) do
     case block do
       # argument matched, create only an anonymous function around it
-      [{:->, _, _}] = block -> ast_create_anonymous_func(block)
+      [{:->, _metadata, _context} | _tail] = block -> ast_create_anonymous_func(block)
       # argument didn't match, create an argument
       # then create an anonymous function around it
       # [{:->, [], [[{:_triggers, [], Elixir}], block]}])
@@ -149,7 +150,7 @@ defmodule Fledex.Utils.Dsl do
 
   @spec ast_create_anonymous_func([{:->, list, [[atom] | any]}]) ::
           {:fn, [], [{:->, list, [[atom] | any]}]}
-  def ast_create_anonymous_func([{:->, _, [args, _body]}] = block) when is_list(args) do
+  def ast_create_anonymous_func([{:->, _, [args, _body]} | _tail] = block) when is_list(args) do
     {:fn, [], block}
   end
 

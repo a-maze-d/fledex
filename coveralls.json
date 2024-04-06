@@ -12,6 +12,8 @@
 
     "skip_files": [
         "lib/fledex/component/thermometer.ex",
+        "lib/fledex/component/dot.ex",
+        "lib/fledex/component/clock.ex",
         "lib/fledex/effect/sequencer.ex",
         "test"
     ],

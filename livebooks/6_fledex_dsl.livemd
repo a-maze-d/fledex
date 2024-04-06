@@ -200,5 +200,5 @@ end
 This time we don't implement the connection to the weather API, but we only fake it.
 
 ```elixir
-Fledex.Utils.PubSub.broadcast(:fledex, "trigger", {:trigger, %{temperature: 17.2}})
+Fledex.Utils.PubSub.simple_broadcast(%{temperature: 17.2})
 ```

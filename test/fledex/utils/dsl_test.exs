@@ -36,7 +36,7 @@ defmodule Fledex.Utils.DslTest do
 
     test "configure_strip (debug only)" do
       block = %{name: %{}}
-      assert Dsl.configure_strip(:name, :debug, block) == block
+      assert Dsl.configure_strip(:name, :config, block) == block
     end
 
     test "ast_add_argument_to_func" do
