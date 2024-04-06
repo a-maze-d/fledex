@@ -149,7 +149,7 @@ defmodule Fledex do
   It is up to each component to define their own set of mandatory and optional
   parameters.
   """
-  # @spec component(atom, module, keyword) :: Macro.t
+  @spec component(atom, module, keyword) :: Fledex.Animation.Manager.config_t()
   def component(name, module, opts) do
     Dsl.create_config(name, module, opts)
   end
