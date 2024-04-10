@@ -25,15 +25,15 @@ defmodule Fledex.Animation.Manager do
 
   alias Fledex.Animation.Animator
   alias Fledex.Animation.Interface
+  alias Fledex.Animation.JobScheduler
   alias Fledex.LedStrip
-  alias Fledex.Utils.Dsl
+  alias Quantum.Job
 
   @type config_t :: %{
           atom => Animator.config_t()
         }
 
   @typep state_t :: %{
-           type_config: map(),
            animations: map(),
            coordinators: map(),
            jobs: map()
@@ -46,21 +46,21 @@ defmodule Fledex.Animation.Manager do
   #   }
   # end
 
-  ### client side
+  ### MARK: client side
   @doc """
   This starts a new `Fledex.Animation.Manager`. Only a single animation manager will be started
   even if called serveral times (thus it's save to call it repeatedly).
   The `type_config` specifies the list of supported animations and their module mapping
   (see `Fledex.Utils.Dsl.fledex_config/0` for the configurations used by default.)
   """
-  @spec start_link(%{atom => module}) :: {:ok, pid()}
-  def start_link(type_config \\ Dsl.fledex_config()) do
+  @spec start_link(keyword) :: {:ok, pid()}
+  def start_link(opts \\ []) do
     # we should only have a single server running. Therefore we check whether need to do something
     # or if the server is already running
     pid = GenServer.whereis(__MODULE__)
 
     if pid == nil do
-      GenServer.start_link(__MODULE__, type_config, name: __MODULE__)
+      GenServer.start_link(__MODULE__, opts, name: __MODULE__)
     else
       {:ok, pid}
     end
@@ -107,21 +107,20 @@ defmodule Fledex.Animation.Manager do
     GenServer.call(__MODULE__, {:register_config, strip_name, configs})
   end
 
-  ### server side
+  ### MARK: server side
   @impl GenServer
-  @spec init(map) :: {:ok, state_t}
-  def init(type_config) when is_map(type_config) do
+  @spec init(keyword) :: {:ok, state_t}
+  def init(_opts) do
     # children = [
     #   {DynamicSupervisor, strategy: :one_for_one, name: Manager.LedStrips},
     #   {DynamicSupervisor, strategy: :one_for_one, name: Manager.Animations},
     #   {DynamicSupervisor, strategy: :one_for_one, name: Manager.Coordinators},
     #   Job
-    #   # Do we need one for Jobs?
     # ]
     # Supervisor.start_link(children, strategy: :one_for_one)
+    JobScheduler.start_link()
 
     state = %{
-      type_config: type_config,
       animations: %{},
       coordinators: %{},
       jobs: %{}
@@ -170,6 +169,17 @@ defmodule Fledex.Animation.Manager do
     {:reply, :ok, unregister_strip(state, strip_name)}
   end
 
+  @impl GenServer
+  @spec terminate(atom, state_t) :: :ok
+  def terminate(_reason, state) do
+    strip_names = Map.keys(state.animations)
+
+    Enum.reduce(strip_names, state, fn strip_name, state ->
+      unregister_strip(state, strip_name)
+    end)
+  end
+
+  ### MARK: private functions
   # we split the animation into the different aspects
   # animations, coordinators and cronjobs
   defp split_config(config) do
@@ -232,8 +242,8 @@ defmodule Fledex.Animation.Manager do
 
     # Logger.info("#{inspect dropped}, #{inspect present}")
     shutdown_animators(strip_name, dropped)
-    update_animators(strip_name, updated, state.type_config)
-    create_animators(strip_name, created, state.type_config)
+    update_animators(strip_name, updated)
+    create_animators(strip_name, created)
 
     %{state | animations: Map.put(state.animations, strip_name, configs)}
   end
@@ -245,33 +255,17 @@ defmodule Fledex.Animation.Manager do
     end)
   end
 
-  @spec update_animators(atom, map, map) :: :ok
-  defp update_animators(strip_name, animations, type_config) do
+  @spec update_animators(atom, map) :: :ok
+  defp update_animators(strip_name, animations) do
     Enum.each(animations, fn {animation_name, config} ->
-      type = config[:type] || :animation
-      module_name = type_config[type] || Animator
-      module_name.config(strip_name, animation_name, config)
+      Animator.config(strip_name, animation_name, config)
     end)
   end
 
-  @spec create_animators(atom, map, map) :: :ok
-  defp create_animators(strip_name, created_animations, type_config) do
+  @spec create_animators(atom, map) :: :ok
+  defp create_animators(strip_name, created_animations) do
     Enum.each(created_animations, fn {animation_name, config} ->
-      module_name = type_config[config.type]
-      {:ok, _pid} = module_name.start_link(config, strip_name, animation_name)
-      #   server_name = Interface.build_name(strip_name, :animation, animation_name)
-      #   case Process.info(pid, :registered_name) do
-      #     {:registered_name, ^server_name} -> :ok
-      #     # we could register the name if it does not exist and we could unregister and reregister
-      #     # the process if it have the wrong name, but that's not gonna end well. It's better to
-      #     # throw this back immediately.
-      #     # nil ->
-      #       # Process.register(pid, server_name)
-      #     # {:registered_name, other_name} ->
-      #       # Process.unregister(other_name)
-      #       # Process.register(pid, server_name)
-      #     _anything -> raise RuntimeError, message: "The animator is not registered under the expected name"
-      #   end
+      {:ok, _pid} = Animator.start_link(config, strip_name, animation_name)
     end)
   end
 
@@ -307,21 +301,32 @@ defmodule Fledex.Animation.Manager do
   defp shutdown_coordinators(_strip_name, _coordinator_names) do
   end
 
-  defp register_jobs(state, _strip_name, _jobs) do
-    # state = %{state | jobs: }
-    state
+  defp register_jobs(state, strip_name, jobs) do
+    {dropped, updated, created} = filter_configs(Map.get(state.jobs, strip_name), jobs)
+
+    shutdown_jobs(strip_name, dropped)
+    update_jobs(strip_name, updated)
+    create_jobs(strip_name, created)
+
+    %{state | jobs: Map.put(state.jobs, strip_name, jobs)}
   end
 
   defp shutdown_jobs(_strip_name, _job_names) do
   end
 
-  @impl GenServer
-  @spec terminate(atom, state_t) :: :ok
-  def terminate(_reason, state) do
-    strip_names = Map.keys(state.animations)
+  def update_jobs(_strip_name, _jobs) do
+  end
 
-    Enum.reduce(strip_names, state, fn strip_name, state ->
-      unregister_strip(state, strip_name)
+  def create_jobs(strip_name, jobs) do
+    Enum.each(jobs, fn job ->
+      JobScheduler.add_job(convert(job, strip_name))
     end)
+  end
+
+  defp convert(job, _strip_name) do
+    JobScheduler.new_job()
+    |> Job.set_name(job.name)
+    |> Job.set_schedule(job.pattern)
+    |> Job.set_task(job.func)
   end
 end

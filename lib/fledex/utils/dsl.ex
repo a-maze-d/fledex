@@ -9,6 +9,7 @@ defmodule Fledex.Utils.Dsl do
   alias Fledex.Animation.Manager
   alias Fledex.Leds
 
+  # TODO: still needed in this form
   @fledex_config %{
     animation: Animator,
     static: Animator,
@@ -101,7 +102,7 @@ defmodule Fledex.Utils.Dsl do
     if Keyword.get(opts, :dont_start, false) do
       :ok
     else
-      Manager.start_link(@fledex_config)
+      Manager.start_link()
     end
   end
 
