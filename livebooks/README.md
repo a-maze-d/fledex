@@ -72,5 +72,8 @@ We won't look at all possible effects, but at some examples. It is quite easy to
 # 8. Fledex: Component
 In this chapter we will take a look on how to create reusable components. This way you don't have to redefine certain animations
 
+# 9. Fledex: Job
+In this chapter we will take a look at the `job` feature that makes the scheduling of repetitive tasks much easier by providing a cron-job like feature. This is mainly intended to trigger some events for the animation(s), but could really be used for anything.
+
 > [!NOTE]
 > The functionality is still very much in fluctuation.

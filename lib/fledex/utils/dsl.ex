@@ -3,30 +3,22 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Utils.Dsl do
-  alias Fledex.Animation.Animator
-  alias Fledex.Animation.Coordinator
-  alias Fledex.Animation.Job
   alias Fledex.Animation.Manager
   alias Fledex.Leds
 
-  # TODO: still needed in this form
-  @fledex_config %{
-    animation: Animator,
-    static: Animator,
-    job: Job,
-    coordinator: Coordinator,
-    # the next 2 are required for the ast manipulation that we need to do
-    # The module is not really correct, but it's not important
-    component: Animator,
-    # The module is not really correct, but it's not important
-    effect: Animator
-  }
-  @fledex_config_keys Map.keys(@fledex_config)
+  @fledex_macros [
+    :animation,
+    :static,
+    :job,
+    :coordinator,
+    :component,
+    :effect
+  ]
 
-  @spec fledex_config :: %{atom => module}
-  def fledex_config do
-    @fledex_config
-  end
+  # @spec fledex_config :: %{atom => module}
+  # def fledex_config do
+  #   @fledex_config
+  # end
 
   @spec create_config(atom, atom, (map -> Leds.t()), keyword | nil) :: Manager.config_t()
   def create_config(name, type, def_func, options)
@@ -120,7 +112,7 @@ defmodule Fledex.Utils.Dsl do
   def ast_extract_configs(block) do
     {_ast, configs_ast} =
       Macro.prewalk(block, [], fn
-        {type, meta, children}, acc when type in @fledex_config_keys ->
+        {type, meta, children}, acc when type in @fledex_macros ->
           {nil, [{type, meta, children} | acc]}
 
         # list, acc when is_list(list) ->

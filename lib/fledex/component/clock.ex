@@ -21,7 +21,7 @@ defmodule Fledex.Component.Clock do
     use Fledex
 
     led_strip name, :config do
-      component(:minute, Dot,
+      component(:second, Dot,
         color: second_color,
         count: 60,
         trigger_name: trigger_second
@@ -40,7 +40,7 @@ defmodule Fledex.Component.Clock do
       )
 
       static create_name(trigger_name, :helper) do
-        leds(5) |> light(helper_color, 5) |> repeat(12)
+        leds(5) |> light(helper_color) |> repeat(12)
       end
     end
   end

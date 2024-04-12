@@ -1,4 +1,4 @@
-# 9. Fledex: Jobs
+# 9. Fledex: Job
 
 ```elixir
 Mix.install([
@@ -12,6 +12,16 @@ Mix.install([
 use Fledex
 ```
 
+In the last couple of examples it was always a bit cumbersome to get those updates in regular intervals. at every screen refresh we needed to do calculate something or we needed a decently complicated `GenServer` to do tasks in regular intervals.
+
+Let me introduce you to `job`. It allows us to take care of repetitive work by easily specifying a cron-job. All you need are:
+
+* a name for the job that identifies it uniquely
+* a schedule when the job should run (see [this cheatsheet](https://hexdocs.pm/crontab/cron_notation.html#expressions) for the possibilities)
+* and a function that should be executed, probably one that will at the end publish an event with `Fledex.Utils.PubSub.simple_broadcast()`
+
+The example here implements our clock example with the `Fledex.Component.Clock` component (see the previous chapter) and uses the `job` macro to schedule the updates.
+
 ```elixir
 alias Fledex.Component.Clock
 import Crontab.CronExpression
@@ -19,9 +29,8 @@ import Crontab.CronExpression
 led_strip :nested_components2, :kino do
   component(:clock, Clock, trigger_name: {:clock_hour, :clock_minute, :clock_second})
 
-  job :clock, ~e[* * * * * * *]e do
+  job :clock, ~e[@secondly]e do
     date_time = DateTime.utc_now()
-    IO.puts("Ok, checking.... #{date_time}")
 
     Fledex.Utils.PubSub.simple_broadcast(%{
       clock_hour: date_time.hour,
