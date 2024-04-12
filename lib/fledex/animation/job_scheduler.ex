@@ -4,6 +4,12 @@
 # MARK: Quantum
 defmodule Fledex.Animation.JobScheduler do
   use Quantum, otp_app: __MODULE__
+
+  @impl true
+  def config(opts \\ []) do
+    Quantum.scheduler_config(opts, __MODULE__, __MODULE__)
+      |> Keyword.put(:debug_logging, false)
+  end
 end
 
 # I was thinking of removing the dependency on Quantum

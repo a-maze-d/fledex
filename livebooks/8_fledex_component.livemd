@@ -8,7 +8,8 @@ SPDX-License-Identifier: Apache-2.0
 
 ```elixir
 Mix.install([
-  {:fledex, "~>0.4"}
+  # "~>0.4"}
+  {:fledex, path: "./"}
 ])
 ```
 
@@ -122,13 +123,24 @@ To use the component, we now simply have to use the clock and pass in the necess
 
 ```elixir
 alias Fledex.Component.Clock
+import Crontab.CronExpression
 
 led_strip :nested_components2, :kino do
-  component(:clock, Clock, trigger_name: :clock)
+  component({:clock_hour, :clock_minute}, Clock, trigger_name: :clock)
+
+  job :clock, ~e[* * * * * * *]e do
+    date_time = DateTime.utc_now()
+    IO.puts("ok, checking... #{date_time}")
+
+    Fledex.Utils.PubSub.simple_broadcast(%{
+      clock_hour: date_time.hour,
+      clock_minute: date_time.minute
+    })
+  end
 end
 ```
 
-And to see the correct time, we now we only need to publish the appropriate time. When we do so we shouldn't forget that the animations are reacting to the sub-name triggers and therefore we need to use `:clock_hour` and `:clock_minute` as triggers.
+And to see the correct time, we only need to publish the appropriate time. When we do so we shouldn't forget that the animations are reacting to two triggers that we passed in. We need to publish the triggers `:clock_hour` and `:clock_minute` as triggers.
 
 ```elixir
 Fledex.Utils.PubSub.simple_broadcast(%{clock_hour: 17, clock_minute: 34})

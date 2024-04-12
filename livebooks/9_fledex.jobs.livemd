@@ -1,0 +1,33 @@
+# 9. Fledex: Jobs
+
+```elixir
+Mix.install([
+  {:fledex, path: "./"}
+])
+```
+
+## Clock with job
+
+```elixir
+use Fledex
+```
+
+```elixir
+alias Fledex.Component.Clock
+import Crontab.CronExpression
+
+led_strip :nested_components2, :kino do
+  component(:clock, Clock, trigger_name: {:clock_hour, :clock_minute, :clock_second})
+
+  job :clock, ~e[* * * * * * *]e do
+    date_time = DateTime.utc_now()
+    IO.puts("Ok, checking.... #{date_time}")
+
+    Fledex.Utils.PubSub.simple_broadcast(%{
+      clock_hour: date_time.hour,
+      clock_minute: date_time.minute,
+      clock_second: date_time.second
+    })
+  end
+end
+```

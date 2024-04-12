@@ -311,22 +311,29 @@ defmodule Fledex.Animation.Manager do
     %{state | jobs: Map.put(state.jobs, strip_name, jobs)}
   end
 
-  defp shutdown_jobs(_strip_name, _job_names) do
-  end
-
-  def update_jobs(_strip_name, _jobs) do
-  end
-
-  def create_jobs(strip_name, jobs) do
-    Enum.each(jobs, fn job ->
-      JobScheduler.add_job(convert(job, strip_name))
+  defp shutdown_jobs(_strip_name, job_names) do
+    Enum.each(job_names, fn job_name ->
+      JobScheduler.delete_job(job_name)
     end)
   end
 
-  defp convert(job, _strip_name) do
+  def update_jobs(strip_name, jobs) do
+    Enum.each(jobs, fn {job, job_config} ->
+      JobScheduler.delete_job(job)
+      JobScheduler.add_job(convert(job, job_config, strip_name))
+    end)
+  end
+
+  def create_jobs(strip_name, jobs) do
+    Enum.each(jobs, fn {job, job_config} ->
+      JobScheduler.add_job(convert(job, job_config, strip_name))
+    end)
+  end
+
+  defp convert(job, job_config, _strip_name) do
     JobScheduler.new_job()
-    |> Job.set_name(job.name)
-    |> Job.set_schedule(job.pattern)
-    |> Job.set_task(job.func)
+    |> Job.set_name(job)
+    |> Job.set_schedule(job_config.pattern)
+    |> Job.set_task(job_config.func)
   end
 end
