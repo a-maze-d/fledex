@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.ManagerTestUtils do
-  alias Fledex.Animation.Interface
+  alias Fledex.Animation.AnimatorInterface
   alias Fledex.Animation.Manager
 
   def get_manager_config, do: get_manager_config(:animations, :all)
@@ -30,7 +30,7 @@ defmodule Fledex.ManagerTestUtils do
   # def get_manager_config, do: get_manager_config(:animations, :all)
   # def get_manager_config(strip), do: get_manager_config(:animations, strip)
   def get_animator_config(strip_name, animation_name) do
-    pid = GenServer.whereis(Interface.build_name(strip_name, :animation, animation_name))
+    pid = GenServer.whereis(AnimatorInterface.build_name(strip_name, :animator, animation_name))
     :sys.get_state(pid)
   end
 end

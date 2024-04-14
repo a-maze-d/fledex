@@ -2,14 +2,14 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-defmodule Fledex.Animation.Interface do
+defmodule Fledex.Animation.AnimatorInterface do
   @moduledoc """
-  The behaviour for animations.
+  The behaviour for an Animator.
 
   This behaviour is the interface expected by the `Fledex.Animation.Manager`
   and should be implemented as a GenServer.
   If  you implement an animation you will have to implement those functions
-  but you can use `Fledex.Animation.Base` to assist you.
+  but you can use `Fledex.Animation.AnimatorBase` to assist you.
   """
 
   @doc """
@@ -45,9 +45,9 @@ defmodule Fledex.Animation.Interface do
   animators that have been removed. We do not keep a reference, but only a config
   Therefore the animator needs to adhere to this naming convention to properly be shut down.
   It is the responsibility of the Animator to set the servername correctly. The
-  `Fledex.Animation.Base` is doing this by default.
+  `Fledex.Animation.AnimatorBase` is doing this by default.
   """
-  @spec build_name(atom, :animation | :job | :coordinator, atom) :: atom
+  @spec build_name(atom, :animator | :job | :coordinator, atom) :: atom
   def build_name(strip_name, type, animation_name)
       when is_atom(strip_name) and is_atom(animation_name) do
     Module.concat(Module.concat(strip_name, type), animation_name)

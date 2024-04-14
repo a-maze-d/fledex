@@ -2,26 +2,26 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-defmodule Fledex.Animation.Base do
-  alias Fledex.Animation.Interface
+defmodule Fledex.Animation.AnimatorBase do
+  alias Fledex.Animation.AnimatorInterface
   alias Fledex.Leds
 
   defmacro __using__(opts) do
     quote location: :keep, bind_quoted: [opts: opts] do
       use GenServer, opts
-      @behaviour Fledex.Animation.Interface
+      @behaviour Fledex.Animation.AnimatorInterface
 
-      alias Fledex.Animation.Base
-      alias Fledex.Animation.Interface
+      alias Fledex.Animation.AnimatorBase
+      alias Fledex.Animation.AnimatorInterface
 
-      # client side
+      # MARK: client side
       @doc false
       @spec start_link(config :: config_t, strip_name :: atom, animation_name :: atom) ::
               GenServer.on_start()
       def start_link(config, strip_name, animation_name) do
         {:ok, _pid} =
           GenServer.start_link(__MODULE__, {config, strip_name, animation_name},
-            name: Interface.build_name(strip_name, :animation, animation_name)
+            name: AnimatorInterface.build_name(strip_name, :animator, animation_name)
           )
       end
 
@@ -29,7 +29,7 @@ defmodule Fledex.Animation.Base do
       @spec config(atom, atom, config_t) :: :ok
       def config(strip_name, animation_name, config) do
         GenServer.cast(
-          Interface.build_name(strip_name, :animation, animation_name),
+          AnimatorInterface.build_name(strip_name, :animator, animation_name),
           {:config, config}
         )
       end
@@ -37,12 +37,15 @@ defmodule Fledex.Animation.Base do
       @doc false
       @spec shutdown(atom, atom) :: :ok
       def shutdown(strip_name, animation_name) do
-        GenServer.stop(Interface.build_name(strip_name, :animation, animation_name), :normal)
+        GenServer.stop(
+          AnimatorInterface.build_name(strip_name, :animator, animation_name),
+          :normal
+        )
       end
 
       defoverridable start_link: 3, config: 3, shutdown: 2
 
-      # server side
+      # MARK: server side
       @impl GenServer
       @spec handle_call(:info, {pid, any}, state_t) :: {:reply, {:ok, map}, state_t}
       def handle_call(:info, _from, state) do

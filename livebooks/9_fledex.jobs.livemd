@@ -1,3 +1,8 @@
+<!--
+Copyright 2024, Matthias Reik <fledex@reik.org>
+
+SPDX-License-Identifier: Apache-2.0
+-->
 # 9. Fledex: Job
 
 ```elixir
@@ -24,7 +29,6 @@ The example here implements our clock example with the `Fledex.Component.Clock` 
 
 ```elixir
 alias Fledex.Component.Clock
-import Crontab.CronExpression
 
 led_strip :nested_components2, :kino do
   component(:clock, Clock, trigger_name: {:clock_hour, :clock_minute, :clock_second})

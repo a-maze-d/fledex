@@ -91,6 +91,7 @@ defmodule Fledex.MixProject do
 
       # testing
       {:circuits_sim, "~> 0.1.0", only: [:dev, :test]},
+      {:mox, "~> 1.1"},
 
       # documentation
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},

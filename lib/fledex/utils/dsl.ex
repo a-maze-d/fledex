@@ -98,11 +98,12 @@ defmodule Fledex.Utils.Dsl do
     end
   end
 
-  def create_job(name, pattern, function) do
+  def create_job(name, pattern, options, function) do
     %{
       name => %{
         type: :job,
         pattern: pattern,
+        options: options,
         func: function
       }
     }

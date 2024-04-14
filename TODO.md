@@ -48,7 +48,7 @@ Even though this library is published, there are things I still want to do befor
       end
     end
     ```
-  - [ ] Create support for a cron-manager (that allows running jobs, like the one we have in the weather station example and thereby no need to handcraft anything) (v0.4)
+  - [x] Create support for a cron-manager (that allows running jobs, like the one we have in the weather station example and thereby no need to handcraft anything) (v0.4)
   - [ ] Create support for a coordinator (that can control individual animations and effects. Effects will have to notify back their state) (v0.5)
   - [ ] Clustering
     - [ ] create an animation that consumes those (this allows to connect remote livebooks to a physical led strip. CAUTION: protect against loops!) (v0.5)

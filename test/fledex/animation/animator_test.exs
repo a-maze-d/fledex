@@ -9,7 +9,7 @@ defmodule Fledex.Animation.AnimatorTest do
   require Logger
 
   alias Fledex.Animation.Animator
-  alias Fledex.Animation.Interface
+  alias Fledex.Animation.AnimatorInterface
   alias Fledex.Effect.Rotation
   alias Fledex.Effect.Wanish
   alias Fledex.Leds
@@ -307,7 +307,7 @@ defmodule Fledex.Animation.AnimatorTest do
       animation_name = :animation_testB
       {:ok, pid} = Animator.start_link(%{type: :static}, strip_name, animation_name)
       assert Process.alive?(pid)
-      GenServer.stop(Interface.build_name(strip_name, :animation, animation_name), :normal)
+      GenServer.stop(AnimatorInterface.build_name(strip_name, :animator, animation_name), :normal)
       assert not Process.alive?(pid)
       GenServer.stop(driver, :normal)
     end

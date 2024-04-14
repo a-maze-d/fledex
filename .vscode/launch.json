@@ -27,7 +27,12 @@
             "requireFiles": [
                 "test/**/test_helper.exs",
                 "test/**/*_test.exs"
+            ],
+            "excludeModules": [
+                "Circuits.I2C.Nif",
+                "Circuits.GPIO.Nif"
             ]
+
         }
     ]
 }

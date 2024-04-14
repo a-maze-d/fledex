@@ -43,13 +43,13 @@ defmodule Fledex.Animation.Animator do
    Both of them can be set by defining an appropriate function and setting and resetting a reference at will
 
    This module does not define any functions on its own, because the interface is defined
-   by `Fledex.Animation.Base`.
+   by `Fledex.Animation.AnimatorBase`.
   """
-  use Fledex.Animation.Base
+  use Fledex.Animation.AnimatorBase
 
   require Logger
 
-  alias Fledex.Animation.Base
+  alias Fledex.Animation.AnimatorBase
   alias Fledex.Leds
   alias Fledex.LedStrip
   alias Fledex.Utils.PubSub
@@ -82,8 +82,8 @@ defmodule Fledex.Animation.Animator do
     state = %{
       triggers: %{},
       type: :animation,
-      def_func: &Base.default_def_func/1,
-      options: [send_config: &Base.default_send_config_func/1],
+      def_func: &AnimatorBase.default_def_func/1,
+      options: [send_config: &AnimatorBase.default_send_config_func/1],
       effects: [],
       strip_name: strip_name,
       animation_name: animation_name
@@ -137,7 +137,7 @@ defmodule Fledex.Animation.Animator do
          } = state
        ) do
     # IO.puts("Update_Leds1: Key: #{Keyword.has_key?(options, :send_config_func)}")
-    send_config_func = options[:send_config] || (&Base.default_send_config_func/1)
+    send_config_func = options[:send_config] || (&AnimatorBase.default_send_config_func/1)
     # IO.puts("Options: #{inspect options}")
     # this is for compatibility reasons. if only a send_config_func is defined
     # in the options list, then no options are defined. In that case we need to define
@@ -200,7 +200,7 @@ defmodule Fledex.Animation.Animator do
     %{
       type: config[:type] || state.type,
       triggers: Map.merge(state.triggers, config[:triggers] || state[:triggers]),
-      def_func: Map.get(config, :def_func, &Base.default_def_func/1),
+      def_func: Map.get(config, :def_func, &AnimatorBase.default_def_func/1),
       options: update_options(config[:options], config[:send_config_func]),
       effects: update_effects(state.effects, config[:effects], state.strip_name),
       # not to be updated

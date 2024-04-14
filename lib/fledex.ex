@@ -37,6 +37,7 @@ defmodule Fledex do
   @spec __using__(keyword) :: Macro.t()
   defmacro __using__(opts) do
     quote bind_quoted: [opts: opts] do
+      import Crontab.CronExpression
       import Fledex
       # import also the Leds and the color name definitions so no namespace are required
       import Fledex.Leds
@@ -196,17 +197,52 @@ defmodule Fledex do
   example livebook](5_fledex_weather_example.livemd)):
 
   ```elixir
-  Fledex.Utils.PubSub.simple_broadcast(%{temperature: -15.2})
+    Fledex.Utils.PubSub.simple_broadcast(%{temperature: -15.2})
+  ```
+
+  Each job consists of:
+
+  * `name`- a unique name
+  * `pattern`- a cron pattern (as specified in
+     [this cheatsheet](https://hexdocs.pm/crontab/cron_notation.html#expressions)).
+     Note: `Crontab.CronExpression` gets imported and therefore the sigil can directly
+     be used, i.e. `~e[* * * * * * * *]e`
+  * `options`- a keyword list with some options. The following options exist:
+    * `:run_once`- a boolean that indicates whether the job should be run once
+      at creation time. This can be important, because you might otherwise have
+      to wait for an extended time before the function will be executed.
+    * `:timezone`- The timezone the cron pattern applies to. If nothing is specified
+      `:utc` is assumed
+    * `:overlap`- This indicates whether jobs should overlap or not. An overlap can
+      happen when running the job takes more time than the interval between job runs.
+      For safety reason the default is `false`.
+  * `:do` - a block of code that should be executed. You can specify directly
+    your code here. It will be wrapped into an anonymous function.
+
+  Example:
+  ```elixir
+  use Fledex
+  led_strip :nested_components2, :kino do
+    job :clock, ~e[@secondly]e do
+      date_time = DateTime.utc_now()
+
+      Fledex.Utils.PubSub.simple_broadcast(%{
+        clock_hour: date_time.hour,
+        clock_minute: date_time.minute,
+        clock_second: date_time.second
+      })
+    end
+  end
   ```
   """
-  defmacro job(name, pattern, do: block) do
-    # IO.puts("#{inspect name}, #{inspect pattern}, #{inspect block}")
+  defmacro job(name, pattern, options \\ [], do: block) do
     ast_func = Dsl.ast_create_anonymous_func([], block)
-    # ast_func = {:fn, [], block}
+
     quote do
       Dsl.create_job(
         unquote(name),
         unquote(pattern),
+        unquote(options),
         unquote(ast_func)
       )
     end

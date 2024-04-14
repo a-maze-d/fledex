@@ -24,7 +24,7 @@ defmodule Fledex.Animation.Manager do
   require Logger
 
   alias Fledex.Animation.Animator
-  alias Fledex.Animation.Interface
+  alias Fledex.Animation.AnimatorInterface
   alias Fledex.Animation.JobScheduler
   alias Fledex.LedStrip
   alias Quantum.Job
@@ -36,7 +36,8 @@ defmodule Fledex.Animation.Manager do
   @typep state_t :: %{
            animations: map(),
            coordinators: map(),
-           jobs: map()
+           jobs: map(),
+           impl: map()
          }
 
   # def child_spec(args) do
@@ -110,7 +111,7 @@ defmodule Fledex.Animation.Manager do
   ### MARK: server side
   @impl GenServer
   @spec init(keyword) :: {:ok, state_t}
-  def init(_opts) do
+  def init(opts) do
     # children = [
     #   {DynamicSupervisor, strategy: :one_for_one, name: Manager.LedStrips},
     #   {DynamicSupervisor, strategy: :one_for_one, name: Manager.Animations},
@@ -118,13 +119,18 @@ defmodule Fledex.Animation.Manager do
     #   Job
     # ]
     # Supervisor.start_link(children, strategy: :one_for_one)
-    JobScheduler.start_link()
-
     state = %{
       animations: %{},
       coordinators: %{},
-      jobs: %{}
+      jobs: %{},
+      impls: %{
+        job_scheduler: Keyword.get(opts, :job_scheduler, JobScheduler),
+        animator: Keyword.get(opts, :animator, Animator),
+        led_strip: Keyword.get(opts, :led_strip, LedStrip)
+      }
     }
+
+    state.impls.job_scheduler.start_link()
 
     {:ok, state}
   end
@@ -160,7 +166,7 @@ defmodule Fledex.Animation.Manager do
 
     {:reply, :ok, state}
   rescue
-    RuntimeError -> {:reply, {:error, "Animator is wrongly configured"}, state}
+    e in RuntimeError -> {:reply, {:error, e.message}, state}
   end
 
   @spec handle_call({:unregister_strip, atom}, GenServer.from(), state_t) ::
@@ -174,9 +180,12 @@ defmodule Fledex.Animation.Manager do
   def terminate(_reason, state) do
     strip_names = Map.keys(state.animations)
 
-    Enum.reduce(strip_names, state, fn strip_name, state ->
-      unregister_strip(state, strip_name)
-    end)
+    state =
+      Enum.reduce(strip_names, state, fn strip_name, state ->
+        unregister_strip(state, strip_name)
+      end)
+
+    state.impls.job_scheduler.stop()
   end
 
   ### MARK: private functions
@@ -204,7 +213,7 @@ defmodule Fledex.Animation.Manager do
   @spec register_strip(state_t, atom, atom | map) :: state_t
   defp register_strip(state, strip_name, driver_config) do
     # Logger.info("registering led_strip: #{strip_name}")
-    {:ok, _pid} = LedStrip.start_link(strip_name, driver_config)
+    {:ok, _pid} = state.impls.led_strip.start_link(strip_name, driver_config)
 
     %{
       state
@@ -217,9 +226,14 @@ defmodule Fledex.Animation.Manager do
   @spec unregister_strip(state_t, atom) :: state_t
   defp unregister_strip(state, strip_name) do
     # Logger.info("unregistering led_strip_ #{strip_name}")
-    shutdown_coordinators(strip_name, Map.keys(state.coordinators[strip_name] || %{}))
-    shutdown_jobs(strip_name, Map.keys(state.jobs[strip_name] || %{}))
-    shutdown_animators(strip_name, Map.keys(state.animations[strip_name] || %{}))
+    shutdown_coordinators(
+      state.impls,
+      strip_name,
+      Map.keys(state.coordinators[strip_name] || %{})
+    )
+
+    shutdown_jobs(state.impls, strip_name, Map.keys(state.jobs[strip_name] || %{}))
+    shutdown_animators(state.impls, strip_name, Map.keys(state.animations[strip_name] || %{}))
     LedStrip.stop(strip_name)
 
     %{
@@ -241,31 +255,31 @@ defmodule Fledex.Animation.Manager do
     {dropped, updated, created} = filter_configs(Map.get(state.animations, strip_name), configs)
 
     # Logger.info("#{inspect dropped}, #{inspect present}")
-    shutdown_animators(strip_name, dropped)
-    update_animators(strip_name, updated)
-    create_animators(strip_name, created)
+    shutdown_animators(state.impls, strip_name, dropped)
+    update_animators(state.impls, strip_name, updated)
+    create_animators(state.impls, strip_name, created)
 
     %{state | animations: Map.put(state.animations, strip_name, configs)}
   end
 
-  @spec shutdown_animators(atom, [atom]) :: :ok
-  defp shutdown_animators(strip_name, dropped_animations) do
+  @spec shutdown_animators(%{atom => module}, atom, [atom]) :: :ok
+  defp shutdown_animators(_impls, strip_name, dropped_animations) do
     Enum.each(dropped_animations, fn animation_name ->
-      GenServer.stop(Interface.build_name(strip_name, :animation, animation_name), :normal)
+      GenServer.stop(AnimatorInterface.build_name(strip_name, :animator, animation_name), :normal)
     end)
   end
 
-  @spec update_animators(atom, map) :: :ok
-  defp update_animators(strip_name, animations) do
+  @spec update_animators(%{atom => module}, atom, map) :: :ok
+  defp update_animators(impls, strip_name, animations) do
     Enum.each(animations, fn {animation_name, config} ->
-      Animator.config(strip_name, animation_name, config)
+      impls.animator.config(strip_name, animation_name, config)
     end)
   end
 
-  @spec create_animators(atom, map) :: :ok
-  defp create_animators(strip_name, created_animations) do
+  @spec create_animators(%{atom => module}, atom, map) :: :ok
+  defp create_animators(impls, strip_name, created_animations) do
     Enum.each(created_animations, fn {animation_name, config} ->
-      {:ok, _pid} = Animator.start_link(config, strip_name, animation_name)
+      {:ok, _pid} = impls.animator.start_link(config, strip_name, animation_name)
     end)
   end
 
@@ -298,42 +312,45 @@ defmodule Fledex.Animation.Manager do
     state
   end
 
-  defp shutdown_coordinators(_strip_name, _coordinator_names) do
+  defp shutdown_coordinators(_impls, _strip_name, _coordinator_names) do
   end
 
   defp register_jobs(state, strip_name, jobs) do
     {dropped, updated, created} = filter_configs(Map.get(state.jobs, strip_name), jobs)
 
-    shutdown_jobs(strip_name, dropped)
-    update_jobs(strip_name, updated)
-    create_jobs(strip_name, created)
+    shutdown_jobs(state.impls, strip_name, dropped)
+    update_jobs(state.impls, strip_name, updated)
+    create_jobs(state.impls, strip_name, created)
 
     %{state | jobs: Map.put(state.jobs, strip_name, jobs)}
   end
 
-  defp shutdown_jobs(_strip_name, job_names) do
+  defp shutdown_jobs(impls, _strip_name, job_names) do
     Enum.each(job_names, fn job_name ->
-      JobScheduler.delete_job(job_name)
+      impls.job_scheduler.delete_job(job_name)
     end)
   end
 
-  def update_jobs(strip_name, jobs) do
+  defp update_jobs(impls, strip_name, jobs) do
     Enum.each(jobs, fn {job, job_config} ->
-      JobScheduler.delete_job(job)
-      JobScheduler.add_job(convert(job, job_config, strip_name))
+      impls.job_scheduler.delete_job(job)
+      impls.job_scheduler.add_job(convert(impls, job, job_config, strip_name))
     end)
   end
 
-  def create_jobs(strip_name, jobs) do
+  defp create_jobs(impls, strip_name, jobs) do
     Enum.each(jobs, fn {job, job_config} ->
-      JobScheduler.add_job(convert(job, job_config, strip_name))
+      impls.job_scheduler.add_job(convert(impls, job, job_config, strip_name))
+      if Keyword.get(job_config.options, :run_once, false), do: impls.job_scheduler.run_job(job)
     end)
   end
 
-  defp convert(job, job_config, _strip_name) do
-    JobScheduler.new_job()
+  defp convert(impls, job, job_config, _strip_name) do
+    impls.job_scheduler.new_job()
     |> Job.set_name(job)
     |> Job.set_schedule(job_config.pattern)
     |> Job.set_task(job_config.func)
+    |> Job.set_timezone(Keyword.get(job_config.options, :timezone, :utc))
+    |> Job.set_overlap(Keyword.get(job_config.options, :overlap, false))
   end
 end

@@ -7,7 +7,7 @@ defmodule Fledex.Component.Clock do
   alias Fledex.Component.Dot
 
   defp create_name(base, child) do
-    String.to_atom("#{inspect base}_#{inspect child}")
+    String.to_atom("#{inspect(base)}_#{inspect(child)}")
   end
 
   @impl true
@@ -47,6 +47,7 @@ defmodule Fledex.Component.Clock do
 
   defp split_trigger({hour, minute} = _trigger_name), do: {hour, minute, nil}
   defp split_trigger({_hour, _minute, _second} = trigger_name), do: trigger_name
+
   defp split_trigger(trigger_name) when is_atom(trigger_name) do
     {
       create_name(trigger_name, :hour),

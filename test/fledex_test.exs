@@ -18,8 +18,12 @@ defmodule Fledex.Test do
       use Fledex
       assert GenServer.whereis(Manager) != nil
 
-      # and check that Fledex, Fledex.Leds and Fledex.Color.Names are imported
-      # Testing for Fledex itself is difficult, since it only defines macros.
+      # and check that Crontab.CronExpression, Fledex, Fledex.Leds and Fledex.Color.Names
+      # are imported:
+      # from Crontab.CronExpression
+      assert :erlang.fun_info(&sigil_e/2)
+      # from Fledex
+      assert :erlang.fun_info(&component/3)
       # from Fledex.Leds
       assert :erlang.fun_info(&leds/1)
       # from Fledex.Color.Names
