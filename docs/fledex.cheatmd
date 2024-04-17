@@ -1,0 +1,20 @@
+<!--
+Copyright 2024, Matthias Reik <fledex@reik.org>
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
+At this point this is just a collection of ideas on waht to writ in the cheat sheet. Once we have all the information we should format it in the correct way.
+
+# initialization
+* use fledex
+
+# macros
+* animation
+* static
+* effect
+* component
+
+# utilities
+* job
+(* coordinator)

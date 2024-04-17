@@ -13,6 +13,7 @@ SPDX-License-Identifier: Apache-2.0
 [![Coverage Status](https://coveralls.io/repos/github/a-maze-d/fledex/badge.svg?branch=main)](https://coveralls.io/github/a-maze-d/fledex?branch=main)
 [![Downloads](https://img.shields.io/hexpm/dt/fledex.svg)](https://hex.pm/packages/fledex)
 
+<img src="docs/fledex_logo.svg" width=100/>
 
 Fledex is a small [Elixir](https://elixir-lang.org/) library It really is intended for educational purposes.
 It is written for a RaspberryPi Zero W running [Nerves](https://nerves-project.org/) especially with a [Nerves-Livebook](https://hexdocs.pm/nerves/getting-started.html#nerves-livebook). 

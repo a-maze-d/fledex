@@ -179,6 +179,7 @@ defmodule Fledex.MixProject do
 
   defp copy_doc_images(_) do
     images = [
+      {"docs/fledex_logo.svg", "doc/fledex_logo.svg"},
       {"docs/architecture.drawio.svg", "doc/architecture.drawio.svg"},
       {"docs/hardware.drawio.svg", "doc/hardware.drawio.svg"},
       {"docs/hardware-Page-2.drawio.svg", "doc/hardware-Page-2.drawio.svg"}
