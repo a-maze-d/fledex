@@ -253,9 +253,9 @@ defmodule Fledex do
   @doc """
     This introduces a new led_strip.
 
-    The `strip_options specifies the driver configuration that should be used.
+    The `strip_options` specifies the driver configuration that should be used.
     A set of default drivers exist for conenience that can be used like `:spi`, `:kino`, ...
-    (see `Fledex.LedStrip` for details)/
+    (see `Fledex.LedStrip` for details)
 
     A special driver `:config` exists that will simply return the converted dsl to the
     corresponding configuration. This can be very convenient for

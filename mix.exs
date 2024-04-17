@@ -83,7 +83,7 @@ defmodule Fledex.MixProject do
 
       {:kino, "~> 0.11"},
       {:phoenix_pubsub, "~> 2.1"},
-      # {:libcluster, "~> 3.3"},
+      {:libcluster, "~> 3.3"},
       {:quantum, "~> 3.0"},
 
       # observability
@@ -123,6 +123,7 @@ defmodule Fledex.MixProject do
         "CODE_OF_CONDUCT.md",
         "docs/architecture.md",
         "docs/hardware.md",
+        "docs/project_plan.md",
         "livebooks/README.md",
         "livebooks/1_first_steps_with_an_led_strip.livemd",
         "livebooks/2_fledex_first_steps.livemd",
@@ -179,7 +180,7 @@ defmodule Fledex.MixProject do
 
   defp copy_doc_images(_) do
     images = [
-      {"docs/fledex_logo.svg", "doc/fledex_logo.svg"},
+      {"fledex_logo.svg", "fledex_logo.svg"},
       {"docs/architecture.drawio.svg", "doc/architecture.drawio.svg"},
       {"docs/hardware.drawio.svg", "doc/hardware.drawio.svg"},
       {"docs/hardware-Page-2.drawio.svg", "doc/hardware-Page-2.drawio.svg"}

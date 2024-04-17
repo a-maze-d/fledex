@@ -51,8 +51,8 @@ defmodule Fledex.Animation.Manager do
   @doc """
   This starts a new `Fledex.Animation.Manager`. Only a single animation manager will be started
   even if called serveral times (thus it's save to call it repeatedly).
-  The `type_config` specifies the list of supported animations and their module mapping
-  (see `Fledex.Utils.Dsl.fledex_config/0` for the configurations used by default.)
+  In general you want to start the function without options, since they are only for
+  debugging purposes.
   """
   @spec start_link(keyword) :: {:ok, pid()}
   def start_link(opts \\ []) do
@@ -90,14 +90,11 @@ defmodule Fledex.Animation.Manager do
   end
 
   @doc """
-  Register a set of animations for a specific led strip. This function can
-  be called as many times as desired to reconfigure the animations.
-  It should be noted that animations were defined before calling this function
-  again, will be stopped if they are not part of the configuration anymore.
+  Register a set of configurations (animations, jobs, ...) for a specific led strip.
+  This function can be called as many times as desired to reconfigure the strip.
+  It should be noted that any animation, job, ... that was defined before calling
+  this function again, will be stopped if they are not part of the configuration anymore.
   Newly defined animations will be started.
-
-  Different types of configurations exist, see `Fledex.Utils.Dsl.fledex_config/0` for
-  the default configurations that will be used when using `use Fledex`.
 
   Note: the animation functions might get called quite frequently and
   therefore any work within them should be kept to a minimum.
