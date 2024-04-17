@@ -21,11 +21,11 @@ Even though this library is published, there are things I still want to do befor
 - [ ] Cleanup
   - [x] add Copyright comment into every file (make reuse green) (v0.4)
   - [x] Improve the Fledex configuration. The fledex_config/0 function feels very wrong (rethink the animator split up. Also effects raise the questions whether static "animations" should really be so static, since the effect would have any real effect on them) (v0.4) <-- DONE: static is only a convenience, they need to be "animated" too. A Coordinator will be introduced to coordinate animations. The sequencer I added before is likely to disappear again. Also the animation state will probably be implemented through pubsub instead of return value. This allows the coordinator to pick those up. We have to be careful though to only publish state changes. All envisaged changed will be tracked independently.
-  - [ ] Improve the LedsDriver config (v0.4)
   - [x] Fix flaky tests (see TODOs) (v0.4) <-- haven't seen any of those anymore
   - [ ] Perform an extra round of testing on hardware (v0.4)
+  - [ ] Improve the LedsDriver config (v0.5)
   - [ ] Enable Telemetry? (v0.5)
-  - [x] Upgrade to a hex released version of circuits_sim as soon as available (v0.?)
+  - [x] Upgrade to a hex released version of circuits_sim as soon as available (v0.4)
 - [ ] Missing functionality
   - [x] see the project plan that was planned out with my son, we are not quite there yet (v0.4)
   - [x] review the ideas.md document to see whether all ideas have been implemented (v0.4)

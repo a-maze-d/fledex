@@ -94,7 +94,7 @@ defmodule Fledex.Utils.Dsl do
     if Keyword.get(opts, :dont_start, false) do
       :ok
     else
-      Manager.start_link()
+      Manager.start_link(opts)
     end
   end
 

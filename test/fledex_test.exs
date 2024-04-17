@@ -4,6 +4,7 @@
 
 defmodule Fledex.Test do
   use ExUnit.Case
+  import Mox
 
   require Logger
 
@@ -44,11 +45,16 @@ defmodule Fledex.Test do
     end
 
     test "simple led strip macro" do
-      # ensure our servers are not started
+      Fledex.MockJobScheduler
+        |> allow(self(), fn -> GenServer.whereis(Manager) end)
+        |> expect(:start_link, fn -> :ok end)
+        |> expect(:stop, fn -> :ok end)
+    # ensure our servers are not started
       assert GenServer.whereis(@server_name) == nil
       assert GenServer.whereis(Manager) == nil
 
-      use Fledex
+      opts = [job_scheduler: Fledex.MockJobScheduler]
+      use Fledex, opts
 
       led_strip @server_name, :kino do
         # we don't define here anything

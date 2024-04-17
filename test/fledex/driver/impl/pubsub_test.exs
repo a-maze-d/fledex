@@ -9,8 +9,8 @@ defmodule Fledex.Driver.Impl.PubSubTest do
   alias Fledex.Utils.PubSub
 
   setup do
-    :ok = PubSub.subscribe(:fledex, "driver")
-    on_exit(:unsubscribe, fn -> PubSub.unsubscribe(:fledex, "driver") end)
+    :ok = PubSub.subscribe(:fledex, "trigger")
+    on_exit(:unsubscribe, fn -> PubSub.unsubscribe(:fledex, "trigger") end)
   end
 
   describe "test driver basic tests" do
@@ -34,7 +34,7 @@ defmodule Fledex.Driver.Impl.PubSubTest do
                  driver
                )
 
-      assert_receive {:driver, %{pixel_data: [0xFF0000, 0x00FF00, 0x0000FF]}}
+      assert_receive {:trigger, %{pixel_data: {[0xFF0000, 0x00FF00, 0x0000FF], 74}}}
     end
 
     test "terminate" do

@@ -5,6 +5,8 @@
 defmodule Fledex.Animation.ManagerTest do
   use ExUnit.Case, async: false
 
+  import Mox
+
   alias Fledex.Animation.Manager
   alias Fledex.ManagerTestUtils
   alias Quantum
@@ -105,13 +107,10 @@ defmodule Fledex.Animation.ManagerTest do
   end
 
   describe "test jobs" do
-    import Mox
-    defmock(Fledex.MockJobScheduler1, for: Fledex.Animation.JobScheduler)
-
     test "add job" do
-      Fledex.MockJobScheduler1
+      Fledex.MockJobScheduler
       |> expect(:new_job, fn ->
-        Quantum.Job.new(Quantum.scheduler_config([], Fledex.MockJobScheduler1, JobScheduler))
+        Quantum.Job.new(Quantum.scheduler_config([], Fledex.MockJobScheduler, JobScheduler))
       end)
       |> expect(:add_job, fn _job -> :ok end)
 
@@ -129,7 +128,7 @@ defmodule Fledex.Animation.ManagerTest do
         animations: %{},
         coordinators: %{},
         impls: %{
-          job_scheduler: Fledex.MockJobScheduler1,
+          job_scheduler: Fledex.MockJobScheduler,
           led_strip: Fledex.LedStrip
         }
       }
@@ -143,9 +142,9 @@ defmodule Fledex.Animation.ManagerTest do
     end
 
     test "update job" do
-      Fledex.MockJobScheduler1
+      Fledex.MockJobScheduler
       |> expect(:new_job, fn ->
-        Quantum.Job.new(Quantum.scheduler_config([], Fledex.MockJobScheduler1, JobScheduler))
+        Quantum.Job.new(Quantum.scheduler_config([], Fledex.MockJobScheduler, JobScheduler))
       end)
       |> expect(:delete_job, fn _name -> :ok end)
       |> expect(:add_job, fn _job -> :ok end)
@@ -173,7 +172,7 @@ defmodule Fledex.Animation.ManagerTest do
           }
         },
         impls: %{
-          job_scheduler: Fledex.MockJobScheduler1,
+          job_scheduler: Fledex.MockJobScheduler,
           led_strip: Fledex.LedStrip
         }
       }
@@ -185,7 +184,7 @@ defmodule Fledex.Animation.ManagerTest do
     end
 
     test "delete job" do
-      Fledex.MockJobScheduler1
+      Fledex.MockJobScheduler
       |> expect(:delete_job, fn _name -> :ok end)
 
       use Fledex
@@ -208,7 +207,7 @@ defmodule Fledex.Animation.ManagerTest do
           }
         },
         impls: %{
-          job_scheduler: Fledex.MockJobScheduler1,
+          job_scheduler: Fledex.MockJobScheduler,
           led_strip: Fledex.LedStrip
         }
       }

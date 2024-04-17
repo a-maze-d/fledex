@@ -20,8 +20,8 @@ defmodule Fledex.Driver.Impl.PubSub do
   end
 
   @spec transfer(list(Types.colorint()), pos_integer, map) :: {map, any}
-  def transfer(leds, _counter, config) do
-    PubSub.broadcast(:fledex, "driver", {:driver, %{config.data_name => leds}})
+  def transfer(leds, counter, config) do
+    PubSub.simple_broadcast(%{config.data_name => {leds, counter}})
     {config, :ok}
   end
 
