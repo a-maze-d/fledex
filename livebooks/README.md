@@ -5,9 +5,9 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 # Intro
-This is a description of the livebooks in this folder. The examples are structured in such a way that we slowly walk up the abstraction stack. From very low level to a high level language. If are not interested in the technical details, the motivations, and the decisions then you probably want to only look livebook [#1](livebooks/README.md#1-first-steps-with-an-led-strip) (to set up your LED strip correctly) and [#6](livebooks/README.md#6-fledex-dsl) (to define your animations). Only the whole set will give you, however, a good overview.
+This is a description of the livebooks in this folder. The examples are structured in such a way that we slowly walk up the abstraction stack. From very low level to a high level language. If are not interested in the technical details, the motivations, and the decisions then you probably want to only look at livebook "[#1 First steps with an led strip](livebooks/README.md#1-first-steps-with-an-led-strip)" (which has nothing to do with Fledex as such but how to set up your LED strip correctly) and the dsl specific chapters starting with livebook [#6 Fledex DSL](livebooks/README.md#6-fledex-dsl) (to define your animations). Only the whole set will give you, however, a good overview.
 
-It is recommended that you look at the different livebooks in parallel to the [Architecture Overview](../docs/architecture.md).
+It is recommended that when you look at the different livebooks you look at the [Architecture Overview](../docs/architecture.md) in parallel. Take also a look at the [Hardware](../docs/hardware.md) description, because you need to have your hardware setup ready to run anything on a real led strip. Most examples can be run in the livebook and don't require any additional hardware.
 
 # 1. First steps with an LED strip
 The first livebook has nothing to do with the Fledex library, but describes on how to set up the [RaspberryPi](https://www.raspberrypi.org/), how to connect the LED strip to it and how we can communicate with it via the SPI bus. It also shows how easy it is to communicate to an LED strip. At the same time it is cumbersome, due the sheer number of LEDs that can be addressed. This example is good to
@@ -73,7 +73,4 @@ We won't look at all possible effects, but at some examples. It is quite easy to
 In this chapter we will take a look on how to create reusable components. This way you don't have to redefine certain animations
 
 # 9. Fledex: Job
-In this chapter we will take a look at the `job` feature that makes the scheduling of repetitive tasks much easier by providing a cron-job like feature. This is mainly intended to trigger some events for the animation(s), but could really be used for anything.
-
-> [!NOTE]
-> The functionality is still very much in fluctuation.
+Animations often require some time activity. In this chapter we will take a look at the `job` feature that makes the scheduling of repetitive tasks much easier by providing a cron-job like feature. This is mainly intended to trigger some events for the animation(s), but could really be used for anything.

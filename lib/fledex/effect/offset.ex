@@ -15,11 +15,11 @@ defmodule Fledex.Effect.Offset do
           config :: keyword,
           triggers :: map
         ) ::
-          {list(Types.colorint()), map, Interface.effect_state_t()}
-  def apply(leds, _count, config, triggers) do
+          {list(Types.colorint()), non_neg_integer, map, Interface.effect_state_t()}
+  def apply(leds, count, config, triggers) do
     offset = config[:offset] || 1
 
     zeros = Enum.map(Enum.to_list(1..offset), fn _index -> 0 end)
-    {zeros ++ leds, triggers, :static}
+    {zeros ++ leds, count + offset, triggers, :static}
   end
 end

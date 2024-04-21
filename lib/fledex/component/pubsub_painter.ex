@@ -9,11 +9,14 @@ defmodule Fledex.Component.PubSubPainter do
     trigger_name = Keyword.get(options, :trigger_name, :pixel_data)
 
     use Fledex
+
     animation name do
-      triggers when is_map_key(triggers, trigger_name) ->
+      %{^trigger_name => {_leds, count}} = triggers when is_integer(count) ->
         {leds, counter} = triggers[trigger_name]
         leds(counter, leds, %{})
-      _ -> leds()
+
+      _ ->
+        leds()
     end
   end
 end

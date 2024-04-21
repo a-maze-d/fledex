@@ -15,7 +15,7 @@ defmodule Fledex.Effect.Wanish do
           config :: keyword,
           triggers :: map
         ) ::
-          {list(Types.colorint()), map, Interface.effect_state_t()}
+          {list(Types.colorint()), non_neg_integer, map, Interface.effect_state_t()}
   def apply(leds, count, config, triggers) do
     trigger_name = Keyword.get(config, :trigger_name)
 
@@ -69,9 +69,9 @@ defmodule Fledex.Effect.Wanish do
       offset = calculate_offset(count, offset, circulate, reappear, reappear_key, triggers)
       triggers = adjust_triggers(count, remainder, offset, reappear_key, triggers)
       effect_status = if remainder == 0, do: :stop_start, else: :progress
-      {switch_off(leds, offset, left), triggers, effect_status}
+      {switch_off(leds, offset, left), count, triggers, effect_status}
     else
-      {leds, triggers, :disabled}
+      {leds, count, triggers, :disabled}
     end
   end
 

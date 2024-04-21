@@ -3,19 +3,30 @@ Copyright 2024, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
+
 # 9. Fledex: Job
 
 ```elixir
 Mix.install([
-  {:fledex, path: "./"}
+  {:fledex, path: "./"},
+  {:jason, "~>1.2"}
 ])
+
+alias Fledex.Utils.PubSub
+:ok
 ```
 
-## Clock with job
+## Setup
+
+Let's start with the usual setup
 
 ```elixir
 use Fledex
 ```
+
+<!-- livebook:{"branch_parent_index":0} -->
+
+## Clock with job
 
 In the last couple of examples it was always a bit cumbersome to get those updates in regular intervals. at every screen refresh we needed to do calculate something or we needed a decently complicated `GenServer` to do tasks in regular intervals.
 
@@ -31,16 +42,69 @@ The example here implements our clock example with the `Fledex.Component.Clock` 
 alias Fledex.Component.Clock
 
 led_strip :nested_components2, :kino do
-  component(:clock, Clock, trigger_name: {:clock_hour, :clock_minute, :clock_second})
+  component(
+    :clock,
+    Clock,
+    trigger_name: {:clock_hour, :clock_minute, :clock_second}
+  )
 
   job :clock, ~e[@secondly]e do
     date_time = DateTime.utc_now()
 
-    Fledex.Utils.PubSub.simple_broadcast(%{
+    PubSub.simple_broadcast(%{
       clock_hour: date_time.hour,
       clock_minute: date_time.minute,
       clock_second: date_time.second
     })
+  end
+end
+```
+
+<!-- livebook:{"branch_parent_index":0} -->
+
+## Weather station with job
+
+Our weather station example becomes now much easier, because we don't have to implement the timer functinality ourselves. We can simply implement a job for that.
+
+As before we need to make sure we can make http calls by starting the appropriate services
+
+```elixir
+:inets.start()
+:ssl.start()
+```
+
+Now we are ready to define our new simplified weather station using:
+
+* defining an `Fledex.led_strip`
+* using the `Fledex.Component.Thermometer` component as `Fledex.component`
+* and defining a `Fledex.job` that runs every 15min (making sure we call it as soon as we define it even though it might not be time for it yet, by specifying `run_once: true`)
+
+**Note:** we are using the normal crontab job pattern, whereas above we used the extended version (with second precision) above.
+
+```elixir
+alias Fledex.Component.Thermometer
+
+led_strip :john, :kino do
+  component(:thermo, Thermometer,
+    range: -20..40,
+    trigger: :temperature,
+    negative: :blue,
+    null: :may_green,
+    positive: :red,
+    marker: :davy_s_grey
+  )
+
+  job :fetcher, ~e[*/15 * * * * *], run_once: true do
+    url =
+      ~c"https://api.open-meteo.com/v1/forecast?latitude=47.4729344&longitude=19.0468802&current=temperature_2m"
+
+    {:ok, resp} =
+      :httpc.request(:get, {url, []}, [], body_format: :binary)
+
+    {{_, 200, ~c"OK"}, _headers, body} = resp
+    json = Jason.decode!(body)
+    temperature = json["current"]["temperature_2m"]
+    PubSub.simple_broadcast(%{temperature: temperature})
   end
 end
 ```

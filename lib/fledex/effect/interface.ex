@@ -49,7 +49,7 @@ defmodule Fledex.Effect.Interface do
               config :: keyword,
               triggers :: map
             ) ::
-              {list(Types.colorint()), map, effect_state_t}
+              {list(Types.colorint()), non_neg_integer, map, effect_state_t}
 
   @callback update_config(config :: keyword, updates :: keyword) :: keyword
   @optional_callbacks update_config: 2

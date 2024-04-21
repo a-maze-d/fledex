@@ -14,7 +14,7 @@ defmodule Fledex.Effect.DimmingTest do
 
       returned_leds = Dimming.apply(leds, 3, [], triggers)
 
-      assert returned_leds == {[0x7E0000, 0x007E00, 0x00007E], triggers, :progress}
+      assert returned_leds == {[0x7E0000, 0x007E00, 0x00007E], 3, triggers, :progress}
     end
 
     test "with trigger name" do
@@ -23,7 +23,7 @@ defmodule Fledex.Effect.DimmingTest do
 
       returned_leds = Dimming.apply(leds, 3, [trigger_name: :counter], triggers)
 
-      assert returned_leds == {[0x7E0000, 0x007E00, 0x00007E], triggers, :progress}
+      assert returned_leds == {[0x7E0000, 0x007E00, 0x00007E], 3, triggers, :progress}
     end
 
     test "with divisor" do
@@ -32,12 +32,12 @@ defmodule Fledex.Effect.DimmingTest do
 
       returned_leds = Dimming.apply(leds, 3, [divisor: 2], triggers)
 
-      assert returned_leds == {[0x7E0000, 0x007E00, 0x00007E], triggers, :progress}
+      assert returned_leds == {[0x7E0000, 0x007E00, 0x00007E], 3, triggers, :progress}
 
       triggers = %{default: 257}
       returned_leds = Dimming.apply(leds, 3, [divisor: 2], triggers)
 
-      assert returned_leds == {[0x7E0000, 0x007E00, 0x00007E], triggers, :progress}
+      assert returned_leds == {[0x7E0000, 0x007E00, 0x00007E], 3, triggers, :progress}
 
       triggers = %{default: 258}
       returned_leds = Dimming.apply(leds, 3, [divisor: 2], triggers)

@@ -11,6 +11,7 @@ defmodule Fledex.Component.PubSubPainterTest do
       options = [
         trigger_name: :pixel_data
       ]
+
       config = PubSubPainter.configure(:john, options)
 
       leds = config.john.def_func.(%{john: 10})

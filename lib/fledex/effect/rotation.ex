@@ -15,16 +15,20 @@ defmodule Fledex.Effect.Rotation do
           config :: keyword,
           triggers :: map
         ) ::
-          {list(Types.colorint()), map, Interface.effect_state_t()}
+          {list(Types.colorint()), non_neg_integer, map, Interface.effect_state_t()}
+  def apply(leds, 0, _config, triggers), do: {leds, 0, triggers, :stop}
+
   def apply(leds, count, config, triggers) do
     left = Keyword.get(config, :direction, :left) != :right
     trigger_name = Keyword.get(config, :trigger_name, :default)
     offset = triggers[trigger_name] || 0
     divisor = Keyword.get(config, :divisor, 1)
+    stretch = Keyword.get(config, :stretch, 0)
+    {leds, count} = stretch({leds, count}, stretch)
     offset = trunc(offset / divisor)
     remainder = rem(offset, count)
     effect_state = if offset == 0 and remainder == 0, do: :stop_start, else: :progress
-    {rotate(leds, count, remainder, left), triggers, effect_state}
+    {rotate(leds, count, remainder, left), count, triggers, effect_state}
   end
 
   @doc """
@@ -39,5 +43,20 @@ defmodule Fledex.Effect.Rotation do
   def rotate(vals, count, offset, rotate_left) do
     offset = if rotate_left, do: offset, else: count - offset
     Enum.slide(vals, 0..rem(offset - 1 + count, count), count)
+  end
+
+  # stretch the number of led_count to be the same as stretch
+  # we ignore the stretching if a too small number is specified
+  # (we don't support shrinking, i.e. negative stretching)
+  def stretch({leds, led_count}, stretch)
+      when stretch == led_count or
+             stretch < led_count do
+    {leds, led_count}
+  end
+
+  def stretch({leds, led_count}, stretch) when stretch > led_count do
+    missing = stretch - led_count
+    missng_leds = Enum.map(1..missing, fn _index -> 0x000000 end)
+    {leds ++ missng_leds, stretch}
   end
 end

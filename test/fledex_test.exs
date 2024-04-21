@@ -46,10 +46,11 @@ defmodule Fledex.Test do
 
     test "simple led strip macro" do
       Fledex.MockJobScheduler
-        |> allow(self(), fn -> GenServer.whereis(Manager) end)
-        |> expect(:start_link, fn -> :ok end)
-        |> expect(:stop, fn -> :ok end)
-    # ensure our servers are not started
+      |> allow(self(), fn -> GenServer.whereis(Manager) end)
+      |> expect(:start_link, fn -> :ok end)
+      |> expect(:stop, fn -> :ok end)
+
+      # ensure our servers are not started
       assert GenServer.whereis(@server_name) == nil
       assert GenServer.whereis(Manager) == nil
 

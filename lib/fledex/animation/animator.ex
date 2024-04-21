@@ -174,14 +174,17 @@ defmodule Fledex.Animation.Animator do
   def apply_effects(leds, effects, triggers) do
     count = leds.count
 
-    {led_list, triggers} =
-      Enum.reduce(Enum.reverse(effects), {Leds.to_list(leds), triggers}, fn {effect, config},
-                                                                            {leds, triggers} ->
-        {leds, triggers, _effect_state} = effect.apply(leds, count, config, triggers)
-        {leds, triggers}
-      end)
+    {led_list, led_count, triggers} =
+      Enum.reduce(
+        Enum.reverse(effects),
+        {Leds.to_list(leds), count, triggers},
+        fn {effect, config}, {leds, count, triggers} ->
+          {leds, count, triggers, _effect_state} = effect.apply(leds, count, config, triggers)
+          {leds, count, triggers}
+        end
+      )
 
-    {Leds.leds(leds.count, led_list, %{}), triggers}
+    {Leds.leds(led_count, led_list, %{}), triggers}
   end
 
   # the response can be with or without trigger, we ensure that it's always with a trigger,

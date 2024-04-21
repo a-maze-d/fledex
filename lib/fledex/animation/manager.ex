@@ -37,7 +37,7 @@ defmodule Fledex.Animation.Manager do
            animations: map(),
            coordinators: map(),
            jobs: map(),
-           impl: map()
+           impls: map()
          }
 
   # def child_spec(args) do

@@ -9,7 +9,7 @@ defmodule Fledex.Animation.JobScheduler do
               | {:error, term}
   @callback stop() :: :ok
   @callback new_job() :: Quantum.Job.t()
-  @callback add_job(Quantum.Job.t() | {Crontab.CronExpression.t(), Job.task()}) ::
+  @callback add_job(Quantum.Job.t() | {Crontab.CronExpression.t(), Quantum.Job.task()}) ::
               :ok
   @callback run_job(atom) :: :ok
   @callback delete_job(atom) :: :ok

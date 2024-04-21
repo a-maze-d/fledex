@@ -16,8 +16,8 @@ defmodule Fledex.Effect.Dimming do
           config :: keyword,
           triggers :: map
         ) ::
-          {list(Types.colorint()), map, Interface.effect_state_t()}
-  def apply(leds, _count, config, triggers) do
+          {list(Types.colorint()), non_neg_integer, map, Interface.effect_state_t()}
+  def apply(leds, count, config, triggers) do
     trigger_name = config[:trigger_name] || :default
     divisor = config[:divisor] || 1
     step = triggers[trigger_name] || 0
@@ -33,6 +33,6 @@ defmodule Fledex.Effect.Dimming do
       end)
 
     effect_state = if step == 0, do: :stop_start, else: :progress
-    {leds, triggers, effect_state}
+    {leds, count, triggers, effect_state}
   end
 end

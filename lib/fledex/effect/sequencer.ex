@@ -15,12 +15,12 @@ defmodule Fledex.Effect.Sequencer do
 
     current_sequence = get_current_sequence(triggers, trigger_name)
     {module, module_config} = get_module(modules, current_sequence)
-    {leds, triggers, effect_state} = module.apply(leds, count, module_config, triggers)
+    {leds, count, triggers, effect_state} = module.apply(leds, count, module_config, triggers)
 
     {triggers, effect_state} =
       set_next_sequence(sequences, triggers, trigger_name, current_sequence, effect_state)
 
-    {leds, triggers, effect_state}
+    {leds, count, triggers, effect_state}
   end
 
   defp get_current_sequence(triggers, trigger_name) do

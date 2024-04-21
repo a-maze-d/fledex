@@ -12,8 +12,8 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Improve hexdocs
     - [ ] create cheatsheet (v0.4)
   - [x] Add documentation on how to connect the LED strip to a RaspberryPi Zero (v0.4) 
-  - [ ] Add installation instructions (v0.4)
-  - [ ] Add Branching sections in the livebooks to separate things that don't need to be together (v0.5)
+  - [ ] Add installation instructions (v0.5)
+  - [ ] Add Branching sections in the livebooks to separate things that don't need to be together? (v0.5)
   - [x] Add documentation on how to connect the LED strip to a RPI with a level shifter (v0.7)
         https://electronics.stackexchange.com/questions/82104/single-transistor-level-up-shifter/82112#82112
 - [ ] Testing
@@ -51,18 +51,17 @@ Even though this library is published, there are things I still want to do befor
   - [x] Create support for a cron-manager (that allows running jobs, like the one we have in the weather station example and thereby no need to handcraft anything) (v0.4)
   - [ ] Create support for a coordinator (that can control individual animations and effects. Effects will have to notify back their state) (v0.5)
   - [ ] Clustering
-    - [ ] create an animation that consumes those (this allows to connect remote livebooks to a physical led strip. CAUTION: protect against loops!) (v0.5)
+    - [x] create an animation that consumes those (this allows to connect remote livebooks to a physical led strip. CAUTION: protect against loops!) (v0.4)
     - [ ] Provide examples on how to cluster (v0.5)
     - [ ] Add an example where several nodes are connected to transfer pubsub messages accross nodes (v0.5)
   - [x] LED-component library
     - [x] Create foundation for a led-component-library that enables defining reusable led components. For example both the clock as well as the weather example have a scale it would be easy to define those as components that would make it easier to defining certain aspects (v0.5) Note: this should now be possible, since we have a component macro which simply returns animation configs. The above improvements should help to make this more smooth. Note2: I decided that (apart from some very basic components, I won't add components within this library but rather add them to a new library/repository)
 - [ ] Increase consumption
   - [ ] Use in school project (v0.4)
-  - [ ] Design a project logo (v0.5)
+  - [x] Design a project logo (v0.4)
   - [ ] Create a video (v0.5)
   - [ ] Talk on meetups? (v0.5 or v0.6)
   - [ ] Migrate outstanding TODOs to github (v0.6?)
   - [ ] Publish/announce on Elixirforum (v0.6)
   - [ ] Get the library into nerves-livebook (v0.7)
-  - [ ] Design a project logo (v0.5)
   - [ ] Create a video (v0.5)
