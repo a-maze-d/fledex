@@ -6,6 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # Fledex
 <img alt="Fledex" src="fledex_logo.svg" width=100/>
+
 [![Hex.pm](https://img.shields.io/hexpm/l/fledex "License")](https://github.com/a-maze-d/fledex/blob/main/LICENSES/Apache-2.0.txt)
 [![Hex version](https://img.shields.io/hexpm/v/fledex.svg?color=0000ff "Hex version")](https://hex.pm/packages/fledex)
 [![API docs](https://img.shields.io/hexpm/v/fledex.svg?label=hexdocs&color=0000ff "API docs")](https://hexdocs.pm/fledex)
