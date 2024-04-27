@@ -15,7 +15,7 @@ defmodule Fledex.Component.PubSubPainter do
         {leds, counter} = triggers[trigger_name]
         leds(counter, leds, %{})
 
-      _ ->
+      _triggers ->
         leds()
     end
   end

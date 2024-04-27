@@ -1,0 +1,325 @@
+<!--
+Copyright 2024, Matthias Reik <fledex@reik.org>
+
+SPDX-License-Identifier: Apache-2.0
+-->
+# Cheatsheet
+
+This is a very brief overview over the most important commands in the Fledex language
+
+## `use Fledex` library
+{: .col-2}
+
+Before you use any of the structures below, you need to `use` the fledex library.
+
+### Example
+
+```elexir
+use Fledex
+```
+
+### Description
+
+By `use`-ing the library, it is possible to use the structures specified below. It is safe to use this even in a functional context, i.e. it does not need to be part of a module.
+
+In addition, the following modules will be imported:
+
+* `Crontab.CronExpression`: used to define job intervals
+* `Fledex.Leds`: used to define LEDs
+* `Fledex.Color.Names`: used to specify colors
+* `Fledex.Utils.PubSub`: used to publish events/data towards animations
+
+In addition a `Fledex.Animation.Manager` will be started in the background (if there is none running) which will manage all animations.
+
+## The `led_strip`
+{: .col-2}
+
+### Example
+```elixir
+led_strip :name, :kino do
+  animation :seconds do
+    %{seconds: seconds} -> leds(60) |> light(:red, seconds)
+    _ -> leds()
+  end
+  static :indicators do
+    leds(5) |> light(:white) |> repeat(12)
+    end
+  end
+  job :clock, ~e[* * * * * * *]e do
+    date_time = DateTime.utc_now()
+    simple_broadcast(%{seconds: date_time.seconds})
+  end
+end
+```
+### Parameters
+
+The `led_strip` takes the following parameters:
+
+| Parameter   | Description                              |
+| ---         | ---                                  |
+| `name`      | (mandatory) Every strip needs a unique name. This needs to be an atom |
+| `driver`    | (mandatory) The driver that should be used to display the LEDs. The most common options are: `:kino` (for livebook), and `:spi` (for real hardware). |
+
+### The `do ... end` block
+
+The following structures inside the `do ... end` block are allowed:
+
+| Structure   | Description       |
+| ---         | ---               |
+| `animation` | Defines an animation that can change over time        |
+| `static`    | Defines a certain pattern, it cannot change over time |
+| `effect`    | Defines an effect that gets applied to an animation   |
+| `job`       | Does not define any LEDs, but some job that should be executed in regular intervals |
+| `component` | Defines a component. It's equivalent to a set of `static`, `animation`, `job`, including `effect`s. It allows to reuse certain aspects |
+
+See below for more details about them
+
+## The `animation`
+{: .col-2}
+
+### Example
+```elexir
+animation name, options do
+  leds(10)
+end
+```
+
+### Parameters
+
+The `animation` takes the following paramerters
+
+| Parameter | Description |
+|---        |---          |
+| `name`    | (mandatory) Every animation needs a unique name. This must be an atom |
+| `options` | (optional) A set of options, that is rarely used |
+
+### The `do ... end` block
+
+The structure inside the `do ... end` block can be any Elixir code, but it needs to return (at least) an `Fledex.Leds` structure (see below). 
+
+**Caution:** This function gets executed quite frequently and you need to ensure to keep it lightweight.
+
+The code block is actually a function and it is possible to pattern match on a parameter (which is a map) and to extract information from the paramerter:
+
+```elexir
+animation :name do
+  %{trigger_name: value} -> leds(value)
+  _ -> leds()
+end
+```
+
+**Note:** it's important to notice that the map might not contain the information you expect especially during initialization phase. Make sure you have a "catch all" clause.
+
+## The `static`
+{: .col-2}
+
+The static structure is very similar to the `animation` structure, except that won't be updated and changed over time. Therefore it's also not possible to use the optional parameter in the `do ... end` block.
+
+### Example
+
+```elexir
+static name, options do
+  leds(10) |> light(:red)
+end
+```
+
+### Parameters
+
+The `static` structure takes the following parameters:
+
+| Parameter | Description |
+|---        |---          |
+| `name`    | (mandatory) Every animation needs a unique name. This must be an atom |
+| `options` | (optional) A set of options, that is rarely used |
+
+### The `do ... end` block
+
+The structure inside the `do ... end` block can be any Elixir code, but it needs to return (at least) an Leds structure (see below).
+
+Contrary to the `animation` the `static` structure only get called once and does not get called repeatedly.
+
+## The `effect`
+{: .col-2}
+
+Any `animation` can be wrapped into an effect that impacts how the `animation` is perceived.
+
+### Example:
+
+```elexir
+effect Fledex.Effect.Rotation, trigger_name: :john do
+  animation :seconds do:
+    ...
+  end
+  animation :minutes do:
+    ...
+  end
+end
+```
+
+As can be seen in the example, the effect encapsulates one (or more) animations that it will impact.
+
+### Parameters
+
+| Parameter | Description |
+|---        |---          |
+| `effect`  | (mandatory) A module that implements the `Fledex.Effect.Interface`. You cand find some examples in the `Fledex.Effect` namespace, like: `Dimming`, `Rotation`, `Offset`, `Wanish`. |
+| `options` | (optional) A list of key value pairs that configure the effect. The settings are very specific to each effect. |
+
+### The `do ... end` block
+
+The `do ... end` block can contain, similar to the `led_strip` any of the fledex macros, but it only has a real effect on `animations`. Effects can even be nested, i.e. to have a `Dimming` around a `Rotation` effect which contains an animation.
+
+## The `job`
+{: .col-2}
+
+As mentioned above, very little work should be done as part of an animation. Any heavy lifting should be done in a separate process, and you probably don't want to do it very frequently anyway.
+
+A `job` is there to shedule a task in regular intervals and to publish it to the animations. The animation can extract that information from the parameter that gets passed to the `do ... end` block (see above).
+
+### Example
+
+```elixir
+job :name, ~e[* * * * * * *]e do
+  date_time = DateTime.utc_now()
+  simple_broadcast(%{seconds: date_time.seconds})
+end
+```
+
+### Parameters
+
+The `job` takes a couple of parameters:
+
+| Parameter | Description |
+|---        |---          |
+| `name`    | (mandatory) Every job needs to get a unique name. This must be an atom |
+| `pattern` | (mandatory) You need to specify a pattern when the job should run. The pattern can eithe rbe a normal crontab pattern (e.g. `~e[*/15]`) with minute precision or an extended one (e.g. `~e[*/15]e`) with second precision. More details can be found in [this cheatsheet](https://hexdocs.pm/crontab/cron_notation.html#expressions). |
+| `options` | (optional) one or more options can be specified (see below for details) |
+
+### Options
+
+The following options are recognized:
+
+| Option | Description |
+|---     |---          |
+| `:run_once` | to run the directly after configuration, independent from the actual schedule |
+| `:timezone` | specify a different timezone than the usual `UTC` |
+| `:overlap`  | Whether different runs should overlap. Usually this is not desired |
+
+### The `do ... end` block
+
+The `do ... end` block can consist of any valid Elixir code. The code will be called without any arguments. Usually you want to use at the end a `simple_broadcast/1` call 
+to publish data towards the animations that react to data and change their look.
+
+## The `component`
+{: .col-2}
+
+The `component` allows to encapsulate several animations and to reuse them into a single component. Examples are: `Fledex.Component.Clock`, `Fledex.Component.Dot`, and `Fledex.Component.Thermometer`.
+
+### Example
+
+```elexir
+  component(:thermo, Thermometer,
+    range: -20..40,
+    trigger: :temperature,
+    negative: :blue,
+    null: :may_green,
+    positive: :red,
+    marker: :davy_s_grey
+  )
+```
+
+### Parameters
+
+The `component` takes the following parameters:
+
+| Parameters | Description |
+| `name`     | (mandatory) Every component needs a name, but since a component consists of potentially several animations, the component could also take a tuple of names that are then assigned to the different animations (otherwise they are generated from the base name passed in) |
+| `component` | (mandatory) The name of the module that defines the component (that implements the `Fledex.Component.Interface` behaviour) |
+| `options` | (mandatory) A lit of options. The exact options are dependent on the component |
+
+
+## The `Fledex.Leds` struct
+{: .col-2}
+
+The `Fledex.Leds` module allows to define a sequence of leds
+
+### Example
+
+```elexir
+leds(3)
+  |> light(:red)
+  |> light(:green)
+  |> light(:blue)
+  |> repeat(5)
+```
+
+### Creation
+
+| Function  | Description |
+|---        |---          |
+| `leds/0`  | Creates an led sequence with zero length. This sounds maybe stupid but is useful if you don't want to define an animation (maybe because you are maybe still not fully initialized) |
+| `leds/1`  | Creates an led sequence with a specified length |
+| `leds/2`  | (rarely used) Creates an led sequence with a specific length and some options (important for the `send` function). |
+| `leds/3`  | Creates an led sequence with a list of colors that will be assigned to the leds. Pass an empty map (`%{}`) as the last argument |
+| `leds/4`   | (rarely used) Creates an led sequence with all the bells and whisles: `count`, list of `colors`, `options`, and some `meta` information |
+
+### Lights
+
+| Function  | Description |
+|---        |---          |
+| `light/2`  | This sets the color of the next led. Whenever you call this function an internal counter will be updated to the next led. Therefore you can nicely sequence it. **Note:**. The "color" can also be another led sequence that will be added at the corresponding position. |
+| `light/3`  | This sets a color at a specific offset. **Note:** the offset is 1 indexed and must be greater than zero. |
+| `light/4`  | This sets a color at a specific position and repeats it several times. **Note:** This is especially intersting if you insert another led sequence as a "color". |
+
+
+### Other Functions
+
+The above functions would be enough, but some special functions make life easier:
+
+
+| Function  | Description |
+|---        |---          |
+| `repeat/2`  | This function does what it says. It will repeat the current sequence n-times and make the whole sequence n-times longer. |
+| `rainbow/2` | This function creates a rainbow over the leds. It takes a couple of parameters to control the rainbow effect. |
+| `gradient/4` | This function creates a gradient between the two colors specified, with a couple of options to control the exact behaviour. |
+
+## The colors
+{: .col-2}
+
+Fledex has a very extensive color list as can be found on [Wikipedia](https://en.wikipedia.org/wiki/List_of_colors:_A%E2%80%93F). Take a look at `Fledex.Color.Names` for the full list of colors, but here the most important colours:
+
+### Examples
+
+<table>
+  <tr>
+    <td><div style="width: 25px; height: 25px; display: inline-block; background-color: #EF0000; border: 1px solid black"></div></td><td style="text-align: left;"><code class="inline">red</code></td>
+  </tr><tr>
+    <td><div style="width: 25px; height: 25px; display: inline-block; background-color: #FF7F00; border: 1px solid black"></div></td><td style="text-align: left;"><code class="inline">orange</code></td>
+  </tr><tr>
+    <td><div style="width: 25px; height: 25px; display: inline-block; background-color: #FFFF00; border: 1px solid black"></div></td><td style="text-align: left;"><code class="inline">yellow</code></td>
+  </tr><tr>
+    <td><div style="width: 25px; height: 25px; display: inline-block; background-color: #00FF00; border: 1px solid black"></div></td><td style="text-align: left;"><code class="inline">green</code></td>
+  </tr><tr>
+    <td><div style="width: 25px; height: 25px; display: inline-block; background-color: #00FFFF; border: 1px solid black"></div></td><td style="text-align: left;"><code class="inline">cyan</code></td>
+  </tr><tr>
+    <td><div style="width: 25px; height: 25px; display: inline-block; background-color: #0000FF; border: 1px solid black"></div></td><td style="text-align: left;"><code class="inline">blue</code></td>
+  </tr><tr>
+    <td><div style="width: 25px; height: 25px; display: inline-block; background-color: #8F00FF; border: 1px solid black"></div></td><td style="text-align: left;"><code class="inline">violet</code></td>
+  </tr>
+</table>
+
+### Usage
+
+There are several ways on how the color can be applied to an `Fledex.Leds` struct:
+
+#### Atom
+
+```elexir
+leds(1) |> light(:red)
+``` 
+
+#### Function
+
+```elexir
+leds(1) |> red()
+``` 

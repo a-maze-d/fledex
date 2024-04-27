@@ -9,15 +9,15 @@ Even though this library is published, there are things I still want to do befor
 
 # Tasks
 - [ ] Documentation
-  - [ ] Improve hexdocs
-    - [ ] create cheatsheet (v0.4)
+  - [X] Improve hexdocs
+    - [X] create cheatsheet (v0.4)
   - [x] Add documentation on how to connect the LED strip to a RaspberryPi Zero (v0.4) 
   - [ ] Add installation instructions (v0.5)
   - [ ] Add Branching sections in the livebooks to separate things that don't need to be together? (v0.5)
   - [x] Add documentation on how to connect the LED strip to a RPI with a level shifter (v0.7)
         https://electronics.stackexchange.com/questions/82104/single-transistor-level-up-shifter/82112#82112
 - [ ] Testing
-  - [ ] Add more error handling scenarios (v0.4)
+  - [ ] Add more error handling scenarios (v0.5)
 - [ ] Cleanup
   - [x] add Copyright comment into every file (make reuse green) (v0.4)
   - [x] Improve the Fledex configuration. The fledex_config/0 function feels very wrong (rethink the animator split up. Also effects raise the questions whether static "animations" should really be so static, since the effect would have any real effect on them) (v0.4) <-- DONE: static is only a convenience, they need to be "animated" too. A Coordinator will be introduced to coordinate animations. The sequencer I added before is likely to disappear again. Also the animation state will probably be implemented through pubsub instead of return value. This allows the coordinator to pick those up. We have to be careful though to only publish state changes. All envisaged changed will be tracked independently.
@@ -31,8 +31,8 @@ Even though this library is published, there are things I still want to do befor
   - [x] review the ideas.md document to see whether all ideas have been implemented (v0.4)
   - [x] improve on the effect state and component state handling. It's currently possible, but not super smooth and it's also difficult to avoid conflicts between different animations/effect/components <-- see my comment above about rethinking the config. This covers this aspect too.
   - [x] Create a sequencer effect that runs one effect before switching to the next effect. Maybe we  can replace the wanish and reappaer effect with 2 distinct effects this way and each of them being simpler. (v0.4) NOTE: This will not be done. I gave it some more thoughts and instead of a sequencer I will implement support for a coordinator that can control individual animations/effects.
-  - [ ] Add the possibility to clear the LEDs when initializing the LedsDriver (v0.4)
-  - [ ] Connect everything into a supervision tree (to make it more robust) (v0.4)
+  - [ ] Add the possibility to clear the LEDs when initializing the LedsDriver (v0.5)
+  - [ ] Connect everything into a supervision tree (to make it more robust) (v0.5)
   - [x] Use protocols ?
     - [x] ??? animations & components? <-- no, only behaviour
   - [x] Create a dsl (domain specific language) to (finally) easily program strips

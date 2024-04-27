@@ -5,6 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 # Fledex
+<img alt="Fledex" src="fledex_logo.svg" width=100/>
 [![Hex.pm](https://img.shields.io/hexpm/l/fledex "License")](https://github.com/a-maze-d/fledex/blob/main/LICENSES/Apache-2.0.txt)
 [![Hex version](https://img.shields.io/hexpm/v/fledex.svg?color=0000ff "Hex version")](https://hex.pm/packages/fledex)
 [![API docs](https://img.shields.io/hexpm/v/fledex.svg?label=hexdocs&color=0000ff "API docs")](https://hexdocs.pm/fledex)
@@ -13,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
 [![Coverage Status](https://coveralls.io/repos/github/a-maze-d/fledex/badge.svg?branch=main)](https://coveralls.io/github/a-maze-d/fledex?branch=main)
 [![Downloads](https://img.shields.io/hexpm/dt/fledex.svg)](https://hex.pm/packages/fledex)
 
-<img src="fledex_logo.svg" width=100/>
+
 Fledex is a small [Elixir](https://elixir-lang.org/) library It really is intended for educational purposes.
 It is written for a RaspberryPi Zero W running [Nerves](https://nerves-project.org/) especially with a [Nerves-Livebook](https://hexdocs.pm/nerves/getting-started.html#nerves-livebook). 
 The intent of the library is to simplify the programming of a programmable LED strip (currently based on a [WS2801 chip](https://cdn-shop.adafruit.com/datasheets/WS2801.pdf)) and thereby to make it accessible even for kids.

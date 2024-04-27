@@ -29,8 +29,9 @@ defmodule Fledex do
   @doc """
   By using this module, the `Fledex` macros are made available.
 
-  This macro does also include the `Fledex.Leds` and the `Fledex.Color.Names` and are
-  therefore available without namespace.
+  This macro does also import `Crontab.CronExpression`, `Fledex.Leds`, `Fledex.Color.Names`,
+  and `Fledex.Utils.PubSub`. Therefore the functions from those modules are directly
+  available without namespace.
 
   Take a look at the various [livebook examples](readme-2.html) on how to use the Fledex macros
   """
@@ -42,8 +43,10 @@ defmodule Fledex do
       # import also the Leds and the color name definitions so no namespace are required
       import Fledex.Leds
       import Fledex.Color.Names
+      import Fledex.Utils.PubSub
 
       alias Fledex.Utils.Dsl
+
       Dsl.init(opts)
     end
   end

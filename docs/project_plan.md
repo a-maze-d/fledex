@@ -4,11 +4,12 @@ Copyright 2023, Matthias Reik <fledex@reik.org>
 SPDX-License-Identifier: Apache-2.0
 -->
 
-# Introduction
+# Project Plan
+## Introduction
 This is the initial project plan developed with my son. Since I speak German
 with him, it's written in German.
 
-# Project Plan
+## The Plan 
 
 1. Was moechtest do machen: Blau blinken
 2. Was bedeutet das genau:
@@ -119,6 +120,6 @@ the `use Fledex`)
    ```
 6. The offset can be defined by using the offset function as shown in 5.5
 
-# Result
+## Result
 The customer has accepted the implementation and we can close down this project
 plan thereby :-)

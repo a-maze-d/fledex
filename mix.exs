@@ -124,6 +124,7 @@ defmodule Fledex.MixProject do
         "docs/architecture.md",
         "docs/hardware.md",
         "docs/project_plan.md",
+        "docs/cheatsheet.cheatmd",
         "livebooks/README.md",
         "livebooks/1_first_steps_with_an_led_strip.livemd",
         "livebooks/2_fledex_first_steps.livemd",
@@ -154,6 +155,8 @@ defmodule Fledex.MixProject do
           Fledex.Application
         ],
         Animation: ~r/Fledex.Animation/,
+        Effect: ~r/Fledex.Effect/,
+        Component: ~r/Fledex.Component/,
         "Driver Implementations": ~r/Fledex.Driver.Impl/,
         Driver: ~r/Fledex.Driver/,
         Utils: ~r/Fledex.Utils/,
