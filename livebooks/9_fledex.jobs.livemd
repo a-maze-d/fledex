@@ -11,9 +11,6 @@ Mix.install([
   {:fledex, "~>0.4"},
   {:jason, "~>1.2"}
 ])
-
-alias Fledex.Utils.PubSub
-:ok
 ```
 
 ## Setup

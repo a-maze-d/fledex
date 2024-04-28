@@ -10,7 +10,17 @@ This is a very brief overview over the most important commands in the Fledex lan
 ## `use Fledex` library
 {: .col-2}
 
-Before you use any of the structures below, you need to `use` the fledex library.
+Before you use any of the structures below, you first need to install the library and then `use` it.
+
+### Installation
+
+Before you can use Fledex, you need to install the library. Either as a dependency in your `mix.exs` file, or as part of your setup in your livebook by calling
+
+```elixir
+Mix.install([
+  {:fledex, "~>0.4"}
+])
+```
 
 ### Example
 
