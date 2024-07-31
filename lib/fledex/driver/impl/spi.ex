@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -10,61 +10,70 @@ defmodule Fledex.Driver.Impl.Spi do
   alias Fledex.Color.Utils
 
   @impl true
-  @spec init(map) :: map
-  def init(init_module_args) do
-    config = %{
-      dev: init_module_args[:dev] || "spidev0.0",
-      mode: init_module_args[:mode] || 0,
-      bits_per_word: init_module_args[:bits_per_word] || 8,
-      speed_hz: init_module_args[:speed_hz] || 1_000_000,
-      delay_us: init_module_args[:delay_us] || 10,
-      lsb_first: init_module_args[:lsb_first] || false,
-      color_correction: init_module_args[:color_correction] || Correction.no_color_correction(),
+  @spec configure(keyword) :: keyword
+  def configure(config) do
+    [
+      dev: Keyword.get(config, :dev, "spidev0.0"),
+      mode: Keyword.get(config, :mode, 0),
+      bits_per_word: Keyword.get(config, :bits_per_word, 8),
+      speed_hz: Keyword.get(config, :speed_hz, 1_000_000),
+      delay_us: Keyword.get(config, :delay_us, 10),
+      lsb_first: Keyword.get(config, :lsb_first, false),
+      color_correction: Keyword.get(config, :color_correction, Correction.no_color_correction()),
       ref: nil
-    }
-
-    put_in(config.ref, open_spi(config))
+    ]
   end
 
   @impl true
-  @spec reinit(map) :: map
-  def reinit(module_config) do
-    module_config
+  @spec init(keyword) :: keyword
+  def init(config) do
+    config = configure(config)
+    Keyword.put(config, :ref, open_spi(config))
   end
 
-  @spec open_spi(map) :: reference
+  @impl true
+  @spec reinit(keyword, keyword) :: keyword
+  def reinit(old_config, new_config) do
+    # TODO: we have to check whether we have to reconfigure the SPI port
+    #       i.e. has any of the settings changed? If yes, we close the port
+    #       and recreate it.
+    Keyword.merge(old_config, new_config)
+  end
+
+  @spec open_spi(keyword) :: reference
   def open_spi(config) do
     {:ok, ref} =
-      Circuits.SPI.open(config.dev,
-        mode: config.mode,
-        bits_per_word: config.bits_per_word,
-        speed_hz: config.speed_hz,
-        delay_us: config.delay_us,
-        lsb_first: config.lsb_first
+      Circuits.SPI.open(
+        Keyword.fetch!(config, :dev),
+        mode: Keyword.fetch!(config, :mode),
+        bits_per_word: Keyword.fetch!(config, :bits_per_word),
+        speed_hz: Keyword.fetch!(config, :speed_hz),
+        delay_us: Keyword.fetch!(config, :delay_us),
+        lsb_first: Keyword.fetch!(config, :lsb_first)
       )
 
     ref
   end
 
   @impl true
-  @spec transfer(list(Types.colorint()), pos_integer, map) :: {map, any}
+  @spec transfer(list(Types.colorint()), pos_integer, keyword) :: {keyword, any}
   def transfer(leds, _counter, config) do
     binary =
       leds
-      |> Correction.apply_rgb_correction(config.color_correction)
+      |> Correction.apply_rgb_correction(Keyword.fetch!(config, :color_correction))
       |> Enum.reduce(<<>>, fn led, acc ->
         {r, g, b} = Utils.to_rgb(led)
         acc <> <<r, g, b>>
       end)
 
-    response = Circuits.SPI.transfer(config.ref, binary)
+    response = Circuits.SPI.transfer(Keyword.fetch!(config, :ref), binary)
     {config, response}
   end
 
   @impl true
-  @spec terminate(reason, map) :: :ok
+  @spec terminate(reason, keyword) :: :ok
         when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(_reason, config) do
-    Circuits.SPI.close(config.ref)
+    Circuits.SPI.close(Keyword.fetch!(config, :ref))
   end
 end

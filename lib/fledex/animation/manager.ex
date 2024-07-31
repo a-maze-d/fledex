@@ -73,10 +73,10 @@ defmodule Fledex.Animation.Manager do
   configurations, or through a map with all the configurations (see
   [`LedStrip`](Fledex.LedStrip.html) for details).
   """
-  @spec register_strip(atom, atom | map) :: :ok
-  def register_strip(strip_name, driver_config) do
+  @spec register_strip(atom, [{module, keyword}], keyword) :: :ok
+  def register_strip(strip_name, drivers, strip_config) do
     # Logger.debug("register strip: #{strip_name}")
-    GenServer.call(__MODULE__, {:register_strip, strip_name, driver_config})
+    GenServer.call(__MODULE__, {:register_strip, strip_name, drivers, strip_config})
   end
 
   @doc """
@@ -133,19 +133,19 @@ defmodule Fledex.Animation.Manager do
   end
 
   @impl GenServer
-  @spec handle_call({:regiseter_strip, atom, atom | map}, GenServer.from(), state_t) ::
+  @spec handle_call({:regiseter_strip, atom, [{module, keyword}], keyword}, GenServer.from(), state_t) ::
           {:reply, :ok, state_t}
-  def handle_call({:register_strip, strip_name, driver_config}, _pid, state)
+  def handle_call({:register_strip, strip_name, drivers, strip_config}, _pid, state)
       when is_atom(strip_name) do
     pid = Process.whereis(strip_name)
 
     if pid == nil do
-      {:reply, :ok, register_strip(state, strip_name, driver_config)}
+      {:reply, :ok, register_strip(state, strip_name, drivers, strip_config)}
     else
       # we have a bit of a problem when using the kino driver, since it will not be reinitialized
       # when calling this function again (and thereby we don't get any frame/display).
       # Therefore we add here an extra step to reinitiate the the drivers while registering the strip.
-      :ok = LedStrip.reinit_drivers(strip_name)
+      :ok = state.impls.led_strip.reinit(strip_name, drivers, strip_config)
       {:reply, :ok, state}
     end
   end
@@ -207,10 +207,10 @@ defmodule Fledex.Animation.Manager do
     {animations, coordinators, jobs}
   end
 
-  @spec register_strip(state_t, atom, atom | map) :: state_t
-  defp register_strip(state, strip_name, driver_config) do
+  @spec register_strip(state_t, atom, [{module, keyword}], keyword) :: state_t
+  defp register_strip(state, strip_name, drivers, strip_config) do
     # Logger.info("registering led_strip: #{strip_name}")
-    {:ok, _pid} = state.impls.led_strip.start_link(strip_name, driver_config)
+    {:ok, _pid} = state.impls.led_strip.start_link(strip_name, drivers, strip_config)
 
     %{
       state
@@ -231,7 +231,7 @@ defmodule Fledex.Animation.Manager do
 
     shutdown_jobs(state.impls, strip_name, Map.keys(state.jobs[strip_name] || %{}))
     shutdown_animators(state.impls, strip_name, Map.keys(state.animations[strip_name] || %{}))
-    LedStrip.stop(strip_name)
+    state.impls.led_strip.stop(strip_name)
 
     %{
       state

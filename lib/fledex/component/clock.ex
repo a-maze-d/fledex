@@ -6,8 +6,8 @@ defmodule Fledex.Component.Clock do
 
   alias Fledex.Component.Dot
 
-  defp create_name(base, child) do
-    String.to_atom("#{inspect(base)}_#{inspect(child)}")
+  defp create_name(base, child) when is_atom(base) and is_atom(child) do
+    String.to_atom("#{Atom.to_string(base)}_#{Atom.to_string(child)}")
   end
 
   @impl true
@@ -21,25 +21,33 @@ defmodule Fledex.Component.Clock do
     use Fledex
 
     led_strip name, :config do
-      component(:second, Dot,
+      component(trigger_second, Dot,
         color: second_color,
         count: 60,
         trigger_name: trigger_second
       )
-
-      component(:minute, Dot,
+      # TODO: document this trick to do some logging
+      # animation :logger do
+      #   %{logger: logger} = trigger ->
+      #     if rem(logger, 10) == 0 do
+      #       IO.puts "logger: #{inspect trigger}"
+      #     end
+      #     {leds(1), %{trigger | logger: logger+1}}
+      #   trigger -> {leds(1), Map.put_new(trigger, :logger, 0)}
+      # end
+      component(trigger_minute, Dot,
         color: minute_color,
         count: 60,
         trigger_name: trigger_minute
       )
 
-      component(:hour, Dot,
+      component(trigger_hour, Dot,
         color: hour_color,
         count: 24,
         trigger_name: trigger_hour
       )
 
-      static create_name(trigger_name, :helper) do
+      static create_name(name, :helper) do
         leds(5) |> light(helper_color) |> repeat(12)
       end
     end

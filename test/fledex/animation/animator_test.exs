@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -10,6 +10,7 @@ defmodule Fledex.Animation.AnimatorTest do
 
   alias Fledex.Animation.Animator
   alias Fledex.Animation.AnimatorInterface
+  alias Fledex.Driver.Impl.Null
   alias Fledex.Effect.Rotation
   alias Fledex.Effect.Wanish
   alias Fledex.Leds
@@ -41,7 +42,7 @@ defmodule Fledex.Animation.AnimatorTest do
     {:ok, pid} =
       start_supervised(%{
         id: LedStrip,
-        start: {LedStrip, :start_link, [@strip_name, :none]}
+        start: {LedStrip, :start_link, [@strip_name, Null]}
       })
 
     %{strip_name: @strip_name, pid: pid}
@@ -292,7 +293,7 @@ defmodule Fledex.Animation.AnimatorTest do
   describe "test shutdown" do
     test "through client API" do
       strip_name = :shutdown_testA
-      {:ok, driver} = LedStrip.start_link(strip_name, :none)
+      {:ok, driver} = LedStrip.start_link(strip_name, Null)
       animation_name = :animation_testA
       {:ok, pid} = Animator.start_link(%{}, strip_name, animation_name)
       assert Process.alive?(pid)
@@ -303,7 +304,7 @@ defmodule Fledex.Animation.AnimatorTest do
 
     test "through GenServer API" do
       strip_name = :shutdown_testB
-      {:ok, driver} = LedStrip.start_link(strip_name, :none)
+      {:ok, driver} = LedStrip.start_link(strip_name, Null)
       animation_name = :animation_testB
       {:ok, pid} = Animator.start_link(%{type: :static}, strip_name, animation_name)
       assert Process.alive?(pid)

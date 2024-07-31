@@ -66,24 +66,41 @@ defmodule Fledex.Utils.Dsl do
           "Unknown block. I don't know how to apply the effect #{module} with options #{inspect(options)} on #{inspect(block)}"
   end
 
-  @spec configure_strip(atom, atom | keyword, [Manager.config_t()] | Manager.config_t()) ::
-          :ok | Manager.config_t()
-  def configure_strip(strip_name, strip_options, config) when is_list(config) do
+  @spec configure_strip(
+          atom,
+          [{module, keyword}] | atom | {module, keyword} | module,
+          keyword,
+          [Manager.config_t()] | Manager.config_t()
+        ) :: :ok | Manager.config_t()
+  def configure_strip(strip_name, drivers, strip_options, config) when is_list(config) do
     config =
       Enum.reduce(config, %{}, fn map, acc ->
         Map.merge(acc, map)
       end)
 
-    configure_strip(strip_name, strip_options, config)
+    configure_strip(strip_name, drivers, strip_options, config)
   end
 
-  def configure_strip(_strip_name, :config, config), do: config
+  def configure_strip(_strip_name, :config, _strip_options, config), do: config
 
-  def configure_strip(strip_name, strip_options, config) do
+  def configure_strip(strip_name, driver, strip_options, config) when is_atom(driver) do
+    configure_strip(strip_name, {driver, []}, strip_options, config)
+  end
+
+  def configure_strip(
+        strip_name,
+        {_driver_module, _driver_config} = driver,
+        strip_options,
+        config
+      ) do
+    configure_strip(strip_name, [driver], strip_options, config)
+  end
+
+  def configure_strip(strip_name, drivers, strip_options, config) when is_list(drivers) do
     # if is_atom(strip_options) and strip_options == :config do
     #   config
     # else
-    Manager.register_strip(strip_name, strip_options)
+    Manager.register_strip(strip_name, drivers, strip_options)
     Manager.register_config(strip_name, config)
     # end
   end

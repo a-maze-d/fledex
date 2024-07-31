@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -154,6 +154,7 @@ defmodule Fledex.Leds do
     count
   end
 
+  # TODO: we shoudl rename this to `set_led_strip_info`
   @doc """
   Define the server_name and the namespace
 
@@ -452,7 +453,7 @@ defmodule Fledex.Leds do
         "The server #{server_name} wasn't started. You should start it before using this function"
       )
 
-      {:ok, _pid} = LedStrip.start_link(server_name, %{})
+      {:ok, _pid} = LedStrip.start_link(server_name)
     end
 
     # b) Is a namespace defined?

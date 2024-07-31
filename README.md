@@ -1,5 +1,5 @@
 <!--
-Copyright 2023, Matthias Reik <fledex@reik.org>
+Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -19,7 +19,7 @@ Fledex is a small [Elixir](https://elixir-lang.org/) library It really is intend
 It is written for a RaspberryPi Zero W running [Nerves](https://nerves-project.org/) especially with a [Nerves-Livebook](https://hexdocs.pm/nerves/getting-started.html#nerves-livebook). 
 The intent of the library is to simplify the programming of a programmable LED strip (currently based on a [WS2801 chip](https://cdn-shop.adafruit.com/datasheets/WS2801.pdf)) and thereby to make it accessible even for kids.
 
-The idea is to introduce similarly easy concepts for the programming of LEDs as [SonicPi](https://sonic-pi.net/) did for music. The library was developped in collaboration with my son and hopefully we can push it to become better over time. For my son the goal will be to connect the LEDs to some music and to animate the LEDs depending on the beat.
+The idea is to introduce similarly easy concepts for the programming of LEDs as [SonicPi](https://sonic-pi.net/) did for music. The library was developed in collaboration with my son and hopefully we can push it to become better over time. For my son the goal will be to connect the LEDs to some music and to animate the LEDs depending on the beat.
 
 Quite a lot of inspiration came from the [FastLED project](http://fastled.io/) and quite a few of their functions got reimplemented in Elixir. If you look at the implementation of some of those functions you might want to look at their comments.
 

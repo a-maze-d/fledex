@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -8,6 +8,7 @@ defmodule Fledex.Animation.ManagerTest do
   import Mox
 
   alias Fledex.Animation.Manager
+  alias Fledex.Driver.Impl.Null
   alias Fledex.ManagerTestUtils
   alias Quantum
 
@@ -19,7 +20,7 @@ defmodule Fledex.Animation.ManagerTest do
         start: {Manager, :start_link, []}
       })
 
-    Manager.register_strip(@strip_name, :null)
+    Manager.register_strip(@strip_name, [{Null, []}], [])
     %{pid: pid, strip_name: @strip_name}
   end
 
@@ -41,7 +42,7 @@ defmodule Fledex.Animation.ManagerTest do
       assert Map.keys(config) == []
       assert GenServer.whereis(strip_name) == nil
 
-      Manager.register_strip(strip_name, :none)
+      Manager.register_strip(strip_name, [{Null, []}], [])
       config = ManagerTestUtils.get_manager_config()
       assert Map.keys(config) == [strip_name]
       assert GenServer.whereis(strip_name) != nil
@@ -51,7 +52,7 @@ defmodule Fledex.Animation.ManagerTest do
       config = ManagerTestUtils.get_manager_config()
       assert Map.keys(config) == [strip_name]
 
-      Manager.register_strip(:strip_name2, :none)
+      Manager.register_strip(:strip_name2, [{Null, []}], [])
 
       config = ManagerTestUtils.get_manager_config()
       assert Map.keys(config) == [strip_name, :strip_name2]
@@ -60,7 +61,7 @@ defmodule Fledex.Animation.ManagerTest do
     test "re-register led_strip", %{strip_name: strip_name} do
       pid = GenServer.whereis(strip_name)
       assert pid != nil
-      Manager.register_strip(strip_name, :none)
+      Manager.register_strip(strip_name, [{Null, []}], [])
       pid2 = GenServer.whereis(strip_name)
       assert pid == pid2
     end
@@ -117,7 +118,7 @@ defmodule Fledex.Animation.ManagerTest do
       use Fledex
 
       config =
-        led_strip :john, :config do
+        led_strip :john, :config, [] do
           job :timer, ~e[* * * * * * *]e do
             :ok
           end
@@ -133,7 +134,8 @@ defmodule Fledex.Animation.ManagerTest do
         }
       }
 
-      {:reply, :ok, state} = Manager.handle_call({:register_strip, :john, :none}, self(), state)
+      {:reply, :ok, state} =
+        Manager.handle_call({:register_strip, :john, [{Null, []}], []}, self(), state)
 
       {:reply, :ok, _state} =
         Manager.handle_call({:register_config, :john, config}, self(), state)
@@ -224,11 +226,12 @@ defmodule Fledex.Animation.ManagerTest2 do
   use ExUnit.Case
 
   alias Fledex.Animation.Manager
+  alias Fledex.Driver.Impl.Null
 
   describe "Animation with wrong type" do
     test "register animation with a broken animation type" do
       {:ok, pid} = Manager.start_link()
-      :ok = Manager.register_strip(:some_strip, :none)
+      :ok = Manager.register_strip(:some_strip, [{Null, []}], [])
 
       config = %{
         t1: %{

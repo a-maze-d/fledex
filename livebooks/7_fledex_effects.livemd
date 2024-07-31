@@ -1,5 +1,5 @@
 <!--
-Copyright 2023, Matthias Reik <fledex@reik.org>
+Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 
 ```elixir
 Mix.install([
-  {:fledex, "~>0.4"}
+  {:fledex, "~>0.5"}
 ])
 
 :ok
@@ -34,6 +34,8 @@ In the following we'll take a closer look at two of the standard effects:
 
 The latter one we have already encountered under the hood, without realizing it. It provided the functionality of the `send_config_func` to rotate the pixels
 
+<!-- livebook:{"branch_parent_index":0} -->
+
 ## The Wanish effect
 
 The wanish effect makes some leds vanish starting from one end and extending to infity. The effect can be controled through a couple of conig parameters:
@@ -48,7 +50,7 @@ The wanish effect makes some leds vanish starting from one end and extending to 
 Here is an example on such an effect on a simple led sequence
 
 ```elixir
-led_strip :john, :kino do
+led_strip :john, Kino do
   effect Wanish, divisor: 2, direction: :right, reappear: true do
     animation :test do
       _triggers ->
@@ -57,6 +59,8 @@ led_strip :john, :kino do
   end
 end
 ```
+
+<!-- livebook:{"branch_parent_index":0} -->
 
 ## The Rotation effect
 
@@ -71,7 +75,7 @@ The available configuration parameters are:
 Let's see how this looks if we rely on the default values:
 
 ```elixir
-led_strip :rotation, :kino do
+led_strip :rotation, Kino do
   effect Rotation do
     animation :rainbow do
       _triggers -> leds(50) |> rainbow
@@ -80,18 +84,16 @@ led_strip :rotation, :kino do
 end
 ```
 
+<!-- livebook:{"branch_parent_index":0} -->
+
 ## Combining effects
 
 It is possble to combine several effects. The order of the effects can be imporant, so make sure you apply them in the correct order.
 
 Let's try it out by combining our rotation and wanishing effect on a rainbow color spectrum.
 
-<!-- livebook:{"break_markdown":true} -->
-
-
-
 ```elixir
-led_strip :rotation_and_wanish, :kino do
+led_strip :rotation_and_wanish, Kino do
   effect Rotation do
     effect Wanish, divisor: 1, direction: :right, reappear: true do
       animation :rainbow do
@@ -101,6 +103,8 @@ led_strip :rotation_and_wanish, :kino do
   end
 end
 ```
+
+<!-- livebook:{"branch_parent_index":0} -->
 
 ## BYOE: Bring Your Own Effect
 
@@ -119,15 +123,17 @@ Let's start to define our own module and the function. The simplest implementati
 defmodule LivebookEffect1 do
   @behaviour Fledex.Effect.Interface
 
+  alias Fledex.Effect.Interface
+
   @impl true
   @spec apply(
           leds :: [Types.colorint()],
           count :: non_neg_integer,
           config :: keyword,
           triggers :: map
-        ) :: {list(Types.colorint()), map, Fledex.Effect.Interface.effect_state_t()}
-  def apply(leds, _count, _config, triggers) do
-    {leds, triggers, :static}
+        ) :: {list(Types.colorint()), non_neg_integer, map, Interface.effect_state_t()}
+  def apply(leds, count, _config, triggers) do
+    {leds, count, triggers, :static}
   end
 end
 ```
@@ -144,15 +150,17 @@ This is very easy to accomplish, we only need to call the `Enum.shuffle/1` funct
 defmodule LivebookEffect2 do
   @behaviour Fledex.Effect.Interface
 
+  alias Fledex.Effect.Interface
+
   @impl true
   @spec apply(
           leds :: [Types.colorint()],
           count :: non_neg_integer,
           config :: keyword,
           triggers :: map
-        ) :: {list(Types.colorint()), map, Fledex.Effect.Interface.effect_state_t()}
-  def apply(leds, _count, _config, triggers) do
-    {Enum.shuffle(leds), triggers, :progress}
+        ) :: {list(Types.colorint()), non_neg_integer, map, Interface.effect_state_t()}
+  def apply(leds, count, _config, triggers) do
+    {Enum.shuffle(leds), count, triggers, :progress}
   end
 end
 ```
@@ -160,7 +168,7 @@ end
 That's it already, now we can already use our own effect as we have used an effect above. Let's see how crazy this looks.
 
 ```elixir
-led_strip :xmas, :kino do
+led_strip :xmas, Kino do
   effect LivebookEffect2 do
     animation :xmas do
       _triggers -> leds(50) |> rainbow

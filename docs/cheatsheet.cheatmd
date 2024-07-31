@@ -45,6 +45,7 @@ In addition a `Fledex.Animation.Manager` will be started in the background (if t
 {: .col-2}
 
 ### Example
+
 ```elixir
 led_strip :name, :kino do
   animation :seconds do
@@ -61,6 +62,7 @@ led_strip :name, :kino do
   end
 end
 ```
+
 ### Parameters
 
 The `led_strip` takes the following parameters:
@@ -88,6 +90,7 @@ See below for more details about them
 {: .col-2}
 
 ### Example
+
 ```elexir
 animation name, options do
   leds(10)
@@ -153,7 +156,7 @@ Contrary to the `animation` the `static` structure only get called once and does
 
 Any `animation` can be wrapped into an effect that impacts how the `animation` is perceived.
 
-### Example:
+### Example
 
 ```elexir
 effect Fledex.Effect.Rotation, trigger_name: :john do
@@ -286,7 +289,6 @@ leds(3)
 
 The above functions would be enough, but some special functions make life easier:
 
-
 | Function  | Description |
 |---        |---          |
 | `repeat/2`  | This function does what it says. It will repeat the current sequence n-times and make the whole sequence n-times longer. |
@@ -296,7 +298,7 @@ The above functions would be enough, but some special functions make life easier
 ## The colors
 {: .col-2}
 
-Fledex has a very extensive color list as can be found on [Wikipedia](https://en.wikipedia.org/wiki/List_of_colors:_A%E2%80%93F). Take a look at `Fledex.Color.Names` for the full list of colors, but here the most important colours:
+Fledex has a very extensive color list as can be found on [Wikipedia](https://en.wikipedia.org/wiki/List_of_colors:_A%E2%80%93F). Take a look at `Fledex.Color.Names` for the full list of colors, but here the most important colors:
 
 ### Examples
 
@@ -320,16 +322,16 @@ Fledex has a very extensive color list as can be found on [Wikipedia](https://en
 
 ### Usage
 
-There are several ways on how the color can be applied to an `Fledex.Leds` struct:
+There are several ways on how a color can be applied to an `Fledex.Leds` struct:
 
 #### Atom
 
 ```elexir
 leds(1) |> light(:red)
-``` 
+```
 
 #### Function
 
 ```elexir
 leds(1) |> red()
-``` 
+```

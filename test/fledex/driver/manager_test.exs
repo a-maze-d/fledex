@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -11,15 +11,19 @@ defmodule Fledex.Driver.ManagerTest do
 
   defmodule TestDriver do
     @behaviour Fledex.Driver.Interface
-    def init(init_args) do
-      %{
-        a1: init_args[:a1] || 0,
+    def configure(config) do
+      [
+        a1: Keyword.get(config, :a1, 0),
         a2: 1
-      }
+      ]
     end
 
-    def reinit(config) do
-      config
+    def init(config) do
+      configure(config)
+    end
+
+    def reinit(old_config, new_config) do
+      Keyword.merge(old_config, new_config)
     end
 
     def transfer(_leds, _count, config) do
@@ -33,19 +37,23 @@ defmodule Fledex.Driver.ManagerTest do
 
   defmodule TestDriver2 do
     @behaviour Fledex.Driver.Interface
-    def init(init_args) do
-      %{
-        a1: init_args[:a1] || 0,
+    def configure(config) do
+      [
+        a1: Keyword.get(config, :a1, 0),
         a2: 2
-      }
+      ]
     end
 
-    def reinit(config) do
-      config
+    def init(config) do
+      configure(config)
+    end
+
+    def reinit(old_config, new_config) do
+      Keyword.merge(old_config, new_config)
     end
 
     def transfer(_leds, _count, config) do
-      {Map.put(config, :a3, 4), :ok}
+      {Keyword.put(config, :a3, 4), :ok}
     end
 
     def terminate(_reason, _config) do
@@ -56,15 +64,19 @@ defmodule Fledex.Driver.ManagerTest do
   defmodule TestDriver3 do
     # note: on purpose we don't inherit from the
     # behaviour.
-    def init(init_args) do
-      %{
-        a1: init_args[:a1] || 0,
+    def configure(config) do
+      [
+        a1: Keyword.get(config, :a1, 0),
         a2: 2
-      }
+      ]
+    end
+
+    def init(config) do
+      configure(config)
     end
 
     def transfer(_leds, config) do
-      {Map.put(config, :a3, 4), :ok}
+      {Keyword.put(config, :a3, 4), :ok}
     end
 
     def terminate(_reason, _config) do
@@ -77,53 +89,43 @@ defmodule Fledex.Driver.ManagerTest do
     alias Fledex.Driver.ManagerTest.TestDriver2
 
     test "init" do
-      led_strip = %{
-        driver_modules: [TestDriver, TestDriver2],
-        config: %{
-          TestDriver => %{
-            a1: 1
-          },
-          TestDriver2 => %{}
-        }
-      }
+      drivers = [
+        {TestDriver, a1: 1},
+        {TestDriver2, []}
+      ]
 
-      led_strip =
-        Manager.init_config(led_strip)
-        |> Manager.init_drivers()
+      drivers = Manager.init_drivers(drivers)
 
-      assert map_size(led_strip[:config]) == 2
-      assert led_strip[:config][TestDriver][:a1] == 1
-      assert led_strip[:config][TestDriver2][:a1] == 0
-      assert led_strip[:config][TestDriver][:a2] == 1
-      assert led_strip[:config][TestDriver2][:a2] == 2
+      assert length(drivers) == 2
+      config1 = get_driver_config(drivers, TestDriver)
+      assert Keyword.fetch!(config1, :a1) == 1
+      assert Keyword.fetch!(config1, :a2) == 1
+
+      config2 = get_driver_config(drivers, TestDriver2)
+      assert Keyword.fetch!(config2, :a1) == 0
+      assert Keyword.fetch!(config2, :a2) == 2
     end
 
     test "transfer" do
       counter = 0
 
-      led_strip = %{
-        driver_modules: [TestDriver, TestDriver2],
-        config: %{
-          TestDriver => %{
-            a1: 1,
-            a2: 1
-          },
-          TestDriver2 => %{
-            a1: 0,
-            a2: 2
-          }
-        }
-      }
+      drivers = [
+        {TestDriver, a1: 1, a2: 1},
+        {TestDriver2, a1: 0, a2: 2}
+      ]
 
-      led_strip = Manager.transfer([], counter, led_strip)
+      drivers = Manager.transfer([], counter, drivers)
 
-      assert map_size(led_strip[:config]) == 2
-      assert led_strip[:config][TestDriver][:a1] == 1
-      assert led_strip[:config][TestDriver2][:a1] == 0
-      assert led_strip[:config][TestDriver][:a2] == 1
-      assert led_strip[:config][TestDriver2][:a2] == 2
-      assert led_strip[:config][TestDriver][:a3] == nil
-      assert led_strip[:config][TestDriver2][:a3] == 4
+      assert length(drivers) == 2
+      config1 = get_driver_config(drivers, TestDriver)
+      assert Keyword.fetch!(config1, :a1) == 1
+      assert Keyword.fetch!(config1, :a2) == 1
+      assert Keyword.get(config1, :a3, nil) == nil
+
+      config2 = get_driver_config(drivers, TestDriver2)
+      assert Keyword.fetch!(config2, :a1) == 0
+      assert Keyword.fetch!(config2, :a2) == 2
+      assert Keyword.fetch!(config2, :a3) == 4
     end
   end
 
@@ -132,46 +134,43 @@ defmodule Fledex.Driver.ManagerTest do
     alias Fledex.Driver.ManagerTest.TestDriver3
 
     test "non-compliant gets dropped" do
-      led_strip = %{
-        driver_modules: [TestDriver, TestDriver3],
-        config: %{
-          TestDriver => %{
-            a1: 1
-          },
-          TestDriver3 => %{}
-        }
-      }
+      drivers = [
+        {TestDriver, a1: 1},
+        {TestDriver3, []}
+      ]
 
-      {led_strip, log} =
+      {drivers, log} =
         with_log(fn ->
-          Manager.init_config(led_strip)
-          |> Manager.init_drivers()
+          Manager.init_drivers(drivers)
         end)
 
-      assert length(led_strip[:driver_modules]) == 1
-      assert led_strip[:driver_modules] == [TestDriver]
+      assert length(drivers) == 1
+      assert drivers == [{TestDriver, a1: 1, a2: 1}]
       assert log =~ "TestDriver3 does not implement the function :reinit"
       assert log =~ "with the wrong arity 2 vs 3"
     end
 
     test "single non-compliant gets replaced with default" do
-      led_strip = %{
-        driver_modules: [TestDriver3],
-        config: %{
-          TestDriver3 => %{}
-        }
-      }
+      drivers = [
+        {TestDriver3, []}
+      ]
 
-      {led_strip, log} =
+      {drivers, log} =
         with_log(fn ->
-          Manager.init_config(led_strip)
-          |> Manager.init_drivers()
+          Manager.init_drivers(drivers)
         end)
 
-      assert length(led_strip[:driver_modules]) == 1
-      assert led_strip[:driver_modules] == [Null]
+      assert length(drivers) == 1
+      assert drivers == [{Null, []}]
       assert log =~ "TestDriver3 does not implement the function :reinit"
       assert log =~ "with the wrong arity 2 vs 3"
     end
+  end
+
+  defp get_driver_config(drivers, driver_module) do
+    [{^driver_module, config} | _] =
+      Enum.filter(drivers, fn {module, _config} -> module == driver_module end)
+
+    config
   end
 end

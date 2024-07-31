@@ -50,7 +50,7 @@ The `led_strip` takes a list of config structs and creates the led strip configu
 It should also be possible to configure jobs and coordinators (on root level), i.e.:
 ``` elixir
 use Fledex
-led_strip :john, :none do
+led_strip :john, Null do
     animation :joe, do
         leds(10)
     end

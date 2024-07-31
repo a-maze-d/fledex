@@ -45,6 +45,11 @@ defmodule Fledex do
       import Fledex.Color.Names
       import Fledex.Utils.PubSub
 
+      alias Fledex.Driver.Impl.Kino
+      alias Fledex.Driver.Impl.Logger
+      alias Fledex.Driver.Impl.Null
+      alias Fledex.Driver.Impl.PubSub
+      alias Fledex.Driver.Impl.Spi
       alias Fledex.Utils.Dsl
 
       Dsl.init(opts)
@@ -200,7 +205,7 @@ defmodule Fledex do
   example livebook](5_fledex_weather_example.livemd)):
 
   ```elixir
-    Fledex.Utils.PubSub.simple_broadcast(%{temperature: -15.2})
+    simple_broadcast(%{temperature: -15.2})
   ```
 
   Each job consists of:
@@ -229,7 +234,7 @@ defmodule Fledex do
     job :clock, ~e[@secondly]e do
       date_time = DateTime.utc_now()
 
-      Fledex.Utils.PubSub.simple_broadcast(%{
+      simple_broadcast(%{
         clock_hour: date_time.hour,
         clock_minute: date_time.minute,
         clock_second: date_time.second
@@ -257,7 +262,7 @@ defmodule Fledex do
     This introduces a new led_strip.
 
     The `strip_options` specifies the driver configuration that should be used.
-    A set of default drivers exist for conenience that can be used like `:spi`, `:kino`, ...
+    A set of default drivers exist for conenience that can be used like `Spi`, `Null`, ...
     (see `Fledex.LedStrip` for details)
 
     A special driver `:config` exists that will simply return the converted dsl to the
@@ -269,12 +274,13 @@ defmodule Fledex do
   """
 
   # @spec led_strip(atom, atom | keyword, Macro.t) :: Macro.t | map()
-  defmacro led_strip(strip_name, strip_options \\ :kino, do: block) do
+  defmacro led_strip(strip_name, drivers, strip_options \\ [], do: block) do
     configs_ast = Dsl.ast_extract_configs(block)
 
     quote do
       Dsl.configure_strip(
         unquote(strip_name),
+        unquote(drivers),
         unquote(strip_options),
         unquote(configs_ast)
       )

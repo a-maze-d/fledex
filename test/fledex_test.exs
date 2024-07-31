@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -59,7 +59,7 @@ defmodule Fledex.Test do
       opts = [job_scheduler: Fledex.MockJobScheduler]
       use Fledex, opts
 
-      led_strip @server_name, :kino do
+      led_strip @server_name, Kino do
         # we don't define here anything
       end
 
@@ -89,7 +89,7 @@ defmodule Fledex.Test do
     test "simple animation macro (with led_strip)" do
       use Fledex
 
-      led_strip :john, :none do
+      led_strip :john, Null do
         animation :merry do
           _triggers -> leds(10)
         end
@@ -106,7 +106,7 @@ defmodule Fledex.Test do
     test "simple animation macro (with led_strip) withoutout trigger" do
       use Fledex
 
-      led_strip :john, :null do
+      led_strip :john, Null do
         animation :merry do
           leds(10)
         end
@@ -123,7 +123,7 @@ defmodule Fledex.Test do
     test "complex scenario" do
       use Fledex
 
-      led_strip :doe, :none do
+      led_strip :doe, Null do
         animation :caine do
           _triggers -> leds(1)
         end
@@ -133,7 +133,7 @@ defmodule Fledex.Test do
         end
       end
 
-      led_strip :john, :none do
+      led_strip :john, Null do
         animation :merry do
           _triggers -> leds(10)
         end
@@ -161,7 +161,7 @@ defmodule Fledex.Test do
     test "no updates" do
       use Fledex
 
-      led_strip :sten, :none do
+      led_strip :sten, Null do
         static :svenson do
           leds(5)
         end

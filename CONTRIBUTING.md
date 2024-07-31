@@ -1,5 +1,5 @@
 <!--
-Copyright 2023, Matthias Reik <fledex@reik.org>
+Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -14,4 +14,4 @@ By making a pull request you agree to the [CLA (= Contributor License Agreement)
 You can also agree to the agreement outside a pull request (even though that's more complicated, but might make sense for companies). Please contact me in that case
 
 ## Right
-As a contributor you have the right to add yourself ot the [Contributors file](CONTRIBUTORS.md).
+As a contributor you have the right to add yourself to the [Contributors file](CONTRIBUTORS.md).

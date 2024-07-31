@@ -1,5 +1,5 @@
 <!--
-Copyright 2023, Matthias Reik <fledex@reik.org>
+Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
 # hardware but on a normal livebook, This makes it easier to stay up-to-date and experiment
 # We start to define our fledex library, directly linking to the latest version on github
 Mix.install([
-  {:fledex, "~>0.4"}
+  {:fledex, "~>0.5"}
 ])
 ```
 
@@ -27,7 +27,7 @@ use Fledex
 
 ## The clock
 
-* We define a new strip with a name (`:clock`), and configure it (we use the `:kino`
+* We define a new strip with a name (`:clock`), and configure it (we use the `Kino`
   default driver for display). This will internally create a new `Fledex.LedStrip` 
   server (if it's not already running) that will control the strip. Its server name will
   be identical to the `led_strip` name.
@@ -43,7 +43,7 @@ use Fledex
 It is also possble to define some other configurations (like the `send_config_func` as we have done in the "[Fledex Clock Example](./4_fledex_clock_example.livemd)") but we will look at this a bit later.
 
 ```elixir
-led_strip :clock, :kino do
+led_strip :clock, Kino do
   static :help do
     leds(5) |> light(davy_s_grey()) |> repeat(12)
   end
@@ -103,7 +103,7 @@ Also, the above strip should continue to run and a new strip will appear below t
 Try it out and modify any of the two animations. They should be fully independent.
 
 ```elixir
-led_strip :clock2, :kino do
+led_strip :clock2, Kino do
   static :help do
     leds(5) |> light(davy_s_grey()) |> repeat(12)
   end
@@ -142,7 +142,7 @@ end
 We now implement the [weather app](./5_fledex_weather_example.livemd) (indicating the temperature) we implemented in chapter 5.
 
 ```elixir
-led_strip :weather, :kino do
+led_strip :weather, Kino do
   animation :temperature do
     triggers ->
       temp = triggers[:temperature] || 100
@@ -198,7 +198,8 @@ end
 ```
 
 This time we don't implement the connection to the weather API, but we only fake it.
+Fledex imports `Fledex.Utils.PubSub` and therefore we can use the `simple_broadcast/1` function directly.
 
 ```elixir
-Fledex.Utils.PubSub.simple_broadcast(%{temperature: 17.2})
+simple_broadcast(%{temperature: 17.2})
 ```

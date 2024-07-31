@@ -1,5 +1,5 @@
 <!--
-Copyright 2023, Matthias Reik <fledex@reik.org>
+Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
 ```elixir
 Mix.install(
   [
-    {:fledex, "~>0.4"}
+    {:fledex, "~>0.5"}
   ],
   # necessary to enable the nicer rendering
   consolidate_protocols: false
@@ -150,7 +150,7 @@ leds =
 
 ## Repeating an LED sequence
 
-It is possble to define a sequence of LEDs by repeating it. If you want to have 5 red LEDs you define a single LED and insturct it to be repeated 5 times. This would look like this (note the first 5 is the offset which needs to be specified and the second specifies the repetition factor):
+It is possble to define a sequence of LEDs by repeating it. If you want to have 5 red LEDs you define a single LED and instruct it to be repeated 5 times. This would look like this (note the first 5 is the offset which needs to be specified and the second specifies the repetition factor):
 
 ```elixir
 leds =
@@ -191,7 +191,7 @@ leds =
   |> Leds.gradient(:red, :blue)
 ```
 
-`repeat/2` is another function that will take the already defined sequence (and `Leds` size `x`) and repeats it `y` times. Hence, the returned strip size will be: `size = x * y`.
+`repeat/2` is another function that will take the already defined sequence (and `Leds` size `x`) and repeats it `y` times. Hence, the returned led sequence size will be: `size = x * y`.
 
 ```elixir
 Leds.leds(10)
@@ -201,11 +201,10 @@ Leds.leds(10)
 
 ## Sending LEDs to a led-strip
 
-Once we have defined our Leds, we can send them to our `Fledex.LedS`. This is not
+Once we have defined our Leds, we can send them to our `Fledex.LedStrip`. This is not
 difficult, but it's such a common task that the Leds module provides the convenience
 function `send/2`. and some supporting functions (`set_driver_info/3`, `rotate/2`,
 `to_list/1`).
 
 The send function has a couple of checks that the `Fledex.LedStrip` is set up correctly.
-We won't discuss the send function in detail, since we'll work a bit more in 
-other chapters.
+We won't discuss the send function in detail, since we'll look at this in more details in other chapters.

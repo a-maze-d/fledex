@@ -1,5 +1,5 @@
 <!--
-Copyright 2023, Matthias Reik <fledex@reik.org>
+Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -34,4 +34,5 @@ Please delete options that are not relevant.
 - [ ] I run `mix docs` and no issues were found
 - [ ] I run through the different `livebook/`s to ensure that they all work.
 - [ ] I added a new livebook (or modified an exisitng one)  to explain the new functionality (only applies for major functionality)
-- [ ] I run `pipx run reuse lint` and fixed all issues
+- [ ] I run `mix reuse` (or `pipx run reuse lint`) and fixed all issues
+- [ ] I run `mix format`

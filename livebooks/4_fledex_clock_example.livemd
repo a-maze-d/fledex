@@ -1,5 +1,5 @@
 <!--
-Copyright 2023, Matthias Reik <fledex@reik.org>
+Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -8,11 +8,12 @@ SPDX-License-Identifier: Apache-2.0
 
 ```elixir
 Mix.install([
-  {:fledex, "~>0.4"}
+  {:fledex, "~>0.5"}
 ])
 
 # we define a couple of aliases to not have to type that much
 alias Fledex.Animation.Manager
+alias Fledex.Driver.Impl.Kino
 alias Fledex.Leds
 alias Fledex.LedStrip
 
@@ -35,10 +36,8 @@ First we register a strip (we name it `:clock`) with our `Fledex.Animation.Manag
 Then we modify the led strip to update with a very low frequency. Our clock only updates every second and therefore it's unnecessary that we update it more often than that. To avoid any issues due to some runtime delays, we update it twice every second. Thereby the second indicator will never jump an led.
 
 ```elixir
-# we start with the default configuration
-:ok = Manager.register_strip(:clock, :kino)
-# and then we modify the timer update frequency to 500ms
-{:ok, _old_value} = LedStrip.change_config(:clock, [:timer, :update_timeout], 500)
+# we start with the default configuration but change the timer update frequency to 500ms
+:ok = Manager.register_strip(:clock, [{Kino, []}], timer_update_timeout: 500)
 
 :ok
 ```

@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -13,50 +13,48 @@ defmodule Fledex.Driver.Impl.LoggerTest do
 
   describe "init" do
     test "defaults" do
-      config = Logger.init(%{})
-      assert config.update_freq == 10
-      assert config.log_color_code == false
-      assert config.terminal == true
+      config = Logger.init([])
+      assert Keyword.fetch!(config, :update_freq) == 10
+      assert Keyword.fetch!(config, :log_color_code) == false
+      assert Keyword.fetch!(config, :terminal) == true
     end
 
     test "init_args" do
       config =
-        Logger.init(%{
+        Logger.init(
           update_freq: 12,
           log_color_code: true,
           terminal: false
-        })
+        )
 
-      assert config.update_freq == 12
-      assert config.log_color_code == true
-      assert config.terminal == false
+      assert Keyword.fetch!(config, :update_freq) == 12
+      assert Keyword.fetch!(config, :log_color_code) == true
+      assert Keyword.fetch!(config, :terminal) == false
     end
 
     test "reinit" do
       config =
-        Logger.init(%{
+        Logger.init(
           update_freq: 12,
           log_color_code: true
-        })
+        )
 
-      assert Logger.reinit(config) == config
+      assert Logger.reinit(config, []) == config
     end
 
     test "transfer (logger without color code)" do
       capture_log(fn ->
         config =
-          Logger.init(%{
+          Logger.init(
             update_freq: 1,
             log_color_code: false,
             terminal: false
-          })
+          )
 
         leds = [0xFF0000, 0x00FF00, 0x0000FF]
         Logger.transfer(leds, 0, config)
       end)
       |> assert_log()
-
-      # TODO
     end
 
     defp assert_log(log) do
@@ -71,11 +69,11 @@ defmodule Fledex.Driver.Impl.LoggerTest do
     test "transfer (logger with color code)" do
       capture_log(fn ->
         config =
-          Logger.init(%{
+          Logger.init(
             update_freq: 1,
             log_color_code: true,
             terminal: false
-          })
+          )
 
         leds = [0xFF0000, 0x00FF00, 0x0000FF]
         Logger.transfer(leds, 0, config)
@@ -90,11 +88,11 @@ defmodule Fledex.Driver.Impl.LoggerTest do
     test "empty transfer" do
       capture_io(fn ->
         config =
-          Logger.init(%{
+          Logger.init(
             update_freq: 10,
             log_color_code: true,
             terminal: true
-          })
+          )
 
         leds = [0xFF0000, 0x00FF00, 0x0000FF]
         Logger.transfer(leds, 1, config)
@@ -108,10 +106,10 @@ defmodule Fledex.Driver.Impl.LoggerTest do
 
     test "terminate" do
       config =
-        Logger.init(%{
+        Logger.init(
           update_freq: 12,
           log_color_code: true
-        })
+        )
 
       assert Logger.terminate(:normal, config) == :ok
     end

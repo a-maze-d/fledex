@@ -13,17 +13,17 @@ defmodule Fledex.Component.Dot do
     zero_indexed = Keyword.get(options, :zero_indexed, true)
 
     animation name do
-      %{^trigger_name => trigger} = triggers when is_integer(trigger) ->
-        case triggers[trigger_name] + correct_index(zero_indexed) do
+      triggers when is_map(triggers) and is_map_key(triggers, trigger_name) ->
+        trigger = triggers[trigger_name]
+        case trigger + correct_index(zero_indexed) do
           trigger when is_integer(trigger) and trigger > 0 and trigger <= count ->
             leds(count) |> light(color, trigger)
-
-          _trigger ->
+          _triggers ->
             leds()
         end
 
       _triggers ->
-        leds()
+          leds()
     end
   end
 

@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -15,17 +15,17 @@ defmodule Fledex.Driver.Impl.PubSubTest do
 
   describe "test driver basic tests" do
     test "default init" do
-      config = Driver.init(%{})
-      assert config.data_name == :pixel_data
+      config = Driver.init(data_name: :pixel_data)
+      assert Keyword.fetch!(config, :data_name) == :pixel_data
     end
 
     test "reinit" do
-      init_config = %{data_name: :pixel_data}
-      assert init_config == Driver.reinit(init_config)
+      config = [data_name: :pixel_data]
+      assert config == Driver.reinit(config, [])
     end
 
     test "transfer" do
-      driver = Driver.init(%{})
+      driver = Driver.init(data_name: :pixel_data)
 
       assert {driver, :ok} ==
                Driver.transfer(
@@ -38,7 +38,7 @@ defmodule Fledex.Driver.Impl.PubSubTest do
     end
 
     test "terminate" do
-      driver = Driver.init(%{})
+      driver = Driver.init(data_name: :pixel_data)
       assert :ok == Driver.terminate(:normal, driver)
     end
   end

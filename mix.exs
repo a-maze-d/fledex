@@ -1,11 +1,11 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.MixProject do
   use Mix.Project
 
-  @version "0.4.0"
+  @version "0.5.0-rc1"
   @source_url "https://github.com/a-maze-d/fledex"
   def project do
     [
@@ -95,6 +95,13 @@ defmodule Fledex.MixProject do
 
       # documentation
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      # documentation coverage is a great idea, but there are several major issues:
+      # * The file inch_ex/lib/inch_ex/docs.ex#L74 needs to look like the following to not
+      #   throw an error: `"location" => "#{inspect source}:#{inspect anno}"`
+      # * The library does not understand the `@doc delegate_to` functionality
+      # * The library sees no documentation on a macro that has A LOT of docs
+      # Therefore disabling it (again)
+      # {:inch_ex, github: "rrrene/inch_ex", only: [:dev, :test]},
 
       # code quality
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},

@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -12,30 +12,37 @@ defmodule Fledex.Driver.Impl.Null do
     anything (similar to a /dev/null device). This can be useful if you
     want to run some tests without getting any output or sending it to hardware.
   """
+
   @impl true
-  @spec init(map) :: map
-  def init(_init_module_args) do
-    %{
+  @spec configure(keyword) :: keyword
+  def configure(_config) do
+    [
       # not storing anything
-    }
+    ]
   end
 
   @impl true
-  @spec reinit(map) :: map
-  def reinit(module_config) do
-    module_config
+  @spec init(keyword) :: keyword
+  def init(config) do
+    configure(config)
   end
 
   @impl true
-  @spec transfer(list(Types.colorint()), pos_integer, map) :: {map, any}
+  @spec reinit(keyword, keyword) :: keyword
+  def reinit(old_config, new_config) do
+    Keyword.merge(old_config, new_config)
+  end
+
+  @impl true
+  @spec transfer(list(Types.colorint()), pos_integer, keyword) :: {keyword, any}
   def transfer(_leds, _counter, config) do
     {config, :ok}
   end
 
   @impl true
-  @spec terminate(reason, map) :: :ok
+  @spec terminate(reason, keyword) :: :ok
         when reason: :normal | :shutdown | {:shutdown, term()} | term()
-  def terminate(_reason, _state) do
+  def terminate(_reason, _config) do
     # nothing needs to be done here
     :ok
   end

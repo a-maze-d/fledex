@@ -1,5 +1,5 @@
 <!--
-Copyright 2023, Matthias Reik <fledex@reik.org>
+Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 
 ```elixir
 Mix.install([
-  {:fledex, "~>0.4"}
+  {:fledex, "~>0.5"}
 ])
 ```
 
@@ -18,6 +18,8 @@ Mix.install([
 use Fledex
 ```
 
+<!-- livebook:{"branch_parent_index":0} -->
+
 ## The Weather animation (with a component)
 
 Instead of defining the complicated logic of the termometer indicator, we use this time a component that has all this logic build in. The component defines our configuration and all we have to do is to specify the mandatory (and if desired optional) parameters.
@@ -25,7 +27,7 @@ Instead of defining the complicated logic of the termometer indicator, we use th
 ```elixir
 alias Fledex.Component.Thermometer
 
-led_strip :john, :kino do
+led_strip :john, Kino do
   component(:thermo, Thermometer,
     range: -20..40,
     trigger: :temperature,
@@ -56,6 +58,8 @@ To get the correct behaviour the component gets 2 parameters:
 
 As you have seen a component is nothing special but it allows to redefine a reusable structure. A component can be defined and distributed through an external library.
 
+<!-- livebook:{"branch_parent_index":0} -->
+
 ## Netsted components
 
 We now take a slightly different approach for creating our component. As we have seen above a component is simply a configuration and the dsl is simply an easier way to write a config. Thus, we can reuse one within the other.
@@ -63,7 +67,7 @@ We now take a slightly different approach for creating our component. As we have
 ```elixir
 alias Fledex.Component.Dot
 
-led_strip :nested_components, :kino do
+led_strip :nested_components, Kino do
   component(:minute, Dot, color: :red, count: 60, trigger_name: :minute)
   component(:hour, Dot, color: :blue, count: 24, trigger_name: :hour)
 
@@ -74,7 +78,7 @@ end
 ```
 
 ```elixir
-Fledex.Utils.PubSub.simple_broadcast(%{hour: 17, minute: 34})
+simple_broadcast(%{hour: 17, minute: 34})
 ```
 
 The interesting thing in the `Fledex.Component.Dot` component is that it actually defines the component by using the `Fledex.animation/3` macro. The code looks like the following
@@ -93,6 +97,8 @@ The interesting thing in the `Fledex.Component.Dot` component is that it actuall
   end
 
 ```
+
+<!-- livebook:{"branch_parent_index":0} -->
 
 ## The clock component
 
@@ -124,23 +130,38 @@ To use the component, we now simply have to use the clock and pass in the necess
 alias Fledex.Component.Clock
 import Crontab.CronExpression
 
-led_strip :nested_components2, :kino do
-  component({:clock_hour, :clock_minute}, Clock, trigger_name: :clock)
-
-  job :clock, ~e[* * * * * * *]e do
-    date_time = DateTime.utc_now()
-    IO.puts("ok, checking... #{date_time}")
-
-    Fledex.Utils.PubSub.simple_broadcast(%{
-      clock_hour: date_time.hour,
-      clock_minute: date_time.minute
-    })
-  end
+led_strip :nested_components2, Kino do
+  component(:myclock, Clock, trigger_name: :clock)
 end
 ```
 
-And to see the correct time, we only need to publish the appropriate time. When we do so we shouldn't forget that the animations are reacting to two triggers that we passed in. We need to publish the triggers `:clock_hour` and `:clock_minute` as triggers.
+And to see the correct time, we only need to publish the appropriate time. When we do so we shouldn't forget that the animations are reacting to two triggers that we passed in. We need to publish the triggers `:clock_hour` and `:clock_minute` as triggers (or if we like add even teh `:clock_second` too).
 
 ```elixir
-Fledex.Utils.PubSub.simple_broadcast(%{clock_hour: 17, clock_minute: 34})
+simple_broadcast(%{clock_hour: 17, clock_minute: 34, clock_second: 12})
+```
+
+<!-- livebook:{"branch_parent_index":0} -->
+
+## A job to drive the clock
+
+Regular updates is something so common that we'll look at the `job` macro that will allows to schedule udpates in regular intervals. We will take a closer look at this in another livebook but here already a sneak preview.
+
+```elixir
+alias Fledex.Component.Clock
+import Crontab.CronExpression
+
+led_strip :nested_components3, Kino do
+  component(:myclock2, Clock, trigger_name: :clock2)
+
+  job :clock, ~e[* * * * * * *]e do
+    %DateTime{hour: hour, minute: minute, second: second} = DateTime.utc_now()
+
+    simple_broadcast(%{
+      clock2_hour: hour,
+      clock2_minute: minute,
+      clock2_second: second
+    })
+  end
+end
 ```

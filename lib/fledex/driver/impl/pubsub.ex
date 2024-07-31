@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -8,24 +8,41 @@ defmodule Fledex.Driver.Impl.PubSub do
   alias Fledex.Color.Types
   alias Fledex.Utils.PubSub
 
-  @default_config %{data_name: :pixel_data}
-  @spec init(map) :: map
-  def init(module_init_args) do
-    Map.merge(@default_config, module_init_args)
+  @impl true
+  @spec configure(keyword) :: keyword
+  def configure(config \\ []) do
+    [
+      data_name: Keyword.get(config, :data_name, :pixel_data)
+    ]
   end
 
-  @spec reinit(map) :: map
-  def reinit(module_config) do
-    module_config
+  @impl true
+  @spec init(keyword) :: keyword
+  def init(config) do
+    configure(config)
   end
 
-  @spec transfer(list(Types.colorint()), pos_integer, map) :: {map, any}
+  @impl true
+  @spec reinit(keyword, keyword) :: keyword
+  def reinit(old_config, new_config) do
+    Keyword.merge(old_config, new_config)
+  end
+
+  @impl true
+  @spec transfer(list(Types.colorint()), pos_integer, keyword) :: {keyword, any}
   def transfer(leds, counter, config) do
-    PubSub.simple_broadcast(%{config.data_name => {leds, counter}})
+    PubSub.direct_broadcast!(
+      Keyword.get(config, :node, Node.self()),
+      :fledex,
+      Keyword.get(config, :topic, "trigger"),
+      {:trigger, %{Keyword.fetch!(config, :data_name) => {leds, counter}}}
+    )
+
     {config, :ok}
   end
 
-  @spec terminate(reason, map) :: :ok
+  @impl true
+  @spec terminate(reason, keyword) :: :ok
         when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(_reason, _config) do
     :ok

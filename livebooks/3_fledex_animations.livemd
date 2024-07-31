@@ -1,5 +1,5 @@
 <!--
-Copyright 2023, Matthias Reik <fledex@reik.org>
+Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
 # hardware but on a normal livebook, This makes it easier to stay up-to-date and experiment
 # We start to define our fledex library, directly linking to the latest version on github
 Mix.install([
-  {:fledex, "~>0.4"}
+  {:fledex, "~>0.5"}
 ])
 
 # we define a couple of aliases to not have to type that much
@@ -42,10 +42,11 @@ configuration to specify an offset to the leds and thereby create a movement.
 
 ```elixir
 defmodule HelperFunctions do
-  @rainbow Leds.leds(50) |> Leds.rainbow(%{
-    num_leds: 50, 
-    reversed: true
-  })
+  @rainbow Leds.leds(50)
+           |> Leds.rainbow(%{
+             num_leds: 50,
+             reversed: true
+           })
   def rainbow(_triggers) do
     @rainbow
   end
@@ -65,7 +66,7 @@ We call our led strip `:john` (it has to be an atom). In this example we will on
 We then define an animation configuration that consists of a map with they key being the name of the animation and the value being the configuration of that animation. Each animation configuration needs to specify the `:type` as `:animation`, because (as we will see later) other types exist, and a `:def_func` that defines our animation (potentially with an additional `:send_config_func` as shown here. We'll look at this in more detail in a later section).
 
 ```elixir
-Manager.register_strip(:john, :kino)
+Manager.register_strip(:john, [{Kino, []}], [])
 
 Manager.register_config(:john, %{
   caine: %{
@@ -78,7 +79,7 @@ Manager.register_config(:john, %{
 
 ## Replacing our animation
 
-We can now redefine our animation by regisetering different functions. Here we define a 3 led wide red dot that moves slowly from right to left.
+We can now redefine our animation by registering different functions. Here we define a 3 led wide red dot that moves slowly from right to left.
 
 Note: we are starting to use color names instead of defining it through an integer. If you want to learn more, then take a small detour to the [Color livebook](./3b_fledex_more_about_colors.livemd)
 
@@ -92,7 +93,7 @@ defmodule HelperFunctions2 do
   end
 
   def send_config(triggers) do
-    slow_offset = rem(triggers[:john] >>> 5, 50)
+    slow_offset = rem(triggers[:john] || 0 >>> 5, 50)
     %{offset: slow_offset}
   end
 end
@@ -120,7 +121,7 @@ defmodule HelperFunctions3 do
   end
 
   def send_config(triggers) do
-    faster_offset = 50 - rem(triggers[:john] >>> 2, 50)
+    faster_offset = 50 - rem(triggers[:john] || 0 >>> 2, 50)
     %{offset: faster_offset}
   end
 end
@@ -160,7 +161,7 @@ Manager.register_config(:john, %{
       Leds.leds(50) |> Leds.light(:blue) |> Leds.light(:blue) |> Leds.light(:blue)
     end,
     send_config_func: fn triggers ->
-      faster_offset = 50 - rem(triggers[:john] >>> 1, 50)
+      faster_offset = 50 - rem(triggers[:john] || 0 >>> 1, 50)
       %{offset: faster_offset}
     end
   }

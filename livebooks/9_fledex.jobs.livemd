@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 
 ```elixir
 Mix.install([
-  {:fledex, "~>0.4"},
+  {:fledex, "~>0.5"},
   {:jason, "~>1.2"}
 ])
 ```
@@ -31,14 +31,14 @@ Let me introduce you to `job`. It allows us to take care of repetitive work by e
 
 * a name for the job that identifies it uniquely
 * a schedule when the job should run (see [this cheatsheet](https://hexdocs.pm/crontab/cron_notation.html#expressions) for the possibilities)
-* and a function that should be executed, probably one that will at the end publish an event with `Fledex.Utils.PubSub.simple_broadcast()`
+* and a function that should be executed, probably one that will at the end publish an event with `Fledex.Utils.PubSub.simple_broadcast/1`
 
 The example here implements our clock example with the `Fledex.Component.Clock` component (see the previous chapter) and uses the `job` macro to schedule the updates.
 
 ```elixir
 alias Fledex.Component.Clock
 
-led_strip :nested_components2, :kino do
+led_strip :nested_components2, Kino do
   component(
     :clock,
     Clock,
@@ -48,7 +48,7 @@ led_strip :nested_components2, :kino do
   job :clock, ~e[@secondly]e do
     date_time = DateTime.utc_now()
 
-    PubSub.simple_broadcast(%{
+    simple_broadcast(%{
       clock_hour: date_time.hour,
       clock_minute: date_time.minute,
       clock_second: date_time.second
@@ -81,7 +81,7 @@ Now we are ready to define our new simplified weather station using:
 ```elixir
 alias Fledex.Component.Thermometer
 
-led_strip :john, :kino do
+led_strip :john, Kin do
   component(:thermo, Thermometer,
     range: -20..40,
     trigger: :temperature,
@@ -101,7 +101,7 @@ led_strip :john, :kino do
     {{_, 200, ~c"OK"}, _headers, body} = resp
     json = Jason.decode!(body)
     temperature = json["current"]["temperature_2m"]
-    PubSub.simple_broadcast(%{temperature: temperature})
+    simple_broadcast(%{temperature: temperature})
   end
 end
 ```

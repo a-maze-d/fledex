@@ -1,5 +1,5 @@
 <!--
-Copyright 2023, Matthias Reik <fledex@reik.org>
+Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
 # the libraries will be loaded, but on a nerves_livebook you can only use
 # what has been compiled in.
 Mix.install([
-  {:fledex, "~>0.4"}
+  {:fledex, "~>0.5"}
 ])
 
 # we define a couple of aliases to not have to type that much
@@ -24,7 +24,7 @@ alias Fledex.Color.Correction
 :ok
 ```
 
-## Section
+## Defining a strip
 
 Fledex has several drivers which can also be used in parallel. It's probably best to only use
 a single driver to start with. The Kino driver does not have any hardware dependency and therefore
@@ -34,28 +34,18 @@ is probably a good start to ensure that the library is loaded correctly.
 # frame = Kino.Frame.new() |> Kino.render()
 
 {:ok, pid} =
-  LedStrip.start_link(%{
-    timer: %{only_dirty_update: false},
-    led_strip: %{
-      merge_strategy: :cap,
-      # [Kino, Spi],
-      driver_modules: [Kino],
-      config: %{
-        Kino => %{
-          update_freq: 1,
-          color_correction: Fledex.Color.Correction.no_color_correction()
-          # frame: frame
-        }
-        #        Spi => %{
-        #          color_correction:
-        #            Correction.define_correction(
-        #              Correction.Color.typical_smd5050(),
-        #              Correction.Temperature.uncorrected_temperature()
-        #            )
-        #        }
-      }
-    }
-  })
+  LedStrip.start_link(
+    LedStrip,
+    [
+      {Kino, update_freq: 1, color_correction: Correction.no_color_correction()}
+      # {Spi, color_correction: Correction.define_correction(
+      #   Correction.Color.typical_smd5050(),
+      #   Correction.Temperature.uncorrected_temperature()
+      # )}
+    ],
+    timer_only_dirty_update: false,
+    merge_strategy: :cap
+  )
 ```
 
 We now define a couple of helper functions. The first 2 functions are talking binaries directly
@@ -66,30 +56,74 @@ create nice effects like a rainbow.
 defmodule Helpers do
   def red(namespace) do
     Enum.each(1..10, fn _index ->
-      LedStrip.set_leds(namespace, [0xFF0000, 0x000000, 0x000000, 0x000000, 0x00000])
+      LedStrip.set_leds(LedStrip, namespace, [0xFF0000, 0x000000, 0x000000, 0x000000, 0x00000])
       Process.sleep(600)
-      LedStrip.set_leds(namespace, [0x000000, 0xFF0000, 0x000000, 0x000000, 0x00000])
+      LedStrip.set_leds(LedStrip, namespace, [0x000000, 0xFF0000, 0x000000, 0x000000, 0x00000])
       Process.sleep(600)
-      LedStrip.set_leds(namespace, [0x000000, 0x000000, 0xFF0000, 0x000000, 0x00000])
+      LedStrip.set_leds(LedStrip, namespace, [0x000000, 0x000000, 0xFF0000, 0x000000, 0x00000])
       Process.sleep(600)
-      LedStrip.set_leds(namespace, [0x000000, 0x000000, 0x000000, 0xFF0000, 0x00000])
+      LedStrip.set_leds(LedStrip, namespace, [0x000000, 0x000000, 0x000000, 0xFF0000, 0x00000])
       Process.sleep(600)
-      LedStrip.set_leds(namespace, [0x000000, 0x000000, 0x000000, 0x000000, 0xFF0000])
+      LedStrip.set_leds(LedStrip, namespace, [0x000000, 0x000000, 0x000000, 0x000000, 0xFF0000])
       Process.sleep(600)
     end)
   end
 
   def blue(namespace) do
     Enum.each(1..10, fn _index ->
-      LedStrip.set_leds(namespace, [0x000000, 0x000000, 0x000000, 0x000000, 0x0000FF, 0x00FF00])
+      LedStrip.set_leds(LedStrip, namespace, [
+        0x000000,
+        0x000000,
+        0x000000,
+        0x000000,
+        0x0000FF,
+        0x00FF00
+      ])
+
       Process.sleep(600)
-      LedStrip.set_leds(namespace, [0x000000, 0x000000, 0x000000, 0x0000FF, 0x000000, 0x00FF00])
+
+      LedStrip.set_leds(LedStrip, namespace, [
+        0x000000,
+        0x000000,
+        0x000000,
+        0x0000FF,
+        0x000000,
+        0x00FF00
+      ])
+
       Process.sleep(600)
-      LedStrip.set_leds(namespace, [0x000000, 0x000000, 0x0000FF, 0x000000, 0x000000, 0x00FF00])
+
+      LedStrip.set_leds(LedStrip, namespace, [
+        0x000000,
+        0x000000,
+        0x0000FF,
+        0x000000,
+        0x000000,
+        0x00FF00
+      ])
+
       Process.sleep(600)
-      LedStrip.set_leds(namespace, [0x000000, 0x0000FF, 0x000000, 0x000000, 0x000000, 0x00FF00])
+
+      LedStrip.set_leds(LedStrip, namespace, [
+        0x000000,
+        0x0000FF,
+        0x000000,
+        0x000000,
+        0x000000,
+        0x00FF00
+      ])
+
       Process.sleep(600)
-      LedStrip.set_leds(namespace, [0x0000FF, 0x000000, 0x000000, 0x000000, 0x000000, 0x00FF00])
+
+      LedStrip.set_leds(LedStrip, namespace, [
+        0x0000FF,
+        0x000000,
+        0x000000,
+        0x000000,
+        0x000000,
+        0x00FF00
+      ])
+
       Process.sleep(600)
     end)
   end
@@ -103,7 +137,7 @@ defmodule Helpers do
 
       Leds.leds(50)
       |> Leds.rainbow(config)
-      |> Leds.send(%{namespace: namespace, offset: index})
+      |> Leds.send(%{server_name: LedStrip, namespace: namespace, offset: index})
 
       # before sending the next update we sleep a bit
       Process.sleep(100)
@@ -113,8 +147,13 @@ defmodule Helpers do
   def gradient(namespace) do
     Enum.each(0..10000, fn index ->
       Leds.leds(50)
-      |> Leds.gradient(0xff0000, 0x0000ff, %{num_leds: 50})
-      |> Leds.send(%{namespace: namespace, offset: index, rotate_left: true})
+      |> Leds.gradient(0xFF0000, 0x0000FF, %{num_leds: 50})
+      |> Leds.send(%{
+        server_name: LedStrip,
+        namespace: namespace,
+        offset: index,
+        rotate_left: true
+      })
 
       # before sending the next update we sleep a bit
       Process.sleep(100)
@@ -123,43 +162,59 @@ defmodule Helpers do
 end
 ```
 
+<!-- livebook:{"branch_parent_index":0} -->
+
+## Rainbow
+
 Now use the above functions. We can run the functions by spawning a new thread. This allows to also see what happens if another thread works in parallel. Here we create a rainbow effect that will be send with an changing offset so that the rainbow rotates through the LEDs
 
 ```elixir
-LedStrup.define_namespace(:default)
+LedStrip.define_namespace(LedStrip, :default)
 spawn(fn -> Helpers.rainbow(:default) end)
 ```
 
-Here we create a gradient between red and blue. Also this one we let rotate through
+<!-- livebook:{"branch_parent_index":0} -->
+
+## Gradient
+
+Here we create a gradient between red and blue. Also this one we let rotate through. Note, depending on whether you started the rainbow above or not, you might see different results. Try this section with and without running the Rainbow section.
 
 ```elixir
-LedStrip.define_namespace(:gradient)
+LedStrip.define_namespace(LedStrip, :gradient)
 spawn(fn -> Helpers.gradient(:gradient) end)
 ```
 
 We can drop the namespaces to see what happens
 
 ```elixir
-LedStrip.drop_namespace(:john)
-LedStrip.drop_namespace(:jane)
-LedStrip.drop_namespace(:default)
-LedStrip.drop_namespace(:gradient)
+LedStrip.drop_namespace(LedStrip, :default)
+LedStrip.drop_namespace(LedStrip, :gradient)
 ```
+
+As we can see our animation continues to be visible, since the namespace gets recreated in every iteration. Not quite what we expected or want. We'll look on how to fix this in as we explore the Fledex library.
+
+<!-- livebook:{"branch_parent_index":0} -->
+
+## Several animations
 
 This test is running a couple of different ligth definitions in parallel.
 
 ```elixir
-LedStrip.define_namespace(:john)
-LedStrip.define_namespace(:jane)
-LedStrip.define_namespace(:default)
+LedStrip.define_namespace(LedStrip, :john)
+LedStrip.define_namespace(LedStrip, :jane)
+LedStrip.define_namespace(LedStrip, :default)
 
 spawn(fn -> Helpers.blue(:jane) end)
 spawn(fn -> Helpers.red(:john) end)
 spawn(fn -> Helpers.rainbow(:default) end)
 ```
 
-Once we are done we should stop our GenServer (even thoguh I rarely run this one ;-))
+As you can see the animations overlap each other. We will work with this principle going forward.
+
+Once we are done we should stop our GenServer (even though I rarely run this one ;-) but it's good to know how to do it).
+
+Note: you might see some warnings, that are caused by our above functions that will automatically start the server if hasn't been started yet. You can safely ignore those for now.
 
 ```elixir
-GenServer.stop(pid)
+LedStrip.stop(LedStrip)
 ```

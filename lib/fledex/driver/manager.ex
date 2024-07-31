@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -12,107 +12,167 @@ defmodule Fledex.Driver.Manager do
   @typedoc """
   The structure to hold the driver related data.
 
-  It consists of:
-  * `:driver_modules`: Which modules should get loaded. More than one module
-      can be loaded at the same time
-  * `config`: a map with driver specific configurations. Each driver gets its
-      own configuration. The driver module name is used as key to separate
-      the drivers from each other. example:
-      ```elixir
-      %{Fledex.Driver.Impl.Kino: %{
-        update_freq: 10
-      }}
-      ```
-  * `:merge_strategy`: The merge strategy that will be applied to
+  It consists of a list (to allow loading of several modules) of tuples with:
+
+  * `driver`: Which modules should get loaded. Each module usually should have
+      a default configuration, which can then be overwritten with specific
+      settings
+  * `config`: a keywrod list to modify the default settings. Each module has
+      their own set of settings. You need to check the driver module documentation
+      for allowed details
+
+  Note: You can specify a driver module several times and give them different settings.
+        This allows for example to send the same data to two different SPI ports.
+
+  Example:
+  ```elixir
+  [{Fledex.Driver.Impl.Kino, update_freq: 10 }]
+  ```
   """
-  @type driver_t :: %{
-          merge_strategy: atom,
-          driver_modules: [module],
-          config: %{atom => map}
-        }
+  @type driver_t :: [{driver :: module, config :: keyword()}]
+
+  # @doc false
+  # @spec init_config(keyword) :: driver_t
+  # def init_config(init_args) do
+  #   %{
+  #     # merge_strategy: init_args[:merge_strategy] || :avg,
+  #     driver_modules: define_drivers(init_args[:driver_modules]),
+  #     config: init_args[:config] || %{}
+  #   }
+  # end
 
   @doc false
-  @spec init_config(map) :: driver_t
-  def init_config(init_args) do
-    %{
-      merge_strategy: init_args[:merge_strategy] || :avg,
-      driver_modules: define_drivers(init_args[:driver_modules]),
-      config: init_args[:config] || %{}
-    }
+  @spec init_drivers(list({module, keyword})) :: list({module, any})
+  def init_drivers(drivers) do
+    drivers = remove_invalid_drivers(drivers)
+
+    drivers =
+      if Enum.empty?(drivers) do
+        [{Null, []}]
+      else
+        drivers
+      end
+
+    for {module, module_config} <- drivers do
+      # Logger.trace("Creating driver: #{inspect module}")
+      config = module.init(module_config)
+      {module, config}
+    end
   end
 
   @doc false
-  @spec init_drivers(driver_t) :: driver_t
-  def init_drivers(led_strip) do
-    configs =
-      for module <- led_strip.driver_modules do
-        # Logger.trace("Creating driver: #{inspect module}")
-        module_init_args = led_strip[:config][module] || %{}
-        config = module.init(module_init_args)
-        {module, config}
-      end
-
-    put_in(led_strip.config, Map.new(configs))
+  @spec reinit(driver_t, driver_t) :: driver_t
+  def reinit(old_drivers, []) do
+    reinit(old_drivers, [{Null, []}])
   end
 
-  @doc false
-  @spec reinit(driver_t) :: driver_t
-  def reinit(led_strip) do
-    configs =
-      for module <- led_strip.driver_modules do
-        module_config = led_strip.config[module]
-        config = module.reinit(module_config)
-        {module, config}
-      end
+  def reinit(old_drivers, new_drivers) do
+    case same_drivers(old_drivers, new_drivers) do
+      true ->
+        # TODO: We need to test what happens if we have new additional drivers. It should
+        #       be implemented, but we don't have tests fhem.
+        drivers =
+          Enum.zip_with([old_drivers, new_drivers], fn [{old_module, old_config}, {_, new_config}] ->
+            # we still have a minimalistic new_config. hence we need to get a proper
+            # set by calling the configure function to get the defaults and overlay
+            # with the new configs. This is now the "new_config" that we can compare
+            # with the old config.
+            # It is the responsibility of the reinit function to "merge" the old and
+            # new config to ensure extra parameters are preserved.
+            new_config = old_module.configure(new_config)
+            config = old_module.reinit(old_config, new_config)
+            {old_module, config}
+          end)
 
-    put_in(led_strip.config, Map.new(configs))
+        # `same_drivers` checks only the number of drivers we had so far with the
+        # ones passed in. But we could pass in additional ones.
+        new_drivers_length = length(new_drivers)
+        old_drivers_length = length(old_drivers)
+
+        extra_drivers =
+          case old_drivers_length < new_drivers_length do
+            true -> init_drivers(Enum.slice(new_drivers, length(drivers)..new_drivers_length))
+            false -> []
+          end
+
+        extra_drivers ++ drivers
+
+      false ->
+        terminate(:normal, old_drivers)
+        init_drivers(new_drivers)
+    end
+  end
+
+  # This function compares whether the passed in old_drivers can also be found
+  # in the new_drivers struct. Note: The new_drivers might contain additional
+  # drivers at the end not found in old_drivers.
+  defp same_drivers(old_drivers, new_drivers) do
+    Enum.zip_reduce([old_drivers, new_drivers], true, fn [
+                                                           {old_driver_module, _},
+                                                           {new_driver_module, _}
+                                                         ],
+                                                         acc ->
+      case old_driver_module == new_driver_module do
+        true -> acc
+        false -> false
+      end
+    end)
   end
 
   @doc false
   @spec transfer(list(Types.colorint()), pos_integer, driver_t) :: driver_t
-  def transfer(leds, counter, led_strip) do
-    configs =
-      for module <- led_strip.driver_modules do
-        {config, _response} = module.transfer(leds, counter, led_strip[:config][module])
-        {module, config}
-      end
-
-    put_in(led_strip.config, Map.new(configs))
+  def transfer(leds, counter, drivers) do
+    for {module, config} <- drivers do
+      {config, _response} = module.transfer(leds, counter, config)
+      {module, config}
+    end
   end
 
   @doc false
   @spec terminate(reason, driver_t) :: :ok
         when reason: :normal | :shutdown | {:shutdown, term()} | term()
-  def terminate(reason, led_strip) do
-    for module <- led_strip.driver_modules do
-      module.terminate(reason, led_strip[:config][module])
+  def terminate(reason, drivers) do
+    for {module, config} <- drivers do
+      module.terminate(reason, config)
     end
 
     :ok
   end
 
-  @default_driver_modules [Null]
-  @spec define_drivers(nil | module | [module]) :: [module]
-  defp define_drivers(nil) do
-    # Logger.warning("No driver_modules defined/ #{inspect @default_driver_modules} will be used")
-    define_drivers(@default_driver_modules)
+  # @default_driver_modules [Null]
+  # @spec define_drivers(nil | module | [module]) :: [module]
+  # defp define_drivers(nil) do
+  #   # Logger.warning("No driver_modules defined/ #{inspect @default_driver_modules} will be used")
+  #   define_drivers(@default_driver_modules)
+  # end
+  # defp define_drivers(driver_modules) when is_list(driver_modules) do
+  #   drivers = Enum.filter(driver_modules, fn driver -> validate_driver(driver) end)
+  #   if length(drivers) > 0, do: drivers, else: @default_driver_modules
+  # end
+  # defp define_drivers(driver_modules) do
+  #   Logger.warning("driver_modules is not a list")
+  #   define_drivers([driver_modules])
+  # end
+
+  def remove_invalid_drivers(drivers) do
+    Enum.filter(drivers, fn {driver_module, _driver_config} ->
+      if validate_driver(driver_module) do
+        true
+      else
+        Logger.warning(
+          "Driver '#{inspect(driver_module)}' invalid and therefore removed as driver"
+        )
+
+        false
+      end
+    end)
   end
 
-  defp define_drivers(driver_modules) when is_list(driver_modules) do
-    drivers = Enum.filter(driver_modules, fn driver -> validate_driver(driver) end)
-    if length(drivers) > 0, do: drivers, else: @default_driver_modules
-  end
-
-  defp define_drivers(driver_modules) do
-    Logger.warning("driver_modules is not a list")
-    define_drivers([driver_modules])
-  end
-
-  defp validate_driver(driver) when is_atom(driver) do
+  def validate_driver(driver_module) when is_atom(driver_module) do
     # this is only to do a rough validation to catch the biggest
     # issues early on.
     required_functions = Interface.behaviour_info(:callbacks)
-    module_functions = driver.__info__(:functions)
+    module_functions = driver_module.__info__(:functions)
 
     existing_functions =
       Enum.map(required_functions, fn {function, arity} ->
@@ -122,14 +182,14 @@ defmodule Fledex.Driver.Manager do
 
           {:ok, value} ->
             Logger.error(
-              "The driver #{inspect(driver)} implements the function #{function} but with the wrong arity #{value} vs #{arity}"
+              "The driver #{inspect(driver_module)} implements the function #{function} but with the wrong arity #{value} vs #{arity}"
             )
 
             false
 
           :error ->
             Logger.error(
-              "The driver #{inspect(driver)} does not implement the function #{inspect(function)}"
+              "The driver #{inspect(driver_module)} does not implement the function #{inspect(function)}"
             )
 
             false

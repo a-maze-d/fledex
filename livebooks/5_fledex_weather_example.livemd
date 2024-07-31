@@ -1,5 +1,5 @@
 <!--
-Copyright 2023, Matthias Reik <fledex@reik.org>
+Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 
 ```elixir
 Mix.install([
-  {:fledex, "~>0.4"},
+  {:fledex, "~>0.5"},
   {:jason, "~>1.2"}
 ])
 
@@ -66,10 +66,8 @@ As can be seen we get the information we are interested in, the current temperat
 Now it's time to prepare our led strip. First we define our strip and we set a very low refresh rate. An update every 10 sec is enough.
 
 ```elixir
-# we start with the default configuration
-:ok = Manager.register_strip(:weather, :kino)
-# and then we modify the timer update frequency to 10 sec
-{:ok, _old_value} = LedStrip.change_config(:weather, [:timer, :update_timeout], 10_000)
+# we start with the default configuration, but change the timer update frequency to 10 sec
+:ok = Manager.register_strip(:weather, [{Kino, []}], timer_update_timeout: 10_000)
 
 :ok
 ```
@@ -105,7 +103,7 @@ Manager.register_config(:weather, %{
              |> Leds.light(:red, 22, 40), 1}
 
           temp when temp < 0 ->
-            {Leds.leds(1) |> Leds.light(:blue) |> Leds.repeat(temp), 21 + temp}
+            {Leds.leds(1) |> Leds.light(:blue) |> Leds.repeat(-temp), 21 + temp}
 
           temp when temp == 0 ->
             {Leds.leds(1) |> Leds.light(:may_green), 21}
@@ -142,10 +140,10 @@ Manager.register_config(:weather, %{
 
 For testing we can send an arbitrary temperature value to our strip in the following way. This allows us to also see whether the strip has the correct behavior when the temperature is at zero (or even below) degree. It wouldn't be really practical if we need to wait until the outside temperature reaches those levels.
 
-Here we send a temperature value of -15.2 degree (which the strip should round to 15 degree)
+Here we send a temperature value of -15.2 degree (which the strip should round to -15 degree)
 
 ```elixir
-Fledex.Utils.PubSub.simple_broadcast(%{temperature: -15.2})
+PubSub.simple_broadcast(%{temperature: -15.2})
 ```
 
 ## Getting the weather data

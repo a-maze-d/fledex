@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -24,47 +24,61 @@ defmodule Fledex.Driver.Impl.Logger do
     (like the channel it has oppened), so that we don't have open/close it
     all the time. Cleanup should happen in the terminate function
   """
-  @impl true
-  @spec init(map) :: map
-  def init(init_module_args) do
-    default_config = %{
-      update_freq: @default_update_freq,
-      log_color_code: false,
-      terminal: true
-    }
 
-    Map.merge(default_config, init_module_args)
+  @impl true
+  @spec configure(keyword) :: keyword
+  def configure(config) do
+    [
+      update_freq: Keyword.get(config, :update_freq, @default_update_freq),
+      log_color_code: Keyword.get(config, :log_color_code, false),
+      terminal: Keyword.get(config, :terminal, true)
+    ]
   end
 
   @impl true
-  @spec reinit(map) :: map
-  def reinit(module_config) do
-    module_config
+  @spec init(keyword) :: keyword
+  def init(config) do
+    configure(config)
   end
 
   @impl true
-  @spec transfer(list(Types.colorint()), pos_integer, map) :: {map, any}
-  def transfer(leds, counter, config) when rem(counter, config.update_freq) == 0 and leds != [] do
-    output =
-      Enum.reduce(leds, <<>>, fn value, acc ->
-        if config.log_color_code do
-          acc <> Integer.to_string(value) <> ","
-        else
-          acc <> to_ansi_color(value) <> @block
-        end
-      end)
+  @spec reinit(keyword, keyword) :: keyword
+  def reinit(old_config, new_config) do
+    Keyword.merge(old_config, new_config)
+  end
 
-    if config.terminal do
-      IO.puts(output <> "\r")
-    else
-      Logger.info(output <> "\r")
+  @impl true
+  @spec transfer(list(Types.colorint()), pos_integer, keyword) :: {keyword, any}
+  def transfer(leds, _counter, config) when leds == [] do
+    {config, :ok}
+  end
+
+  def transfer(leds, counter, config) do
+    if rem(counter, Keyword.fetch!(config, :update_freq)) == 0 do
+      log_color_mode = Keyword.fetch!(config, :log_color_code)
+
+      output =
+        Enum.reduce(leds, <<>>, fn value, acc ->
+          add(acc, value, log_color_mode)
+        end)
+
+      if Keyword.fetch!(config, :terminal) do
+        IO.puts(output <> "\r")
+      else
+        Logger.info(output <> "\r")
+      end
     end
 
     {config, :ok}
   end
 
-  def transfer(_leds, _counter, config) do
-    {config, :ok}
+  @spec add(acc :: String.t(), value :: Types.colorint(), log_color_mode :: boolean) :: String.t()
+  defp add(acc, value, true) do
+    acc <> Integer.to_string(value) <> ","
+  end
+
+  defp add(acc, value, false) do
+    acc <> to_ansi_color(value) <> @block
   end
 
   @spec to_ansi_color(Types.colorint()) :: String.t()
@@ -74,9 +88,9 @@ defmodule Fledex.Driver.Impl.Logger do
   end
 
   @impl true
-  @spec terminate(reason, map) :: :ok
+  @spec terminate(reason, keyword) :: :ok
         when reason: :normal | :shutdown | {:shutdown, term()} | term()
-  def terminate(_reason, _state) do
+  def terminate(_reason, _config) do
     # nothing needs to be done here
     :ok
   end
