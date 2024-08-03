@@ -15,9 +15,12 @@ defmodule Fledex.Component.Dot do
     animation name do
       triggers when is_map(triggers) and is_map_key(triggers, trigger_name) ->
         trigger = triggers[trigger_name]
-        case trigger + correct_index(zero_indexed) do
-          trigger when is_integer(trigger) and trigger > 0 and trigger <= count ->
-            leds(count) |> light(color, trigger)
+        case trigger do
+          trigger when is_integer(trigger) and (
+            (zero_indexed and trigger + 1 > 0 and trigger + 1 <= count) or
+            (not zero_indexed and trigger > 0 and trigger <= count)
+          ) ->
+            leds(count) |> light(color, trigger + correct_index(zero_indexed))
           _triggers ->
             leds()
         end

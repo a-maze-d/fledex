@@ -9,9 +9,9 @@ Even though this library is published, there are things I still want to do befor
 
 # Tasks
 - [ ] Documentation
-  - [ ] change the doc structure? so that links don't get so easily broken? (v0.5)
+  - [ ] change the doc structure? so that links don't get so easily broken? (v0.6)
   - [ ] Add installation instructions (v0.5)
-  - [ ] Add Branching sections in the livebooks to separate things that don't need to be together? (v0.5)
+  - [x] Add Branching sections in the livebooks to separate things that don't need to be together? (v0.5)
 - [ ] Testing
   - [x] Perform an extra round of testing on hardware (v0.4)
   - [x] Fix the issue in the livebooks that `simple_broadcast/1` gets called directly now, since the function gets imported (v0.4)
@@ -26,6 +26,7 @@ Even though this library is published, there are things I still want to do befor
     - [ ] Update the documentation
     - [ ] Cleanup
     - [x] Update the livebooks
+    - [ ] Update the README.md
     - [ ] Add some more tests
     - [ ] Remove the "change_config" function
     - [ ] Some extensive testing
@@ -36,8 +37,9 @@ Even though this library is published, there are things I still want to do befor
 - [ ] Missing functionality
   - [ ] Add the possibility to clear the LEDs when initializing the LedsDriver (v0.5)
   - [ ] Connect everything into a supervision tree (to make it more robust) (v0.5)
-  - [ ] Create support for a coordinator (that can control individual animations and effects. Effects will have to notify back their state) (v0.5)
+  - [ ] Create support for a coordinator (that can control individual animations and effects. Effects will have to notify back their state) (v0.6)
   - [ ] Clustering
+    - [ ] Rethink the clusering and check whether the new livebook API endpoints might make it easier to cluster. Currently it seems to be quite complicated.
     - [ ] Provide examples on how to cluster (v0.5)
     - [ ] Add an example where several nodes are connected to transfer pubsub messages accross nodes (v0.5)
     - [ ] Implement music beat through clustering
