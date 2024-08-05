@@ -410,6 +410,7 @@ defmodule Fledex.LedStripTestSync do
       :ok = GenServer.stop(pid)
       assert {:ok, pid} = LedStrip.start_link(:test_strip_name5, Null, [])
       :ok = GenServer.stop(pid)
+      assert {:error, _} = LedStrip.start_link(:test_strop_name6, %{wrong: "structure"}, [])
     end
 
     test "client API calls", %{strip_name: strip_name} do
@@ -427,6 +428,9 @@ defmodule Fledex.LedStripTestSync do
                  test2: 123
                )
 
+      # test all 3 reinit functions (they all lead to the same result)
+      assert :ok == LedStrip.reinit(strip_name, Fledex.LedStripTest.TestDriver, [])
+      assert :ok == LedStrip.reinit(strip_name, {Fledex.LedStripTest.TestDriver, []}, [])
       assert :ok == LedStrip.reinit(strip_name, [{Fledex.LedStripTest.TestDriver, []}], [])
       assert :ok == LedStrip.drop_namespace(strip_name, @namespace)
       assert :ok == GenServer.stop(strip_name)

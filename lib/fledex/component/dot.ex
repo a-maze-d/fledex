@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 defmodule Fledex.Component.Dot do
   @behaviour Fledex.Component.Interface
+  import Fledex.Utils.Guards
 
   @impl true
   def configure(name, options) when is_atom(name) and is_list(options) do
@@ -16,10 +17,7 @@ defmodule Fledex.Component.Dot do
       triggers when is_map(triggers) and is_map_key(triggers, trigger_name) ->
         trigger = triggers[trigger_name]
         case trigger do
-          trigger when is_integer(trigger) and (
-            (zero_indexed and trigger + 1 > 0 and trigger + 1 <= count) or
-            (not zero_indexed and trigger > 0 and trigger <= count)
-          ) ->
+          trigger when is_in_range(trigger, zero_indexed, 0, count) ->
             leds(count) |> light(color, trigger + correct_index(zero_indexed))
           _triggers ->
             leds()

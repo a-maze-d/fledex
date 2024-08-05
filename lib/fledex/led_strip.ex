@@ -92,14 +92,14 @@ defmodule Fledex.LedStrip do
   end
 
   def start_link(strip_name, drivers, global_config) do
-    raise "Unexpected arguments #{inspect(strip_name)}, #{inspect(drivers)}, #{inspect(global_config)}"
+    {:error, "Unexpected arguments #{inspect(strip_name)}, #{inspect(drivers)}, #{inspect(global_config)}"}
   end
 
   @doc """
   Define a new namespace
   """
   @spec define_namespace(atom, atom) :: :ok | {:error, String.t()}
-  def define_namespace(strip_name \\ __MODULE__, namespace) do
+  def define_namespace(strip_name, namespace) do
     # Logger.info("defining namespace: #{strip_name}-#{namespace}")
     GenServer.call(strip_name, {:define_namespace, namespace})
   end
@@ -108,7 +108,7 @@ defmodule Fledex.LedStrip do
   Drop a previously defined namespace.
   """
   @spec drop_namespace(atom, atom) :: :ok
-  def drop_namespace(strip_name \\ __MODULE__, namespace) do
+  def drop_namespace(strip_name, namespace) do
     # Logger.info("dropping namespace: #{strip_name}-#{namespace}")
     GenServer.call(strip_name, {:drop_namespace, namespace})
   end
@@ -117,7 +117,7 @@ defmodule Fledex.LedStrip do
   Checks whether the specified namespace already exists
   """
   @spec exist_namespace(atom, atom) :: boolean
-  def exist_namespace(strip_name \\ __MODULE__, namespace) do
+  def exist_namespace(strip_name, namespace) do
     GenServer.call(strip_name, {:exist_namespace, namespace})
   end
 
@@ -130,7 +130,7 @@ defmodule Fledex.LedStrip do
   case some leds might retain their previously set value.
   """
   @spec set_leds(atom, atom, list(pos_integer)) :: :ok | {:error, String.t()}
-  def set_leds(strip_name \\ __MODULE__, namespace, leds) do
+  def set_leds(strip_name, namespace, leds) do
     GenServer.call(strip_name, {:set_leds, namespace, leds})
   end
 
@@ -143,7 +143,7 @@ defmodule Fledex.LedStrip do
   """
   @deprecated "will be replaced with better strip_config right from the beginning"
   @spec change_config(atom, list(atom), any) :: {:ok, any}
-  def change_config(strip_name \\ __MODULE__, config_path, value) do
+  def change_config(strip_name, config_path, value) do
     GenServer.call(strip_name, {:change_config, config_path, value})
   end
 
@@ -153,8 +153,6 @@ defmodule Fledex.LedStrip do
   If you do, you will surely know about it :)
   """
   @spec reinit(atom, module | {module, keyword} | [{module, keyword}], keyword) :: :ok
-  def reinit(strip_name \\ __MODULE__, drivers, strip_config)
-
   def reinit(strip_name, driver, strip_config) when is_atom(driver) do
     reinit(strip_name, {driver, []}, strip_config)
   end
@@ -169,7 +167,7 @@ defmodule Fledex.LedStrip do
   end
 
   @spec stop(GenServer.server()) :: :ok
-  def stop(strip_name \\ __MODULE__) do
+  def stop(strip_name) do
     GenServer.stop(strip_name)
   end
 

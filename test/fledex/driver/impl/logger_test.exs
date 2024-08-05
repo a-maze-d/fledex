@@ -66,6 +66,22 @@ defmodule Fledex.Driver.Impl.LoggerTest do
       assert String.contains?(log, ansi_color_b)
     end
 
+    test "transfer without leds" do
+      log = capture_log(fn ->
+        config =
+          Logger.init(
+            update_freq: 1,
+            log_color_code: false,
+            terminal: false
+          )
+
+        leds = []
+        Logger.transfer(leds, 0, config)
+      end)
+
+      assert log == ""
+    end
+
     test "transfer (logger with color code)" do
       capture_log(fn ->
         config =
