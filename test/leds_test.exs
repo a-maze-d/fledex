@@ -269,11 +269,11 @@ defmodule Fledex.LedsTest do
     end
 
     test "setting driver info" do
-      leds = Leds.leds() |> Leds.set_driver_info(:test_name, :test_strip)
+      leds = Leds.leds() |> Leds.set_led_strip_info(:test_name, :test_strip)
       assert leds.opts.namespace == :test_name
       assert leds.opts.server_name == :test_strip
 
-      leds = Leds.leds() |> Leds.set_driver_info(:test_name)
+      leds = Leds.leds() |> Leds.set_led_strip_info(:test_name)
       assert leds.opts.namespace == :test_name
       assert leds.opts.server_name == LedStrip
     end

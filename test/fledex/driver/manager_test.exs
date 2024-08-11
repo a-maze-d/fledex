@@ -84,6 +84,29 @@ defmodule Fledex.Driver.ManagerTest do
     end
   end
 
+  defmodule TestDriver4 do
+    @behaviour Fledex.Driver.Interface
+    def configure(config) do
+      Keyword.merge([], config)
+    end
+
+    def init(config) do
+      configure(config)
+    end
+
+    def reinit(old_config, new_config) do
+      Keyword.merge(old_config, new_config)
+    end
+
+    def transfer(_leds, _count, config) do
+      {Keyword.put(config, :a3, 4), :ok}
+    end
+
+    def terminate(_reason, _config) do
+      :ok
+    end
+  end
+
   describe "test multi-module dispatching functions" do
     alias Fledex.Driver.ManagerTest.TestDriver
     alias Fledex.Driver.ManagerTest.TestDriver2
@@ -172,5 +195,58 @@ defmodule Fledex.Driver.ManagerTest do
       Enum.filter(drivers, fn {module, _config} -> module == driver_module end)
 
     config
+  end
+
+  describe "reinit drivers" do
+    test "without drivers" do
+      drivers = Manager.reinit([], [])
+      assert drivers == [{Null, []}]
+    end
+
+    test "with existing default" do
+      drivers = Manager.reinit([{Null, []}], [])
+      assert drivers == [{Null, []}]
+    end
+
+    test "with overlapping driver" do
+      drivers = Manager.reinit([{TestDriver4, []}], [{TestDriver4, []}])
+      assert drivers == [{TestDriver4, []}]
+    end
+
+    test "with overlapping driver, new config" do
+      drivers = Manager.reinit([{TestDriver4, [abc: 123]}], [{TestDriver4, [abc: 345]}])
+      assert drivers == [{TestDriver4, abc: 345}]
+    end
+
+    test "with overlapping driver, non-overlapping config" do
+      drivers = Manager.reinit([{TestDriver4, [abc: 123]}], [{TestDriver4, [efg: 345]}])
+      assert drivers == [{TestDriver4, [abc: 123, efg: 345]}]
+    end
+
+    test "with overlapping driver and extra driver" do
+      drivers = Manager.reinit([{TestDriver4, [abc: 123]}],
+        [{TestDriver4, [abc: 345]}, {Null, []}]
+      )
+      assert drivers == [{Null, []}, {TestDriver4, [abc: 345]}]
+    end
+
+    test "drivers stay sorted" do
+      drivers = Manager.reinit([], [{TestDriver4, []}, {Null, []}])
+      assert drivers == [{Null, []}, {TestDriver4, []}]
+    end
+
+    test "with dropped driver, config retained" do
+      old_drivers = Enum.sort([{TestDriver4, [abc: 123]}, {Null, []}])
+      drivers = Manager.reinit(old_drivers, [{TestDriver4, []}, {Null, []}])
+
+      assert drivers == [{Null, []}, {TestDriver4, [abc: 123]}]
+    end
+
+    test "with dropped driver, config retained (second order)" do
+      old_drivers = Enum.sort([{TestDriver4, [abc: 123]}, {Null, []}])
+      drivers = Manager.reinit(old_drivers, [{Null, []}, {TestDriver4, []}])
+
+      assert drivers == [{Null, []}, {TestDriver4, [abc: 123]}]
+    end
   end
 end

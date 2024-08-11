@@ -155,7 +155,7 @@ defmodule Fledex.Animation.Animator do
 
     # independent on the configs say we want to ensure we use the correct namespace (animation_name)
     # and server_name (strip_name). Therefore we inject it
-    leds = Leds.set_driver_info(leds, animation_name, strip_name)
+    leds = Leds.set_led_strip_info(leds, animation_name, strip_name)
     {config, triggers} = send_config_func.(triggers) |> get_with_triggers(triggers)
     Leds.send(leds, config)
     %{state | triggers: triggers}

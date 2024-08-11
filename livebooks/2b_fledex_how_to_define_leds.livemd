@@ -203,7 +203,7 @@ Leds.leds(10)
 
 Once we have defined our Leds, we can send them to our `Fledex.LedStrip`. This is not
 difficult, but it's such a common task that the Leds module provides the convenience
-function `send/2`. and some supporting functions (`set_driver_info/3`, `rotate/2`,
+function `send/2`. and some supporting functions (`set_led_strip_info/3`, `rotate/2`,
 `to_list/1`).
 
 The send function has a couple of checks that the `Fledex.LedStrip` is set up correctly.

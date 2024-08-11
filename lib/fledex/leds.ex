@@ -73,7 +73,7 @@ defmodule Fledex.Leds do
 
   Those are important when you want to send your led sequence to an
   `Fledex.LedStrip`.
-  You should prefer to use the `set_driver_info/3` function instead.
+  You should prefer to use the `set_led_strip_info/3` function instead.
   """
   @spec leds(integer, map) :: t
   def leds(count, opts) do
@@ -154,15 +154,14 @@ defmodule Fledex.Leds do
     count
   end
 
-  # TODO: we shoudl rename this to `set_led_strip_info`
   @doc """
   Define the server_name and the namespace
 
   This is used when the led sequence is sent to the `Fledex.LedStrip` when the
   `send/2` function is called.
   """
-  @spec set_driver_info(t, namespace :: atom, server_name :: atom) :: t
-  def set_driver_info(%{opts: opts} = leds, namespace, server_name \\ Fledex.LedStrip) do
+  @spec set_led_strip_info(t, namespace :: atom, server_name :: atom) :: t
+  def set_led_strip_info(%{opts: opts} = leds, namespace, server_name \\ Fledex.LedStrip) do
     opts = %{opts | server_name: server_name, namespace: namespace}
     %__MODULE__{leds | opts: opts}
   end
@@ -422,7 +421,7 @@ defmodule Fledex.Leds do
   @doc """
   Convenience function to send the led sequence to an `Fledex.LedStrip`.
 
-  In order for the function to succeed either `set_driver_info/3` needs to be
+  In order for the function to succeed either `set_led_strip_info/3` needs to be
   called or the information needs to be passed as part of the opts. The opts can
   be the following:
 

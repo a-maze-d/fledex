@@ -17,9 +17,9 @@ defmodule Fledex.Driver.Manager do
   * `driver`: Which modules should get loaded. Each module usually should have
       a default configuration, which can then be overwritten with specific
       settings
-  * `config`: a keywrod list to modify the default settings. Each module has
+  * `config`: a keyword list to modify the default settings. Each module has
       their own set of settings. You need to check the driver module documentation
-      for allowed details
+      for allowed settings
 
   Note: You can specify a driver module several times and give them different settings.
         This allows for example to send the same data to two different SPI ports.
@@ -67,10 +67,11 @@ defmodule Fledex.Driver.Manager do
   end
 
   def reinit(old_drivers, new_drivers) do
+    new_drivers = Enum.sort(new_drivers)
     case same_drivers(old_drivers, new_drivers) do
       true ->
         # TODO: We need to test what happens if we have new additional drivers. It should
-        #       be implemented, but we don't have tests fhem.
+        #       be implemented, but there are no tests yet.
         drivers =
           Enum.zip_with([old_drivers, new_drivers], fn [{old_module, old_config}, {_, new_config}] ->
             # we still have a minimalistic new_config. hence we need to get a proper
@@ -91,7 +92,7 @@ defmodule Fledex.Driver.Manager do
 
         extra_drivers =
           case old_drivers_length < new_drivers_length do
-            true -> init_drivers(Enum.slice(new_drivers, length(drivers)..new_drivers_length))
+            true -> init_drivers(Enum.slice(new_drivers, old_drivers_length..new_drivers_length))
             false -> []
           end
 
