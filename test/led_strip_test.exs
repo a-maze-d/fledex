@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-defmodule Fledex.LedDriverTest do
+defmodule Fledex.LedStripTest do
   use ExUnit.Case, async: true
   import ExUnit.CaptureIO
 
@@ -17,13 +17,13 @@ defmodule Fledex.LedDriverTest do
   describe "test init" do
     test "init_args are correctly set (disable timer)" do
       {:ok, state} = LedStrip.init({:strip_name, [{Null, []}], timer_disabled: true})
-      assert state.timer.disabled == true
-      assert state.timer.counter == 0
-      assert state.timer.update_timeout == 50
-      assert state.timer.update_func != nil
-      assert state.timer.only_dirty_update == false
-      assert state.timer.is_dirty == false
-      assert state.timer.ref == nil
+      assert state.config.timer.disabled == true
+      assert state.config.timer.counter == 0
+      assert state.config.timer.update_timeout == 50
+      assert state.config.timer.update_func != nil
+      assert state.config.timer.only_dirty_update == false
+      assert state.config.timer.is_dirty == false
+      assert state.config.timer.ref == nil
       assert state.config.merge_strategy == :cap
       assert state.drivers == [{Null, []}]
       assert state.namespaces == %{}
@@ -39,13 +39,13 @@ defmodule Fledex.LedDriverTest do
            timer_update_func: update_func, timer_only_dirty_update: false}
         )
 
-      assert state.timer.disabled == false
-      assert state.timer.counter == 0
-      assert state.timer.update_timeout == 50
-      assert state.timer.update_func == update_func
-      assert state.timer.only_dirty_update == false
-      assert state.timer.is_dirty == false
-      assert state.timer.ref != nil
+      assert state.config.timer.disabled == false
+      assert state.config.timer.counter == 0
+      assert state.config.timer.update_timeout == 50
+      assert state.config.timer.update_func == update_func
+      assert state.config.timer.only_dirty_update == false
+      assert state.config.timer.is_dirty == false
+      assert state.config.timer.ref != nil
       assert state.config.merge_strategy == :cap
       assert state.drivers == [{Null, []}]
       assert state.namespaces == %{}
@@ -54,7 +54,7 @@ defmodule Fledex.LedDriverTest do
     end
 
     test "init args need to be a tuple with 3 elements" do
-      assert {:stop, "Init args need to be a 3 element tuple with name, drivers, global configs"} ==
+      assert {:stop, "Init args need to be a 3 element tuple with name, drivers, global config"} ==
                LedStrip.init([])
     end
 
@@ -75,17 +75,17 @@ defmodule Fledex.LedDriverTest do
 
     test "change config" do
       {:ok, state} = LedStrip.init({:strip_name, [{Null, []}], timer_disabled: true})
-      assert state.timer.update_timeout == 50
+      assert state.config.timer.update_timeout == 50
 
-      {:reply, {:ok, old_value}, state} =
+      {:reply, {:ok, old_values}, state} =
         LedStrip.handle_call(
-          {:change_config, [:timer, :update_timeout], 100},
+          {:change_config, timer_update_timeout: 100},
           {self(), :tag},
           state
         )
 
-      assert old_value == 50
-      assert state.timer.update_timeout == 100
+      assert old_values == [timer_update_timeout: 50]
+      assert state.config.timer.update_timeout == 100
     end
   end
 
@@ -99,7 +99,7 @@ defmodule Fledex.LedDriverTest do
           :strip_name,
           [],
           timer_counter: 1,
-          update_func: update_func
+          timer_update_func: update_func
         )
       )
 
@@ -109,7 +109,7 @@ defmodule Fledex.LedDriverTest do
     test "ensure the config can be updated in the update function" do
       update_func = fn state ->
         {_old_update_counter, state} =
-          get_and_update_in(state, [:timer, :counter], &{&1, &1 + 1})
+          get_and_update_in(state, [:config, :timer, :counter], &{&1, &1 + 1})
 
         state
       end
@@ -117,26 +117,26 @@ defmodule Fledex.LedDriverTest do
       state =
         LedStrip.init_state(:strip_name, [], timer_counter: 1, timer_update_func: update_func)
 
-      orig_counter = state.timer.counter
+      orig_counter = state.config.timer.counter
       {:noreply, state} = LedStrip.handle_info({:update_timeout, update_func}, state)
-      assert state.timer.counter > orig_counter
+      assert state.config.timer.counter > orig_counter
     end
   end
 
   describe "test update shortcutting" do
     test "state is dirty after client calls" do
       {:ok, state} = LedStrip.init({:strip_name, [], timer_disabled: true})
-      assert state.timer.is_dirty == false
-      {:reply, _na, state} = LedStrip.handle_call({:define_namespace, "name"}, self(), state)
-      assert state.timer.is_dirty == true
-      state = put_in(state, [:timer, :is_dirty], false)
-      assert state.timer.is_dirty == false
-      {:reply, _na, state} = LedStrip.handle_call({:set_leds, "name", [0xFF0000]}, self(), state)
-      assert state.timer.is_dirty == true
-      state = put_in(state, [:timer, :is_dirty], false)
-      assert state.timer.is_dirty == false
-      {:reply, _na, state} = LedStrip.handle_call({:drop_namespace, "name"}, self(), state)
-      assert state.timer.is_dirty == true
+      assert state.config.timer.is_dirty == false
+      {:reply, _na, state} = LedStrip.handle_call({:define_namespace, :name}, self(), state)
+      assert state.config.timer.is_dirty == true
+      state = put_in(state, [:config, :timer, :is_dirty], false)
+      assert state.config.timer.is_dirty == false
+      {:reply, _na, state} = LedStrip.handle_call({:set_leds, :name, [0xFF0000]}, self(), state)
+      assert state.config.timer.is_dirty == true
+      state = put_in(state, [:config, :timer, :is_dirty], false)
+      assert state.config.timer.is_dirty == false
+      {:reply, _na, state} = LedStrip.handle_call({:drop_namespace, :name}, self(), state)
+      assert state.config.timer.is_dirty == true
     end
 
     test "transfer shortcutting" do
@@ -144,8 +144,8 @@ defmodule Fledex.LedDriverTest do
 
       state =
         state
-        |> put_in([:timer, :is_dirty], false)
-        |> put_in([:timer, :only_dirty_updates], true)
+        |> put_in([:config, :timer, :is_dirty], false)
+        |> put_in([:config, :timer, :only_dirty_updates], true)
 
       assert state == LedStrip.transfer_data(state)
     end
@@ -256,7 +256,7 @@ defmodule Fledex.LedDriverTest do
 
       assert capture_io(fn ->
                response = LedStrip.transfer_data(state)
-               assert response.timer.is_dirty == false
+               assert response.config.timer.is_dirty == false
              end) ==
                "\e[38;5;100m█\e[38;5;30m█\e[38;5;90m█\e[38;5;30m█\e[38;5;100m█\e[38;5;90m█\r\n"
     end
@@ -367,35 +367,18 @@ defmodule Fledex.LedStripTest.TestDriver do
 end
 
 defmodule Fledex.LedStripTestSync do
-  use ExUnit.Case
+  use ExUnit.Case, async: false
+
+  import ExUnit.CaptureLog
+
   alias Fledex.Driver.Impl.Null
   alias Fledex.Driver.Impl.Spi
   alias Fledex.LedStrip
 
-  @strip_name :test_strip
-  setup do
-    {:ok, pid} =
-      start_supervised(%{
-        id: LedStrip,
-        start:
-          {LedStrip, :start_link,
-           [
-             @strip_name,
-             {
-               Fledex.LedStripTest.TestDriver,
-               [test: 123]
-             },
-             [timer_disable: true]
-           ]}
-      })
-
-    %{strip_name: @strip_name, pid: pid}
-  end
-
   @namespace :namespace
   describe "startup tests" do
     test "start server with custom parameters" do
-      assert {:ok, pid} = LedStrip.start_link(:test_strip_name, {Null, []}, timer_disable: true)
+      assert {:ok, pid} = LedStrip.start_link(:test_strip_name, {Null, []}, timer_disabled: true)
       :ok = GenServer.stop(pid)
     end
 
@@ -412,77 +395,74 @@ defmodule Fledex.LedStripTestSync do
       :ok = GenServer.stop(pid)
       assert {:error, _} = LedStrip.start_link(:test_strop_name6, %{wrong: "structure"}, [])
     end
+  end
 
-    test "client API calls", %{strip_name: strip_name} do
+  describe "test LedStrip client APIs" do
+    @strip_name :test_strip
+    setup do
+      Mox.set_mox_global()
+
+      driver =
+        Mox.defmock(Fledex.Driver.Mock, for: Fledex.Driver.Interface, moduledoc: false)
+        |> Mox.expect(:init, fn configs ->
+          assert Keyword.get(configs, :test, nil) == 123
+          Keyword.put_new(configs, :test2, 321)
+        end)
+        |> Mox.expect(:configure, 3, fn config -> config end)
+        |> Mox.expect(:reinit, 3, fn old_config, new_config ->
+          assert Keyword.get(old_config, :test2, nil) == 321
+          old_config = Keyword.put_new(old_config, :test3, "abc")
+          Keyword.merge(old_config, new_config)
+        end)
+        |> Mox.expect(:terminate, fn reason, config ->
+          assert reason == :normal
+          assert Keyword.get(config, :test, nil) == 123
+          assert Keyword.get(config, :test2, nil) == 321
+          assert Keyword.get(config, :test3, nil) == "abc"
+          :ok
+        end)
+
+      {:ok, pid} =
+        start_supervised(%{
+          id: LedStrip,
+          start:
+            {LedStrip, :start_link,
+             [
+               @strip_name,
+               {
+                 driver,
+                 [test: 123]
+               },
+               [timer_disabled: true]
+             ]}
+        })
+
+      %{strip_name: @strip_name, driver: driver, pid: pid}
+    end
+
+    test "client API calls", %{strip_name: strip_name, driver: driver, pid: pid} do
       # we only make sure that they are correctly wired to the server side calls
       # that are tested independently
       assert :ok == LedStrip.define_namespace(strip_name, @namespace)
       assert true == LedStrip.exist_namespace(strip_name, @namespace)
       assert :ok == LedStrip.set_leds(strip_name, @namespace, [0xFF0000, 0x00FF00, 0x0000FF])
 
-      assert {:ok, test2: 321, test: 123} ==
-               LedStrip.change_config(
-                 strip_name,
-                 [:drivers, Access.at!(0), Access.elem(1)],
-                 test: 321,
-                 test2: 123
-               )
+      # successful config change
+      assert {:ok, timer_counter: 0} = LedStrip.change_config(strip_name, timer_counter: 1)
+      assert %{config: %{timer: %{counter: 1}}} = :sys.get_state(pid)
+
+      # unsuccessful config change
+      assert capture_log(fn ->
+               assert {:ok, []} = LedStrip.change_config(strip_name, counter: 2)
+             end) =~ "Unknown config key (:counter with value 2) was specified"
+
+      assert %{config: %{timer: %{counter: 1}}} = :sys.get_state(pid)
 
       # test all 3 reinit functions (they all lead to the same result)
-      assert :ok == LedStrip.reinit(strip_name, Fledex.LedStripTest.TestDriver, [])
-      assert :ok == LedStrip.reinit(strip_name, {Fledex.LedStripTest.TestDriver, []}, [])
-      assert :ok == LedStrip.reinit(strip_name, [{Fledex.LedStripTest.TestDriver, []}], [])
-      assert :ok == LedStrip.drop_namespace(strip_name, @namespace)
-      assert :ok == GenServer.stop(strip_name)
-    end
-  end
-end
-
-defmodule Fledex.LedStripTestSync2 do
-  use ExUnit.Case
-  alias Fledex.LedStrip
-
-  @strip_name :test_strip_sync2
-  setup do
-    {:ok, pid} =
-      start_supervised(%{
-        id: LedStrip,
-        start:
-          {LedStrip, :start_link,
-           [
-             @strip_name,
-             [
-               {
-                 Fledex.LedStripTest.TestDriver,
-                 [test: 123]
-               }
-             ],
-             [timer_disable: true]
-           ]}
-      })
-
-    %{strip_name: @strip_name, pid: pid}
-  end
-
-  @namespace :namespace
-  describe "test default server_name" do
-    test "client API calls", %{strip_name: strip_name} do
-      # we only make sure that they are correctly wired to the server side calls
-      # that are tested independently
-      assert :ok == LedStrip.define_namespace(strip_name, @namespace)
-      assert true == LedStrip.exist_namespace(strip_name, @namespace)
-      assert :ok == LedStrip.set_leds(strip_name, @namespace, [0xFF0000, 0x00FF00, 0x0000FF])
-
-      assert {:ok, [test2: 321, test: 123]} =
-               LedStrip.change_config(
-                 strip_name,
-                 [:drivers, Access.at!(0), Access.elem(1)],
-                 test: 321,
-                 test2: 123
-               )
-
-      assert :ok == LedStrip.reinit(strip_name, {Fledex.LedStripTest.TestDriver, []}, [])
-      assert :ok == LedStrip.drop_namespace(strip_name, @namespace)
+      # This is the reason why we expect the configure and reinit to be called 3 times
+      assert :ok == LedStrip.reinit(strip_name, driver, [])
+      assert :ok == LedStrip.reinit(strip_name, {driver, []}, [])
+      assert :ok == LedStrip.reinit(strip_name, [{driver, []}], [])
       assert :ok == GenServer.stop(strip_name)
     end
   end

@@ -26,6 +26,7 @@ defmodule Fledex.Component.Clock do
         count: 60,
         trigger_name: trigger_second
       )
+
       # TODO: document this trick to do some logging
       # animation :logger do
       #   %{logger: logger} = trigger ->

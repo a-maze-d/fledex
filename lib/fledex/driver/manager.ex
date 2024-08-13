@@ -68,10 +68,9 @@ defmodule Fledex.Driver.Manager do
 
   def reinit(old_drivers, new_drivers) do
     new_drivers = Enum.sort(new_drivers)
+
     case same_drivers(old_drivers, new_drivers) do
       true ->
-        # TODO: We need to test what happens if we have new additional drivers. It should
-        #       be implemented, but there are no tests yet.
         drivers =
           Enum.zip_with([old_drivers, new_drivers], fn [{old_module, old_config}, {_, new_config}] ->
             # we still have a minimalistic new_config. hence we need to get a proper

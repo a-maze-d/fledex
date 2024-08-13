@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -54,16 +54,13 @@ defmodule Fledex.Animation.Animator do
   alias Fledex.LedStrip
   alias Fledex.Utils.PubSub
 
+  # TODO: I think this struct needs some cleanup. Several options are not really correct
+  #       anymore. Especially check: :counter, :timer_ref
   @type config_t :: %{
           optional(:type) => :animation | :static | :job | :coordinator,
           optional(:def_func) => (map -> Leds.t()),
           optional(:options) => keyword | nil,
           optional(:effects) => [{module, keyword}],
-          optional(:send_config_func) => (map -> map),
-          optional(:counter) => integer,
-          optional(:timer_ref) => reference | nil,
-          optional(:strip_name) => atom,
-          optional(:animation_name) => atom
         }
 
   @type state_t :: %{

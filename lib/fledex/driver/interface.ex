@@ -25,7 +25,7 @@ defmodule Fledex.Driver.Interface do
   """
 
   @doc """
-  This optional callback will be called to retrieve the default set of parameters for
+  This callback will be called to retrieve the default set of parameters for
   this driver. It will be used as default and then ovelayed with the additional arguments
   passed in (which can be passed in to the function)
   """
@@ -67,6 +67,4 @@ defmodule Fledex.Driver.Interface do
   """
   @callback terminate(reason, config :: keyword) :: :ok
             when reason: :normal | :shutdown | {:shutdown, term()} | term()
-
-  #   @optional_callbacks configure: 1
 end

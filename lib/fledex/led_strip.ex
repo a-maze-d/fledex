@@ -20,7 +20,6 @@ defmodule Fledex.LedStrip do
 
   require Logger
 
-  # alias Fledex.Color.Correction
   alias Fledex.Color.Types
   alias Fledex.Color.Utils
   alias Fledex.Driver.Impl.Null
@@ -36,17 +35,31 @@ defmodule Fledex.LedStrip do
            is_dirty: boolean,
            ref: reference | nil
          }
+  @typep config_t :: %{
+           merge_strategy: atom,
+           timer: timer_t
+         }
+
   @typep state_t :: %{
            strip_name: atom,
-           timer: timer_t,
-           config: %{merge_strategy: atom},
+           config: config_t,
            drivers: Manager.driver_t(),
            namespaces: map
          }
 
-  @default_update_timeout 50
-
   @type start_link_response :: :ignore | {:error, any} | {:ok, pid}
+
+  @default_update_timeout 50
+  @config_mappings %{
+    timer_disabled: [:timer, :disabled],
+    timer_counter: [:timer, :counter],
+    timer_update_timeout: [:timer, :update_timeout],
+    timer_update_func: [:timer, :update_func],
+    timer_only_dirty_update: [:timer, :only_dirty_update],
+    timer_is_dirty: [:timer, :is_dirty],
+    merge_strategy: [:merge_strategy]
+  }
+
   # client code
   @doc """
   This starts the server controlling a specfic led strip. It is possible
@@ -92,7 +105,8 @@ defmodule Fledex.LedStrip do
   end
 
   def start_link(strip_name, drivers, global_config) do
-    {:error, "Unexpected arguments #{inspect(strip_name)}, #{inspect(drivers)}, #{inspect(global_config)}"}
+    {:error,
+     "Unexpected arguments #{inspect(strip_name)}, #{inspect(drivers)}, #{inspect(global_config)}"}
   end
 
   @doc """
@@ -109,7 +123,6 @@ defmodule Fledex.LedStrip do
   """
   @spec drop_namespace(atom, atom) :: :ok
   def drop_namespace(strip_name, namespace) do
-    # Logger.info("dropping namespace: #{strip_name}-#{namespace}")
     GenServer.call(strip_name, {:drop_namespace, namespace})
   end
 
@@ -136,15 +149,11 @@ defmodule Fledex.LedStrip do
 
   @doc """
   Change some aspect of a configuration for a specific strip. The configuration
-  will be updated and the old value will be returned.
-
-  Caution: No error checking is performed, so you might end up with a useless
-  configuration
+  will be updated and the old values will be returned.
   """
-  @deprecated "will be replaced with better strip_config right from the beginning"
-  @spec change_config(atom, list(atom), any) :: {:ok, any}
-  def change_config(strip_name, config_path, value) do
-    GenServer.call(strip_name, {:change_config, config_path, value})
+  @spec change_config(atom, keyword) :: {:ok, [keyword]}
+  def change_config(strip_name, global_config) do
+    GenServer.call(strip_name, {:change_config, global_config})
   end
 
   @doc """
@@ -174,62 +183,71 @@ defmodule Fledex.LedStrip do
   # server code
   @impl GenServer
   @spec init({atom, list({module, keyword}), keyword}) :: {:ok, state_t} | {:stop, String.t()}
-  def init({strip_name, drivers, global_configs})
-      when is_atom(strip_name) and is_list(drivers) and is_list(global_configs) do
+  def init({strip_name, drivers, global_config})
+      when is_atom(strip_name) and is_list(drivers) and is_list(global_config) do
     {
       :ok,
-      init_state(strip_name, drivers, global_configs)
+      init_state(strip_name, drivers, global_config)
       |> start_timer()
     }
   end
 
   def init(_na) do
-    {:stop, "Init args need to be a 3 element tuple with name, drivers, global configs"}
+    {:stop, "Init args need to be a 3 element tuple with name, drivers, global config"}
   end
-
-  # @doc false
-  # @spec init_driver(state_t) :: state_t
-  # def init_driver(state) do
-  #   %{state | led_strip: Manager.init_drivers(state.led_strip)}
-  # end
 
   @doc false
   @spec init_state(atom, [{module, keyword}], keyword) :: state_t
-  def init_state(strip_name, drivers, global_configs)
-      when is_atom(strip_name) and is_list(global_configs) do
+  def init_state(strip_name, drivers, global_config)
+      when is_atom(strip_name) and
+             is_list(drivers) and
+             is_list(global_config) do
+    config = Keyword.delete(global_config, :namespaces)
+
     %{
       strip_name: strip_name,
-      timer: init_timer(global_configs),
-      config: %{
-        merge_strategy: Keyword.get(global_configs, :merge_strategy, :cap)
-      },
+      config: init_config(config),
       drivers: Manager.init_drivers(drivers),
       # led_strip: Manager.init_config(init_args[:led_strip] || %{}),
-      namespaces: Keyword.get(global_configs, :namespaces, %{})
+      namespaces: Keyword.get(global_config, :namespaces, %{})
     }
   end
 
-  # @allowed_keys [
-  #   :disabled,
-  #   :counter,
-  #   :update_timeout,
-  #   :update_func,
-  #   :only_dirty_update,
-  #   :is_dirty,
-  #   :ref
-  # ]
-  @doc false
-  @spec init_timer(keyword) :: timer_t
-  defp init_timer(global_configs) when is_list(global_configs) do
-    %{
-      disabled: Keyword.get(global_configs, :timer_disabled, false),
-      counter: Keyword.get(global_configs, :timer_counter, 0),
-      update_timeout: Keyword.get(global_configs, :timer_update_timeout, @default_update_timeout),
-      update_func: Keyword.get(global_configs, :timer_update_func, &transfer_data/1),
-      only_dirty_update: Keyword.get(global_configs, :timer_only_dirty_update, false),
-      is_dirty: Keyword.get(global_configs, :timer_is_direty, false),
-      ref: nil
+  @spec init_config(keyword) :: config_t
+  def init_config(updates) do
+    base = %{
+      merge_strategy: :cap,
+      timer: %{
+        disabled: false,
+        counter: 0,
+        update_timeout: @default_update_timeout,
+        update_func: &transfer_data/1,
+        only_dirty_update: false,
+        is_dirty: false,
+        ref: nil
+      }
     }
+
+    {config, _rets} = update_config(base, updates)
+    config
+  end
+
+  defp update_config(base, updates) do
+    Enum.reduce(updates, {base, []}, fn {key, value}, {config, rets} ->
+      case key do
+        key when is_map_key(@config_mappings, key) ->
+          path = @config_mappings[key]
+          old_value = get_in(config, path)
+          {put_in(config, path, value), Keyword.put(rets, key, old_value)}
+
+        key ->
+          Logger.warning(
+            "Unknown config key (#{inspect(key)} with value #{inspect(value)}) was specified\n#{Exception.format_stacktrace()}"
+          )
+
+          {config, rets}
+      end
+    end)
   end
 
   @impl GenServer
@@ -241,14 +259,14 @@ defmodule Fledex.LedStrip do
 
   @doc false
   @spec start_timer(state_t) :: state_t
-  defp start_timer(%{timer: %{disabled: true}} = state), do: state
+  defp start_timer(%{config: %{timer: %{disabled: true}}} = state), do: state
 
   defp start_timer(state) do
-    update_timeout = state[:timer][:update_timeout]
-    update_func = state[:timer][:update_func]
+    update_timeout = state.config.timer.update_timeout
+    update_func = state.config.timer.update_func
 
     ref = Process.send_after(self(), {:update_timeout, update_func}, update_timeout)
-    state = update_in(state, [:timer, :ref], fn _current_ref -> ref end)
+    state = update_in(state, [:config, :timer, :ref], fn _current_ref -> ref end)
 
     state
   end
@@ -257,7 +275,7 @@ defmodule Fledex.LedStrip do
   @spec handle_call({:define_namespace, atom}, {pid, any}, state_t) ::
           {:reply, :ok | {:error, binary}, state_t}
   def handle_call({:define_namespace, name}, _from, %{namespaces: namespaces} = state) do
-    state = put_in(state, [:timer, :is_dirty], true)
+    state = put_in(state, [:config, :timer, :is_dirty], true)
 
     case Map.has_key?(namespaces, name) do
       false -> {:reply, :ok, %{state | namespaces: Map.put_new(namespaces, name, [])}}
@@ -268,8 +286,8 @@ defmodule Fledex.LedStrip do
   @impl GenServer
   @spec handle_call({:drop_namespace, atom}, GenServer.from(), state_t) :: {:reply, :ok, state_t}
   def handle_call({:drop_namespace, name}, _from, %{namespaces: namespaces} = state) do
-    state = put_in(state, [:timer, :is_dirty], true)
-    {:reply, :ok, %{state | namespaces: Map.drop(namespaces, [name])}}
+    state = put_in(state, [:config, :timer, :is_dirty], true)
+    {:reply, :ok, %{state | namespaces: Map.delete(namespaces, name)}}
   end
 
   @impl GenServer
@@ -289,7 +307,7 @@ defmodule Fledex.LedStrip do
   @spec handle_call({:set_leds, atom, list(Types.colorint())}, {pid, any}, state_t) ::
           {:reply, :ok | {:error, String.t()}, state_t}
   def handle_call({:set_leds, name, leds}, _from, %{namespaces: namespaces} = state) do
-    state = put_in(state, [:timer, :is_dirty], true)
+    state = put_in(state, [:config, :timer, :is_dirty], true)
 
     case Map.has_key?(namespaces, name) do
       true ->
@@ -303,31 +321,33 @@ defmodule Fledex.LedStrip do
   end
 
   @impl GenServer
-  @spec handle_call({:change_config, list(), any}, {pid, any}, state_t) ::
-          {:reply, {:ok, any}, state_t}
-  def handle_call({:change_config, config_path, value}, _from, state) do
-    previous_value = get_in(state, config_path)
-    state = put_in(state, config_path, value)
-    {:reply, {:ok, previous_value}, state}
+  @spec handle_call({:change_config, keyword}, {pid, any}, state_t) :: {:ok, keyword}
+  def handle_call({:change_config, global_config}, _from, state) do
+    {new_config, rets} = update_config(state.config, global_config)
+    {:reply, {:ok, rets}, %{state | config: new_config}}
   end
 
   @impl GenServer
   @spec handle_call({:reinit, [{module, keyword}], keyword}, {pid, any}, state_t) ::
           {:reply, :ok, state_t}
-  def handle_call({:reinit, drivers, _config}, _from, state) do
-    # TODO: enable the change of configs not just of drivers
-    {:reply, :ok, %{state | drivers: Manager.reinit(state.drivers, drivers)}}
+  def handle_call({:reinit, drivers, config}, _from, state) do
+    {:reply, :ok,
+     %{
+       state
+       | config: update_config(state.config, config),
+         drivers: Manager.reinit(state.drivers, drivers)
+     }}
   end
 
   @impl GenServer
   @spec handle_info({:update_timeout, (state_t -> state_t)}, state_t) :: {:noreply, state_t}
   def handle_info({:update_timeout, func}, state) do
     state =
-      update_in(state, [:timer, :counter], &(&1 + 1))
+      update_in(state, [:config, :timer, :counter], &(&1 + 1))
       |> start_timer()
       |> func.()
 
-    PubSub.simple_broadcast(Map.put(%{}, state.strip_name, state.timer.counter))
+    PubSub.simple_broadcast(Map.put(%{}, state.strip_name, state.config.timer.counter))
 
     {:noreply, state}
   end
@@ -335,7 +355,7 @@ defmodule Fledex.LedStrip do
   @doc false
   @spec transfer_data(state_t) :: state_t
   def transfer_data(
-        %{timer: %{is_dirty: is_dirty, only_dirty_updates: only_dirty_updates}} = state
+        %{config: %{timer: %{is_dirty: is_dirty, only_dirty_updates: only_dirty_updates}}} = state
       )
       when only_dirty_updates == true and is_dirty == false do
     # we shortcut if there is nothing to update and if we are allowed to shortcut
@@ -345,15 +365,15 @@ defmodule Fledex.LedStrip do
   def transfer_data(state) do
     # state = :telemetry.span(
     #   [:transfer_data],
-    #   %{timer_counter: state.timer.counter},
+    #   %{timer_counter: state.config.timer.counter},
     #   fn ->
     drivers =
       state.namespaces
       |> merge_namespaces(state.config.merge_strategy)
-      |> Manager.transfer(state.timer.counter, state.drivers)
+      |> Manager.transfer(state.config.timer.counter, state.drivers)
 
     %{state | drivers: drivers}
-    |> put_in([:timer, :is_dirty], false)
+    |> put_in([:config, :timer, :is_dirty], false)
 
     #       {state, %{metadata: "done"}}
     #   end
@@ -415,79 +435,15 @@ defmodule Fledex.LedStrip do
 
   @doc false
   @spec apply_merge_strategy(list(Types.colorint()), atom) :: Types.rgb()
-  def apply_merge_strategy(rgb, merge_strategy) do
-    case merge_strategy do
-      :avg -> Utils.avg(rgb)
-      :cap -> Utils.cap(rgb)
-      na -> raise ArgumentError, message: "Unknown merge strategy #{na}"
-    end
+  def apply_merge_strategy(rgb, :avg) do
+    Utils.avg(rgb)
   end
 
-  # @spec apply_global_config(map, keyword) :: map
-  # defp apply_global_config(config, changes) do
-  #   %{config | global: Enum.reduce(changes, config.global, fn {path, value}, acc ->
-  #     Map.put(acc, path, value)
-  #   end)}
-  # end
+  def apply_merge_strategy(rgb, :cap) do
+    Utils.cap(rgb)
+  end
 
-  # @spec convert_strip_config({atom, keyword}) :: map
-  # defp convert_strip_config({base_config, changes}) do
-  #   base_config
-  #     |> convert_strip_config()
-  #     |> apply_strip_config_changes(changes)
-  # end
-  # defp convert_strip_config(:kino) do
-  #   %{
-  #     timer: %{only_dirty_update: true},
-  #     led_strip: %{
-  #       merge_strategy: :cap,
-  #       driver_modules: [Fledex.Driver.Impl.Kino],
-  #       config: %{
-  #         Fledex.Driver.Impl.Kino => %{
-  #           update_freq: 1,
-  #           color_correction: Correction.no_color_correction()
-  #         }
-  #       }
-  #     }
-  #   }
-  # end
-  # defp convert_strip_config(:spi) do
-  #   %{
-  #     timer: %{only_dirty_update: true},
-  #     led_strip: %{
-  #       merge_strategy: :cap,
-  #       driver_modules: [Fledex.Driver.Impl.Spi],
-  #       config: %{
-  #         Fledex.Driver.Impl.Spi => %{
-  #           color_correction:
-  #             Correction.define_correction(
-  #               Correction.Color.typical_smd5050(),
-  #               Correction.Temperature.uncorrected_temperature()
-  #             )
-  #         }
-  #       }
-  #     }
-  #   }
-  # end
-  # defp convert_strip_config(:null) do
-  #   %{
-  #     timer: %{only_dirty_update: true},
-  #     led_strip: %{
-  #       merge_strategy: :cap,
-  #       driver_modules: [Fledex.Driver.Impl.Null],
-  #       config: %{
-  #         Fledex.Driver.Impl.Null => %{}
-  #       }
-  #     }
-  #   }
-  # end
-  # defp convert_strip_config(:none) do
-  #   %{}
-  # end
-
-  # @spec apply_strip_config_changes(map, keyword) :: map
-  # defp apply_strip_config_changes(base_config, _changes) do
-  #   # TODO: apply the changes
-  #   base_config
-  # end
+  def apply_merge_strategy(_rgb, merge_strategy) do
+    raise ArgumentError, message: "Unknown merge strategy #{inspect(merge_strategy)}"
+  end
 end

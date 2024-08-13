@@ -67,17 +67,18 @@ defmodule Fledex.Driver.Impl.LoggerTest do
     end
 
     test "transfer without leds" do
-      log = capture_log(fn ->
-        config =
-          Logger.init(
-            update_freq: 1,
-            log_color_code: false,
-            terminal: false
-          )
+      log =
+        capture_log(fn ->
+          config =
+            Logger.init(
+              update_freq: 1,
+              log_color_code: false,
+              terminal: false
+            )
 
-        leds = []
-        Logger.transfer(leds, 0, config)
-      end)
+          leds = []
+          Logger.transfer(leds, 0, config)
+        end)
 
       assert log == ""
     end

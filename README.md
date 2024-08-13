@@ -39,7 +39,7 @@ end
 
 TODO: This whole section needs some updating, since it has become much easier now that we can `use Fledex` to load the macros
 
-Once in you have installed the library and run your usual `mix deps.get` you can start the LedDriver Server by calling:
+Once in you have installed the library and run your usual `mix deps.get` you can start the LedStrip Server by calling:
 ```elixir
 {:ok, pid} = LedStrip.start_link(:strip_name)
 ```

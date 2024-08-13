@@ -224,9 +224,12 @@ defmodule Fledex.Driver.ManagerTest do
     end
 
     test "with overlapping driver and extra driver" do
-      drivers = Manager.reinit([{TestDriver4, [abc: 123]}],
-        [{TestDriver4, [abc: 345]}, {Null, []}]
-      )
+      drivers =
+        Manager.reinit(
+          [{TestDriver4, [abc: 123]}],
+          [{TestDriver4, [abc: 345]}, {Null, []}]
+        )
+
       assert drivers == [{Null, []}, {TestDriver4, [abc: 345]}]
     end
 

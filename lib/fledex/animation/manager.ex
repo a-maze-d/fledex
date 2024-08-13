@@ -133,7 +133,11 @@ defmodule Fledex.Animation.Manager do
   end
 
   @impl GenServer
-  @spec handle_call({:regiseter_strip, atom, [{module, keyword}], keyword}, GenServer.from(), state_t) ::
+  @spec handle_call(
+          {:regiseter_strip, atom, [{module, keyword}], keyword},
+          GenServer.from(),
+          state_t
+        ) ::
           {:reply, :ok, state_t}
   def handle_call({:register_strip, strip_name, drivers, strip_config}, _pid, state)
       when is_atom(strip_name) do

@@ -15,9 +15,9 @@ Even though this library is published, there are things I still want to do befor
 - [ ] Testing
   - [x] Perform an extra round of testing on hardware (v0.4)
   - [x] Fix the issue in the livebooks that `simple_broadcast/1` gets called directly now, since the function gets imported (v0.4)
-  - [ ] Go through all Livebooks and make sure they all work after all the refactorings, there seem to be some minor issues. (v0.4) 
+  - [x] Go through all Livebooks and make sure they all work after all the refactorings, there seem to be some minor issues. (v0.4) 
   - [ ] Add more error handling scenarios (v0.5)
-  - [ ] parse the config for missing functions, so that errors can be detected early on, instead of failing when trying to paint things (v0.6)
+  - [x] parse the config for missing functions, so that errors can be detected early on, instead of failing when trying to paint things (v0.5)
 - [ ] Driver improvements
   - [x] Fix the LedsDriver.reinit so that a reconfiguration of drivers is possible. Currently the new config is not passed in (v0.5)
     - [ ] Give it an extra test drive
@@ -28,14 +28,14 @@ Even though this library is published, there are things I still want to do befor
     - [x] Update the livebooks
     - [ ] Update the README.md
     - [ ] Add some more tests
-    - [ ] Remove the "change_config" function
-    - [ ] Some extensive testing
+    - [x] Remove the "change_config" function
+    - [x] Some extensive testing
     - [ ] Work down the TODOs
 - [ ] Cleanup
   - [x] `LedStrip`  is partially directly called in the `Manager` (v0.5)
-  - [ ] Enable Telemetry? (v0.5)
+  - [ ] Enable Telemetry? (v0.7)
 - [ ] Missing functionality
-  - [ ] Add the possibility to clear the LEDs when initializing the LedsDriver (v0.5)
+  - [ ] Add the possibility to clear the LEDs when initializing the LedsDriver. This should be a feature fo the Spi Driver (v0.5)
   - [ ] Connect everything into a supervision tree (to make it more robust) (v0.5)
   - [ ] Create support for a coordinator (that can control individual animations and effects. Effects will have to notify back their state) (v0.6)
   - [ ] Clustering
