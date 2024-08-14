@@ -34,10 +34,11 @@ defmodule Fledex.Driver.Impl.Spi do
   @impl true
   @spec reinit(keyword, keyword) :: keyword
   def reinit(old_config, new_config) do
-    # TODO: we have to check whether we have to reconfigure the SPI port
-    #       i.e. has any of the settings changed? If yes, we close the port
-    #       and recreate it.
-    Keyword.merge(old_config, new_config)
+    config = Keyword.merge(old_config, new_config)
+    # Maybe the following code coudl be optimized
+    # to only reopen the port if it's necessary. But this is safe
+    :ok  = terminate(:normal, old_config)
+    Keyword.put(config, :ref, open_spi(config))
   end
 
   @spec open_spi(keyword) :: reference

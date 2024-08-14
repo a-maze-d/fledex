@@ -21,17 +21,18 @@ Even though this library is published, there are things I still want to do befor
 - [ ] Driver improvements
   - [x] Fix the LedsDriver.reinit so that a reconfiguration of drivers is possible. Currently the new config is not passed in (v0.5)
     - [ ] Give it an extra test drive
-    - [ ] Fix the SPI driver so that it compares the settings
+    - [x] Fix the SPI driver so that it compares the settings
   - [x] Improve the LedsDriver config (v0.5)
     - [ ] Update the documentation
-    - [ ] Cleanup
+    - [x] Cleanup
     - [x] Update the livebooks
     - [ ] Update the README.md
-    - [ ] Add some more tests
+    - [x] Add some more tests
     - [x] Remove the "change_config" function
     - [x] Some extensive testing
-    - [ ] Work down the TODOs
+    - [x] Work down the TODOs (related to the driver changes)
 - [ ] Cleanup
+  - [x] Upgrade dependencies [v0.5]
   - [x] `LedStrip`  is partially directly called in the `Manager` (v0.5)
   - [ ] Enable Telemetry? (v0.7)
 - [ ] Missing functionality

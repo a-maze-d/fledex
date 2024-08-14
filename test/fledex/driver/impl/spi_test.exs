@@ -24,18 +24,9 @@ defmodule Fledex.Driver.Impl.SpiTest do
     end
 
     test "reinit" do
-      config = [
-        dev: "spidev0.0",
-        mode: 0,
-        bits_per_word: 8,
-        speed_hz: 1_000_000,
-        delay_us: 10,
-        lsb_first: false,
-        color_correction: Correction.no_color_correction(),
-        ref: nil
-      ]
-
+      config = Spi.init([])
       assert config == Spi.reinit(config, [])
+      :ok = Spi.terminate(:normal, config)
     end
 
     test "transfer" do
