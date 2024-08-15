@@ -47,7 +47,7 @@ In addition a `Fledex.Animation.Manager` will be started in the background (if t
 ### Example
 
 ```elixir
-led_strip :name, :kino do
+led_strip :name, Kino do
   animation :seconds do
     %{seconds: seconds} -> leds(60) |> light(:red, seconds)
     _ -> leds()
@@ -70,7 +70,7 @@ The `led_strip` takes the following parameters:
 | Parameter   | Description                              |
 | ---         | ---                                  |
 | `name`      | (mandatory) Every strip needs a unique name. This needs to be an atom |
-| `driver`    | (mandatory) The driver that should be used to display the LEDs. The most common options are: `:kino` (for livebook), and `:spi` (for real hardware). |
+| `driver`    | (mandatory) The driver that should be used to display the LEDs. The most common options are: `Kino` (for livebook), and `Spi` (for real hardware). |
 
 ### The `do ... end` block
 

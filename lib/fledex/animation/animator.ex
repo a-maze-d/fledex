@@ -54,18 +54,16 @@ defmodule Fledex.Animation.Animator do
   alias Fledex.LedStrip
   alias Fledex.Utils.PubSub
 
-  # TODO: I think this struct needs some cleanup. Several options are not really correct
-  #       anymore. Especially check: :counter, :timer_ref
   @type config_t :: %{
-          optional(:type) => :animation | :static | :job | :coordinator,
+          optional(:type) => :animation | :static,
           optional(:def_func) => (map -> Leds.t()),
           optional(:options) => keyword | nil,
-          optional(:effects) => [{module, keyword}],
+          optional(:effects) => [{module, keyword}]
         }
 
   @type state_t :: %{
           :triggers => map,
-          :type => atom,
+          :type => :animation | :static,
           :def_func => (integer -> Leds.t()),
           :options => keyword | nil,
           :effects => [{module, keyword}],
@@ -129,7 +127,6 @@ defmodule Fledex.Animation.Animator do
            def_func: def_func,
            options: options,
            effects: effects,
-           # send_config_func: send_config_func,
            triggers: triggers
          } = state
        ) do

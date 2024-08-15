@@ -110,7 +110,7 @@ defmodule Fledex.Animation.ManagerTest do
   describe "test jobs" do
     test "add job" do
       Fledex.MockJobScheduler
-      |> expect(:new_job, fn ->
+      |> expect(:create_job, fn _name, _schedule, _strip_name ->
         Quantum.Job.new(Quantum.scheduler_config([], Fledex.MockJobScheduler, JobScheduler))
       end)
       |> expect(:add_job, fn _job -> :ok end)
@@ -145,7 +145,7 @@ defmodule Fledex.Animation.ManagerTest do
 
     test "update job" do
       Fledex.MockJobScheduler
-      |> expect(:new_job, fn ->
+      |> expect(:create_job, fn _name, _schedule, _strip_name ->
         Quantum.Job.new(Quantum.scheduler_config([], Fledex.MockJobScheduler, JobScheduler))
       end)
       |> expect(:delete_job, fn _name -> :ok end)

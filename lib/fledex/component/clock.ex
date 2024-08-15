@@ -27,15 +27,6 @@ defmodule Fledex.Component.Clock do
         trigger_name: trigger_second
       )
 
-      # TODO: document this trick to do some logging
-      # animation :logger do
-      #   %{logger: logger} = trigger ->
-      #     if rem(logger, 10) == 0 do
-      #       IO.puts "logger: #{inspect trigger}"
-      #     end
-      #     {leds(1), %{trigger | logger: logger+1}}
-      #   trigger -> {leds(1), Map.put_new(trigger, :logger, 0)}
-      # end
       component(trigger_minute, Dot,
         color: minute_color,
         count: 60,

@@ -9,7 +9,7 @@ defmodule Fledex do
   look something like the following:
   ``` elixir
     use Fledex
-    led_strip :strip_name, ;kino do
+    led_strip :strip_name, Kino do
       animation :john do
         config = %{
           num_leds: 50,
@@ -66,7 +66,7 @@ defmodule Fledex do
 
     * Either you pattern match on the triggers, e.g. something like the following:
     ```elixir
-    led_strip :strip, :kino do
+    led_strip :strip, Kino do
       animation :name do
         %{strip: counter} ->
           do_something_with_the_counter(counter)
@@ -78,7 +78,7 @@ defmodule Fledex do
     ```
     * Or, if you don't require the trigger, you can specify it without a trigger, e.g.
     ```elixir
-    led_strip :strip, :kino do
+    led_strip :strip, Kino do
       animation :name do
         do_something_without_a_trigger()
       end
@@ -158,7 +158,7 @@ defmodule Fledex do
   It is up to each component to define their own set of mandatory and optional
   parameters.
   """
-  @spec component(atom, module, keyword) :: Fledex.Animation.Manager.config_t()
+  @spec component(atom, module, keyword) :: Fledex.Animation.Manager.configs_t()
   def component(name, module, opts) do
     Dsl.create_config(name, module, opts)
   end
@@ -177,7 +177,7 @@ defmodule Fledex do
   ```elixir
   use Fledex
   alias Fledex.Effect.Wanish
-  led_strip :john, :kino do
+  led_strip :john, Kino do
     effect Wanish, trigger_name: :john do
       animation :test do
         _triggers ->
@@ -230,7 +230,7 @@ defmodule Fledex do
   Example:
   ```elixir
   use Fledex
-  led_strip :nested_components2, :kino do
+  led_strip :nested_components2, Kino do
     job :clock, ~e[@secondly]e do
       date_time = DateTime.utc_now()
 
@@ -261,16 +261,24 @@ defmodule Fledex do
   @doc """
     This introduces a new led_strip.
 
-    The `strip_options` specifies the driver configuration that should be used.
+    The `drivers` can be spcified in 3 different ways:
+
+    * just a driver module (like `Spi`). In this case the default settings will be used
+    * a driver module with it's configuration (like `{Spi, [dev: "spidev0.1"]}`)
+    * or a set of drivers (always with their configuration), like: `[{Spi, []}, {Spi, [dev: "spidev0.1"}]`
+
     A set of default drivers exist for conenience that can be used like `Spi`, `Null`, ...
-    (see `Fledex.LedStrip` for details)
+    (see `Fledex.LedStrip` for details).
 
     A special driver `:config` exists that will simply return the converted dsl to the
     corresponding configuration. This can be very convenient for
 
     * running tests
     * implementing components consisting of several animations. Take a look at the
-    `Fledex.Component.Clock` example.
+    `Fledex.Component.Clock` as an example.
+
+    The `strip_options` configures any non-driver specific settings of the strip (like how
+    often the strip should be repainted, how different animations should be merged, ...).
   """
 
   # @spec led_strip(atom, atom | keyword, Macro.t) :: Macro.t | map()

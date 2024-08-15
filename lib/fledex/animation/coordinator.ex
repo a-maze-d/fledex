@@ -2,4 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 defmodule Fledex.Animation.Coordinator do
+  @type config_t :: %{
+          type: :coordinator
+        }
 end

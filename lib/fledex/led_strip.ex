@@ -81,7 +81,7 @@ defmodule Fledex.LedStrip do
   * With real driver: `start_link(:name, Spi)`
   * With some global config overlay and real driver: `start_link(:name, Spi, timer_only_dirty_update: true)`
   * With real driver and some driver overlay: `start_link(:name, {Spi, dev: "spidev0.1"})`
-  * With several drivers: `start_link(:name, [{:spi, []}, {Spi, dev: "spidev0.1"}])`
+  * With several drivers: `start_link(:name, [{Spu, []}, {Spi, dev: "spidev0.1"}])`
   * With several drivers and global config: `start_link(:name, [{Spi, []}, {Spi, dev: "spidev0.1"}], timer_only_dirty_update: true)`
   """
   @spec start_link(atom, module | {module, keyword} | [{module, keyword}], keyword) ::

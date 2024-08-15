@@ -49,7 +49,7 @@ To test our animation we fake again the temperature by simply publishing the des
 
 The question now is just "what is a component"?
 
-The component is simply a module that implements the `@behaviour Fledex.Component.Interface`. Only a single `configure/2` function is required that returns a `Fledex.Animation.Manager.config_t` structure and thus can define anything you normaly would define through the `animation`, `static`, ... macros.
+The component is simply a module that implements the `@behaviour Fledex.Component.Interface`. Only a single `configure/2` function is required that returns a `Fledex.Animation.Manager.configs_t` structure and thus can define anything you normaly would define through the `animation`, `static`, ... macros.
 
 To get the correct behaviour the component gets 2 parameters:
 
@@ -165,3 +165,29 @@ led_strip :nested_components3, Kino do
   end
 end
 ```
+
+<!-- livebook:{"branch_parent_index":0} -->
+
+## Debugging tricks
+
+When you develop components it can sometimes be difficult to debug them especially if you nest other components into your own. You easily will run into the question "Why does my component not show what I expect it to show?". The issue is usually that the triggers are not properly configured. But figuring out where it goes wrong is not so easy.
+
+There is a quite simply trick to debug a component by adding the following animation
+to your component:
+
+<!-- livebook:{"force_markdown":true} -->
+
+```elixir
+  animation :logger do
+    %{logger: logger} = trigger ->
+      if rem(logger, 10) == 0 do
+        IO.puts "logger: #{inspect trigger}"
+      end
+      {leds(), %{trigger | logger: logger+1}}
+    trigger -> {leds(), Map.put_new(trigger, :logger, 0)}
+  end
+```
+
+It will log the triggers in regular intervals so you see what the component receives and you can then compare it with what you would expect.
+As you can see this animation has no effect on your animation, because it always returns empty `leds()`. We only use the side effect (writing to `IO.puts`) of this animation.
+

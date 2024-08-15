@@ -68,7 +68,7 @@ the `use Fledex`)
     ```elixir
     led_count = 1
     divisor = 10
-    led_strip :one, :kino do
+    led_strip :one, Kino do
       animation :blink_blue do
         triggers ->
         counter = triggers[:one] || 0 

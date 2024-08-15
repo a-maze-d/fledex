@@ -37,7 +37,7 @@ defmodule Fledex.Driver.Impl.Spi do
     config = Keyword.merge(old_config, new_config)
     # Maybe the following code coudl be optimized
     # to only reopen the port if it's necessary. But this is safe
-    :ok  = terminate(:normal, old_config)
+    :ok = terminate(:normal, old_config)
     Keyword.put(config, :ref, open_spi(config))
   end
 

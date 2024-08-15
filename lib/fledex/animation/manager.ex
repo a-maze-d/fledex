@@ -25,19 +25,23 @@ defmodule Fledex.Animation.Manager do
 
   alias Fledex.Animation.Animator
   alias Fledex.Animation.AnimatorInterface
+  alias Fledex.Animation.Coordinator
   alias Fledex.Animation.JobScheduler
   alias Fledex.LedStrip
-  alias Quantum.Job
 
-  @type config_t :: %{
-          atom => Animator.config_t()
+  @type configs_t :: %{
+          atom => Animator.config_t() | JobScheduler.config_t() | Coordinator.config_t()
         }
 
   @typep state_t :: %{
-           animations: map(),
-           coordinators: map(),
-           jobs: map(),
-           impls: map()
+           animations: %{atom => Animator.config_t()},
+           coordinators: %{atom => Coordinator.config_t()},
+           jobs: %{atom => JobScheduler.config_t()},
+           impls: %{
+             job_scheduler: module,
+             animator: module,
+             led_strip: module
+           }
          }
 
   # def child_spec(args) do
@@ -69,9 +73,9 @@ defmodule Fledex.Animation.Manager do
 
   @doc """
   Register a new LED strip with the specific `strip_name`. The LED strip
-  needs to be configured, either through a simple atom (for predefined
-  configurations, or through a map with all the configurations (see
-  [`LedStrip`](Fledex.LedStrip.html) for details).
+  needs to be configured, either through a simple module (for predefined
+  configurations, or a touple with module and keyword list to adjust the
+  configuration.(see [`LedStrip`](Fledex.LedStrip.html) for details).
   """
   @spec register_strip(atom, [{module, keyword}], keyword) :: :ok
   def register_strip(strip_name, drivers, strip_config) do
@@ -335,23 +339,18 @@ defmodule Fledex.Animation.Manager do
   defp update_jobs(impls, strip_name, jobs) do
     Enum.each(jobs, fn {job, job_config} ->
       impls.job_scheduler.delete_job(job)
-      impls.job_scheduler.add_job(convert(impls, job, job_config, strip_name))
+
+      impls.job_scheduler.create_job(job, job_config, strip_name)
+      |> impls.job_scheduler.add_job()
     end)
   end
 
   defp create_jobs(impls, strip_name, jobs) do
     Enum.each(jobs, fn {job, job_config} ->
-      impls.job_scheduler.add_job(convert(impls, job, job_config, strip_name))
+      impls.job_scheduler.create_job(job, job_config, strip_name)
+      |> impls.job_scheduler.add_job()
+
       if Keyword.get(job_config.options, :run_once, false), do: impls.job_scheduler.run_job(job)
     end)
-  end
-
-  defp convert(impls, job, job_config, _strip_name) do
-    impls.job_scheduler.new_job()
-    |> Job.set_name(job)
-    |> Job.set_schedule(job_config.pattern)
-    |> Job.set_task(job_config.func)
-    |> Job.set_timezone(Keyword.get(job_config.options, :timezone, :utc))
-    |> Job.set_overlap(Keyword.get(job_config.options, :overlap, false))
   end
 end

@@ -20,7 +20,7 @@ defmodule Fledex.Utils.Dsl do
   #   @fledex_config
   # end
 
-  @spec create_config(atom, atom, (map -> Leds.t()), keyword | nil) :: Manager.config_t()
+  @spec create_config(atom, atom, (map -> Leds.t()), keyword | nil) :: Manager.configs_t()
   def create_config(name, type, def_func, options)
       when is_atom(name) and is_atom(type) and
              (is_function(def_func, 1) or is_function(def_func, 2)) do
@@ -34,13 +34,13 @@ defmodule Fledex.Utils.Dsl do
     }
   end
 
-  @spec create_config(atom, atom, keyword | nil) :: Manager.config_t()
+  @spec create_config(atom, atom, keyword | nil) :: Manager.configs_t()
   def create_config(name, module, opts) do
     module.configure(name, opts)
   end
 
-  @spec apply_effect(atom, keyword, Manager.config_t() | [Manager.config_t()]) ::
-          Manager.config_t()
+  @spec apply_effect(atom, keyword, Manager.configs_t() | [Manager.configs_t()]) ::
+          Manager.configs_t()
   def apply_effect(module, options, block)
       when is_atom(module) and is_list(options) and is_map(block) do
     apply_effect(module, options, [block])
@@ -68,10 +68,10 @@ defmodule Fledex.Utils.Dsl do
 
   @spec configure_strip(
           atom,
-          [{module, keyword}] | atom | {module, keyword} | module,
+          :config | module | {module, keyword} | [{module, keyword}],
           keyword,
-          [Manager.config_t()] | Manager.config_t()
-        ) :: :ok | Manager.config_t()
+          [Manager.configs_t()] | Manager.configs_t()
+        ) :: :ok | Manager.configs_t()
   def configure_strip(strip_name, drivers, strip_options, config) when is_list(config) do
     config =
       Enum.reduce(config, %{}, fn map, acc ->
