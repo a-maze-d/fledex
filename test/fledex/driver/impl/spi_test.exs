@@ -23,6 +23,35 @@ defmodule Fledex.Driver.Impl.SpiTest do
       assert Keyword.fetch!(config, :ref) != nil
     end
 
+    def test_zero_transfer(_leds, _counter, config) do
+      assert false
+      {config, <<>>}
+    end
+    def test_100_transfer(leds, counter, config) do
+      assert Enum.count(leds) == 100
+      assert counter == 100
+      Enum.each(leds, fn led ->
+        assert led == 0x000000
+      end)
+      {config, <<>>}
+    end
+    def test_100red_transfer(leds, counter, config) do
+      assert Enum.count(leds) == 100
+      assert counter == 100
+      Enum.each(leds, fn led ->
+        assert led == 0xff0000
+      end)
+      {config, <<>>}
+    end
+    test "clear_leds" do
+      config = Spi.init([])
+      Spi.clear_leds(0, config, &test_zero_transfer/3)
+      Spi.clear_leds(100, config, &test_100_transfer/3)
+      Spi.clear_leds({100, 0xff0000}, config, &test_100red_transfer/3)
+
+      Spi.terminate(:normal, config)
+    end
+
     test "reinit" do
       config = Spi.init([])
       assert config == Spi.reinit(config, [])

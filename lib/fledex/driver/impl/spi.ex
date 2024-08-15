@@ -27,8 +27,10 @@ defmodule Fledex.Driver.Impl.Spi do
   @impl true
   @spec init(keyword) :: keyword
   def init(config) do
+    {clear_leds, config} = Keyword.pop(config, :clear_leds, 0)
     config = configure(config)
-    Keyword.put(config, :ref, open_spi(config))
+    config = Keyword.put(config, :ref, open_spi(config))
+    clear_leds(clear_leds, config, &transfer/3)
   end
 
   @impl true
@@ -77,4 +79,25 @@ defmodule Fledex.Driver.Impl.Spi do
   def terminate(_reason, config) do
     Circuits.SPI.close(Keyword.fetch!(config, :ref))
   end
+
+  @spec clear_leds(
+          count :: non_neg_integer | {count :: non_neg_integer, color :: non_neg_integer},
+          config :: keyword,
+          clear_func :: (list(Types.colorint()), pos_integer, keyword -> {keyword, any})
+        ) :: keyword
+  def clear_leds(count, config, clear_func) when is_integer(count) do
+    # set it to black by default
+    clear_leds({count, 0x000000}, config, clear_func)
+  end
+
+  def clear_leds({count, color} = _clear_leds, config, clear_func) when is_integer(count) and count > 0 do
+    leds =
+      Enum.reduce(1..count, [], fn _index, acc ->
+        [color | acc]
+      end)
+    {config, _response} = clear_func.(leds, count, config)
+    config
+  end
+
+  def clear_leds({0, _color} = _clear_leds, config, _clear_func), do: config
 end

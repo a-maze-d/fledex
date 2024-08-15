@@ -35,22 +35,21 @@ Even though this library is published, there are things I still want to do befor
 - [x] Cleanup
   - [x] Upgrade dependencies [v0.5]
   - [x] `LedStrip`  is partially directly called in the `Manager` (v0.5)
-  - [ ] Change the animation properties to a keyword list instead of a map (v0.6)
 - [ ] Enable Telemetry? (v0.7)
 - [ ] Missing functionality
-  - [ ] Add the possibility to clear the LEDs when initializing the LedsDriver. This should be a feature fo the Spi Driver (v0.5)
-  - [ ] Connect everything into a supervision tree (to make it more robust) (v0.5)
+  - [x] Add the possibility to clear the LEDs when initializing the LedsDriver. This should be a feature fo the Spi Driver (v0.5)
+  - [ ] Connect everything into a supervision tree (to make it more robust) (v0.6)
   - [ ] Create support for a coordinator (that can control individual animations and effects. Effects will have to notify back their state) (v0.6)
-  - [ ] Clustering
+  - [ ] Clustering (v0.7)
     - [ ] Rethink the clusering and check whether the new livebook API endpoints might make it easier to cluster. Currently it seems to be quite complicated.
-    - [ ] Provide examples on how to cluster (v0.5)
-    - [ ] Add an example where several nodes are connected to transfer pubsub messages accross nodes (v0.5)
+    - [ ] Provide examples on how to cluster
+    - [ ] Add an example where several nodes are connected to transfer pubsub messages accross nodes
     - [ ] Implement music beat through clustering
   - [ ] Do we need to have language packs that allows to adjust to other languages? At least for color it would be quite easy with some `defdelegate`
-  - [ ] Create smartcells (v0.6)
+  - [ ] Create smartcells (v0.7)
 - [ ] Increase consumption
   - [x] Use in school project (v0.4). The learnings:
-    - [ ] setting up livebook (a really working version) on windows is anything than easy :-( Can we do something about it? Investigate (v0.5?) 
+    - [ ] setting up livebook (a really working version) on windows is anything than easy :-( Can we do something about it? Investigate (v0.7) 
     - [x] Reconfiguration of the strip is an important thing (see TODO item above)
     - [ ] Useful to provide a full story about colors (additive / subtractive colors), hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up
   - [ ] Create a video (v0.5)

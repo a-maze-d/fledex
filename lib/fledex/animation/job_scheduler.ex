@@ -9,7 +9,7 @@ defmodule Fledex.Animation.JobScheduler do
   @type config_t :: %{
           type: :job,
           pattern: Crontab.CronExpression.t(),
-          options: map,
+          options: keyword,
           func: (-> any)
         }
 
