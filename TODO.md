@@ -10,11 +10,12 @@ Even though this library is published, there are things I still want to do befor
 # Tasks
 - [ ] Documentation
   - [x] Add Branching sections in the livebooks to separate things that don't need to be together? (v0.5)
-  - [ ] change the doc structure? so that links don't get so easily broken? (v0.6)
+  - [x] Update the README.md (v0.5)
   - [ ] Add installation instructions (v0.5)
-  - [ ] Update the README.md (v0.5)
   - [ ] Update the architectural overview to adjust to the new driver approach (v0.5)
   - [ ] Update Cheatsheet with new driver approach (v0.5)
+  - [ ] Mark the livbooks so that it becomes clear what kind they are (internal, background, usage,...) (v0.5)
+  - [ ] change the doc structure? so that links don't get so easily broken? (v0.6)
 - [ ] Testing
   - [x] Perform an extra round of testing on hardware (v0.4)
   - [x] Fix the issue in the livebooks that `simple_broadcast/1` gets called directly now, since the function gets imported (v0.4)

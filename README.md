@@ -37,29 +37,62 @@ def deps do
 end
 ```
 
-TODO: This whole section needs some updating, since it has become much easier now that we can `use Fledex` to load the macros
+## Usage
+The smoothest way is to use the Fledex DSL wjich defines some functions and macros. To enable them you need to `use Fledex`. This will (by default) start the animation manager (`Fledex.Animation.Manager`) through all led definitions are routed. But don't worry, you won't really see it.
 
-Once in you have installed the library and run your usual `mix deps.get` you can start the LedStrip Server by calling:
+As a next step you define an LED strip through the `led_strip` macro. While defining the led strip you need to decide on how you want to talk to your stip. There are several ways on how you can address your LED strip. You need an appropriate driver. The most common ways are through an SPI bus (`Fledex.Driver.Impl.Spi`) or through Kino (`Fledex.Driver.Impl.Kino`) as a simulated LED strip in a [Livebook](https://livebook.dev/). It is possible to adjust the settings of the drivers, or even define severael drivers at the same time.
+
+This will look like the following:
 ```elixir
-{:ok, pid} = LedStrip.start_link(:strip_name)
+led_strip Spi do
+  # ... here comes the definition of your leds ...
+end
 ```
 
-The `Fledex.LedStrip` should have quite reasonable defaults to get you started (a `Fledex.Driver.Impl.Null` driver is used by default)
+Once we have defined our led strip we can start to define sequences of leds. This can be achieved in 4 different ways:
 
-Your interaction with the LedDriver should mainly happen through the Leds module. To set the first 3 LEDs (of a 50 LED strip) to red, green and blue you would do the following (here the [color names](https://www.ditig.com/256-colors-cheat-sheet) are used, but you could have used the hex values `0xFF0000`, `0x00FF00`, and `0x0000FF` too):
+* **static:** a static set of leds that do not change over time
+* **animation:** an animated, i.e. changing set of leds
+* **component** can encapsulate (and make the usage) of already predefined static and animated set of leds easier.
+
+All of them define a function that defines a sequence of leds (`Fledex.Leds`). which might (or might not) change over time to give the desired effects.
+
+Combined this might look like the following (a bit of an artificial example to demonstrate all 3 types at the same time):
 ```elixir
-LedStrip.define_namespace(:default)
-Leds.leds(50)
-  |> Leds.light(:red)
-  |> Leds.light(:green1) 
-  |> Leds.light(:blue)
-  |> Leds.send() # :default namespace is used as default
+alias Fledex.Component.Dot
+
+led_strip :nested_components, Kino do
+  animation :second,
+    send_config: fn _triggers ->
+      %{hour: _hour, minute: _minute, second: second} = Time.utc_now()
+      %{offset: second, rotate_left: false}
+    end do
+    _triggers ->
+      leds(60) |> light(:red)
+  end
+
+  component(:minute, Dot, color: :red, count: 60, trigger_name: :minute)
+  component(:hour, Dot, color: :blue, count: 24, trigger_name: :hour)
+
+  static :helper do
+    leds(5) |> light(:davy_s_grey, 5) |> repeat(12)
+  end
+end
 ```
-All other LEDs would be set to off
 
-The above approach is rather cumbersome with a lot of LEDs, and would be even more difficult if you want to animate it. Thus, instead of managing the LED strip yourself, you should use the Fledex DSL.
+You mainly use the functionality from `Fledex.Leds` which has plenty of functions. It allows to set individual leds, provides the possibility to nest led sequences, to repeat and to define leds through some functions, like gradients and rainbow distributions.
+`Fledex.Color.Names` provides a very rich set of predefined [color names](https://www.ditig.com/256-colors-cheat-sheet), but you can define it also by specifying a hex value. 
+Here an example of an led squence of 10 leds with the first 3 being `red`, `green`, and  `0x0000ff` (blue). The rest will be black (off).
+```elixir
+  leds(10) |> red() |> light(:green) |> light(0x0000ff)
+```
 
-Take a look at the [Livebook examples](README.md#livebook) on how to use the DSL
+There is also a rich set of support functionality to make the definition of LED strips (and especially animations) easier, like:
+
+* `Fledex.Effect.*` to define some effects (like Dimming, Wanish, ...) on a sequence of leds
+* `Fledex.job` to define repetitive tasks, like fetching some weather information
+
+Take a look at the [Livebook examples](README.md#livebook) on how to use the DSL. Note: the livebooks do present also the internals how the library works. As a first step you can skip those.
 
 ## Livebook
 As mentioned above, the library works well in conjunction with Livebook so you probably want to take your first steps with it. You can find some [livebooks](livebooks/README.md) files that show you how to use the library in a notebook (with and without hardware). You should be able to do most of your development on a computer (emulating the LED strip with a `Fledex.Driver.Impl.Kino`) before adjusting it to the real hardware (with the `Fledex.Driver.Impl.Spi`). On real hardware you can even run it with serveral drivers at the same time.
