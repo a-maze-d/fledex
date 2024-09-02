@@ -25,7 +25,7 @@ Even though this library is published, there are things I still want to do befor
 - [x] Driver improvements
   - [x] Fix the LedsDriver.reinit so that a reconfiguration of drivers is possible. Currently the new config is not passed in (v0.5)
     - [x] Give it an extra test drive
-    - [x] Fix the SPI driver so that it compares the settings
+    - [x] Fix the SPI driver so that it compares the settings (kind of fixed, we always reconnect instead)
   - [x] Improve the LedsDriver config (v0.5)
     - [x] Cleanup
     - [x] Update the livebooks
