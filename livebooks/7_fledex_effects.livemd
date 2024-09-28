@@ -131,9 +131,9 @@ defmodule LivebookEffect1 do
           count :: non_neg_integer,
           config :: keyword,
           triggers :: map
-        ) :: {list(Types.colorint()), non_neg_integer, map, Interface.effect_state_t()}
+        ) :: {list(Types.colorint()), non_neg_integer, map}
   def apply(leds, count, _config, triggers) do
-    {leds, count, triggers, :static}
+    {leds, count, triggers}
   end
 end
 ```
@@ -158,9 +158,9 @@ defmodule LivebookEffect2 do
           count :: non_neg_integer,
           config :: keyword,
           triggers :: map
-        ) :: {list(Types.colorint()), non_neg_integer, map, Interface.effect_state_t()}
+        ) :: {list(Types.colorint()), non_neg_integer, map}
   def apply(leds, count, _config, triggers) do
-    {Enum.shuffle(leds), count, triggers, :progress}
+    {Enum.shuffle(leds), count, triggers}
   end
 end
 ```

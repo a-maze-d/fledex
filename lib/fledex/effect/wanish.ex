@@ -6,7 +6,6 @@ defmodule Fledex.Effect.Wanish do
   @behaviour Fledex.Effect.Interface
 
   alias Fledex.Color.Types
-  alias Fledex.Effect.Interface
 
   @impl true
   @spec apply(
@@ -15,14 +14,14 @@ defmodule Fledex.Effect.Wanish do
           config :: keyword,
           triggers :: map
         ) ::
-          {list(Types.colorint()), non_neg_integer, map, Interface.effect_state_t()}
+          {list(Types.colorint()), non_neg_integer, map}
   def apply(leds, count, config, triggers) do
     case enabled?(config) do
       true ->
         trigger_name = Keyword.get(config, :trigger_name)
         do_apply(leds, count, config, trigger_name, triggers)
       false ->
-        {leds, count, config, :static}
+        {leds, count, config}
     end
   end
 
@@ -84,10 +83,9 @@ defmodule Fledex.Effect.Wanish do
     if task == :run do
       offset = calculate_offset(count, offset, circulate, reappear, reappear_key, triggers)
       triggers = adjust_triggers(count, remainder, offset, reappear_key, triggers)
-      effect_status = if remainder == 0, do: :stop_start, else: :progress
-      {switch_off(leds, offset, left), count, triggers, effect_status}
+      {switch_off(leds, offset, left), count, triggers}
     else
-      {leds, count, triggers, :disabled}
+      {leds, count, triggers}
     end
   end
 

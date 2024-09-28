@@ -173,7 +173,7 @@ defmodule Fledex.Animation.Animator do
         Enum.reverse(effects),
         {Leds.to_list(leds), count, triggers},
         fn {effect, config}, {leds, count, triggers} ->
-          {leds, count, triggers, _effect_state} = effect.apply(leds, count, config, triggers)
+          {leds, count, triggers} = effect.apply(leds, count, config, triggers)
           {leds, count, triggers}
         end
       )

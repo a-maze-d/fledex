@@ -57,12 +57,11 @@ defmodule Fledex.Effect.Interface do
   * (deprecated) the effect state is something that will be removed in the next version. States
     will be handled through side effects (and triggers)
 
-  The most simplest filter is the one that simply returns the passed in parameters (and :static as
-  effect state):
+  The most simplest filter is the one that simply returns the passed in parameters:
 
   ```elixir
   def apply(leds, count, _config, trigggers) do
-    {leds, count, triggers, :static}
+    {leds, count, triggers}
   end
   ```
   """
@@ -72,7 +71,7 @@ defmodule Fledex.Effect.Interface do
               config :: keyword,
               triggers :: map
             ) ::
-              {list(Types.colorint()), non_neg_integer, map, effect_state_t}
+              {list(Types.colorint()), non_neg_integer, map}
 
   @callback enable(config :: keyword, enable :: boolean) :: keyword
   @callback enabled?(config :: keyword) :: boolean

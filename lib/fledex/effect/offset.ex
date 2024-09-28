@@ -6,7 +6,6 @@ defmodule Fledex.Effect.Offset do
   @behaviour Fledex.Effect.Interface
 
   alias Fledex.Color.Types
-  alias Fledex.Effect.Interface
 
   @impl true
   @spec apply(
@@ -15,14 +14,14 @@ defmodule Fledex.Effect.Offset do
         config :: keyword,
         triggers :: map
       ) ::
-        {list(Types.colorint()), non_neg_integer, map, Interface.effect_state_t()}
-  def apply(leds, 0, _config, triggers), do: {leds, 0, triggers, :stop}
+        {list(Types.colorint()), non_neg_integer, map}
+  def apply(leds, 0, _config, triggers), do: {leds, 0, triggers}
   def apply(leds, count, config, triggers) do
     case enabled?(config) do
       true ->
         do_apply(leds, count, config, triggers)
       false ->
-        {leds, count, config, :static}
+        {leds, count, config}
     end
   end
 
@@ -30,7 +29,7 @@ defmodule Fledex.Effect.Offset do
     offset = config[:offset] || 1
 
     zeros = Enum.map(Enum.to_list(1..offset), fn _index -> 0 end)
-    {zeros ++ leds, count + offset, triggers, :static}
+    {zeros ++ leds, count + offset, triggers}
   end
 
   @impl true
