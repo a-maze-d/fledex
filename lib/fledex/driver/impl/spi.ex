@@ -90,11 +90,13 @@ defmodule Fledex.Driver.Impl.Spi do
     clear_leds({count, 0x000000}, config, clear_func)
   end
 
-  def clear_leds({count, color} = _clear_leds, config, clear_func) when is_integer(count) and count > 0 do
+  def clear_leds({count, color} = _clear_leds, config, clear_func)
+      when is_integer(count) and count > 0 do
     leds =
       Enum.reduce(1..count, [], fn _index, acc ->
         [color | acc]
       end)
+
     {config, _response} = clear_func.(leds, count, config)
     config
   end

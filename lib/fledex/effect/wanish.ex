@@ -17,9 +17,25 @@ defmodule Fledex.Effect.Wanish do
         ) ::
           {list(Types.colorint()), non_neg_integer, map, Interface.effect_state_t()}
   def apply(leds, count, config, triggers) do
-    trigger_name = Keyword.get(config, :trigger_name)
+    case enabled?(config) do
+      true ->
+        trigger_name = Keyword.get(config, :trigger_name)
+        do_apply(leds, count, config, trigger_name, triggers)
+      false ->
+        {leds, count, config, :static}
+    end
+  end
 
-    do_apply(leds, count, config, trigger_name, triggers)
+  @impl true
+  @spec enable(config :: keyword, enable :: boolean) :: keyword
+  def enable(config, enable) do
+    Keyword.put(config, :enabled, enable)
+  end
+
+  @impl true
+  @spec enabled?(config :: keyword) :: boolean
+  def enabled?(config) do
+    Keyword.get(config, :enabled, true)
   end
 
   # This function is a bit complicated. It calculates how many pixels should be switched off or not

@@ -70,7 +70,7 @@ defmodule Fledex.Animation.Animator do
           :strip_name => atom,
           :animation_name => atom
         }
-  ### server side
+  ### MARK: server side
   @impl GenServer
   @spec init({config_t, atom, atom}) :: {:ok, state_t, {:continue, :paint_once}}
   def init({init_args, strip_name, animation_name}) do
@@ -229,6 +229,31 @@ defmodule Fledex.Animation.Animator do
     state = update_config(state, config)
 
     {:noreply, update_leds(state)}
+  end
+
+  @impl GenServer
+  @spec handle_cast({:enable, :all | pos_integer, boolean}, state_t) :: {:noreply, state_t}
+  def handle_cast({:enable, :all, enable}, %{options: options} = state) when is_boolean(enable) do
+    {:noreply, %{state | options: Keyword.replace(options, :enabled, enable)}}
+  end
+
+  def handle_cast({:enable, what, enable}, %{effects: effects} = state)
+      when is_number(what) and what > 0 and is_boolean(enable) do
+    # TODO: test function
+    {:noreply, %{state | effects: enable_effect(effects, what, enable)}}
+  end
+
+  @spec enable_effect(list({module, config_t}), pos_integer(), boolean) :: [{module, config_t}]
+  defp enable_effect(effects, what, enable)
+       when is_list(effects) and is_integer(what) and is_boolean(enable) do
+    case Enum.at(effects, what) do
+      {module, config} when is_atom(module) and is_list(config) ->
+        updated_config = module.enable(config, enable)
+        List.replace_at(effects, what, {module, updated_config})
+
+      nil ->
+        effects
+    end
   end
 
   @impl GenServer

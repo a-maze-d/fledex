@@ -109,7 +109,7 @@ defmodule Fledex.Color.Utils do
   end
 
   @spec do_cap(pos_integer, Range.t()) :: pos_integer
-  defp do_cap(value, min..max) when min <= max do
+  defp do_cap(value, min..max//1) when min <= max do
     case value do
       value when value < min -> min
       value when value > max -> max

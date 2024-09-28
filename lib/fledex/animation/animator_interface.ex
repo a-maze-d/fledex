@@ -32,6 +32,19 @@ defmodule Fledex.Animation.AnimatorInterface do
   @callback config(strip_name :: atom, animation_name :: atom, config :: map) :: :ok
 
   @doc """
+  Sometimes it can be very practical to disable or re-enable an animation or to
+  disable a certain effect.
+  If you disable `:all` the whole animaion will affected, if you specify an index,
+  only the effect with the given index will be affected.
+  """
+  @callback enable(
+              strip_name :: atom,
+              animation_name :: atom,
+              what :: :all | pos_integer,
+              enable :: boolean
+            ) :: :ok
+
+  @doc """
   When the animation is no long required, this function should be called. This will
   call (by default) GenServer.stop. The animation can implement the `terminate/2`
   function if necessary.
@@ -50,6 +63,6 @@ defmodule Fledex.Animation.AnimatorInterface do
   @spec build_name(atom, :animator | :job | :coordinator, atom) :: atom
   def build_name(strip_name, type, animation_name)
       when is_atom(strip_name) and is_atom(animation_name) do
-    Module.concat(Module.concat(strip_name, type), animation_name)
+    Module.concat([strip_name, type, animation_name])
   end
 end

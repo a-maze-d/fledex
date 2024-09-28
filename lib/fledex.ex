@@ -27,7 +27,14 @@ defmodule Fledex do
   alias Fledex.Utils.Dsl
 
   @doc """
-  By using this module, the `Fledex` macros are made available.
+  Returns the version of the `Fledex` library.
+  It can be important to know the version in order to adjust some code depending
+  on the version
+  """
+  def version, do: Mix.Project.config()[:version]
+
+  @doc """
+  By `use`-ing this module, the `Fledex` macros are made available.
 
   This macro does also import `Crontab.CronExpression`, `Fledex.Leds`, `Fledex.Color.Names`,
   and `Fledex.Utils.PubSub`. Therefore the functions from those modules are directly

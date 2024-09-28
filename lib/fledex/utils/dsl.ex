@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Utils.Dsl do
+  require Logger
+
   alias Fledex.Animation.Manager
   alias Fledex.Leds
 
@@ -111,7 +113,28 @@ defmodule Fledex.Utils.Dsl do
     if Keyword.get(opts, :dont_start, false) do
       :ok
     else
-      Manager.start_link(opts)
+      # starting Fledex.Animation.Manager as child process of Kino if we opperate in a Kino env
+      # (which I think we currently always do due to the Kino driver dependency :-()
+      # TODO: investigate more
+      case kino_env?() do
+        true -> Kino.start_child({Manager, opts})
+        false -> Manager.start_link(opts)
+      end
+    end
+  end
+
+  @spec kino_env? :: boolean
+  defp kino_env? do
+    case Code.ensure_compiled(Kino.Supervisor) do
+      {:error, :nofile} ->
+        false
+
+      {:module, _} ->
+        true
+
+      x ->
+        Logger.warning("Unknown env error #{inspect(x)}")
+        false
     end
   end
 

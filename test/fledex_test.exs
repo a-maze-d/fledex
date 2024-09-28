@@ -11,6 +11,11 @@ defmodule Fledex.Test do
   alias Fledex.Animation.Manager
   alias Fledex.ManagerTestUtils
 
+  test "version" do
+    assert nil != Fledex.version()
+    assert {:ok, _} = Version.parse(Fledex.version())
+  end
+
   @server_name :john
   describe "test macros" do
     test "use macro" do
