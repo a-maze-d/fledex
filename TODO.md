@@ -18,7 +18,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] change the doc structure? so that links don't get so easily broken? (v0.6)
 - [ ] Testing
   - [x] Perform an extra round of testing on hardware (v0.4)
-  - [x] Fix the issue in the livebooks that `simple_broadcast/1` gets called directly now, since the function gets imported (v0.4)
+  - [x] Fix the issue in the livebooks that `broadcast_trigger/1` gets called directly now, since the function gets imported (v0.4)
   - [x] Go through all Livebooks and make sure they all work after all the refactorings, there seem to be some minor issues. (v0.4) 
   - [x] parse the config for missing functions, so that errors can be detected early on, instead of failing when trying to paint things (v0.5)
   - [ ] Add more error handling scenarios (v0.5)

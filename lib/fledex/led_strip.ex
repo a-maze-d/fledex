@@ -347,7 +347,7 @@ defmodule Fledex.LedStrip do
       |> start_timer()
       |> func.()
 
-    PubSub.simple_broadcast(Map.put(%{}, state.strip_name, state.config.timer.counter))
+    PubSub.broadcast_trigger(Map.put(%{}, state.strip_name, state.config.timer.counter))
 
     {:noreply, state}
   end

@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -17,9 +17,10 @@ defmodule Fledex.Effect.Interface do
 
   alias Fledex.Color.Types
 
-  # TODO: remove the effect state
   @typedoc """
-  The state of an effect.
+  Typical states of an effect that should be published
+
+  Note: This is not used yet and still very much in flux
 
   An effect can be in different states
   * `:static`: effect is a static effect (and hence can not be used in a sequencer)
@@ -47,6 +48,7 @@ defmodule Fledex.Effect.Interface do
   * The `config` are some settings that can be used to configure the effect
   * The `triggers` map contains all the triggers can that can be used by the effect. It
     does contain also the extra parameters passed in in previous calls (see below)
+  * The `context` is a tuple of `strip_name`, `animation_name` and effect `index`.
 
   The function returns
 
@@ -54,13 +56,11 @@ defmodule Fledex.Effect.Interface do
   * the new count of the list,
   * and a (potentially modified) `triggers` map. This allows to retain some state between applying
   the filter in consecutive calls.
-  * (deprecated) the effect state is something that will be removed in the next version. States
-    will be handled through side effects (and triggers)
 
   The most simplest filter is the one that simply returns the passed in parameters:
 
   ```elixir
-  def apply(leds, count, _config, trigggers) do
+  def apply(leds, count, _config, trigggers, _context) do
     {leds, count, triggers}
   end
   ```
@@ -69,7 +69,8 @@ defmodule Fledex.Effect.Interface do
               leds :: [Types.colorint()],
               count :: non_neg_integer,
               config :: keyword,
-              triggers :: map
+              triggers :: map,
+              context :: map
             ) ::
               {list(Types.colorint()), non_neg_integer, map}
 
@@ -79,4 +80,23 @@ defmodule Fledex.Effect.Interface do
   @callback update_config(config :: keyword, updates :: keyword) :: keyword
 
   @optional_callbacks update_config: 2
+
+  @spec __using__(keyword) :: Macro.t()
+  defmacro __using__(_opts) do
+    quote do
+      @behaviour Fledex.Effect.Interface
+
+      @impl true
+      @spec enable(config :: keyword, enable :: boolean) :: keyword
+      def enable(config, enable) do
+        Keyword.put(config, :enabled, enable)
+      end
+
+      @impl true
+      @spec enabled?(config :: keyword) :: boolean
+      def enabled?(config) do
+        Keyword.get(config, :enabled, true)
+      end
+    end
+  end
 end

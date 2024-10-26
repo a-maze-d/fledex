@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -9,23 +9,26 @@ defmodule Fledex.Effect.Rotation do
 
   @impl true
   @spec apply(
-        leds :: list(Types.colorint()),
-        count :: non_neg_integer,
-        config :: keyword,
-        triggers :: map
-      ) ::
-        {list(Types.colorint()), non_neg_integer, map}
-  def apply(leds, 0, _config, triggers), do: {leds, 0, triggers}
-  def apply(leds, count, config, triggers) do
+          leds :: list(Types.colorint()),
+          count :: non_neg_integer,
+          config :: keyword,
+          triggers :: map,
+          context :: map
+        ) ::
+          {list(Types.colorint()), non_neg_integer, map}
+  def apply(leds, 0, _config, triggers, _context), do: {leds, 0, triggers}
+
+  def apply(leds, count, config, triggers, context) do
     case enabled?(config) do
       true ->
-        do_apply(leds, count, config, triggers)
+        do_apply(leds, count, config, triggers, context)
+
       false ->
         {leds, count, config}
     end
   end
 
-  defp do_apply(leds, count, config, triggers) do
+  defp do_apply(leds, count, config, triggers, _context) do
     left = Keyword.get(config, :direction, :left) != :right
     trigger_name = Keyword.get(config, :trigger_name, :default)
     offset = triggers[trigger_name] || 0

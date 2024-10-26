@@ -2,6 +2,14 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+defmodule Fledex.Animation.TestEffect do
+  use Fledex.Effect.Interface
+
+  def apply(leds, count, _config, triggers, _context) do
+    {leds, count, triggers}
+  end
+end
+
 defmodule Fledex.Animation.AnimatorTest do
   use ExUnit.Case
 
@@ -319,7 +327,13 @@ defmodule Fledex.Animation.AnimatorTest do
       leds = Leds.leds(3, [0xFF0000, 0x00FF00, 0x0000FF], %{})
       effects = [{Rotation, [trigger_name: :counter]}]
       triggers = %{counter: 1}
-      {returned_leds, returned_triggers} = Animator.apply_effects(leds, effects, triggers)
+
+      {returned_leds, returned_triggers} =
+        Animator.apply_effects(leds, effects, triggers, %{
+          strip_name: :strip_name,
+          animation_name: :animation_name
+        })
+
       assert returned_triggers == triggers
       assert Leds.to_list(returned_leds) == [0x00FF00, 0x0000FF, 0xFF0000]
     end
@@ -334,9 +348,74 @@ defmodule Fledex.Animation.AnimatorTest do
 
       triggers = %{counter: 1}
 
-      {returned_leds, returned_triggers} = Animator.apply_effects(leds, effects, triggers)
+      {returned_leds, returned_triggers} =
+        Animator.apply_effects(leds, effects, triggers, %{
+          strip_name: :strip_name,
+          animation_name: :animation_name
+        })
+
       assert returned_triggers == triggers
       assert Leds.to_list(returned_leds) == [0x00FF00, 0x0000FF, 0x000000]
+    end
+
+    test "enable animation without effects" do
+      alias Fledex.Animation.AnimatorBase
+
+      state = %{
+        triggers: %{},
+        type: :animation,
+        def_func: &AnimatorBase.default_def_func/1,
+        options: [send_config: &AnimatorBase.default_send_config_func/1],
+        effects: [],
+        strip_name: :strip_name,
+        animation_name: :animation_name
+      }
+
+      {:noreply, state} = Animator.handle_cast({:enable, :all, true}, state)
+      assert Keyword.get(Map.get(state, :options, []), :enabled, true) == true
+      {:noreply, state} = Animator.handle_cast({:enable, :all, false}, state)
+      assert Keyword.get(Map.get(state, :options, []), :enabled, true) == true
+    end
+
+    test "enable animation with effects" do
+      import ExUnit.CaptureLog
+      alias Fledex.Animation.AnimatorBase
+      effect = Fledex.Animation.TestEffect
+      config = []
+
+      state = %{
+        triggers: %{},
+        type: :animation,
+        def_func: &AnimatorBase.default_def_func/1,
+        options: [send_config: &AnimatorBase.default_send_config_func/1],
+        effects: [{effect, config}],
+        strip_name: :strip_name,
+        animation_name: :animation_name
+      }
+
+      {:noreply, state} = Animator.handle_cast({:enable, :all, true}, state)
+      assert Keyword.get(Map.get(state, :options, []), :enabled, true) == true
+      assert [{module, config} | []] = state.effects
+      assert module.enabled?(config) == true
+      {:noreply, state} = Animator.handle_cast({:enable, :all, false}, state)
+      assert Keyword.get(Map.get(state, :options, []), :enabled, true) == true
+      assert [{module, config} | []] = state.effects
+      assert module.enabled?(config) == false
+      {:noreply, state} = Animator.handle_cast({:enable, 0, true}, state)
+      assert Keyword.get(Map.get(state, :options, []), :enabled, true) == true
+      assert [{module, config} | []] = state.effects
+      assert module.enabled?(config) == true
+      {:noreply, state} = Animator.handle_cast({:enable, 0, false}, state)
+      assert Keyword.get(Map.get(state, :options, []), :enabled, true) == true
+      assert [{module, config} | []] = state.effects
+      assert module.enabled?(config) == false
+
+      assert capture_log(fn ->
+               {:noreply, state} = Animator.handle_cast({:enable, 1, true}, state)
+               assert Keyword.get(Map.get(state, :options, []), :enabled, true) == true
+               assert [{module, config} | []] = state.effects
+               assert module.enabled?(config) == false
+             end) =~ "No effect found at index 1"
     end
   end
 end

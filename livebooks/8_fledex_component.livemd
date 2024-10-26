@@ -78,7 +78,7 @@ end
 ```
 
 ```elixir
-simple_broadcast(%{hour: 17, minute: 34})
+broadcast_trigger(%{hour: 17, minute: 34})
 ```
 
 The interesting thing in the `Fledex.Component.Dot` component is that it actually defines the component by using the `Fledex.animation/3` macro. The code looks like the following
@@ -138,7 +138,7 @@ end
 And to see the correct time, we only need to publish the appropriate time. When we do so we shouldn't forget that the animations are reacting to two triggers that we passed in. We need to publish the triggers `:clock_hour` and `:clock_minute` as triggers (or if we like add even teh `:clock_second` too).
 
 ```elixir
-simple_broadcast(%{clock_hour: 17, clock_minute: 34, clock_second: 12})
+broadcast_trigger(%{clock_hour: 17, clock_minute: 34, clock_second: 12})
 ```
 
 <!-- livebook:{"branch_parent_index":0} -->
@@ -157,7 +157,7 @@ led_strip :nested_components3, Kino do
   job :clock, ~e[* * * * * * *]e do
     %DateTime{hour: hour, minute: minute, second: second} = DateTime.utc_now()
 
-    simple_broadcast(%{
+    broadcast_trigger(%{
       clock2_hour: hour,
       clock2_minute: minute,
       clock2_second: second

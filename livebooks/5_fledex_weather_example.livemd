@@ -143,7 +143,7 @@ For testing we can send an arbitrary temperature value to our strip in the follo
 Here we send a temperature value of -15.2 degree (which the strip should round to -15 degree)
 
 ```elixir
-PubSub.simple_broadcast(%{temperature: -15.2})
+PubSub.broadcast_trigger(%{temperature: -15.2})
 ```
 
 ## Getting the weather data
@@ -190,7 +190,7 @@ defmodule CallUrlPeriodic do
     {{_, 200, ~c"OK"}, _headers, body} = resp
     json = Jason.decode!(body)
     temperature = json["current"]["temperature_2m"]
-    PubSub.simple_broadcast(%{temperature: temperature})
+    PubSub.broadcast_trigger(%{temperature: temperature})
 
     {:noreply, state}
   end

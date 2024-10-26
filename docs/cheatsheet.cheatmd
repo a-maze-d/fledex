@@ -58,7 +58,7 @@ led_strip :name, Kino do
   end
   job :clock, ~e[* * * * * * *]e do
     date_time = DateTime.utc_now()
-    simple_broadcast(%{seconds: date_time.seconds})
+    broadcast_trigger(%{seconds: date_time.seconds})
   end
 end
 ```
@@ -194,7 +194,7 @@ A `job` is there to shedule a task in regular intervals and to publish it to the
 ```elixir
 job :name, ~e[* * * * * * *]e do
   date_time = DateTime.utc_now()
-  simple_broadcast(%{seconds: date_time.seconds})
+  broadcast_trigger(%{seconds: date_time.seconds})
 end
 ```
 
@@ -220,7 +220,7 @@ The following options are recognized:
 
 ### The `do ... end` block
 
-The `do ... end` block can consist of any valid Elixir code. The code will be called without any arguments. Usually you want to use at the end a `simple_broadcast/1` call 
+The `do ... end` block can consist of any valid Elixir code. The code will be called without any arguments. Usually you want to use at the end a `broadcast_trigger/1` call 
 to publish data towards the animations that react to data and change their look.
 
 ## The `component`

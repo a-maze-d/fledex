@@ -33,8 +33,8 @@ defmodule Fledex.Animation.AnimatorInterface do
 
   @doc """
   Sometimes it can be very practical to disable or re-enable an animation or to
-  disable a certain effect.
-  If you disable `:all` the whole animaion will affected, if you specify an index,
+  disable a certain effect applied to an animation.
+  If you disable `:all` the whole animaion will be affected, if you specify an index,
   only the effect with the given index will be affected.
   """
   @callback enable(

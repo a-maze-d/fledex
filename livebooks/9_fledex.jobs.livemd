@@ -31,7 +31,7 @@ Let me introduce you to `job`. It allows us to take care of repetitive work by e
 
 * a name for the job that identifies it uniquely
 * a schedule when the job should run (see [this cheatsheet](https://hexdocs.pm/crontab/cron_notation.html#expressions) for the possibilities)
-* and a function that should be executed, probably one that will at the end publish an event with `Fledex.Utils.PubSub.simple_broadcast/1`
+* and a function that should be executed, probably one that will at the end publish an event with `Fledex.Utils.PubSub.broadcast_trigger/1`
 
 The example here implements our clock example with the `Fledex.Component.Clock` component (see the previous chapter) and uses the `job` macro to schedule the updates.
 
@@ -48,7 +48,7 @@ led_strip :nested_components2, Kino do
   job :clock, ~e[@secondly]e do
     date_time = DateTime.utc_now()
 
-    simple_broadcast(%{
+    broadcast_trigger(%{
       clock_hour: date_time.hour,
       clock_minute: date_time.minute,
       clock_second: date_time.second
@@ -101,7 +101,7 @@ led_strip :john, Kin do
     {{_, 200, ~c"OK"}, _headers, body} = resp
     json = Jason.decode!(body)
     temperature = json["current"]["temperature_2m"]
-    simple_broadcast(%{temperature: temperature})
+    broadcast_trigger(%{temperature: temperature})
   end
 end
 ```

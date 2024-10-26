@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -12,14 +12,16 @@ defmodule Fledex.Effect.Wanish do
           leds :: list(Types.colorint()),
           count :: non_neg_integer,
           config :: keyword,
-          triggers :: map
+          triggers :: map,
+          context :: map
         ) ::
           {list(Types.colorint()), non_neg_integer, map}
-  def apply(leds, count, config, triggers) do
+  def apply(leds, count, config, triggers, context) do
     case enabled?(config) do
       true ->
         trigger_name = Keyword.get(config, :trigger_name)
-        do_apply(leds, count, config, trigger_name, triggers)
+        do_apply(leds, count, config, trigger_name, triggers, context)
+
       false ->
         {leds, count, config}
     end
@@ -59,8 +61,8 @@ defmodule Fledex.Effect.Wanish do
   # We change back the direction when our offset is at 1 (here again, the direction doesn't matter
   # in the next round, to align it to the modulo). This becomes a bit more complicated if we have
   # a divisor, since the same state appears twice. Therefore we take the remainder of the divisor
-  # into consideration  defp do_apply(leds, _count, _config, nil, triggers), do: {leds, triggers}
-  defp do_apply(leds, count, config, trigger_name, triggers) do
+  # into consideration  defp do_apply(leds, _count, _config, nil, triggers, _context), do: {leds, triggers}
+  defp do_apply(leds, count, config, trigger_name, triggers, _context) do
     left = Keyword.get(config, :direction, :left) != :right
     reappear = Keyword.get(config, :reappear, false)
     # reappear does not make sense without circulate

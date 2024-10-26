@@ -31,6 +31,7 @@ defmodule Fledex do
   It can be important to know the version in order to adjust some code depending
   on the version
   """
+  @doc since: "0.5"
   def version, do: Mix.Project.config()[:version]
 
   @doc """
@@ -212,7 +213,7 @@ defmodule Fledex do
   example livebook](5_fledex_weather_example.livemd)):
 
   ```elixir
-    simple_broadcast(%{temperature: -15.2})
+    broadcast_trigger(%{temperature: -15.2})
   ```
 
   Each job consists of:
@@ -241,7 +242,7 @@ defmodule Fledex do
     job :clock, ~e[@secondly]e do
       date_time = DateTime.utc_now()
 
-      simple_broadcast(%{
+      broadcast_trigger(%{
         clock_hour: date_time.hour,
         clock_minute: date_time.minute,
         clock_second: date_time.second

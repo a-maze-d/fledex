@@ -35,7 +35,7 @@ defmodule Fledex.Test do
       # from Fledex.Color.Names
       assert :erlang.fun_info(&red/1)
       # from Fledex.Utils.PubSub
-      assert :erlang.fun_info(&simple_broadcast/1)
+      assert :erlang.fun_info(&broadcast_trigger/1)
     end
 
     test "use macro without server" do

@@ -64,7 +64,7 @@ defmodule Fledex.Animation.Animator do
   @type state_t :: %{
           :triggers => map,
           :type => :animation | :static,
-          :def_func => (integer -> Leds.t()),
+          :def_func => (map -> Leds.t()),
           :options => keyword | nil,
           :effects => [{module, keyword}],
           :strip_name => atom,
@@ -145,7 +145,8 @@ defmodule Fledex.Animation.Animator do
 
     # we can get two different responses, with or without triggers, we make sure our result contains the triggers
     {leds, triggers} = call_def_func(def_func, triggers, options) |> get_with_triggers(triggers)
-    {leds, triggers} = apply_effects(leds, effects, triggers)
+    context = %{strip_name: strip_name, animation_name: animation_name}
+    {leds, triggers} = apply_effects(leds, effects, triggers, context)
 
     # independent on the configs say we want to ensure we use the correct namespace (animation_name)
     # and server_name (strip_name). Therefore we inject it
@@ -164,16 +165,18 @@ defmodule Fledex.Animation.Animator do
   defp call_def_func(def_func, triggers, options) when is_function(def_func, 2),
     do: def_func.(triggers, options)
 
-  @spec apply_effects(Leds.t(), [{module, map}], map) :: {Leds.t(), map}
-  def apply_effects(leds, effects, triggers) do
+  @spec apply_effects(Leds.t(), [{module, map}], map, map) :: {Leds.t(), map}
+  def apply_effects(leds, effects, triggers, context) do
     count = leds.count
 
     {led_list, led_count, triggers} =
-      Enum.reduce(
+      Enum.zip_reduce(
+        1..length(effects)//1,
         Enum.reverse(effects),
         {Leds.to_list(leds), count, triggers},
-        fn {effect, config}, {leds, count, triggers} ->
-          {leds, count, triggers} = effect.apply(leds, count, config, triggers)
+        fn index, {effect, config}, {leds, count, triggers} ->
+          context = Map.put(context, :effect, index)
+          {leds, count, triggers} = effect.apply(leds, count, config, triggers, context)
           {leds, count, triggers}
         end
       )
@@ -233,27 +236,44 @@ defmodule Fledex.Animation.Animator do
 
   @impl GenServer
   @spec handle_cast({:enable, :all | pos_integer, boolean}, state_t) :: {:noreply, state_t}
-  def handle_cast({:enable, :all, enable}, %{options: options} = state) when is_boolean(enable) do
-    {:noreply, %{state | options: Keyword.replace(options, :enabled, enable)}}
+  def handle_cast({:enable, :all, enable}, state) when is_boolean(enable) do
+    effects = Enum.map(state.effects, fn effect -> enable_effect(effect, enable) end)
+    # , options: Keyword.replace(options, :enabled, enable)}}
+    {:noreply, %{state | effects: effects}}
   end
 
   def handle_cast({:enable, what, enable}, %{effects: effects} = state)
-      when is_number(what) and what > 0 and is_boolean(enable) do
-    # TODO: test function
-    {:noreply, %{state | effects: enable_effect(effects, what, enable)}}
+      when is_integer(what) and what >= 0 and is_boolean(enable) do
+    {:noreply,
+     %{
+       state
+       | effects:
+           enable_effect_at(effects, what, enable, %{
+             strip_name: state.strip_name,
+             animation_name: state.animation_name
+           })
+     }}
   end
 
-  @spec enable_effect(list({module, config_t}), pos_integer(), boolean) :: [{module, config_t}]
-  defp enable_effect(effects, what, enable)
-       when is_list(effects) and is_integer(what) and is_boolean(enable) do
-    case Enum.at(effects, what) do
-      {module, config} when is_atom(module) and is_list(config) ->
-        updated_config = module.enable(config, enable)
-        List.replace_at(effects, what, {module, updated_config})
-
+  @spec enable_effect_at(list({module, config_t}), non_neg_integer(), boolean, map) :: [
+          {module, config_t}
+        ]
+  defp enable_effect_at(effects, what, enable, context)
+       when is_list(effects) and is_integer(what) and what >= 0 and is_boolean(enable) do
+    case Enum.at(effects, what, nil) do
       nil ->
+        Logger.warning("No effect found at index #{inspect(what)} (context: #{inspect(context)})")
         effects
+
+      effect ->
+        List.replace_at(effects, what, enable_effect(effect, enable))
     end
+  end
+
+  @spec enable_effect({module, keyword}, boolean) :: {module, keyword}
+  defp enable_effect({module, config} = _effect, enabled)
+       when is_atom(module) and is_list(config) do
+    {module, module.enable(config, enabled)}
   end
 
   @impl GenServer

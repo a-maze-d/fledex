@@ -6,13 +6,14 @@ defmodule Fledex.Effect.WanishTest do
   use ExUnit.Case
 
   alias Fledex.Effect.Wanish
+  @context %{strip_name: :strip_name, animation_name: :animation_name, effect: 1}
 
   describe "wanish effect" do
     test "without trigger name" do
       leds = [0xFF0000, 0x00FF00, 0x0000FF]
       triggers = %{counter: 1}
 
-      {returned_leds, 3, _triggers} = Wanish.apply(leds, 3, [], triggers)
+      {returned_leds, 3, _triggers} = Wanish.apply(leds, 3, [], triggers, @context)
 
       assert returned_leds == [0xFF0000, 0x00FF00, 0x0000FF]
     end
@@ -22,7 +23,7 @@ defmodule Fledex.Effect.WanishTest do
       triggers = %{counter: 1}
 
       {returned_leds, 3, _triggers} =
-        Wanish.apply(leds, 3, [trigger_name: :counter], triggers)
+        Wanish.apply(leds, 3, [trigger_name: :counter], triggers, @context)
 
       assert returned_leds == [0x000000, 0x00FF00, 0x0000FF]
     end
@@ -32,7 +33,7 @@ defmodule Fledex.Effect.WanishTest do
       triggers = %{default: 1}
 
       {returned_leds, 3, _triggers} =
-        Wanish.apply(leds, 3, [trigger_name: :default, direction: :right], triggers)
+        Wanish.apply(leds, 3, [trigger_name: :default, direction: :right], triggers, @context)
 
       assert returned_leds == [0xFF0000, 0x00FF00, 0x000000]
     end
@@ -42,14 +43,14 @@ defmodule Fledex.Effect.WanishTest do
       triggers = %{default: 1}
 
       {returned_leds, 3, _triggers} =
-        Wanish.apply(leds, 3, [trigger_name: :default, divisor: 2], triggers)
+        Wanish.apply(leds, 3, [trigger_name: :default, divisor: 2], triggers, @context)
 
       assert returned_leds == [0xFF0000, 0x00FF00, 0x0000FF]
 
       triggers = %{default: 2}
 
       {returned_leds, 3, _triggers} =
-        Wanish.apply(leds, 3, [trigger_name: :default, divisor: 2], triggers)
+        Wanish.apply(leds, 3, [trigger_name: :default, divisor: 2], triggers, @context)
 
       assert returned_leds == [0x000000, 0x00FF00, 0x0000FF]
     end
@@ -71,7 +72,7 @@ defmodule Fledex.Effect.WanishTest do
 
       Enum.reduce(expected_results, %{}, fn {expected_result, expected_reappear_key}, triggers ->
         triggers = Map.update(triggers, :default, 1, fn value -> value + 1 end)
-        {returned_leds, 3, triggers} = Wanish.apply(leds, 3, config, triggers)
+        {returned_leds, 3, triggers} = Wanish.apply(leds, 3, config, triggers, @context)
         assert returned_leds == expected_result
         assert triggers[reappear_key] == expected_reappear_key
         triggers
@@ -102,7 +103,7 @@ defmodule Fledex.Effect.WanishTest do
 
       Enum.reduce(expected_results, %{}, fn expected_result, triggers ->
         triggers = Map.update(triggers, :default, 1, fn value -> value + 1 end)
-        {returned_leds, 3, triggers} = Wanish.apply(leds, 3, config, triggers)
+        {returned_leds, 3, triggers} = Wanish.apply(leds, 3, config, triggers, @context)
         assert returned_leds == expected_result
         triggers
       end)
@@ -121,7 +122,7 @@ defmodule Fledex.Effect.WanishTest do
         end
       ]
 
-      {returned_leds, 3, triggers} = Wanish.apply(leds, 3, config, %{})
+      {returned_leds, 3, triggers} = Wanish.apply(leds, 3, config, %{}, @context)
       assert returned_leds == leds
       assert triggers == %{}
     end
