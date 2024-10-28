@@ -3,41 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Effect.Wanish do
-  @behaviour Fledex.Effect.Interface
-
-  alias Fledex.Color.Types
-
-  @impl true
-  @spec apply(
-          leds :: list(Types.colorint()),
-          count :: non_neg_integer,
-          config :: keyword,
-          triggers :: map,
-          context :: map
-        ) ::
-          {list(Types.colorint()), non_neg_integer, map}
-  def apply(leds, count, config, triggers, context) do
-    case enabled?(config) do
-      true ->
-        trigger_name = Keyword.get(config, :trigger_name)
-        do_apply(leds, count, config, trigger_name, triggers, context)
-
-      false ->
-        {leds, count, config}
-    end
-  end
-
-  @impl true
-  @spec enable(config :: keyword, enable :: boolean) :: keyword
-  def enable(config, enable) do
-    Keyword.put(config, :enabled, enable)
-  end
-
-  @impl true
-  @spec enabled?(config :: keyword) :: boolean
-  def enabled?(config) do
-    Keyword.get(config, :enabled, true)
-  end
+  use Fledex.Effect.Interface
 
   # This function is a bit complicated. It calculates how many pixels should be switched off or not
   # It starts with just getting the appropriate counter, rescaling it and circuling between to the number
@@ -62,7 +28,8 @@ defmodule Fledex.Effect.Wanish do
   # in the next round, to align it to the modulo). This becomes a bit more complicated if we have
   # a divisor, since the same state appears twice. Therefore we take the remainder of the divisor
   # into consideration  defp do_apply(leds, _count, _config, nil, triggers, _context), do: {leds, triggers}
-  defp do_apply(leds, count, config, trigger_name, triggers, _context) do
+  defp do_apply(leds, count, config, triggers, _context) do
+    trigger_name = Keyword.get(config, :trigger_name)
     left = Keyword.get(config, :direction, :left) != :right
     reappear = Keyword.get(config, :reappear, false)
     # reappear does not make sense without circulate

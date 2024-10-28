@@ -10,7 +10,7 @@ defmodule Fledex.Animation.Coordinator do
   alias Fledex.Utils.PubSub
 
   @callback start_link(strip_name :: atom, coordinator_name :: atom, configs :: keyword) ::
-  GenServer.on_start()
+              GenServer.on_start()
   @callback config(atom, atom, config_t) :: :ok
   @callback shutdown(atom, atom) :: :ok
 
@@ -20,11 +20,13 @@ defmodule Fledex.Animation.Coordinator do
           optional(:func) => (any, map, keyword -> keyword)
         }
   @typep state_t :: %__MODULE__{
-          options: keyword,
-          func: (broadcast_state :: any, context :: map(), options :: keyword() -> new_options :: keyword()),
-          strip_name: atom,
-          coordinator_name: atom
-        }
+           options: keyword,
+           func:
+             (broadcast_state :: any, context :: map(), options :: keyword() ->
+                new_options :: keyword()),
+           strip_name: atom,
+           coordinator_name: atom
+         }
 
   @spec default_func(any, map, keyword) :: keyword
   def default_func(_broadcast_state, _context, options), do: options
@@ -70,6 +72,7 @@ defmodule Fledex.Animation.Coordinator do
       strip_name: strip_name,
       coordinator_name: coordinator_name
     }
+
     :ok = PubSub.subscribe(PubSub.app(), PubSub.channel_state())
     {:ok, state}
   end
@@ -78,18 +81,25 @@ defmodule Fledex.Animation.Coordinator do
   @spec handle_cast({:config, config_t}, state_t) :: {:noreply, state_t}
   def handle_cast({:config, config}, %__MODULE__{options: options} = state) do
     # make sure to keep options, because they might be added as part of the coordination
-    {:noreply, %__MODULE__{state | func: config.func, options: Keyword.merge(options, config.options)}}
+    {:noreply,
+     %__MODULE__{state | func: config.func, options: Keyword.merge(options, config.options)}}
   end
 
   @impl GenServer
   @spec handle_info({:state_change, any, map}, state_t) :: {:noreply, state_t}
-  def handle_info({:state_change, broadcast_state, context}, %__MODULE__{func: func, options: options} = state) do
+  def handle_info(
+        {:state_change, broadcast_state, context},
+        %__MODULE__{func: func, options: options} = state
+      ) do
     state =
       try do
         %__MODULE__{state | options: func.(broadcast_state, context, options)}
       rescue
         value ->
-          Logger.warning("Coordinator issue, caught #{inspect(value)} (context: #{inspect context})")
+          Logger.warning(
+            "Coordinator issue, caught #{inspect(value)} (context: #{inspect(context)})"
+          )
+
           state
       end
 

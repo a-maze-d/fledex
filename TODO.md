@@ -21,7 +21,7 @@ Even though this library is published, there are things I still want to do befor
   - [x] Fix the issue in the livebooks that `broadcast_trigger/1` gets called directly now, since the function gets imported (v0.4)
   - [x] Go through all Livebooks and make sure they all work after all the refactorings, there seem to be some minor issues. (v0.4) 
   - [x] parse the config for missing functions, so that errors can be detected early on, instead of failing when trying to paint things (v0.5)
-  - [ ] Add more error handling scenarios (v0.5)
+  - [ ] Add more error handling scenarios (v0.6)
 - [x] Driver improvements
   - [x] Fix the LedsDriver.reinit so that a reconfiguration of drivers is possible. Currently the new config is not passed in (v0.5)
     - [x] Give it an extra test drive
@@ -40,7 +40,9 @@ Even though this library is published, there are things I still want to do befor
 - [ ] Missing functionality
   - [x] Add the possibility to clear the LEDs when initializing the LedsDriver. This should be a feature fo the Spi Driver (v0.5)
   - [ ] Connect everything into a supervision tree (to make it more robust) (v0.6)
-  - [ ] Create support for a coordinator (that can control individual animations and effects. Effects will have to notify back their state) (v0.6)
+  - [x] Create support for a coordinator (that can control individual animations and effects. 
+  - [ ] Update effects to make use of the coordinator functionality by reporting back their state through PubSub (v0.5)
+  - [ ] Update livebook examples how animations, effects, ... can be coordinated
   - [ ] Clustering (v0.7)
     - [ ] Rethink the clusering and check whether the new livebook API endpoints might make it easier to cluster. Currently it seems to be quite complicated.
     - [ ] Provide examples on how to cluster
@@ -50,12 +52,11 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Create smartcells (v0.7)
 - [ ] Increase consumption
   - [x] Use in school project (v0.4). The learnings:
-    - [ ] setting up livebook (a really working version) on windows is anything than easy :-( Can we do something about it? Investigate (v0.7) 
+    - [ ] setting up livebook (a really working version) on windows is anything than easy :-(Can we do something about it? Investigate (v0.7) 
     - [x] Reconfiguration of the strip is an important thing (see TODO item above)
     - [ ] Useful to provide a full story about colors (additive / subtractive colors), hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up
   - [ ] Create a video (v0.5)
-  - [ ] Talk on meetups? (v0.5 or v0.6)
+  - [ ] Talk on meetups? (v0.5)
   - [ ] Migrate outstanding TODOs to github (v0.6?)
   - [ ] Publish/announce on Elixirforum (v0.6)
   - [ ] Get the library into nerves-livebook (v0.7)
-  - [ ] Create a video (v0.5)

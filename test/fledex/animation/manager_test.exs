@@ -232,6 +232,7 @@ defmodule Fledex.Animation.ManagerTest do
       |> expect(:shutdown, 2, fn :john, _coordinator -> :ok end)
 
       use Fledex, dont_start: true
+
       state = %{
         animations: %{john: %{}},
         coordinators: %{john: %{}},
@@ -241,21 +242,28 @@ defmodule Fledex.Animation.ManagerTest do
         }
       }
 
-      config1 = led_strip :john, :config do
-        coordinator :coord1, [] do
-          {_state, _context, opts} -> Keyword.put(opts, :test1, true)
+      config1 =
+        led_strip :john, :config do
+          coordinator :coord1, [] do
+            {_state, _context, opts} -> Keyword.put(opts, :test1, true)
+          end
         end
-      end
-      config2 = led_strip :john, :config do
-        coordinator :coord1 do
-          {_state, _context, opts} -> Keyword.put(opts, :test2, true)
+
+      config2 =
+        led_strip :john, :config do
+          coordinator :coord1 do
+            {_state, _context, opts} -> Keyword.put(opts, :test2, true)
+          end
+
+          coordinator :coord2, [] do
+            {_state, _context, opts} -> Keyword.put(opts, :test1, false)
+          end
         end
-        coordinator :coord2, [] do
-          {_state, _context, opts} -> Keyword.put(opts, :test1, false)
+
+      config3 =
+        led_strip :john, :config do
         end
-      end
-      config3 = led_strip :john, :config do
-      end
+
       from = {self(), :ok}
       {:reply, :ok, state} = Manager.handle_call({:register_config, :john, config1}, from, state)
       {:reply, :ok, state} = Manager.handle_call({:register_config, :john, config2}, from, state)

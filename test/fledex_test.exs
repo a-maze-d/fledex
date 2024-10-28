@@ -387,19 +387,23 @@ defmodule Fledex.Test do
       assert %{john: %{type: :animation}, john_job: %{type: :job, pattern: "* * * * * *"}} =
                config
     end
+
     test "animation with coordinator" do
       use Fledex, dont_start: true
-      config = led_strip :strip, :config do
-        animation :john do
-          leds(20)
+
+      config =
+        led_strip :strip, :config do
+          animation :john do
+            leds(20)
+          end
+
+          coordinator :coord do
+            _context, _config -> :ok
+          end
         end
-        coordinator :coord do
-          _context, _config -> :ok
-        end
-      end
 
       assert %{john: %{type: :animation}, coord: %{type: :coordinator, options: []}} =
-        config
+               config
 
       assert :ok = config.coord.func.(%{}, [])
     end

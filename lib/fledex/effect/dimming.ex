@@ -3,31 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Effect.Dimming do
-  @behaviour Fledex.Effect.Interface
+  use Fledex.Effect.Interface
 
-  alias Fledex.Color.Types
   alias Fledex.Color.Utils
-
-  @impl true
-  @spec apply(
-          leds :: list(Types.colorint()),
-          count :: non_neg_integer,
-          config :: keyword,
-          triggers :: map,
-          context :: map
-        ) ::
-          {list(Types.colorint()), non_neg_integer, map}
-  def apply(leds, 0, _config, triggers, _context), do: {leds, 0, triggers}
-
-  def apply(leds, count, config, triggers, context) do
-    case enabled?(config) do
-      true ->
-        do_apply(leds, count, config, triggers, context)
-
-      false ->
-        {leds, count, config}
-    end
-  end
 
   def do_apply(leds, count, config, triggers, _context) do
     trigger_name = config[:trigger_name] || :default
@@ -45,17 +23,5 @@ defmodule Fledex.Effect.Dimming do
       end)
 
     {leds, count, triggers}
-  end
-
-  @impl true
-  @spec enable(config :: keyword, enable :: boolean) :: keyword
-  def enable(config, enable) do
-    Keyword.put(config, :enabled, enable)
-  end
-
-  @impl true
-  @spec enabled?(config :: keyword) :: boolean
-  def enabled?(config) do
-    Keyword.get(config, :enabled, true)
   end
 end
