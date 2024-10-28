@@ -12,7 +12,7 @@ defmodule Fledex.Animation.Manager do
 
   The 3 main functions are:
 
-  * `regiseter_strip/2`: to add a new led strip. This will also create
+  * `register_strip/2`: to add a new led strip. This will also create
   the necessary `Fledex.LedStrip` and configures it.
   * `unregister_strip/1`: this will remove an led strip again
   * `register_config/2`: this registers (or reregisters) a set of
@@ -40,7 +40,8 @@ defmodule Fledex.Animation.Manager do
            impls: %{
              job_scheduler: module,
              animator: module,
-             led_strip: module
+             led_strip: module,
+             coordinator: module
            }
          }
 
@@ -127,7 +128,8 @@ defmodule Fledex.Animation.Manager do
       impls: %{
         job_scheduler: Keyword.get(opts, :job_scheduler, JobScheduler),
         animator: Keyword.get(opts, :animator, Animator),
-        led_strip: Keyword.get(opts, :led_strip, LedStrip)
+        led_strip: Keyword.get(opts, :led_strip, LedStrip),
+        coordinator: Keyword.get(opts, :coordinator, Coordinator)
       }
     }
 
@@ -194,11 +196,11 @@ defmodule Fledex.Animation.Manager do
   end
 
   ### MARK: private functions
-  # we split the animation into the different aspects
-  # animations, coordinators and cronjobs
+  # we split the "animation" into the different aspects
+  # animations, coordinators and (cron)jobs
   defp split_config(config) do
     {coordinators, rest} =
-      Map.split_with(config, fn {_key, value} -> value.type == :coordiantor end)
+      Map.split_with(config, fn {_key, value} -> value.type == :coordinator end)
 
     {jobs, rest} = Map.split_with(rest, fn {_key, value} -> value.type == :job end)
 
@@ -313,11 +315,35 @@ defmodule Fledex.Animation.Manager do
     {dropped, existing, created}
   end
 
-  defp register_coordinators(state, _strip_name, _coordinators) do
-    state
+  defp register_coordinators(state, strip_name, coordinators) do
+    {dropped, updated, created} =
+      filter_configs(Map.get(state.coordinators, strip_name), coordinators)
+
+    shutdown_coordinators(state.impls, strip_name, dropped)
+    update_coordinators(state.impls, strip_name, updated)
+    create_coordinators(state.impls, strip_name, created)
+
+    %{state | coordinators: Map.put(state.coordinators, strip_name, coordinators)}
   end
 
-  defp shutdown_coordinators(_impls, _strip_name, _coordinator_names) do
+  @spec create_coordinators(%{atom => module}, atom, map) :: :ok
+  defp create_coordinators(impls, strip_name, created_coordinators) do
+    Enum.each(created_coordinators, fn {coordinator_name, config} ->
+      {:ok, _pid} = impls.coordinator.start_link(strip_name, coordinator_name, config)
+    end)
+  end
+
+  @spec update_coordinators(%{atom => module}, atom, map) :: :ok
+  defp update_coordinators(impls, strip_name, coordinators) do
+    Enum.each(coordinators, fn {coordinator_name, config} ->
+      impls.coordinator.config(strip_name, coordinator_name, config)
+    end)
+  end
+
+  defp shutdown_coordinators(impls, strip_name, coordinator_names) do
+    Enum.each(coordinator_names, fn coordinator_name ->
+      impls.coordinator.shutdown(strip_name, coordinator_name)
+    end)
   end
 
   defp register_jobs(state, strip_name, jobs) do

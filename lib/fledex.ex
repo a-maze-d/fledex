@@ -266,6 +266,20 @@ defmodule Fledex do
     # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
 
+  defmacro coordinator(name, options \\ [], do: block) do
+    ast_func = Dsl.ast_create_anonymous_func(block)
+
+    quote do
+      Dsl.create_coordinator(
+        unquote(name),
+        unquote(options),
+        unquote(ast_func)
+      )
+    end
+
+    # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
+  end
+
   @doc """
     This introduces a new led_strip.
 

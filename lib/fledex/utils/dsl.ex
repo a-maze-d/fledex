@@ -149,6 +149,16 @@ defmodule Fledex.Utils.Dsl do
     }
   end
 
+  def create_coordinator(name, options, function) do
+    %{
+      name => %{
+        type: :coordinator,
+        options: options,
+        func: function
+      }
+    }
+  end
+
   @spec ast_extract_configs(Macro.t()) :: Macro.t()
   def ast_extract_configs(block) do
     {_ast, configs_ast} =
@@ -165,6 +175,13 @@ defmodule Fledex.Utils.Dsl do
     configs_ast
   end
 
+  @doc """
+  This function takes an ast function block and adds an argument
+  to the function. This is different from `ast_add_argument_to_func_if_missing/1`
+  that it does not expect there to be an arugment and therefore will raise an
+  `ArgumentError` if it does find one.
+  """
+  @spec ast_add_argument_to_func(any()) :: {:fn, [], [{:->, list(), list()}, ...]}
   def ast_add_argument_to_func(block) do
     case block do
       [{:->, _, _}] -> raise ArgumentError, "No argument expected"
@@ -172,6 +189,17 @@ defmodule Fledex.Utils.Dsl do
     end
   end
 
+  @doc """
+  This function takes an AST block of a function, checks whether
+  the required parameter (`trigger`) is present, and if not will
+  add one.
+  This function is to decide on whether `ast_create_anonymous_func/1`
+  or `ast_create_anonymous_func/2` should be called
+
+  NOTE: this function makes the assumption that a single argument is
+        required.
+  """
+  @spec ast_add_argument_to_func_if_missing(any()) :: {:fn, [], [{:->, list(), list()}, ...]}
   def ast_add_argument_to_func_if_missing(block) do
     case block do
       # argument matched, create only an anonymous function around it
@@ -183,12 +211,30 @@ defmodule Fledex.Utils.Dsl do
     end
   end
 
+  @doc """
+    This function takes an AST of a function body and wraps it into
+    an anonymous function.
+    It does expect that the arguments are handled as part of the function
+    body, e.g. the function body should look something like this:
+
+    ```elixir
+    arg1 -> :ok
+    arg1, arg2 -> :ok
+    ```
+  """
   @spec ast_create_anonymous_func([{:->, list, [[atom] | any]}]) ::
           {:fn, [], [{:->, list, [[atom] | any]}]}
   def ast_create_anonymous_func([{:->, _, [args, _body]} | _tail] = block) when is_list(args) do
     {:fn, [], block}
   end
 
+  @doc """
+   This function is similar to `ast_create_anonymous_func/1`, except that no
+   argument was specified in the block (because the user does not want to use it),
+   even though the function should have one.
+   The function will make sure to add the argument to the block before wrapping
+   it into an anonymous function.
+  """
   @spec ast_create_anonymous_func([atom], any) :: {:fn, [], [{:->, [], [[atom] | any]}]}
   def ast_create_anonymous_func(args, block) when is_list(args) do
     args =

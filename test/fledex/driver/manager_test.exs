@@ -61,9 +61,9 @@ defmodule Fledex.Driver.ManagerTest do
     end
   end
 
-  defmodule TestDriver3 do
+  defmodule NonCompliantDriver do
     # note: on purpose we don't inherit from the
-    # behaviour.
+    # behaviour. This is a non-compliant driver
     def configure(config) do
       [
         a1: Keyword.get(config, :a1, 0),
@@ -153,13 +153,13 @@ defmodule Fledex.Driver.ManagerTest do
   end
 
   describe "non-compliant module" do
+    alias Fledex.Driver.ManagerTest.NonCompliantDriver
     alias Fledex.Driver.ManagerTest.TestDriver
-    alias Fledex.Driver.ManagerTest.TestDriver3
 
     test "non-compliant gets dropped" do
       drivers = [
         {TestDriver, a1: 1},
-        {TestDriver3, []}
+        {NonCompliantDriver, []}
       ]
 
       {drivers, log} =
@@ -169,13 +169,13 @@ defmodule Fledex.Driver.ManagerTest do
 
       assert length(drivers) == 1
       assert drivers == [{TestDriver, a1: 1, a2: 1}]
-      assert log =~ "TestDriver3 does not implement the function :reinit"
+      assert log =~ "NonCompliantDriver does not implement the function :reinit"
       assert log =~ "with the wrong arity 2 vs 3"
     end
 
     test "single non-compliant gets replaced with default" do
       drivers = [
-        {TestDriver3, []}
+        {NonCompliantDriver, []}
       ]
 
       {drivers, log} =
@@ -185,7 +185,7 @@ defmodule Fledex.Driver.ManagerTest do
 
       assert length(drivers) == 1
       assert drivers == [{Null, []}]
-      assert log =~ "TestDriver3 does not implement the function :reinit"
+      assert log =~ "NonCompliantDriver does not implement the function :reinit"
       assert log =~ "with the wrong arity 2 vs 3"
     end
   end

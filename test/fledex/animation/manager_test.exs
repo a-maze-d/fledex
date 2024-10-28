@@ -115,7 +115,7 @@ defmodule Fledex.Animation.ManagerTest do
       end)
       |> expect(:add_job, fn _job -> :ok end)
 
-      use Fledex
+      use Fledex, dont_start: true
 
       config =
         led_strip :john, :config, [] do
@@ -145,13 +145,13 @@ defmodule Fledex.Animation.ManagerTest do
 
     test "update job" do
       Fledex.MockJobScheduler
+      |> expect(:delete_job, fn _name -> :ok end)
       |> expect(:create_job, fn _name, _schedule, _strip_name ->
         Quantum.Job.new(Quantum.scheduler_config([], Fledex.MockJobScheduler, JobScheduler))
       end)
-      |> expect(:delete_job, fn _name -> :ok end)
       |> expect(:add_job, fn _job -> :ok end)
 
-      use Fledex
+      use Fledex, dont_start: true
 
       config =
         led_strip :john, :config do
@@ -189,7 +189,7 @@ defmodule Fledex.Animation.ManagerTest do
       Fledex.MockJobScheduler
       |> expect(:delete_job, fn _name -> :ok end)
 
-      use Fledex
+      use Fledex, dont_start: true
 
       config =
         led_strip :john, :config do
@@ -210,12 +210,56 @@ defmodule Fledex.Animation.ManagerTest do
         },
         impls: %{
           job_scheduler: Fledex.MockJobScheduler,
-          led_strip: Fledex.LedStrip
+          led_strip: Fledex.LedStrip,
+          coordinator: Fledex.Animation.Coordinator,
+          animator: Fledex.Animation.Animator
         }
       }
 
       {:reply, :ok, _state} =
         Manager.handle_call({:register_config, :john, config}, self(), state)
+
+      Mox.verify!()
+    end
+  end
+
+  describe "test coordinators" do
+    test "dispatching" do
+      Fledex.MockCoordinator
+      |> expect(:start_link, fn :john, :coord1, _opts -> {:ok, {self()}} end)
+      |> expect(:start_link, fn :john, :coord2, _opts -> {:ok, {self()}} end)
+      |> expect(:config, fn :john, :coord1, _config -> :ok end)
+      |> expect(:shutdown, 2, fn :john, _coordinator -> :ok end)
+
+      use Fledex, dont_start: true
+      state = %{
+        animations: %{john: %{}},
+        coordinators: %{john: %{}},
+        jobs: %{john: %{}},
+        impls: %{
+          coordinator: Fledex.MockCoordinator
+        }
+      }
+
+      config1 = led_strip :john, :config do
+        coordinator :coord1, [] do
+          {_state, _context, opts} -> Keyword.put(opts, :test1, true)
+        end
+      end
+      config2 = led_strip :john, :config do
+        coordinator :coord1 do
+          {_state, _context, opts} -> Keyword.put(opts, :test2, true)
+        end
+        coordinator :coord2, [] do
+          {_state, _context, opts} -> Keyword.put(opts, :test1, false)
+        end
+      end
+      config3 = led_strip :john, :config do
+      end
+      from = {self(), :ok}
+      {:reply, :ok, state} = Manager.handle_call({:register_config, :john, config1}, from, state)
+      {:reply, :ok, state} = Manager.handle_call({:register_config, :john, config2}, from, state)
+      {:reply, :ok, _state} = Manager.handle_call({:register_config, :john, config3}, from, state)
 
       Mox.verify!()
     end

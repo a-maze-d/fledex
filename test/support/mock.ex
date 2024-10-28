@@ -4,3 +4,4 @@
 
 import Mox
 defmock(Fledex.MockJobScheduler, for: Fledex.Animation.JobScheduler)
+defmock(Fledex.MockCoordinator, for: Fledex.Animation.Coordinator)

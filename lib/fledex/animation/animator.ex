@@ -89,7 +89,7 @@ defmodule Fledex.Animation.Animator do
     :ok = LedStrip.define_namespace(state.strip_name, state.animation_name)
 
     case state.type do
-      :animation -> :ok = PubSub.subscribe(:fledex, "trigger")
+      :animation -> :ok = PubSub.subscribe(PubSub.app(), PubSub.channel_trigger())
       # we don't subscribe because we paint only once
       :static -> :ok
     end
@@ -288,7 +288,7 @@ defmodule Fledex.Animation.Animator do
         } = _state
       ) do
     case type do
-      :animation -> PubSub.unsubscribe(:fledex, "trigger")
+      :animation -> PubSub.unsubscribe(PubSub.app(), PubSub.channel_trigger())
       # nothing to do, since we haven't been subscribed
       :static -> :ok
     end

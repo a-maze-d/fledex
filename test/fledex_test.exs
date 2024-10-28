@@ -269,7 +269,7 @@ defmodule Fledex.Test do
         end
       end
 
-      use Fledex
+      use Fledex, dont_start: true
 
       config =
         component(:name, Test,
@@ -292,7 +292,7 @@ defmodule Fledex.Test do
 
   describe "dsl" do
     test "effect + double animation" do
-      use Fledex
+      use Fledex, dont_start: true
       alias Fledex.Effect.Dimming
 
       config =
@@ -318,7 +318,7 @@ defmodule Fledex.Test do
     end
 
     test "nested effect, on effect and animation" do
-      use Fledex
+      use Fledex, dont_start: true
       alias Fledex.Effect.Dimming
       alias Fledex.Effect.Rotation
 
@@ -347,7 +347,7 @@ defmodule Fledex.Test do
     end
 
     test "double animation in strip" do
-      use Fledex
+      use Fledex, dont_start: true
 
       config =
         led_strip :strip, :config do
@@ -370,7 +370,7 @@ defmodule Fledex.Test do
     end
 
     test "animation with job" do
-      use Fledex
+      use Fledex, dont_start: true
 
       config =
         led_strip :strip, :config do
@@ -386,6 +386,22 @@ defmodule Fledex.Test do
       # IO.puts("job: #{inspect config}")
       assert %{john: %{type: :animation}, john_job: %{type: :job, pattern: "* * * * * *"}} =
                config
+    end
+    test "animation with coordinator" do
+      use Fledex, dont_start: true
+      config = led_strip :strip, :config do
+        animation :john do
+          leds(20)
+        end
+        coordinator :coord do
+          _context, _config -> :ok
+        end
+      end
+
+      assert %{john: %{type: :animation}, coord: %{type: :coordinator, options: []}} =
+        config
+
+      assert :ok = config.coord.func.(%{}, [])
     end
   end
 end
