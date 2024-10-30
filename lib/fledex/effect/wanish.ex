@@ -28,7 +28,7 @@ defmodule Fledex.Effect.Wanish do
   # in the next round, to align it to the modulo). This becomes a bit more complicated if we have
   # a divisor, since the same state appears twice. Therefore we take the remainder of the divisor
   # into consideration  defp do_apply(leds, _count, _config, nil, triggers, _context), do: {leds, triggers}
-  defp do_apply(leds, count, config, triggers, _context) do
+  def do_apply(leds, count, config, triggers, _context) do
     trigger_name = Keyword.get(config, :trigger_name)
     left = Keyword.get(config, :direction, :left) != :right
     reappear = Keyword.get(config, :reappear, false)

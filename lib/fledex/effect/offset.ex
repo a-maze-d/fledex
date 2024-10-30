@@ -5,7 +5,7 @@
 defmodule Fledex.Effect.Offset do
   use Fledex.Effect.Interface
 
-  defp do_apply(leds, count, config, triggers, _context) do
+  def do_apply(leds, count, config, triggers, _context) do
     offset = config[:offset] || 1
 
     zeros = Enum.map(Enum.to_list(1..offset), fn _index -> 0 end)

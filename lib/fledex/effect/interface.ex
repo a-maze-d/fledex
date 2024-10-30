@@ -74,23 +74,12 @@ defmodule Fledex.Effect.Interface do
             ) ::
               {list(Types.colorint()), non_neg_integer, map}
 
-  @callback enable(config :: keyword, enable :: boolean) :: keyword
   @callback enabled?(config :: keyword) :: boolean
-
-  @callback update_config(config :: keyword, updates :: keyword) :: keyword
-
-  @optional_callbacks update_config: 2
 
   @spec __using__(keyword) :: Macro.t()
   defmacro __using__(_opts) do
     quote do
       @behaviour Fledex.Effect.Interface
-
-      @impl true
-      @spec enable(config :: keyword, enable :: boolean) :: keyword
-      def enable(config, enable) do
-        Keyword.put(config, :enabled, enable)
-      end
 
       @impl true
       @spec enabled?(config :: keyword) :: boolean

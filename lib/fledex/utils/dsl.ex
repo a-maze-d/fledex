@@ -119,7 +119,7 @@ defmodule Fledex.Utils.Dsl do
       # case kino_env?() do
       #   true -> Kino.start_child({Manager, opts})
       #   false ->
-          Manager.start_link(opts)
+      Manager.start_link(opts)
       # end
     end
   end

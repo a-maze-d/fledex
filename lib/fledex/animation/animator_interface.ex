@@ -32,16 +32,18 @@ defmodule Fledex.Animation.AnimatorInterface do
   @callback config(strip_name :: atom, animation_name :: atom, config :: map) :: :ok
 
   @doc """
-  Sometimes it can be very practical to disable or re-enable an animation or to
-  disable a certain effect applied to an animation.
-  If you disable `:all` the whole animaion will be affected, if you specify an index,
-  only the effect with the given index will be affected.
+  Update the configuration of an effect at runtime
+
+  Sometimes you want to change the configuration of an effect not only at definition time,
+  but aiso at runtime.
+  It is possible to apply the configuration change to ALL effects of the animator, which
+  can be convenient especially if you want to enable/disable all effects at once.
   """
-  @callback enable(
+  @callback update_effect(
               strip_name :: atom,
               animation_name :: atom,
               what :: :all | pos_integer,
-              enable :: boolean
+              config_update :: keyword
             ) :: :ok
 
   @doc """

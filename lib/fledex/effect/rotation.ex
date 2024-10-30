@@ -6,8 +6,9 @@ defmodule Fledex.Effect.Rotation do
   use Fledex.Effect.Interface
 
   alias Fledex.Color.Types
+  alias Fledex.Utils.PubSub
 
-  defp do_apply(leds, count, config, triggers, _context) do
+  def do_apply(leds, count, config, triggers, context) do
     left = Keyword.get(config, :direction, :left) != :right
     trigger_name = Keyword.get(config, :trigger_name, :default)
     offset = triggers[trigger_name] || 0
@@ -16,6 +17,7 @@ defmodule Fledex.Effect.Rotation do
     {leds, count} = stretch({leds, count}, stretch)
     offset = trunc(offset / divisor)
     remainder = rem(offset, count)
+    if remainder == 0, do: PubSub.broadcast_state(:stop_start, context)
     {rotate(leds, count, remainder, left), count, triggers}
   end
 

@@ -39,16 +39,16 @@ Even though this library is published, there are things I still want to do befor
 - [ ] Enable Telemetry? (v0.7)
 - [ ] Missing functionality
   - [x] Add the possibility to clear the LEDs when initializing the LedsDriver. This should be a feature fo the Spi Driver (v0.5)
+  - [x] Create support for a coordinator (that can control individual animations and effects. (v0.5) 
+  - [x] Update effects to make use of the coordinator functionality by reporting back their state through PubSub (v0.5)
+  - [ ] Update livebook examples how animations, effects, ... can be coordinated (v0.5)
   - [ ] Connect everything into a supervision tree (to make it more robust) (v0.6)
-  - [x] Create support for a coordinator (that can control individual animations and effects. 
-  - [ ] Update effects to make use of the coordinator functionality by reporting back their state through PubSub (v0.5)
-  - [ ] Update livebook examples how animations, effects, ... can be coordinated
   - [ ] Clustering (v0.7)
     - [ ] Rethink the clusering and check whether the new livebook API endpoints might make it easier to cluster. Currently it seems to be quite complicated.
     - [ ] Provide examples on how to cluster
     - [ ] Add an example where several nodes are connected to transfer pubsub messages accross nodes
     - [ ] Implement music beat through clustering
-  - [ ] Do we need to have language packs that allows to adjust to other languages? At least for color it would be quite easy with some `defdelegate`
+  - [ ] Do we need to have language packs that allows to adjust to other languages? At least for color it would be quite easy with some `defdelegate` (v0.9)
   - [ ] Create smartcells (v0.7)
 - [ ] Increase consumption
   - [x] Use in school project (v0.4). The learnings:
@@ -56,7 +56,7 @@ Even though this library is published, there are things I still want to do befor
     - [x] Reconfiguration of the strip is an important thing (see TODO item above)
     - [ ] Useful to provide a full story about colors (additive / subtractive colors), hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up
   - [ ] Create a video (v0.5)
-  - [ ] Talk on meetups? (v0.5)
+  - [ ] Talk on meetup (v0.5)
   - [ ] Migrate outstanding TODOs to github (v0.6?)
   - [ ] Publish/announce on Elixirforum (v0.6)
   - [ ] Get the library into nerves-livebook (v0.7)

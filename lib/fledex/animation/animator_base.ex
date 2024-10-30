@@ -35,11 +35,11 @@ defmodule Fledex.Animation.AnimatorBase do
       end
 
       @doc false
-      @spec enable(atom, atom, :all | pos_integer, boolean) :: :ok
-      def enable(strip_name, animation_name, what, enable) do
+      @spec update_effect(atom, atom, :all | pos_integer, keyword) :: :ok
+      def update_effect(strip_name, animation_name, what, config_update) do
         GenServer.cast(
           AnimatorInterface.build_name(strip_name, :animator, animation_name),
-          {:enable, what, enable}
+          {:update_effect, what, config_update}
         )
       end
 

@@ -371,9 +371,9 @@ defmodule Fledex.Animation.AnimatorTest do
         animation_name: :animation_name
       }
 
-      {:noreply, state} = Animator.handle_cast({:enable, :all, true}, state)
+      {:noreply, state} = Animator.handle_cast({:update_effect, :all, [enabled: true]}, state)
       assert Keyword.get(Map.get(state, :options, []), :enabled, true) == true
-      {:noreply, state} = Animator.handle_cast({:enable, :all, false}, state)
+      {:noreply, state} = Animator.handle_cast({:update_effect, :all, [enabled: false]}, state)
       assert Keyword.get(Map.get(state, :options, []), :enabled, true) == true
     end
 
@@ -393,29 +393,31 @@ defmodule Fledex.Animation.AnimatorTest do
         animation_name: :animation_name
       }
 
-      {:noreply, state} = Animator.handle_cast({:enable, :all, true}, state)
+      {:noreply, state} = Animator.handle_cast({:update_effect, :all, [enabled: true]}, state)
       assert Keyword.get(Map.get(state, :options, []), :enabled, true) == true
       assert [{module, config} | []] = state.effects
       assert module.enabled?(config) == true
-      {:noreply, state} = Animator.handle_cast({:enable, :all, false}, state)
+      {:noreply, state} = Animator.handle_cast({:update_effect, :all, [enabled: false]}, state)
       assert Keyword.get(Map.get(state, :options, []), :enabled, true) == true
       assert [{module, config} | []] = state.effects
       assert module.enabled?(config) == false
-      {:noreply, state} = Animator.handle_cast({:enable, 0, true}, state)
+      {:noreply, state} = Animator.handle_cast({:update_effect, 1, [enabled: true]}, state)
       assert Keyword.get(Map.get(state, :options, []), :enabled, true) == true
       assert [{module, config} | []] = state.effects
       assert module.enabled?(config) == true
-      {:noreply, state} = Animator.handle_cast({:enable, 0, false}, state)
+      {:noreply, state} = Animator.handle_cast({:update_effect, 1, [enabled: false]}, state)
       assert Keyword.get(Map.get(state, :options, []), :enabled, true) == true
       assert [{module, config} | []] = state.effects
       assert module.enabled?(config) == false
 
       assert capture_log(fn ->
-               {:noreply, state} = Animator.handle_cast({:enable, 1, true}, state)
+               {:noreply, state} =
+                 Animator.handle_cast({:update_effect, 2, [enabled: true]}, state)
+
                assert Keyword.get(Map.get(state, :options, []), :enabled, true) == true
                assert [{module, config} | []] = state.effects
                assert module.enabled?(config) == false
-             end) =~ "No effect found at index 1"
+             end) =~ "No effect found at index 2"
     end
   end
 end
