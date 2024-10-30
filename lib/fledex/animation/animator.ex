@@ -260,6 +260,7 @@ defmodule Fledex.Animation.Animator do
   defp update_effect_at(effects, what, config_updates, context)
        when is_list(effects) and is_integer(what) and what > 0 do
     what_zero_index = what - 1
+
     case Enum.at(effects, what_zero_index, nil) do
       nil ->
         Logger.warning("No effect found at index #{inspect(what)} (context: #{inspect(context)})")
