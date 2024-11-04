@@ -36,6 +36,7 @@ Even though this library is published, there are things I still want to do befor
 - [x] Cleanup
   - [x] Upgrade dependencies [v0.5]
   - [x] `LedStrip`  is partially directly called in the `Manager` (v0.5)
+  - [ ] The `Leds` code contains a lot of aspects that shouldn't be necessary anymore (like check that the namespace is defined, that the process is up and running, ...). This does not only make the code over complicated, but also will have a performance impact. We should clean this up. 
 - [ ] Enable Telemetry? (v0.7)
 - [ ] Missing functionality
   - [x] Add the possibility to clear the LEDs when initializing the LedsDriver. This should be a feature fo the Spi Driver (v0.5)

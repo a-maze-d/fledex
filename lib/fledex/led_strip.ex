@@ -20,6 +20,7 @@ defmodule Fledex.LedStrip do
 
   require Logger
 
+  require IEx
   alias Fledex.Color.Types
   alias Fledex.Color.Utils
   alias Fledex.Driver.Impl.Null
@@ -304,6 +305,13 @@ defmodule Fledex.LedStrip do
   end
 
   @impl GenServer
+  @spec handle_call({:change_config, keyword}, {pid, any}, state_t) :: {:ok, keyword}
+  def handle_call({:change_config, global_config}, _from, state) do
+    {new_config, rets} = update_config(state.config, global_config)
+    {:reply, {:ok, rets}, %{state | config: new_config}}
+  end
+
+  @impl GenServer
   @spec handle_call({:set_leds, atom, list(Types.colorint())}, {pid, any}, state_t) ::
           {:reply, :ok | {:error, String.t()}, state_t}
   def handle_call({:set_leds, name, leds}, _from, %{namespaces: namespaces} = state) do
@@ -321,21 +329,16 @@ defmodule Fledex.LedStrip do
   end
 
   @impl GenServer
-  @spec handle_call({:change_config, keyword}, {pid, any}, state_t) :: {:ok, keyword}
-  def handle_call({:change_config, global_config}, _from, state) do
-    {new_config, rets} = update_config(state.config, global_config)
-    {:reply, {:ok, rets}, %{state | config: new_config}}
-  end
-
-  @impl GenServer
   @spec handle_call({:reinit, [{module, keyword}], keyword}, {pid, any}, state_t) ::
           {:reply, :ok, state_t}
   def handle_call({:reinit, drivers, config}, _from, state) do
+    {updated_config, _rets}= update_config(state.config, config)
+    updated_drivers = Manager.reinit(state.drivers, drivers)
     {:reply, :ok,
      %{
        state
-       | config: update_config(state.config, config),
-         drivers: Manager.reinit(state.drivers, drivers)
+       | config: updated_config,
+         drivers: updated_drivers
      }}
   end
 
