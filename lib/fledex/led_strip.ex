@@ -332,8 +332,9 @@ defmodule Fledex.LedStrip do
   @spec handle_call({:reinit, [{module, keyword}], keyword}, {pid, any}, state_t) ::
           {:reply, :ok, state_t}
   def handle_call({:reinit, drivers, config}, _from, state) do
-    {updated_config, _rets}= update_config(state.config, config)
+    {updated_config, _rets} = update_config(state.config, config)
     updated_drivers = Manager.reinit(state.drivers, drivers)
+
     {:reply, :ok,
      %{
        state

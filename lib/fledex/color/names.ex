@@ -46,7 +46,7 @@ defmodule Fledex.Color.Names do
   The different properties that can be interrogated from a named color
   """
   @type color_props_t ::
-          :all | :index | :name | :decriptive_name | :hex | :rgb | :hsl | :hsv | :spource
+          :all | :index | :name | :decriptive_name | :hex | :rgb | :hsl | :hsv | :source
   @typedoc """
   The structure of a named color with all it's attributes.
   """

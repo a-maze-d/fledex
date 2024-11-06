@@ -49,8 +49,9 @@ Even though this library is published, there are things I still want to do befor
     - [ ] Provide examples on how to cluster
     - [ ] Add an example where several nodes are connected to transfer pubsub messages accross nodes
     - [ ] Implement music beat through clustering
+  - [ ] Define functions that are valid in the correct scope? (v0.7)
+  - [ ] Create smartcells (v0.8)
   - [ ] Do we need to have language packs that allows to adjust to other languages? At least for color it would be quite easy with some `defdelegate` (v0.9)
-  - [ ] Create smartcells (v0.7)
 - [ ] Increase consumption
   - [x] Use in school project (v0.4). The learnings:
     - [ ] setting up livebook (a really working version) on windows is anything than easy :-(Can we do something about it? Investigate (v0.7) 

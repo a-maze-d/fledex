@@ -62,7 +62,7 @@ For this we need to combine the above steps, i.e.
 3. We send the binary to the SPI bus
 4. We define our data structure with some colors (see above)
 5. We send the binary to the SPI bus
-6. We close teh SPI bus
+6. We close the SPI bus
 
 Let's see what the result will be
 
