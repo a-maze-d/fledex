@@ -2,11 +2,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
 name: Elixir CI
 
 on:
@@ -29,30 +24,47 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+ 
     - name: Set up Elixir
-      uses: erlef/setup-beam@v1 # 61e01a43a562a89bfc54c7f9a378ff67b03e4a21 # v1.16.0
+      uses: erlef/setup-beam@v1
       with:
         otp-version: ${{matrix.otp}}
         elixir-version: ${{matrix.elixir}}
+
     - name: Restore dependencies cache
       uses: actions/cache@v4
+      id: mix_cache
       with:
-        path: deps
-        key: deps-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('**/mix.lock') }}
-    - name: Get build cache
-      uses: actions/cache@v4
-      with:
-        path: _build/test
-        key: build-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('**/mix.lock') }}
+        path: |
+          deps
+          _build
+        key: test-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('**/mix.lock') }}
+
     - name: Install dependencies
+      if: steps.mix_cache.outputs.cache-hit != 'true'
       run: |
+        mix local.rebar --force
+        mix local.hex --force
         mix deps.get
-        mix compile
+        mix deps.compile
+
+    - name: Compile app
+      run: mix compile --warning-as-error
+
     - name: REUSE Compliance Check
       uses: fsfe/reuse-action@v3
+
+    - name: Check format
+      run: mix format --check-formatted
+
     - name: Run tests
       run: mix coveralls.github
       env:
         MIX_ENV: test
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Check for transitive compilation dependencies
+      run: mix xref graph --label compile-connected --fail-above 10
 
