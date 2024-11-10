@@ -149,7 +149,6 @@ Regular updates is something so common that we'll look at the `job` macro that w
 
 ```elixir
 alias Fledex.Component.Clock
-import Crontab.CronExpression
 
 led_strip :nested_components3, Kino do
   component(:myclock2, Clock, trigger_name: :clock2)
@@ -190,4 +189,3 @@ to your component:
 
 It will log the triggers in regular intervals so you see what the component receives and you can then compare it with what you would expect.
 As you can see this animation has no effect on your animation, because it always returns empty `leds()`. We only use the side effect (writing to `IO.puts`) of this animation.
-
