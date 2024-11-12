@@ -438,7 +438,7 @@ defmodule Fledex.Leds do
   Note2: If no `server_name` and/or no `namespace` are defined, then they will be defined
   (and started). A warning will be emitted to the concole.
   """
-  @spec send(t, map) :: :ok | {:error, String.t}
+  @spec send(t, map) :: :ok | {:error, String.t()}
   def send(leds, opts \\ %{}) do
     offset = opts[:offset] || 0
     rotate_left = if opts[:rotate_left] != nil, do: opts[:rotate_left], else: true
@@ -447,13 +447,14 @@ defmodule Fledex.Leds do
     # we probably want to do some validation here and probably
     # want to optimise it a bit
     # a) is the server running?
-    _ = if Process.whereis(server_name) == nil do
-      Logger.warning(
-        "The server #{server_name} wasn't started. You should start it before using this function"
-      )
+    _ =
+      if Process.whereis(server_name) == nil do
+        Logger.warning(
+          "The server #{server_name} wasn't started. You should start it before using this function"
+        )
 
-      {:ok, _pid} = LedStrip.start_link(server_name)
-    end
+        {:ok, _pid} = LedStrip.start_link(server_name)
+      end
 
     # b) Is a namespace defined?
     exists = LedStrip.exist_namespace(server_name, namespace)

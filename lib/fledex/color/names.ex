@@ -79,7 +79,7 @@ defmodule Fledex.Color.Names do
   @doc """
   Check whether the atom is a valid color name
   """
-   @doc guard: true
+  @doc guard: true
   defguard is_color_name(atom) when atom in @color_names
 
   @doc """

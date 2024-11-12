@@ -24,9 +24,9 @@ defmodule Fledex.MixProject do
           # :missing_return,
           # :extra_return,
           # :unmatched_returns,
-          :error_handling,
+          :error_handling
           # :underspecs
-          ],
+        ],
         plt_add_apps: [:mix]
       ],
       test_coverage: [
@@ -176,8 +176,8 @@ defmodule Fledex.MixProject do
         Color: ~r/Fledex.Color/
       ],
       groups_for_docs: [
-        "Guards": &  &1[:guard],
-        "Color Names": & &1[:color_name],
+        Guards: & &1[:guard],
+        "Color Names": & &1[:color_name]
       ]
     ]
   end
