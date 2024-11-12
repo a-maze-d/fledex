@@ -33,6 +33,8 @@ Currently there are 4 drivers available:
 * `Null` is a driver that acts similar to `/dev/null`, i.e. doesn't do anyting with the
   data. This can be very convenient for running some tests.
 
+Note: In addition an additional a special `:config` driver can be used, which simply returns the current definition. This can be very useful when defining components as well as in tests.
+
 # The Leds
 The `Leds` is an easy way to define a set of Leds. This module provides the 
 possibility to specify individual leds by integer/name/rgb-values, by a generator 
@@ -64,19 +66,26 @@ The various `Fledex.Animation.Animator`s can be managed through a
 The ultimate goal is to define a `Fledex` DSL that can configure the 
 `Fledex.Animation.Manager` and update annimations on the fly.
 
-In the above diagram an example is shown on how such a DSL might look like. 
+In the above diagram an example is shown on how such a DSL might look like (and how it maps to the different components), but for clarity does not show all features. 
 
 # The Triggers
-
-The `Fledex.LedStrip` is publishing via `Fledex.Util.PubSub` an event (a trigger) 
+The `Fledex.LedStrip` is publishing via `Fledex.Utils.PubSub` an event (a trigger) 
 that gets picked up by the `Fledex.Animation.Animator`s to change their animation. 
 The trigger can not only be created by the driver, but also by external events. The
 difference is that only the triggers from the driver is used by the `Fledex.Animation.
 Animator`s to redefine the animation. All other triggers are collected over time and
-can be used when updating the animation. 
+can be used when updating the animation.
 
 For example: we want to be able to check the current temperature in regular interval 
-and trigger a re-animation to adjust the "display" depending on the temperature.
+and trigger a re-animation to adjust the "display" depending on the temperature. Your temperature checking code would use the `Fledex.Utils.PubSub.broadcast_trigger/1` function to publish the temperature.
+
+# The Job
+It is quite common to execute certain functions in regular intervals (like in the example mentioned above to check the temperature). For this purpose a cron job facility is provided.
+
+# The Coordinator and the states
+Animations and Effects can publish an event to communicate about the animation/effect state.
+This state can then be picked up by a coordinator to control different animations and effects.
+The Coordinator will simply execute a function which can pattern match on the context and the state to make some decisions.
 
 # Final Notes
 ## Naming

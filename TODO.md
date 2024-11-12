@@ -12,8 +12,8 @@ Even though this library is published, there are things I still want to do befor
   - [x] Add Branching sections in the livebooks to separate things that don't need to be together? (v0.5)
   - [x] Update the README.md (v0.5)
   - [ ] Add installation instructions (v0.5)
-  - [ ] Update the architectural overview to adjust to the new driver approach (v0.5)
-  - [ ] Update Cheatsheet with new driver approach (v0.5)
+  - [x] Update the architectural overview to adjust to the new driver approach (v0.5)
+  - [x] Update Cheatsheet with new driver approach (v0.5)
   - [ ] Mark the livbooks so that it becomes clear what kind they are (internal, background, usage,...) (v0.5)
   - [ ] change the doc structure? so that links don't get so easily broken? (v0.6)
 - [ ] Testing
@@ -51,7 +51,12 @@ Even though this library is published, there are things I still want to do befor
     - [ ] Implement music beat through clustering
   - [ ] Define functions that are valid in the correct scope? (v0.7)
   - [ ] Create smartcells (v0.8)
-  - [ ] Do we need to have language packs that allows to adjust to other languages? At least for color it would be quite easy with some `defdelegate` (v0.9)
+  - [ ] Do we need to have language packs that allows to adjust to other languages? it would be quite easy with some `defdelegate`  At least for: (v0.9)
+    - [ ] color names (but it might be massive and not sure where to get the names from),
+    - [ ] color functions
+    - [ ] components, 
+    - [ ] effects,
+    - [ ] ... 
 - [ ] Increase consumption
   - [x] Use in school project (v0.4). The learnings:
     - [ ] setting up livebook (a really working version) on windows is anything than easy :-(Can we do something about it? Investigate (v0.7) 

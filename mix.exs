@@ -19,14 +19,20 @@ defmodule Fledex.MixProject do
       deps: deps(),
       name: "fledex",
       source_url: @source_url,
-      # dialyzer: [
-      #   flags: [:missing_return, :extra_return, :unmatched_returns, :error_handling, :underspecs]
-      # ],
+      dialyzer: [
+        flags: [
+          # :missing_return,
+          # :extra_return,
+          # :unmatched_returns,
+          :error_handling,
+          # :underspecs
+          ],
+        plt_add_apps: [:mix]
+      ],
       test_coverage: [
         tool: ExCoveralls,
         ignore_modules: [
           Fledex.Test.CircuitsSim.Device.WS2801,
-          Fledex.Effect.Sequencer,
           Fledex.Component.Thermometer
         ]
       ],
@@ -170,7 +176,8 @@ defmodule Fledex.MixProject do
         Color: ~r/Fledex.Color/
       ],
       groups_for_docs: [
-        "Color Names": & &1[:color_name]
+        "Guards": &  &1[:guard],
+        "Color Names": & &1[:color_name],
       ]
     ]
   end

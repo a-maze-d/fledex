@@ -15,6 +15,7 @@ defmodule Fledex.Utils.Guards do
       * The upper bound is included (except if `inverse_bounds` is true)
       * This guard is not fully tested, so be careful when using that it works for you.
   """
+  @doc guard: true
   # @spec is_in_range(integer, boolean, integer, integer) :: boolean
   defguard is_in_range(value, inverse_bounds, min, max)
            when is_integer(value) and

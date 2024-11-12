@@ -8,6 +8,10 @@ defmodule Fledex.Color.KinoRender do
   alias Fledex.Color.Utils
   alias Fledex.Leds
 
+  @doc """
+  Guard to check that the value is within the provided bounds of a byte [0, 255]
+  """
+  @doc guard: true
   defguard is_byte(sub_pixel) when is_integer(sub_pixel) and sub_pixel >= 0 and sub_pixel <= 255
 
   defstruct [:colors]

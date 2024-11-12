@@ -25,22 +25,18 @@ defmodule Fledex.Color.Utils do
 
   @frac_48_128 trunc(48 * 256 / 128)
   @doc false
-  @spec frac_48_128 :: 0..255
   def frac_48_128, do: @frac_48_128
 
   @frac_32_85 trunc(32 * 256 / 85)
   @doc false
-  @spec frac_32_85 :: 0..255
   def frac_32_85, do: @frac_32_85
 
   @frac_24_128 trunc(24 * 257 / 128)
   @doc false
-  @spec frac_24_128 :: 0..255
   def frac_24_128, do: @frac_24_128
 
   @frac_8_42 trunc(8 * 256 / 42)
   @doc false
-  @spec frac_8_42 :: 0..255
   def frac_8_42, do: @frac_8_42
 
   @spec scale8_video_addition(boolean, 0..255, 0..255) :: 0 | 1

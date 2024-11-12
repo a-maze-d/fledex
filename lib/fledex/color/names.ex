@@ -15,13 +15,24 @@ defmodule Fledex.Color.Names do
   The additional parameter determines which additional information should be provided. The options are:
 
     * `:all`: This retrieves the full data set
-    * `:desriptive_name`: a string with name (from this the Atom is derived)
+    * `:descriptive_name`: a string with name (from this the Atom is derived)
     * `:hex` (default): This is the same as `almond/0`
     * `:hsl`: This retrieves an HSL struct, i.e. `{h, s, l}`
     * `:hsv`: This retrieves an HSV struct, i.e. `{h, s, v}`
     * `:index`: The index of this color in the list of all colors
     * `:rgb`: This retrieves an RGB struct, i.e. `{r, g, b}`
     * `:source`: Information where the color comes from, see Wikipedia for more details
+
+  And finally every color exists also in a version that allows you to add it to a `Fledex.Leds`
+  sequence. Either as next led (`almond/1`) or with a specified offset (`almond/2`). The latter
+  has no extra documentation, because it wouldn't add any real value, but would clutter the doc.
+  Here an example spec:
+
+  ```elixir
+  @spec almond(leds :: Fledex.Leds.t, offset :: non_neg_integer) :: Fledex.Leds.t
+  ```
+
+  Some additional functions exist for guards and for retrieving all colors.
   """
   @external_resource Fledex.Color.LoadUtils.names_file()
 
@@ -46,7 +57,7 @@ defmodule Fledex.Color.Names do
   The different properties that can be interrogated from a named color
   """
   @type color_props_t ::
-          :all | :index | :name | :decriptive_name | :hex | :rgb | :hsl | :hsv | :source
+          :all | :index | :name | :descriptive_name | :hex | :rgb | :hsl | :hsv | :source
   @typedoc """
   The structure of a named color with all it's attributes.
   """
@@ -65,6 +76,10 @@ defmodule Fledex.Color.Names do
   """
   @type color_vals_t :: Types.color_any() | color_struct_t | String.t()
 
+  @doc """
+  Check whether the atom is a valid color name
+  """
+   @doc guard: true
   defguard is_color_name(atom) when atom in @color_names
 
   @doc """
@@ -76,9 +91,10 @@ defmodule Fledex.Color.Names do
   end
 
   @doc """
-  Get a list of all the predefined color (atom) names. The name can be used to either
-  retrieve the info by calling `info/2` or by calling the function with that
-  name (see also the __Color Names__ section nad the [example livebook](3b_fledex_more_about_colors.livemd))
+  Get a list of all the predefined color (atom) names.
+
+  The name can be used to either retrieve the info by calling `info/2` or by calling the function with that
+  name (see also the description at the top and take a look at this [example livebook](3b_fledex_more_about_colors.livemd))
   """
   @spec names :: list(color_names_t)
   def names, do: @color_names
@@ -120,6 +136,7 @@ defmodule Fledex.Color.Names do
     def unquote(name)(:source), do: unquote(Macro.escape(color)).source
     @spec unquote(name)(Leds.t()) :: Leds.t()
     def unquote(name)(leds), do: leds |> Leds.light(unquote(Macro.escape(color)).hex)
+    @doc false
     @spec unquote(name)(Leds.t(), offset :: non_neg_integer) :: Leds.t()
     def unquote(name)(leds, offset),
       do: leds |> Leds.light(unquote(Macro.escape(color)).hex, offset)

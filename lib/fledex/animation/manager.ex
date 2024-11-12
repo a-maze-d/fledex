@@ -155,7 +155,7 @@ defmodule Fledex.Animation.Manager do
       # we have a bit of a problem when using the kino driver, since it will not be reinitialized
       # when calling this function again (and thereby we don't get any frame/display).
       # Therefore we add here an extra step to reinitiate the the drivers while registering the strip.
-      :ok = state.impls.led_strip.reinit(strip_name, drivers, strip_config)
+      state.impls.led_strip.reinit(strip_name, drivers, strip_config)
       {:reply, :ok, state}
     end
   end
