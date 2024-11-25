@@ -15,6 +15,7 @@ Even though this library is published, there are things I still want to do befor
   - [x] Update the architectural overview to adjust to the new driver approach (v0.5)
   - [x] Update Cheatsheet with new driver approach (v0.5)
   - [ ] Mark the livbooks so that it becomes clear what kind they are (internal, background, usage,...) (v0.5)
+  - [ ] Check that all livebooks are mentioned in the README.md
   - [ ] change the doc structure? so that links don't get so easily broken? (v0.6)
 - [ ] Testing
   - [x] Perform an extra round of testing on hardware (v0.4)
@@ -63,7 +64,7 @@ Even though this library is published, there are things I still want to do befor
     - [x] Reconfiguration of the strip is an important thing (see TODO item above)
     - [ ] Useful to provide a full story about colors (additive / subtractive colors), hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up
   - [ ] Create a video (v0.5)
-  - [ ] Talk on meetup (v0.5)
+  - [x] Talk on meetup (v0.5)
   - [ ] Migrate outstanding TODOs to github (v0.6?)
   - [ ] Publish/announce on Elixirforum (v0.6)
   - [ ] Get the library into nerves-livebook (v0.7)
