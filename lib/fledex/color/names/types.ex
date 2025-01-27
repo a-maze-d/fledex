@@ -9,13 +9,13 @@ defmodule Fledex.Color.Names.Types do
   alias Fledex.Color.Names
   alias Fledex.Color.Types
 
-    @typedoc """
+  @typedoc """
   The allowed color names
   """
   @type color_names_t :: Names.color_names_t()
-    # NamesA2F.color_names_t
-    # | NamesG2M.color_names_t
-    # | NamesN2Z.color_names_t
+  # NamesA2F.color_names_t
+  # | NamesG2M.color_names_t
+  # | NamesN2Z.color_names_t
 
   @typedoc """
   The different properties that can be interrogated from a named color
