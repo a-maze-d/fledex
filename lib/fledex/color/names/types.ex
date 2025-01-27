@@ -1,3 +1,7 @@
+# Copyright 2024, Matthias Reik <fledex@reik.org>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 defmodule Fledex.Color.Names.Types do
   # alias Fledex.Color.Names.NamesA2F
   # alias Fledex.Color.Names.NamesG2M
