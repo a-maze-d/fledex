@@ -1,11 +1,11 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
-defmodule Fledex.Color.LoadUtils do
-  def names_file, do: "#{Path.dirname(__DIR__)}/color/names.csv"
+defmodule Fledex.Color.Names.LoadUtils do
+  def names_file, do: "#{Path.dirname(__DIR__)}/names/names.csv"
 
-  def load_color_file(names_file) do
+  def load_color_file(names_file, names_pattern \\ ~r/^.*$/i) do
     # Name, Hex (RGB), Red (RGB), Green (RGB), Blue (RGB), Hue (HSL/HSV), Satur. (HSL),
     #   Light (HSL), Satur.(HSV), Value (HSV), Source
     names_file
@@ -25,6 +25,7 @@ defmodule Fledex.Color.LoadUtils do
         source: String.trim(source)
       }
     end)
+    |> Stream.filter(fn element -> String.match?(element.descriptive_name, names_pattern) end)
     |> Enum.to_list()
   end
 

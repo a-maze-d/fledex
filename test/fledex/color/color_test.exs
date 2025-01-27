@@ -14,7 +14,7 @@ defmodule Fledex.Color.ColorTest do
   alias Fledex.Color.Correction.Color
   alias Fledex.Color.Correction.Temperature
 
-  alias Fledex.Color.LoadUtils
+  alias Fledex.Color.Names.LoadUtils
   alias Fledex.Color.Names
   alias Fledex.Color.Utils
 

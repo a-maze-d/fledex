@@ -17,7 +17,7 @@ defmodule Fledex.Effect.Rotation do
     {leds, count} = stretch({leds, count}, stretch)
     offset = trunc(offset / divisor)
     remainder = rem(offset, count)
-    _ = if remainder == 0, do: PubSub.broadcast_state(:stop_start, context)
+    _ignore = if remainder == 0, do: PubSub.broadcast_state(:stop_start, context)
     {rotate(leds, count, remainder, left), count, triggers}
   end
 

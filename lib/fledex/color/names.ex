@@ -34,10 +34,10 @@ defmodule Fledex.Color.Names do
 
   Some additional functions exist for guards and for retrieving all colors.
   """
-  @external_resource Fledex.Color.LoadUtils.names_file()
+  @external_resource Fledex.Color.Names.LoadUtils.names_file()
 
-  alias Fledex.Color.LoadUtils
-  alias Fledex.Color.Types
+  alias Fledex.Color.Names.LoadUtils
+  alias Fledex.Color.Names.Types
   alias Fledex.Leds
 
   colors = LoadUtils.load_color_file(@external_resource)
@@ -53,28 +53,6 @@ defmodule Fledex.Color.Names do
             |> Enum.map_join(" | ", &inspect/1)
             |> Code.string_to_quoted!()
           )
-  @typedoc """
-  The different properties that can be interrogated from a named color
-  """
-  @type color_props_t ::
-          :all | :index | :name | :descriptive_name | :hex | :rgb | :hsl | :hsv | :source
-  @typedoc """
-  The structure of a named color with all it's attributes.
-  """
-  @type color_struct_t :: %{
-          index: integer,
-          name: color_names_t,
-          descriptive_name: String.t(),
-          hex: Types.colorint(),
-          rgb: Types.rgb(),
-          hsl: Types.hsl(),
-          hsv: Types.hsv(),
-          source: String.t()
-        }
-  @typedoc """
-  The different values that can be returned when interrogating for some named color properties
-  """
-  @type color_vals_t :: Types.color_any() | color_struct_t | String.t()
 
   @doc """
   Check whether the atom is a valid color name
@@ -85,7 +63,7 @@ defmodule Fledex.Color.Names do
   @doc """
   Get all the data about the predefined colors
   """
-  @spec colors :: list(color_struct_t)
+  @spec colors :: list(Types.color_struct_t)
   def colors do
     @colors
   end
@@ -102,7 +80,7 @@ defmodule Fledex.Color.Names do
   @doc """
   Retrieve information about the color with the given name
   """
-  @spec info(name :: color_names_t, what :: color_props_t) :: color_vals_t
+  @spec info(name :: Types.color_names_t, what :: Types.color_props_t) :: Types.color_vals_t
   def info(name, what \\ :hex)
   def info(name, what) when is_color_name(name), do: apply(__MODULE__, name, [what])
   def info(_name, _what), do: nil
@@ -123,7 +101,7 @@ defmodule Fledex.Color.Names do
     Defines the color rgb(#{r}, #{g}, #{b}).
     """
     @doc color_name: true
-    @spec unquote(name)(color_props_t) :: color_vals_t
+    @spec unquote(name)(Types.color_props_t) :: Types.color_vals_t
     def unquote(name)(what \\ :hex)
     def unquote(name)(:all), do: unquote(Macro.escape(color))
     def unquote(name)(:index), do: unquote(Macro.escape(color)).index
