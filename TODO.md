@@ -37,6 +37,7 @@ Even though this library is published, there are things I still want to do befor
 - [x] Cleanup
   - [x] Upgrade dependencies [v0.5]
   - [x] `LedStrip`  is partially directly called in the `Manager` (v0.5)
+  - [x] restructure the `Fledex.Color.Names` so that the compilcation doesn't take that much time and that we can add easier more colors
   - [ ] The `Leds` code contains a lot of aspects that shouldn't be necessary anymore (like check that the namespace is defined, that the process is up and running, ...). This does not only make the code over complicated, but also will have a performance impact. We should clean this up. 
 - [ ] Enable Telemetry? (v0.7)
 - [ ] Missing functionality
