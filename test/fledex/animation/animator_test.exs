@@ -207,7 +207,7 @@ defmodule Fledex.Animation.AnimatorTest do
 
     def count_and_assert(line, acc) do
       case line do
-        {_, 0} ->
+        {_keyword, 0} ->
           acc
 
         {"send", trigger} ->

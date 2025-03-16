@@ -191,7 +191,7 @@ defmodule Fledex.Driver.ManagerTest do
   end
 
   defp get_driver_config(drivers, driver_module) do
-    [{^driver_module, config} | _] =
+    [{^driver_module, config} | _other] =
       Enum.filter(drivers, fn {module, _config} -> module == driver_module end)
 
     config

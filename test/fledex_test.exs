@@ -13,7 +13,7 @@ defmodule Fledex.Test do
 
   test "version" do
     assert nil != Fledex.version()
-    assert {:ok, _} = Version.parse(Fledex.version())
+    assert {:ok, _some_version} = Version.parse(Fledex.version())
   end
 
   @server_name :john

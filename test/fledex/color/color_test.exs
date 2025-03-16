@@ -14,8 +14,8 @@ defmodule Fledex.Color.ColorTest do
   alias Fledex.Color.Correction.Color
   alias Fledex.Color.Correction.Temperature
 
-  alias Fledex.Color.Names.LoadUtils
   alias Fledex.Color.Names
+  alias Fledex.Color.Names.LoadUtils
   alias Fledex.Color.Utils
 
   alias Fledex.Leds
@@ -139,7 +139,7 @@ defmodule Fledex.Color.ColorTest do
     end
 
     test "color name guard" do
-      import Fledex.Color.Names, only: [is_color_name: 1]
+      import Fledex.Color.Names.Guards, only: [is_color_name: 1]
       assert is_color_name(:vermilion2) == true
       assert is_color_name(:non_existing) == false
     end

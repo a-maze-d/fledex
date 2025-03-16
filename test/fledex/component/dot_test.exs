@@ -12,7 +12,7 @@ defmodule Fledex.Component.DotTest do
 
       assert %{
                name: %{
-                 def_func: _,
+                 def_func: _whatever,
                  effects: [],
                  options: [],
                  type: :animation

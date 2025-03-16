@@ -393,7 +393,9 @@ defmodule Fledex.LedStripTestSync do
       :ok = GenServer.stop(pid)
       assert {:ok, pid} = LedStrip.start_link(:test_strip_name5, Null, [])
       :ok = GenServer.stop(pid)
-      assert {:error, _} = LedStrip.start_link(:test_strop_name6, %{wrong: "structure"}, [])
+
+      assert {:error, _message} =
+               LedStrip.start_link(:test_strop_name6, %{wrong: "structure"}, [])
     end
   end
 

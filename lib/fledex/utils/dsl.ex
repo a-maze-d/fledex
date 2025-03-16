@@ -113,7 +113,7 @@ defmodule Fledex.Utils.Dsl do
     if Keyword.get(opts, :dont_start, false) do
       :ok
     else
-      # starting Fledex.Animation.Manager as child process of Kino if we opperate in a Kino env
+      # starting Fledex.Animation.Manager as child process of Kino if we operate in a Kino env
       # (which I think we currently always do due to the Kino driver dependency :-()
       # TODO: investigate more
       # case kino_env?() do
@@ -185,7 +185,7 @@ defmodule Fledex.Utils.Dsl do
   @spec ast_add_argument_to_func(any()) :: {:fn, [], [{:->, list(), list()}, ...]}
   def ast_add_argument_to_func(block) do
     case block do
-      [{:->, _, _}] -> raise ArgumentError, "No argument expected"
+      [{:->, _func, _args}] -> raise ArgumentError, "No argument expected"
       block -> ast_add_argument_to_func_if_missing(block)
     end
   end
@@ -225,7 +225,8 @@ defmodule Fledex.Utils.Dsl do
   """
   @spec ast_create_anonymous_func([{:->, list, [[atom] | any]}]) ::
           {:fn, [], [{:->, list, [[atom] | any]}]}
-  def ast_create_anonymous_func([{:->, _, [args, _body]} | _tail] = block) when is_list(args) do
+  def ast_create_anonymous_func([{:->, _func, [args, _body]} | _tail] = block)
+      when is_list(args) do
     {:fn, [], block}
   end
 

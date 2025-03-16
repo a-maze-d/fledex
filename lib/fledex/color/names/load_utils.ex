@@ -45,7 +45,7 @@ defmodule Fledex.Color.Names.LoadUtils do
 
   defp clean_and_convert(hex_string) do
     hex_string = String.replace(hex_string, "#", "")
-    {hex_int, _} = Integer.parse(hex_string, 16)
+    {hex_int, _rest} = Integer.parse(hex_string, 16)
     hex_int
   end
 

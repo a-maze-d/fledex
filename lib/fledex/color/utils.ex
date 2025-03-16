@@ -9,8 +9,7 @@ defmodule Fledex.Color.Utils do
   https://github.com/FastLED/FastLED/wiki/High-performance-math
   """
   import Bitwise
-
-  require Fledex.Color.Names
+  import Fledex.Color.Names.Guards
 
   alias Fledex.Color.Names
   alias Fledex.Color.Types
@@ -142,7 +141,7 @@ defmodule Fledex.Color.Utils do
     do: (min(r, @max_value) <<< 16) + (min(g, @max_value) <<< 8) + min(b, @max_value)
 
   def to_colorint(color) when is_integer(color), do: color
-  def to_colorint(color) when Names.is_color_name(color), do: apply(Names, color, [:hex])
+  def to_colorint(color) when is_color_name(color), do: apply(Names, color, [:hex])
 
   @doc """
   This function splits a color into it's rgb components
@@ -150,6 +149,6 @@ defmodule Fledex.Color.Utils do
   @spec to_rgb(Types.color() | %{rgb: Types.rgb()} | %{rgb: Types.colorint()}) :: Types.rgb()
   def to_rgb(%{rgb: x} = _color), do: to_rgb(x)
   def to_rgb({r, g, b} = _color), do: {r, g, b}
-  def to_rgb(color) when Names.is_color_name(color), do: apply(Names, color, [:rgb])
+  def to_rgb(color) when is_color_name(color), do: apply(Names, color, [:rgb])
   def to_rgb(color) when is_integer(color), do: split_into_subpixels(color)
 end

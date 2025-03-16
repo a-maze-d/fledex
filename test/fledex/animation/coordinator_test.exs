@@ -47,7 +47,7 @@ defmodule Fledex.Animation.CoordinatorTest do
       subscribers = subscribers()
       assert length(subscribers) == 1
       pid = self()
-      assert [{^pid, _}] = subscribers
+      assert [{^pid, _registry_val}] = subscribers
 
       # ensure we registered to the correct topic
       PubSub.broadcast_state(:bstate, %{})

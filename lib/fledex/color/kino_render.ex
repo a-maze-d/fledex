@@ -3,7 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Color.KinoRender do
-  import Fledex.Color.Names, only: [is_color_name: 1]
+  import Fledex.Color.Names.Guards
+
   alias Fledex.Color.Types
   alias Fledex.Color.Utils
   alias Fledex.Leds

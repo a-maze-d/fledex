@@ -72,7 +72,10 @@ defmodule Fledex.Driver.Manager do
     case same_drivers(old_drivers, new_drivers) do
       true ->
         drivers =
-          Enum.zip_with([old_drivers, new_drivers], fn [{old_module, old_config}, {_, new_config}] ->
+          Enum.zip_with([old_drivers, new_drivers], fn [
+                                                         {old_module, old_config},
+                                                         {_new_module, new_config}
+                                                       ] ->
             # we still have a minimalistic new_config. hence we need to get a proper
             # set by calling the configure function to get the defaults and overlay
             # with the new configs. This is now the "new_config" that we can compare
@@ -108,8 +111,8 @@ defmodule Fledex.Driver.Manager do
   # drivers at the end not found in old_drivers.
   defp same_drivers(old_drivers, new_drivers) do
     Enum.zip_reduce([old_drivers, new_drivers], true, fn [
-                                                           {old_driver_module, _},
-                                                           {new_driver_module, _}
+                                                           {old_driver_module, _old_config},
+                                                           {new_driver_module, _new_config}
                                                          ],
                                                          acc ->
       case old_driver_module == new_driver_module do

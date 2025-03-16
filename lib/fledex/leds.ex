@@ -447,7 +447,7 @@ defmodule Fledex.Leds do
     # we probably want to do some validation here and probably
     # want to optimise it a bit
     # a) is the server running?
-    _ =
+    _response =
       if Process.whereis(server_name) == nil do
         Logger.warning(
           "The server #{server_name} wasn't started. You should start it before using this function"
