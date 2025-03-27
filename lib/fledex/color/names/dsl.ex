@@ -3,23 +3,60 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Color.Names.Dsl do
+  alias Fledex.Color.Names.LoadUtils
+
   defmacro __using__(opts) do
-    pattern = Keyword.get(opts, :pattern, ~r/^.*$/i)
-    create_color_functions(pattern)
+    filename = Keyword.fetch!(opts, :filename)
+    pattern = Keyword.fetch!(opts, :pattern)
+    drop = Keyword.fetch!(opts, :drop)
+    splitter_opts = Keyword.fetch!(opts, :splitter_opts)
+    converter = Keyword.fetch!(opts, :converter)
+    module = Keyword.get(opts, :module, :unknown)
+
+    create_color_functions(
+      filename,
+      pattern,
+      drop,
+      splitter_opts,
+      converter,
+      module
+    )
   end
 
-  def create_color_functions(pattern) do
-    quote unquote: false, bind_quoted: [pattern: pattern] do
+  # credo:disable-for-next-line
+  def create_color_functions(
+        filename,
+        pattern,
+        drop,
+        splitter_opts,
+        converter,
+        module
+      ) do
+    quote unquote: false,
+          bind_quoted: [
+            pattern: pattern,
+            filename: filename,
+            drop: drop,
+            splitter_opts: splitter_opts,
+            converter: converter,
+            module: module
+          ] do
       @moduledoc ~S"""
       Do not use this module directly, but use Fledex.Color.Names instead
       """
 
-      alias Fledex.Color.Names.LoadUtils
       alias Fledex.Color.Names.Types
       alias Fledex.Leds
 
-      @external_resource Fledex.Color.Names.LoadUtils.names_file()
-      colors = LoadUtils.load_color_file(@external_resource, pattern)
+      colors =
+        LoadUtils.load_color_file(
+          filename,
+          pattern,
+          drop,
+          splitter_opts,
+          converter,
+          module
+        )
 
       @colors colors
       @color_names Enum.map(@colors, fn %{name: name} = _colorinfo -> name end)
@@ -91,6 +128,7 @@ defmodule Fledex.Color.Names.Dsl do
         def unquote(name)(:hsl), do: unquote(Macro.escape(color)).hsl
         def unquote(name)(:descriptive_name), do: unquote(Macro.escape(color)).descriptive_name
         def unquote(name)(:source), do: unquote(Macro.escape(color)).source
+        def unquote(name)(:module), do: unquote(Macro.escape(color)).module
         @spec unquote(name)(Leds.t()) :: Leds.t()
         def unquote(name)(leds), do: leds |> Leds.light(unquote(Macro.escape(color)).hex)
         @doc false

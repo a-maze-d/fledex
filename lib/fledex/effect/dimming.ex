@@ -5,6 +5,7 @@
 defmodule Fledex.Effect.Dimming do
   use Fledex.Effect.Interface
 
+  alias Fledex.Color.Conversion.CalcUtils
   alias Fledex.Color.Utils
 
   def do_apply(leds, count, config, triggers, _context) do
@@ -18,7 +19,7 @@ defmodule Fledex.Effect.Dimming do
       Enum.map(leds, fn led ->
         led
         |> Utils.to_rgb()
-        |> Utils.nscale8(255 - step, false)
+        |> CalcUtils.nscale8(255 - step, false)
         |> Utils.to_colorint()
       end)
 

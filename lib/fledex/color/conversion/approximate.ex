@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Color.Conversion.Approximate do
+  alias Fledex.Color.Conversion.CalcUtils
   alias Fledex.Color.Types
-  alias Fledex.Color.Utils
+  # alias Fledex.Color.Utils
 
   @hue_red 0
   @hue_orange 32
@@ -57,47 +58,48 @@ defmodule Fledex.Color.Conversion.Approximate do
 
   defp calc_hue({r, 0, _b}, r) do
     # pink-red-range
-    (@hue_purple + @hue_pink) / 2 + Utils.scale8(qsub8(r, 128), Utils.frac_48_128())
+    (@hue_purple + @hue_pink) / 2 + CalcUtils.scale8(qsub8(r, 128), CalcUtils.frac_48_128())
   end
 
   defp calc_hue({r, g, _b}, r) when r - g > g do
     # red-orange-range
-    @hue_red + Utils.scale8(g, Utils.frac_32_85())
+    @hue_red + CalcUtils.scale8(g, CalcUtils.frac_32_85())
   end
 
   defp calc_hue({r, g, _b}, r) do
     # orange-yellow-range
-    @hue_orange + Utils.scale8(qsub8(g - 85 + (171 - r), 4), Utils.frac_32_85())
+    @hue_orange + CalcUtils.scale8(qsub8(g - 85 + (171 - r), 4), CalcUtils.frac_32_85())
   end
 
   defp calc_hue({r, g, 0}, g) do
     # yellow-green-range
-    @hue_yellow + (Utils.scale8(qsub8(171, r), 47) + Utils.scale8(qsub8(g, 171), 96)) / 2
+    @hue_yellow + (CalcUtils.scale8(qsub8(171, r), 47) + CalcUtils.scale8(qsub8(g, 171), 96)) / 2
   end
 
   defp calc_hue({_r, g, b}, g) when g - b > b do
     # green-aqua-range
-    @hue_green + Utils.scale8(b, Utils.frac_32_85())
+    @hue_green + CalcUtils.scale8(b, CalcUtils.frac_32_85())
   end
 
   defp calc_hue({_r, g, b}, g) do
     # aqua-aquablue-range?
-    @hue_aqua + Utils.scale8(qsub8(b, 85), Utils.frac_8_42())
+    @hue_aqua + CalcUtils.scale8(qsub8(b, 85), CalcUtils.frac_8_42())
   end
 
   defp calc_hue({0, _g, b}, b) do
     # aquablue-blue-range
-    @hue_aqua + (@hue_blue - @hue_aqua) / 4 + Utils.scale8(qsub8(b, 128), Utils.frac_24_128())
+    @hue_aqua + (@hue_blue - @hue_aqua) / 4 +
+      CalcUtils.scale8(qsub8(b, 128), CalcUtils.frac_24_128())
   end
 
   defp calc_hue({r, _g, b}, b) when b - r > r do
     # blue-purple-range
-    @hue_blue + Utils.scale8(r, Utils.frac_32_85())
+    @hue_blue + CalcUtils.scale8(r, CalcUtils.frac_32_85())
   end
 
   defp calc_hue({r, _g, b}, b) do
     # purple-pink-range
-    @hue_purple + Utils.scale8(qsub8(r, 85), Utils.frac_32_85())
+    @hue_purple + CalcUtils.scale8(qsub8(r, 85), CalcUtils.frac_32_85())
   end
 
   defp calc_hue({r, g, b} = rgb) do

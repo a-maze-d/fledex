@@ -6,7 +6,16 @@ defmodule Fledex.Color.Names.DslTest do
   use ExUnit.Case
 
   defmodule TestNames do
-    use Fledex.Color.Names.Dsl, pattern: ~r/^[a].*$/i
+    alias Fledex.Color.Names.Wiki
+    alias Fledex.Color.Names.WikiUtils
+
+    use Fledex.Color.Names.Dsl,
+      filename: Wiki.file(),
+      pattern: ~r/^[a].*$/i,
+      drop: 1,
+      splitter_opts: [separator: ",", split_opts: [parts: 11]],
+      converter: &WikiUtils.converter/1,
+      module: __MODULE__
   end
 
   describe "check function creation" do

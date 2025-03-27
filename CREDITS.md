@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # Contributors
 Url: [CONTRIBUTORS.md](CONTRIBUTORS.md)
-THe first thank goes of course to all those that are contributing to this library, not only directly but also indirectly.
+The first thank goes of course to all those that are contributing to this library, not only directly but also indirectly.
 
 # FastLED
 Url: http://fastled.io
@@ -42,8 +42,10 @@ Urls:
 * https://en.wikipedia.org/wiki/List_of_colors:_G%E2%80%93M
 * https://en.wikipedia.org/wiki/List_of_colors:_N%E2%80%93Z
 
-The color names and attributes have been extracted from Wikipedia and been converted to a csv file and can be found in the [names.csv](lib/color/names.csv) file.
+The color names and attributes have been extracted from Wikipedia and W3C standards
+and been converted to a csv file and can be found in the files: [wiki_colors.csv](lib/color/names/wiki/wiki_colors.csv), [css_colors.csv](lib/color/names/css/css_colors.csv), [svg_colors.csv](lib/color/names/svg/svg_colors.csv), and [ral_colors.csv](lib/color/names/ral/ral_colors.csv).
 Only modification made was to rename Vermilion, since it appears twice in the data. We now have a Vermilion and Vermilion2
+
 
 ## License:
 Text is available under the Creative Commons Attribution-ShareAlike License 3.0; additional terms may apply. By using this site, you agree to the Terms of Use and Privacy Policy. Wikipedia® is a registered trademark of the Wikimedia Foundation, Inc., a non-profit organization.

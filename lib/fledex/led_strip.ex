@@ -21,6 +21,7 @@ defmodule Fledex.LedStrip do
   require Logger
 
   require IEx
+  alias Fledex.Color.Conversion.CalcUtils
   alias Fledex.Color.Types
   alias Fledex.Color.Utils
   alias Fledex.Driver.Impl.Null
@@ -433,7 +434,7 @@ defmodule Fledex.LedStrip do
   @spec merge_pixels(list(Types.colorint()), atom) :: Types.colorint()
   def merge_pixels(elems, merge_strategy) do
     elems
-    |> Enum.map(fn elem -> Utils.split_into_subpixels(elem) end)
+    |> Enum.map(fn elem -> CalcUtils.split_into_subpixels(elem) end)
     |> apply_merge_strategy(merge_strategy)
     |> Utils.to_colorint()
   end
@@ -441,11 +442,11 @@ defmodule Fledex.LedStrip do
   @doc false
   @spec apply_merge_strategy(list(Types.colorint()), atom) :: Types.rgb()
   def apply_merge_strategy(rgb, :avg) do
-    Utils.avg(rgb)
+    CalcUtils.avg(rgb)
   end
 
   def apply_merge_strategy(rgb, :cap) do
-    Utils.cap(rgb)
+    CalcUtils.cap(rgb)
   end
 
   def apply_merge_strategy(_rgb, merge_strategy) do

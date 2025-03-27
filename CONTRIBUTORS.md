@@ -7,3 +7,4 @@ SPDX-License-Identifier: Apache-2.0
 I would like to say thank you to all those people that have directly or indirectly contributed. If you think you should be on this list, do not hesitate to ping me.
 
 * christhekeele (on Elixirforum for helping with my macro issues)
+* sodapopcan and hauleth (on Elixirforum for helping with my guard issues)

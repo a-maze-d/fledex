@@ -5,8 +5,8 @@
 defmodule Fledex.Color.Correction do
   import Bitwise
 
+  alias Fledex.Color.Conversion.CalcUtils
   alias Fledex.Color.Types
-  alias Fledex.Color.Utils
 
   defmodule Color do
     # 255, 176, 240
@@ -93,8 +93,8 @@ defmodule Fledex.Color.Correction do
   def define_correction(scale \\ 255, color_correction, temperature_correction)
 
   def define_correction(scale, color_correction, temperature_correction) when scale > 0 do
-    {ccr, ccg, ccb} = Utils.split_into_subpixels(color_correction)
-    {tcr, tcg, tcb} = Utils.split_into_subpixels(temperature_correction)
+    {ccr, ccg, ccb} = CalcUtils.split_into_subpixels(color_correction)
+    {tcr, tcg, tcb} = CalcUtils.split_into_subpixels(temperature_correction)
 
     r = calculate_color_correction(scale, ccr, tcr)
     g = calculate_color_correction(scale, ccg, tcg)
@@ -119,7 +119,7 @@ defmodule Fledex.Color.Correction do
 
   def apply_rgb_correction(leds, correction) do
     Enum.map(leds, fn led ->
-      Utils.nscale8(led, correction, false)
+      CalcUtils.nscale8(led, correction, false)
     end)
   end
 

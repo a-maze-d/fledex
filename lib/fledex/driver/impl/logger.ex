@@ -6,8 +6,8 @@ defmodule Fledex.Driver.Impl.Logger do
   @behaviour Fledex.Driver.Interface
   require Logger
 
+  alias Fledex.Color.Conversion.CalcUtils
   alias Fledex.Color.Types
-  alias Fledex.Color.Utils
 
   @default_update_freq 10
   @divisor 255 / 5
@@ -83,7 +83,7 @@ defmodule Fledex.Driver.Impl.Logger do
 
   @spec to_ansi_color(Types.colorint()) :: String.t()
   defp to_ansi_color(value) do
-    {r, g, b} = Utils.split_into_subpixels(value)
+    {r, g, b} = CalcUtils.split_into_subpixels(value)
     IO.ANSI.color(trunc(r / @divisor), trunc(g / @divisor), trunc(b / @divisor))
   end
 

@@ -33,7 +33,8 @@ defmodule Fledex.Color.Names.Types do
           rgb: Types.rgb(),
           hsl: Types.hsl(),
           hsv: Types.hsv(),
-          source: String.t()
+          source: String.t(),
+          module: module
         }
   @typedoc """
   The different values that can be returned when interrogating for some named color properties

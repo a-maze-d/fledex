@@ -32,7 +32,7 @@ Please delete options that are not relevant.
 - [ ] I run `mix dialyzer` and no issues were found
 - [ ] I added module and function documentation to all my public modules/functions
 - [ ] I run `mix docs` and no issues were found
-- [ ] I run `mix xref graph --label compile-connected --fail-above 14` or explain why you will need to increase it.
+- [ ] I run `mix xref graph --label compile-connected --fail-above 18` or explain why you will need to increase it.
 - [ ] I run through the different `livebook/`s to ensure that they all work.
 - [ ] I added a new livebook (or modified an exisitng one)  to explain the new functionality (only applies for major functionality)
 - [ ] I run `mix reuse` (or `pipx run reuse lint`) and fixed all issues

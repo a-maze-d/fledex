@@ -5,8 +5,8 @@
 defmodule Fledex.Color.Conversion.Rainbow do
   import Bitwise
 
+  alias Fledex.Color.Conversion.CalcUtils
   alias Fledex.Color.Types
-  alias Fledex.Color.Utils
 
   @k255 255
   @k171 171
@@ -27,8 +27,8 @@ defmodule Fledex.Color.Conversion.Rainbow do
     offset = h &&& 0x1F
     offset8 = offset <<< 3
 
-    third = Utils.scale8(offset8, Kernel.trunc(256 / 3))
-    twothird = Utils.scale8(offset8, Kernel.trunc(256 * 2 / 3))
+    third = CalcUtils.scale8(offset8, Kernel.trunc(256 / 3))
+    twothird = CalcUtils.scale8(offset8, Kernel.trunc(256 * 2 / 3))
     build_rgb(main, third, twothird)
   end
 
@@ -71,9 +71,9 @@ defmodule Fledex.Color.Conversion.Rainbow do
 
   defp desaturate({r, g, b}, s) do
     desat = 255 - s
-    desat = Utils.scale8(desat, desat, true)
+    desat = CalcUtils.scale8(desat, desat, true)
     satscale = 255 - desat
-    {r, g, b} = Utils.nscale8({r, g, b}, satscale, true)
+    {r, g, b} = CalcUtils.nscale8({r, g, b}, satscale, true)
 
     {r + desat, g + desat, b + desat}
   end
@@ -84,7 +84,7 @@ defmodule Fledex.Color.Conversion.Rainbow do
   defp scale_brightness(_na, v) when (v * v) >>> 8 == 0, do: {0, 0, 0}
 
   defp scale_brightness({r, g, b}, v) do
-    val = Utils.scale8(v, v, true)
-    Utils.nscale8({r, g, b}, val, true)
+    val = CalcUtils.scale8(v, v, true)
+    CalcUtils.nscale8({r, g, b}, val, true)
   end
 end
