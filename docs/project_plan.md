@@ -95,7 +95,7 @@ the `use Fledex`)
 5. Here the solutions for the different parts:
    1. Use of the repeat function within the light function (note the offset does need to be specified)
    ```elixir
-   leds(10) |> light(:red, 1, 5)
+   leds(10) |> light(:red, offset: 1, repeat: 5)
    ```
    Use of the repeat function for an led sequence (the resulting sequence is shorter compared to the above example):
    ```elixir
@@ -103,7 +103,7 @@ the `use Fledex`)
    ```
    2. But the latter allows us to solve the next one too
    ```elixir
-   leds(3) |> red |> green |> blue |> repeat(3)
+   leds(3) |> red() |> green() |> blue() |> repeat(3)
    ```
    3. This is easily done with the gradient function
    ```elixir
@@ -111,11 +111,11 @@ the `use Fledex`)
    ```
    4. This is solved as the above one, but we use the rainbow function
    ```elixir
-   leds(10) |> rainbow
+   leds(10) |> rainbow()
    ```
    5. The above can be combined in a wild way:
    ```elixir
-   l1 = leds(7) |> rainbow |> repeat(3)
+   l1 = leds(7) |> rainbow() |> repeat(3)
    leds(50) |> light(l1, 5) |> light(l1, 30)
    ```
 6. The offset can be defined by using the offset function as shown in 5.5

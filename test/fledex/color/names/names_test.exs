@@ -130,7 +130,9 @@ defmodule Fledex.Color.NamesTest do
       assert Leds.get_light(leds, 2) == 0x00FF00
       assert Leds.get_light(leds, 3) == 0x0000FF
 
-      leds = Leds.leds(3) |> Names.blue(3) |> Names.green(2) |> Names.red(1)
+      leds =
+        Leds.leds(3) |> Names.blue(offset: 3) |> Names.green(offset: 2) |> Names.red(offset: 1)
+
       assert Leds.get_light(leds, 1) == 0xFF0000
       assert Leds.get_light(leds, 2) == 0x00FF00
       assert Leds.get_light(leds, 3) == 0x0000FF

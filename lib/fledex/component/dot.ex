@@ -19,7 +19,7 @@ defmodule Fledex.Component.Dot do
 
         case trigger do
           trigger when is_in_range(trigger, zero_indexed, 0, count) ->
-            leds(count) |> light(color, trigger + correct_index(zero_indexed))
+            leds(count) |> light(color, offset: trigger + correct_index(zero_indexed))
 
           _triggers ->
             leds()

@@ -71,7 +71,7 @@ From the color names you can also get more information, but as mentioned above w
 
 In addition, you might encounter, in some cases, other color encodings like `Type.hsv` or `Typee.hsl`. But they are in general not so important.
 
-## Defining individual Led
+## Defining individual Leds
 
 In Fledex you define a sequence of LEDs (and their colors) through the `Leds` module.
 You first define the size of the sequence. Let us define a sequence of 30 LEDs (by calling `Leds.leds`):
@@ -103,14 +103,14 @@ alias Fledex.Color.Names
 
 leds =
   leds
-  |> Leds.light(:red, 10)
+  |> Leds.light(:red, offset: 10)
   |> Leds.light(Names.green())
   |> Leds.light({0, 0, 0xFF})
 ```
 
 As seen, if we specify the offset of `10` and we continue to define colors without offset the next LED in the sequence will be defined (i.e `11`)
 
-At the `Raw` result you can see how the deta is encoded.
+If you are curious, at the `Raw` result you can see how the deta is encoded.
 
 <!-- livebook:{"force_markdown":true} -->
 
@@ -129,7 +129,7 @@ It is possble to define a color with an invalid offset. i.e. which is outside th
 ```elixir
 leds =
   leds
-  |> Leds.light(:green, 40)
+  |> Leds.light(:green, offset: 40)
 ```
 
 ## Merging LED sequences
@@ -145,7 +145,7 @@ leds_sub =
 leds =
   Leds.leds(30)
   |> Leds.light(leds_sub)
-  |> Leds.light(leds_sub, 5)
+  |> Leds.light(leds_sub, offset: 5)
 ```
 
 ## Repeating an LED sequence
@@ -155,10 +155,10 @@ It is possble to define a sequence of LEDs by repeating it. If you want to have 
 ```elixir
 leds =
   Leds.leds(30)
-  |> Leds.light(:red, 5, 5)
+  |> Leds.light(:red, offset: 5, repeat: 5)
 ```
 
-You can also use this to repeat a sub-sequence. This will will repeat the whole subsequence as many times in a row as specified.
+You can also use this to repeat a sub-sequence. This will repeat the whole subsequence as many times in a row as specified.
 
 ```elixir
 leds_sub =
@@ -168,7 +168,7 @@ leds_sub =
 
 leds =
   Leds.leds(30)
-  |> Leds.light(leds_sub, 5, 3)
+  |> Leds.light(leds_sub, offset: 5, repeat: 3)
 ```
 
 ## Definining LEDs through a function
@@ -180,7 +180,7 @@ If, for example, you want to create a rainbow pattern over 10 LEDs, you can do s
 ```elixir
 leds =
   Leds.leds(30)
-  |> Leds.rainbow()
+  |> Leds.rainbow(%{num_leds: 10})
 ```
 
 Another function is the `gradient/3` function that allows a transition from one color to another.
@@ -206,5 +206,4 @@ difficult, but it's such a common task that the Leds module provides the conveni
 function `send/2`. and some supporting functions (`set_led_strip_info/3`, `rotate/2`,
 `to_list/1`).
 
-The send function has a couple of checks that the `Fledex.LedStrip` is set up correctly.
 We won't discuss the send function in detail, since we'll look at this in more details in other chapters.

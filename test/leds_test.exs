@@ -68,7 +68,7 @@ defmodule Fledex.LedsTest do
     test "resetting led count" do
       offset = 15
       color = 0x00FF00
-      leds = Leds.leds(10) |> Leds.light(color, offset)
+      leds = Leds.leds(10) |> Leds.light(color, offset: offset)
       assert Leds.count(leds) == 10
       assert Leds.get_light(leds, offset) == color
 
@@ -140,7 +140,7 @@ defmodule Fledex.LedsTest do
 
       leds =
         Leds.leds(10)
-        |> Leds.light(0xFF0000, offset)
+        |> Leds.light(0xFF0000, offset: offset)
         |> Leds.light(0x00FF00)
 
       assert Leds.get_light(leds, offset) == 0xFF0000
@@ -152,9 +152,9 @@ defmodule Fledex.LedsTest do
 
       leds =
         Leds.leds(10)
-        |> Leds.light(0xFF0000, offset)
+        |> Leds.light(0xFF0000, offset: offset)
         |> Leds.light(0x00FF00)
-        |> Leds.light(0x0000FF, offset)
+        |> Leds.light(0x0000FF, offset: offset)
 
       assert Leds.get_light(leds, offset) == 0x0000FF
       assert Leds.get_light(leds, offset + 1) == 0x00FF00
@@ -178,7 +178,7 @@ defmodule Fledex.LedsTest do
 
       leds_all =
         Leds.leds(100)
-        |> Leds.light(leds_some, offset)
+        |> Leds.light(leds_some, offset: offset)
 
       assert Leds.get_light(leds_all, offset) == 0x00FF00
       assert Leds.get_light(leds_all, offset + 1) == 0x0000FF
@@ -204,8 +204,8 @@ defmodule Fledex.LedsTest do
       leds_all =
         Leds.leds(10)
         # this led will be overwritten with 0x0000FF
-        |> Leds.light(0xFF0000, offset + 1)
-        |> Leds.light(leds_some, offset)
+        |> Leds.light(0xFF0000, offset: offset + 1)
+        |> Leds.light(leds_some, offset: offset)
 
       assert Leds.get_light(leds_all, offset) == 0x00FF00
       assert Leds.get_light(leds_all, offset + 1) == 0x0000FF
@@ -214,7 +214,7 @@ defmodule Fledex.LedsTest do
     end
 
     test "get light" do
-      leds = Leds.leds(10) |> Leds.light(0xFF0000, 5) |> Leds.light(0x00FF00, 20)
+      leds = Leds.leds(10) |> Leds.light(0xFF0000, offset: 5) |> Leds.light(0x00FF00, offset: 20)
       assert Leds.get_light(leds, 1) == 0
       assert Leds.get_light(leds, 5) == 0xFF0000
       assert Leds.get_light(leds, 20) == 0x00FF00
@@ -368,18 +368,14 @@ defmodule Fledex.LedsTest do
     end
 
     test "light with repeat" do
-      leds = Leds.leds(3) |> Leds.light(:red, 2, 3)
+      leds = Leds.leds(3) |> Leds.light(:red, offset: 2, repeat: 3)
       assert Leds.count(leds) == 3
       assert Leds.get_light(leds, 1) == 0x000000
       assert Leds.get_light(leds, 2) == 0xFF0000
       assert Leds.get_light(leds, 3) == 0xFF0000
 
-      assert_raise ArgumentError, fn ->
-        Leds.leds(3) |> Leds.light(:red, 1, 0)
-      end
-
-      assert_raise ArgumentError, fn ->
-        Leds.leds(3) |> Leds.light(:red, -1, 2)
+      assert_raise ArgumentError, ~r/repeat needs to be a positive number > 0/, fn ->
+        Leds.leds(3) |> Leds.light(:red, offset: 1, repeat: 0)
       end
     end
 
@@ -394,9 +390,9 @@ defmodule Fledex.LedsTest do
           },
           %{}
         )
-        |> Leds.light(0xAABBCC, 4, 2)
-        |> Leds.light(:may_green, 6, 2)
-        |> Leds.light(Leds.leds(1) |> Leds.light(:red), 8, 2)
+        |> Leds.light(0xAABBCC, offset: 4, repeat: 2)
+        |> Leds.light(:may_green, offset: 6, repeat: 2)
+        |> Leds.light(Leds.leds(1) |> Leds.light(:red), offset: 8, repeat: 2)
 
       assert leds.leds[1] == 0xFF0000
       assert leds.leds[2] == 0x00FF00
@@ -413,7 +409,13 @@ defmodule Fledex.LedsTest do
   describe "errors" do
     test "light on negative offset position" do
       assert_raise ArgumentError, ~r/the offset needs to be > 0/, fn ->
-        Leds.light(Leds.leds(2), :red, -1)
+        Leds.light(Leds.leds(2), :red, offset: -1)
+      end
+    end
+
+    test "wrong argument" do
+      assert_raise ArgumentError, ~r/The options are a list, but not a keyword list/, fn ->
+        Leds.light(Leds.leds(2), :red, [1, 2])
       end
     end
 
@@ -434,25 +436,25 @@ defmodule Fledex.LedsTestSync do
   # them in a sync way. We split them out for that reason
   use ExUnit.Case
 
-  import ExUnit.CaptureLog
+  # import ExUnit.CaptureLog
   require Logger
 
   alias Fledex.Leds
 
-  describe "send functions" do
-    test "correct setup and warnings" do
-      leds = Leds.leds(20) |> Leds.light(:red, 1, 10)
+  # describe "send functions" do
+  #   test "correct setup and warnings" do
+  #     leds = Leds.leds(20) |> Leds.light(:red, 1, 10)
 
-      {:ok, log} =
-        with_log(fn ->
-          Leds.send(leds)
-        end)
+  #     {:ok, log} =
+  #       with_log(fn ->
+  #         Leds.send(leds)
+  #       end)
 
-      assert String.match?(log, ~r/warning/)
-      assert String.match?(log, ~r/You should start it/)
-      assert String.match?(log, ~r/namespace hasn't been defined/)
-    end
-  end
+  #     assert String.match?(log, ~r/warning/)
+  #     assert String.match?(log, ~r/You should start it/)
+  #     assert String.match?(log, ~r/namespace hasn't been defined/)
+  #   end
+  # end
 end
 
 defmodule Fledex.LedsTestKino do

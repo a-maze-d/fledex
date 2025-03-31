@@ -25,6 +25,7 @@ Please delete options that are not relevant.
 
 ## Checklist before requesting a review
 - [ ] I performed a self-review of my code
+- [ ] I run `mix format`
 - [ ] I run `mix compile` and it compiles without errors or warnings
 - [ ] I run `mix test` or `mix coveralls.html` and have **100%** code coverage (and if not I explained below why)
 - [ ] I run `mix credo` and no issues (that weren't there before) were found.

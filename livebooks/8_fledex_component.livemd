@@ -72,7 +72,7 @@ led_strip :nested_components, Kino do
   component(:hour, Dot, color: :blue, count: 24, trigger_name: :hour)
 
   static :helper do
-    leds(5) |> light(:davy_s_grey, 5) |> repeat(12)
+    leds(5) |> light(:davy_s_grey, offset: 5) |> repeat(12)
   end
 end
 ```
@@ -91,7 +91,7 @@ The interesting thing in the `Fledex.Component.Dot` component is that it actuall
     # ... here comes some option extraction stuff
     animation name do
       triggers when is_map(triggers) and is_map_key(triggers, trigger_name) ->
-        leds(count) |> light(color, triggers[trigger_name])
+        leds(count) |> light(color, offset: triggers[trigger_name])
       _ -> leds()
     end
   end
@@ -116,7 +116,7 @@ Each animation requires its own unique name and this is accomplished with a smal
       component :minute, Dot, color: minute_color, count: 60, trigger_name: create_name(trigger_name, :minute)
       component :hour, Dot, color: hour_color, count: 24, trigger_name: create_name(trigger_name, :hour)
       static create_name(trigger_name, :helper) do
-        leds(5) |> light(helper_color, 5) |> repeat(12)
+        leds(5) |> light(helper_color, offset: 5) |> repeat(12)
       end
     end
   end

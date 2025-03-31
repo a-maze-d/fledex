@@ -86,7 +86,7 @@ defmodule Fledex.Component.Thermometer do
           {Leds.leds(1) |> Leds.light(pos_color) |> Leds.repeat(abs(temp)), pos_offset}
       end
 
-    Leds.leds(total_leds) |> Leds.light(leds, offset)
+    Leds.leds(total_leds) |> Leds.light(leds, offset: offset)
   end
 
   defp def_func_helper(_triggers, options) do
@@ -101,7 +101,7 @@ defmodule Fledex.Component.Thermometer do
 
     positive_scale =
       Leds.leds(marker_distance)
-      |> Leds.light(marker, marker_distance)
+      |> Leds.light(marker, offset: marker_distance)
       |> Leds.repeat(trunc(range.last / marker_distance))
 
     Leds.leds(Range.size(range))
@@ -112,7 +112,7 @@ defmodule Fledex.Component.Thermometer do
 
   defp cond_add(leds, condition, color, offset, repeat) do
     if condition do
-      leds |> Leds.light(color, offset, repeat)
+      leds |> Leds.light(color, offset: offset, repeat: repeat)
     else
       leds
     end

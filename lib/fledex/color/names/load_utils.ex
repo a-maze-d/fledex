@@ -13,6 +13,7 @@ defmodule Fledex.Color.Names.LoadUtils do
         converter,
         module
       ) do
+    # Example how the structure of the CSV might look like
     # Name, Hex (RGB), Red (RGB), Green (RGB), Blue (RGB), Hue (HSL/HSV), Satur. (HSL),
     #   Light (HSL), Satur.(HSV), Value (HSV), Source
     names_file

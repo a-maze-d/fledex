@@ -397,6 +397,12 @@ defmodule Fledex.LedStripTestSync do
       assert {:error, _message} =
                LedStrip.start_link(:test_strop_name6, %{wrong: "structure"}, [])
     end
+
+    test "start server a second time" do
+      {:ok, pid} = LedStrip.start_link(:test_strip_name1)
+      assert {:ok, pid} == LedStrip.start_link(:test_strip_name1)
+      :ok = GenServer.stop(pid)
+    end
   end
 
   describe "test LedStrip client APIs" do
@@ -447,6 +453,7 @@ defmodule Fledex.LedStripTestSync do
       # that are tested independently
       assert :ok == LedStrip.define_namespace(strip_name, @namespace)
       assert true == LedStrip.exist_namespace(strip_name, @namespace)
+      assert false == LedStrip.exist_namespace(strip_name, :non_existent)
       assert :ok == LedStrip.set_leds(strip_name, @namespace, [0xFF0000, 0x00FF00, 0x0000FF])
 
       # successful config change

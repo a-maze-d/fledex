@@ -65,7 +65,7 @@ In addition each color can also be used directly in an `Leds` sequence since it 
   ```
 * `almond(leds, offset)` which takes an `Leds` sequence and an offset to specify where the led should be positioned. This is equivalent to:
   ```elixir
-  leds |> Leds.light(almond(:hex), offset)
+  leds |> Leds.light(almond(:hex), offset: offset)
   ```
 
 This allows for a very natural way to define an led sequence. especially if we import the `Fledex.Leds` and `Fledex.Color.Names` modules.

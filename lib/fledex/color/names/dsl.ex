@@ -132,9 +132,9 @@ defmodule Fledex.Color.Names.Dsl do
         @spec unquote(name)(Leds.t()) :: Leds.t()
         def unquote(name)(leds), do: leds |> Leds.light(unquote(Macro.escape(color)).hex)
         @doc false
-        @spec unquote(name)(Leds.t(), offset :: non_neg_integer) :: Leds.t()
-        def unquote(name)(leds, offset),
-          do: leds |> Leds.light(unquote(Macro.escape(color)).hex, offset)
+        @spec unquote(name)(Leds.t(), opts :: keyword) :: Leds.t()
+        def unquote(name)(leds, opts),
+          do: leds |> Leds.light(unquote(Macro.escape(color)).hex, opts)
       end
     end
   end

@@ -230,13 +230,15 @@ defmodule Fledex.Leds do
   end
 
   @doc """
-  repeat teh existing sequence `amount` times
+  repeat the existing sequence `amount` times
 
   This way you can easily create a repetitive pattern
 
   **Note:** this will change the led sequence count  (`amount` times the initial `count`)
   """
   @spec repeat(t, integer) :: t
+  def repeat(leds, amount) when amount == 1, do: leds
+
   def repeat(
         %__MODULE__{
           count: count,
@@ -246,7 +248,7 @@ defmodule Fledex.Leds do
         },
         amount
       )
-      when amount >= 1 do
+      when amount > 1 do
     index = meta[:index] || 1
     new_index = (amount - 1) * count + index
     new_count = count * amount
@@ -269,85 +271,190 @@ defmodule Fledex.Leds do
   the sequence.
   """
   @spec light(t, Types.color() | t) :: t
-  def light(leds, rgb) do
-    do_update(leds, rgb)
+  # def light(leds, rgb) do
+  #   do_update(leds, rgb)
+  # end
+  def light(%__MODULE__{meta: meta} = leds, rgb) do
+    index = meta[:index] || 1
+    index = max(index, 1)
+    light(leds, rgb, offset: index)
   end
 
   @doc """
-  Defines the color of an led at `position` (one indexed)
+  Defines the color of an led with some options specified.
 
-  The `offset` needs to be `> 0` if it's bigger than the count
-  then the led will be stored, but ignored (but see the description
-  of `set_count/2`). The same note as for `light/2` applies.
+  The options can be the following:
+
+  * `:offset`: by how many leds sdo we want to offset. needs to be
+  `> 0` if it's bigger than the count then the led will be stored,
+  but ignored (but see the description of `set_count/2`). The same
+  note as for `light/2` applies.
+  * `:repeat`: How often the light should be repeated. It needs to be
+  more than 1, otherwise it wouldn't make sense. In addition the same
+  note as for `light/2` applies.
+
+  if you don't specify a list, but only a  number as option, then
+  it's the same as specifying the offset.
   """
-  @spec light(t, Types.color() | t, pos_integer) :: t
-  def light(leds, led, offset) when offset > 0 do
-    do_update(leds, led, offset)
+  @spec light(t, Types.color() | t, keyword) :: t
+  def light(leds, rgb, opts) when is_list(opts) do
+    case Keyword.keyword?(opts) do
+      true ->
+        offset = Keyword.get(opts, :offset, 1)
+        repeat = Keyword.get(opts, :repeat, 1)
+
+        do_light(leds, rgb, offset, repeat)
+
+      # __MODULE__.light(leds, rgb, offset)
+      false ->
+        raise ArgumentError, message: "The options are a list, but not a keyword list"
+    end
   end
 
-  def light(_leds, _led, offset) do
+  def light(leds, led, opts) do
+    raise ArgumentError,
+      message:
+        "unknown data - leds: #{inspect(leds)}, rgb: #{inspect(led)}, opts: #{inspect(opts)}"
+  end
+
+  defp do_light(_leds, _rgb, offset, _repeat) when offset <= 0 do
     raise ArgumentError, message: "the offset needs to be > 0 (found: #{offset})"
   end
 
-  @doc """
-  Defines the color of an led at `position` and repeats it `repeat` times.
+  defp do_light(_leds, _rgb, _offset, repeat) when repeat <= 0 do
+    raise ArgumentError, message: "repeat needs to be a positive number > 0 (found: #{repeat})"
+  end
 
-  THe `repeat` needs to be more than 1, otherwise it wouldn't make sense.
-  In adition the same note as for `light/2` applies.
-  """
-  @spec light(t, Types.color() | t, pos_integer, pos_integer) :: t
-  def light(%__MODULE__{} = leds, led, offset, repeat) when offset > 0 and repeat >= 1 do
+  defp do_light(
+         %__MODULE__{count: count1, leds: leds1, opts: opts1, meta: meta1},
+         rgb,
+         offset,
+         repeat
+       ) do
     # convert led to a LEDs struct
-    led =
-      case led do
-        led when is_integer(led) -> __MODULE__.leds(1) |> __MODULE__.light(led)
-        led when is_atom(led) -> __MODULE__.leds(1) |> __MODULE__.light(led)
-        %__MODULE__{} = led -> led
+    rgb =
+      case rgb do
+        rgb
+        when is_integer(rgb) or
+               is_atom(rgb) or
+               tuple_size(rgb) == 3 ->
+          __MODULE__.leds(1, %{1 => Utils.to_colorint(rgb)}, %{}, %{index: 2})
+
+        # rgb when is_atom(rgb) -> __MODULE__.leds(1,%{ 1 => rgb}) |> __MODULE__.light(rgb)
+        %__MODULE__{} = rgb ->
+          rgb
       end
 
     # repeat the sequence
-    led = led |> __MODULE__.repeat(repeat)
+    %__MODULE__{count: count2, leds: leds2} = rgb |> __MODULE__.repeat(repeat)
     # merge in the sequence at the coorect offset
-    __MODULE__.light(leds, led, offset)
-  end
-
-  def light(_leds, _led, offset, repeat) do
-    raise ArgumentError,
-      message: "the offset needs to be > 0 (found: #{offset}) and repeat >= 1 (found: #{repeat})"
-  end
-
-  @spec do_update(t, Types.color() | t) :: t
-  defp do_update(%__MODULE__{meta: meta} = leds, rgb) do
-    index = meta[:index] || 1
-    index = max(index, 1)
-    do_update(leds, rgb, index)
-  end
-
-  @spec do_update(t, Types.color() | t, pos_integer) :: t
-  defp do_update(
-         %__MODULE__{count: count1, leds: leds1, opts: opts1, meta: meta1},
-         %__MODULE__{count: count2, leds: leds2},
-         offset
-       ) do
     # remap the indicies (1 indexed)
     remapped_new_leds = remap_leds(leds2, offset)
     leds = Map.merge(leds1, remapped_new_leds)
     __MODULE__.leds(count1, leds, opts1, %{meta1 | index: offset + count2})
   end
 
-  defp do_update(
-         %__MODULE__{count: count, leds: leds, opts: opts, meta: meta},
-         color,
-         offset
-       ) do
-    color_int = Utils.to_colorint(color)
-    __MODULE__.leds(count, Map.put(leds, offset, color_int), opts, %{meta | index: offset + 1})
-  end
+  # @doc """
+  # Defines the color of an led at `position` (one indexed)
 
-  defp do_update(leds, led, offset) do
-    raise ArgumentError,
-      message: "unknown data #{inspect(leds)}, #{inspect(led)}, #{inspect(offset)}"
-  end
+  # The `offset` needs to be `> 0` if it's bigger than the count
+  # then the led will be stored, but ignored (but see the description
+  # of `set_count/2`). The same note as for `light/2` applies.
+  # """
+  # @deprecated "use `Fledex.Leds,light(leds, rgb, offset: offset)` instead"
+  # @spec light(t, Types.color() | t, pos_integer) :: t
+  # def light(leds, led, offset) when offset > 0 do
+  #   do_update(leds, led, offset)
+  # end
+  # def light(_leds, _led, offset) when is_integer(offset) and offset <= 0 do
+  #   raise ArgumentError, message: "the offset needs to be > 0 (found: #{offset})"
+  # end
+  # @deprecated "use `Fledex.Leds,light(leds, rgb, offset: offset)` instead"
+  # def light(leds, rgb, offset) when is_integer(offset) do
+  #   light(leds, rgb, offset: offset)
+  # end
+  # def light(
+  #   %__MODULE__{count: count1, leds: leds1, opts: opts1, meta: meta1},
+  #   %__MODULE__{count: count2, leds: leds2},
+  #   offset) do
+  #   # remap the indicies (1 indexed)
+  #   remapped_new_leds = remap_leds(leds2, offset)
+  #   leds = Map.merge(leds1, remapped_new_leds)
+  #   __MODULE__.leds(count1, leds, opts1, %{meta1 | index: offset + count2})
+  # end
+  # def light(
+  #   %__MODULE__{count: count, leds: leds, opts: opts, meta: meta},
+  #   color,
+  #   offset) do
+  #   color_int = Utils.to_colorint(color)
+  #   __MODULE__.leds(count, Map.put(leds, offset, color_int), opts, %{meta | index: offset + 1})
+  # end
+  # @deprecated "use `Fledex.Leds,light(leds, rgb, offset: offset)` instead"
+  # def light(leds, led, offset) do
+  #   raise ArgumentError,
+  #   message: "unknown data #{inspect(leds)}, #{inspect(led)}, #{inspect(offset)}"
+  # end
+
+  # @doc """
+  # Defines the color of an led at `position` and repeats it `repeat` times.
+
+  # The `repeat` needs to be more than 1, otherwise it wouldn't make sense.
+  # In addition the same note as for `light/2` applies.
+  # """
+  # @deprecated "use `light(leds, rgb, offset: offset, repeat: repeat)) instead"
+  # @spec light(t, Types.color() | t, pos_integer, pos_integer) :: t
+  # def light(%__MODULE__{} = leds, led, offset, repeat) when offset > 0 and repeat > 0 do
+  #   # convert led to a LEDs struct
+  #   led =
+  #     case led do
+  #       led when is_integer(led) -> __MODULE__.leds(1) |> __MODULE__.light(led)
+  #       led when is_atom(led) -> __MODULE__.leds(1) |> __MODULE__.light(led)
+  #       %__MODULE__{} = led -> led
+  #     end
+
+  #   # repeat the sequence
+  #   led = led |> __MODULE__.repeat(repeat)
+  #   # merge in the sequence at the coorect offset
+  #   __MODULE__.light(leds, led, offset)
+  # end
+
+  # def light(_leds, _led, offset, repeat) do
+  #   raise ArgumentError,
+  #     message: "the offset needs to be > 0 (found: #{offset}) and repeat >= 1 (found: #{repeat})"
+  # end
+
+  # @spec do_update(t, Types.color() | t) :: t
+  # defp do_update(%__MODULE__{meta: meta} = leds, rgb) do
+  #   index = meta[:index] || 1
+  #   index = max(index, 1)
+  #   do_update(leds, rgb, index)
+  # end
+
+  # @spec do_update(t, Types.color() | t, pos_integer) :: t
+  # defp do_update(
+  #        %__MODULE__{count: count1, leds: leds1, opts: opts1, meta: meta1},
+  #        %__MODULE__{count: count2, leds: leds2},
+  #        offset
+  #      ) do
+  #   # remap the indicies (1 indexed)
+  #   remapped_new_leds = remap_leds(leds2, offset)
+  #   leds = Map.merge(leds1, remapped_new_leds)
+  #   __MODULE__.leds(count1, leds, opts1, %{meta1 | index: offset + count2})
+  # end
+
+  # defp do_update(
+  #        %__MODULE__{count: count, leds: leds, opts: opts, meta: meta},
+  #        color,
+  #        offset
+  #      ) do
+  #   color_int = Utils.to_colorint(color)
+  #   __MODULE__.leds(count, Map.put(leds, offset, color_int), opts, %{meta | index: offset + 1})
+  # end
+
+  # defp do_update(leds, led, offset) do
+  #   raise ArgumentError,
+  #     message: "unknown data #{inspect(leds)}, #{inspect(led)}, #{inspect(offset)}"
+  # end
 
   @spec remap_leds(%{pos_integer => Types.colorint()}, pos_integer) :: %{
           pos_integer => Types.colorint()
@@ -442,33 +549,10 @@ defmodule Fledex.Leds do
   def send(leds, opts \\ %{}) do
     offset = opts[:offset] || 0
     rotate_left = if opts[:rotate_left] != nil, do: opts[:rotate_left], else: true
-    server_name = leds.opts.server_name || LedStrip
-    namespace = leds.opts.namespace || :default
-    # we probably want to do some validation here and probably
-    # want to optimise it a bit
-    # a) is the server running?
-    _response =
-      if Process.whereis(server_name) == nil do
-        Logger.warning(
-          "The server #{server_name} wasn't started. You should start it before using this function"
-        )
-
-        {:ok, _pid} = LedStrip.start_link(server_name)
-      end
-
-    # b) Is a namespace defined?
-    exists = LedStrip.exist_namespace(server_name, namespace)
-
-    if not exists do
-      # Logger.error(Exception.format_stacktrace())
-      Logger.warning(
-        "The namespace hasn't been defined. This should be done before calling this function"
-      )
-
-      :ok = LedStrip.define_namespace(server_name, namespace)
-    end
-
+    server_name = leds.opts.server_name || opts.server_name
+    namespace = leds.opts.namespace || opts.namespace
     offset = if leds.count == 0, do: 0, else: rem(offset, leds.count)
+
     vals = Rotation.rotate(to_list(leds), leds.count, offset, rotate_left)
     LedStrip.set_leds(server_name, namespace, vals)
   end

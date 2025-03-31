@@ -51,19 +51,19 @@ led_strip :clock, Kino do
   animation :hour do
     _triggers ->
       %{hour: hour, minute: _minute, second: _second} = Time.utc_now() |> Time.add(1, :hour)
-      leds(24) |> light(blue(), hour + 1)
+      leds(24) |> light(blue(), offset: hour + 1)
   end
 
   animation :minute do
     _triggers ->
       %{hour: _hour, minute: minute, second: _second} = Time.utc_now() |> Time.add(1, :hour)
-      leds(60) |> light(:may_green, minute + 1)
+      leds(60) |> light(:may_green, offset: minute + 1)
   end
 
   animation :second do
     _triggers ->
       %{hour: _hour, minute: _minute, second: second} = Time.utc_now() |> Time.add(1, :hour)
-      leds(60) |> light(:red, second + 1)
+      leds(60) |> light(:red, offset: second + 1)
   end
 end
 ```
@@ -84,7 +84,7 @@ Exapmle: For the second indicator the following would have been enough:
   animation :second do
     _triggers ->
       %{second: second} = Time.utc_now() |> Time.add(1, :hour)
-      leds(60) |> light(:red, second + 1)
+      leds(60) |> light(:red, offset: second + 1)
   end
 ```
 
@@ -160,9 +160,9 @@ led_strip :weather, Kino do
         case temp do
           temp when temp == 100 ->
             {leds(61)
-             |> light(:blue, 1, 20)
+             |> light(:blue, offset: 1, repeat: 20)
              |> light(:may_green)
-             |> light(:red, 22, 40), 1}
+             |> light(:red, offset: 22, repeat: 40), 1}
 
           temp when temp < 0 ->
             {leds(1) |> light(:blue) |> repeat(temp), 21 + temp}
@@ -174,7 +174,7 @@ led_strip :weather, Kino do
             {leds(1) |> light(:red) |> repeat(temp), 22}
         end
 
-      leds(61) |> light(leds, offset)
+      leds(61) |> light(leds, offset: offset)
   end
 
   static :help do
@@ -186,7 +186,7 @@ led_strip :weather, Kino do
 
     positive_scale =
       leds(5)
-      |> light(davy_s_grey(), 5)
+      |> light(davy_s_grey(), offset: 5)
       |> repeat(8)
 
     leds(61)

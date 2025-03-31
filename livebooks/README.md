@@ -9,15 +9,22 @@ This is a description of the livebooks in this folder. The examples are structur
 
 It is recommended that when you look at the different livebooks you look at the [Architecture Overview](../docs/architecture.md) in parallel. Take also a look at the [Hardware](../docs/hardware.md) description, because you need to have your hardware setup ready to run anything on a real led strip. Most examples can be run in the livebook and don't require any additional hardware.
 
-# 1. First steps with an LED strip
+The different livebooks have been categorized:
+
+* **intro:** You probably want to start with this one
+* **background:** You can skip this livebook, except if you want to understand the evolution of the library
+* **details:** You should probably look at those livebooks, because it explains some details and generic concepts. You can do so either right from the beginning, or at a later point in time (when you feel that it's time to learn more about it)
+* **usage:** Those livebooks you really should look at to learn how to use the library
+
+# 1. First steps with an LED strip (intro)
 The first livebook has nothing to do with the Fledex library, but describes on how to set up the [RaspberryPi](https://www.raspberrypi.org/), how to connect the LED strip to it and how we can communicate with it via the SPI bus. It also shows how easy it is to communicate to an LED strip. At the same time it is cumbersome, due the sheer number of LEDs that can be addressed. This example is good to
 
-- ensure that everything everything is set up correctly (before we bring the complexity of a library in)
+- ensure that everything is set up correctly (before we bring the complexity of a library in)
 - get an understanding on why Fledex was created in the first place to make the definition of the strip easier
 
 We don't really want to work on this level
 
-# 2. Fledex: First steps
+# 2. Fledex: First steps (background)
 The first steps with the Fledex library. The example shows how the LED strip can be emulated with
 the Kino driver, but it does contain commented out code for the SPI driver too to send it to a
 real LED strip.
@@ -28,21 +35,21 @@ By changing the definition of our LEDs we can also create some simple animations
 
 This example works still on a very low level, one that we do not want use. 
 
-# 2b. Fledex: How to define LEDs
+# 2b. Fledex: How to define LEDs (details)
 In this livebook we take a closer look how we can define sequences of leds. We start with a brief look at how we can define colors, but we'll take a more detailed look at colors
 in __3b. Fledex: More about colors__. Then we'll look at sub-sequences and how to
 generate sequences with functions.
 
-# 3. Fledex: Animations
+# 3. Fledex: Animations (background)
 In this livebook we look how animations can be defined, this is the next step(s) above the `Fledex.LedStrip`. The `Fledex.Animation.Manager` is the level that we want to operate on and the following examples will use what we have explored here and will create some concrete examples:
 
 * a clock (using local information) and 
 * a weather indicator (collecting data via the internet)
 
-# 3b. Fledex: More about colors
+# 3b. Fledex: More about colors (details)
 Here we talk a bit more about colors and even color corrections
 
-# 4. Fledex: Clock example
+# 4. Fledex: Clock example (background)
 This is the first "meaningful" example that displays the current time on the LED strip. We define 4 "animations" for:
 
 * the indicators (otherwise it becomes hard to read the time), 
@@ -54,23 +61,23 @@ This example demonstrates how easy we do things when we can pull the information
 
 **CAUTION:** we repaint the LED strip very frequent and therefore it's nothing you want to do with data that is expensive to retrieve.
 
-# 5. Fledex: Weather example
+# 5. Fledex: Weather example (background)
 This is an example where we **CANNOT** fetch the information every time we want to paint the strip (which could be serveral times per second), since we are calling a public API. The API would surely block us if we would try to attempt to call it that often.
 
 Therefore we fetch the information at regular intervals, outside of our animation loop. For that we define a small GenServer which makes the API call, and publishes the data via pubsub to then be picked up by the animation loop.
 
-# 6. Fledex: DSL
+# 6. Fledex: DSL (usage)
 In this example we will look at the Fledex DSL that removes a lot of the boilerplate and therefore makes the definition of an LED strip even easier. Under the hood it uses the same principles as the ones we have encountered in the examples 3-5.
 
 In this example we will reimplement the Clock, but this time with our DSL.
 
-# 7. Fledex: Effects
-In this chapter we take a look at the effect functionality. An animation can be "spiced" with an effect. This also exists as part of the Fledex DSL.
+# 7. Fledex: Effects (usage)
+In this chapter we take a look at the effect functionality. An animation can be "spiced" with one or more effects. This id also part of the Fledex DSL.
 
-We won't look at all possible effects, but at some examples. It is quite easy to create your own effect and we'll take a look on how to do that.
+We won't look at all possible effects, but at some examples. It is quite easy to create your own effect and we'll take a look on how to do that too.
 
-# 8. Fledex: Component
+# 8. Fledex: Component (usage)
 In this chapter we will take a look on how to create reusable components. This way you don't have to redefine certain animations
 
-# 9. Fledex: Job
+# 9. Fledex: Job (usage)
 Animations often require some time activity. In this chapter we will take a look at the `job` feature that makes the scheduling of repetitive tasks much easier by providing a cron-job like feature. This is mainly intended to trigger some events for the animation(s), but could really be used for anything.

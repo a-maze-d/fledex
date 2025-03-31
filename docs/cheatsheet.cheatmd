@@ -49,7 +49,7 @@ In addition a `Fledex.Animation.Manager` will be started in the background (if t
 ```elixir
 led_strip :name, Kino do
   animation :seconds do
-    %{seconds: seconds} -> leds(60) |> light(:red, seconds)
+    %{seconds: seconds} -> leds(60) |> light(:red, offset: seconds)
     _ -> leds()
   end
   static :indicators do
@@ -281,8 +281,7 @@ leds(3)
 | Function  | Description |
 |---        |---          |
 | `light/2`  | This sets the color of the next led. Whenever you call this function an internal counter will be updated to the next led. Therefore you can nicely sequence it. **Note:**. The "color" can also be another led sequence that will be added at the corresponding position. |
-| `light/3`  | This sets a color at a specific offset. **Note:** the offset is 1 indexed and must be greater than zero. |
-| `light/4`  | This sets a color at a specific position and repeats it several times. **Note:** This is especially intersting if you insert another led sequence as a "color". |
+| `light/3`  | This sets a color with some options, like to offset and whether it repeats. **Note:** the offset is 1 indexed and must be greater than zero. |
 
 
 ### Other Functions

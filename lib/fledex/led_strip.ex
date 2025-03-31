@@ -103,7 +103,14 @@ defmodule Fledex.LedStrip do
   def start_link(strip_name, drivers, global_config)
       when is_list(drivers) and is_list(global_config) do
     drivers = Manager.remove_invalid_drivers(drivers)
-    GenServer.start_link(__MODULE__, {strip_name, drivers, global_config}, name: strip_name)
+
+    case Process.whereis(strip_name) do
+      nil ->
+        GenServer.start_link(__MODULE__, {strip_name, drivers, global_config}, name: strip_name)
+
+      pid ->
+        {:ok, pid}
+    end
   end
 
   def start_link(strip_name, drivers, global_config) do

@@ -94,7 +94,7 @@ defmodule Fledex.Color.Names do
     @doc false
     defdelegate unquote(name)(param), to: module
     @doc false
-    defdelegate unquote(name)(param, offset), to: module
+    defdelegate unquote(name)(param, opts), to: module
   end
 
   @typedoc """

@@ -38,9 +38,13 @@ end
 ```
 
 ## Usage
-The smoothest way is to use the Fledex DSL wjich defines some functions and macros. To enable them you need to `use Fledex`. This will (by default) start the animation manager (`Fledex.Animation.Manager`) through all led definitions are routed. But don't worry, you won't really see it.
+The smoothest way is to use the Fledex DSL which defines some functions and macros. To enable them you need to `use Fledex`. This will (by default) start the animation manager (`Fledex.Animation.Manager`) through which all led definitions are routed. But don't worry, you won't really see it.
 
-As a next step you define an LED strip through the `led_strip` macro. While defining the led strip you need to decide on how you want to talk to your stip. There are several ways on how you can address your LED strip. You need an appropriate driver. The most common ways are through an SPI bus (`Fledex.Driver.Impl.Spi`) or through Kino (`Fledex.Driver.Impl.Kino`) as a simulated LED strip in a [Livebook](https://livebook.dev/). It is possible to adjust the settings of the drivers, or even define severael drivers at the same time.
+**Note:** by enabling the DSL through the `use Fledex` call, the most important modules 
+are aliased: `Fledex.Leds`, `Fledex.LedStrip`, `Fledex.Utils.PubSub`, `Fledex.Color.Names`, and the different drivers (all part of the `FledexDriver.Impl` namespace). We will see a 
+bit later what functionality those modules provide.
+
+As a next step you define an LED strip through the `led_strip` macro. While defining the led strip you need to decide on how you want to talk to your strip; you need an appropriate driver.  There are several ways on how you can address your LED strip. The most common ways are through an SPI bus (`Fledex.Driver.Impl.Spi`) or through Kino (`Fledex.Driver.Impl.Kino`) as a simulated LED strip in [Livebook](https://livebook.dev/). It is possible to adjust the settings of the drivers, or even define several drivers at the same time.
 
 This will look like the following:
 ```elixir
@@ -75,7 +79,7 @@ led_strip :nested_components, Kino do
   component(:hour, Dot, color: :blue, count: 24, trigger_name: :hour)
 
   static :helper do
-    leds(5) |> light(:davy_s_grey, 5) |> repeat(12)
+    leds(5) |> light(:davy_s_grey, offset: 5) |> repeat(12)
   end
 end
 ```

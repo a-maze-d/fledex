@@ -98,9 +98,9 @@ Manager.register_config(:weather, %{
         case temp do
           temp when temp == 100 ->
             {Leds.leds(61)
-             |> Leds.light(:blue, 1, 20)
+             |> Leds.light(:blue, offset: 1, repeat: 20)
              |> Leds.light(:may_green)
-             |> Leds.light(:red, 22, 40), 1}
+             |> Leds.light(:red, offset: 22, repeat: 40), 1}
 
           temp when temp < 0 ->
             {Leds.leds(1) |> Leds.light(:blue) |> Leds.repeat(-temp), 21 + temp}
@@ -112,7 +112,7 @@ Manager.register_config(:weather, %{
             {Leds.leds(1) |> Leds.light(:red) |> Leds.repeat(temp), 22}
         end
 
-      Leds.leds(61) |> Leds.light(leds, offset)
+      Leds.leds(61) |> Leds.light(leds, offset: offset)
     end
   },
   help: %{
@@ -126,7 +126,7 @@ Manager.register_config(:weather, %{
 
       positive_scale =
         Leds.leds(5)
-        |> Leds.light(:ash_gray, 5)
+        |> Leds.light(:ash_gray, offset: 5)
         |> Leds.repeat(8)
 
       Leds.leds(61)
