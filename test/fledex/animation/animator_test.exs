@@ -29,7 +29,7 @@ defmodule Fledex.Animation.AnimatorTest do
   end
 
   def default_send_config_func(_triggers) do
-    %{namespace: "test"}
+    [namespace: "test"]
   end
 
   # some logging versions to test the workflow
@@ -42,7 +42,7 @@ defmodule Fledex.Animation.AnimatorTest do
   def logging_send_config_func(triggers) do
     counter = triggers[:test_strip] || "undefined"
     Logger.info("creating send config, #{counter}")
-    %{namespace: "test#{ExUnit.configuration()[:seed]}"}
+    [namespace: "test#{ExUnit.configuration()[:seed]}"]
   end
 
   @strip_name :test_strip
@@ -275,7 +275,7 @@ defmodule Fledex.Animation.AnimatorTest do
             assert triggers.something == "abc"
             assert triggers[strip_name] == 11
             assert triggers.test1 == 4
-            {%{}, Map.put_new(triggers, :test2, 7)}
+            {[], Map.put_new(triggers, :test2, 7)}
           end
         ],
         effects: [],

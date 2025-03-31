@@ -54,7 +54,7 @@ led_strip :john, Kino do
   effect Wanish, divisor: 2, direction: :right, reappear: true do
     animation :test do
       _triggers ->
-        leds(50) |> rainbow
+        leds(50) |> rainbow()
     end
   end
 end
@@ -78,7 +78,7 @@ Let's see how this looks if we rely on the default values:
 led_strip :rotation, Kino do
   effect Rotation do
     animation :rainbow do
-      _triggers -> leds(50) |> rainbow
+      _triggers -> leds(50) |> rainbow()
     end
   end
 end
@@ -97,7 +97,7 @@ led_strip :rotation_and_wanish, Kino do
   effect Rotation do
     effect Wanish, divisor: 1, direction: :right, reappear: true do
       animation :rainbow do
-        _triggers -> leds(50) |> rainbow
+        _triggers -> leds(50) |> rainbow()
       end
     end
   end
@@ -171,7 +171,7 @@ That's it already, now we can already use our own effect as we have used an effe
 led_strip :xmas, Kino do
   effect LivebookEffect2 do
     animation :xmas do
-      _triggers -> leds(50) |> rainbow
+      _triggers -> leds(50) |> rainbow()
     end
   end
 end

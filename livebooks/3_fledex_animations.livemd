@@ -43,10 +43,10 @@ configuration to specify an offset to the leds and thereby create a movement.
 ```elixir
 defmodule HelperFunctions do
   @rainbow Leds.leds(50)
-           |> Leds.rainbow(%{
+           |> Leds.rainbow(
              num_leds: 50,
              reversed: true
-           })
+           )
   def rainbow(_triggers) do
     @rainbow
   end

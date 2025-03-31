@@ -281,11 +281,11 @@ defmodule Fledex.LedsTest do
 
   describe "test functions" do
     test "rainbow" do
-      config = %{
+      config = [
         num_leds: 20,
         initial_hue: 0,
         reversed: true
-      }
+      ]
 
       list =
         Leds.leds(20)

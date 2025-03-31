@@ -73,8 +73,8 @@ defmodule Fledex.Animation.AnimatorBase do
   end
 
   @doc false
-  @spec default_send_config_func(map) :: %{}
+  @spec default_send_config_func(map) :: []
   def default_send_config_func(_triggers) do
-    %{}
+    []
   end
 end

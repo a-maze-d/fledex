@@ -143,15 +143,15 @@ defmodule Helpers do
 
   def rainbow(namespace) do
     Enum.each(0..10000, fn index ->
-      config = %{
+      config = [
         num_leds: 50,
         reversed: true
-      }
+      ]
 
       Leds.leds(50)
       |> Leds.set_led_strip_info(namespace, LedStrip)
       |> Leds.rainbow(config)
-      |> Leds.send(%{offset: index})
+      |> Leds.send(offset: index)
 
       # before sending the next update we sleep a bit
       Process.sleep(100)
@@ -163,10 +163,10 @@ defmodule Helpers do
       Leds.leds(50)
       |> Leds.set_led_strip_info(namespace, LedStrip)
       |> Leds.gradient(0xFF0000, 0x0000FF, %{num_leds: 50})
-      |> Leds.send(%{
+      |> Leds.send(
         offset: index,
         rotate_left: true
-      })
+      )
 
       # before sending the next update we sleep a bit
       Process.sleep(100)

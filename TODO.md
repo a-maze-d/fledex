@@ -39,8 +39,9 @@ Even though this library is published, there are things I still want to do befor
   - [x] `LedStrip`  is partially directly called in the `Manager` (v0.5)
   - [x] restructure the `Fledex.Color.Names` so that the compilcation doesn't take that much time and that we can add easier more colors. Done, but the compilation didn't get faster, by adding more colors, it even got slower. But I still leave it.
   - [x] The `Leds` code contains a lot of aspects that shouldn't be necessary anymore (like check that the namespace is defined, that the process is up and running, ...). This does not only make the code over complicated, but also will have a performance impact. We should clean this up. 
-  - [ ] the `Leds` rainbow function take currently a map, but it would be better to take a keyword list. (v0.5)
+  - [x] the `Leds` rainbow function take currently a map, but it would be better to take a keyword list. (v0.5)
   - [x] Maybe even change the light function and move the offset and repeat to be opts parameters (v0.5)
+  - [x] Use a keyword list for the Leds.send optional parameters (v0.5)
   - [ ] have clear namespaces with protocols? THis could avoid some of the cyclic dependencies that we are seeing (v0.6) 
 - [ ] Enable Telemetry? (v0.7)
 - [ ] Missing functionality

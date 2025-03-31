@@ -180,7 +180,7 @@ If, for example, you want to create a rainbow pattern over 10 LEDs, you can do s
 ```elixir
 leds =
   Leds.leds(30)
-  |> Leds.rainbow(%{num_leds: 10})
+  |> Leds.rainbow(num_leds: 10)
 ```
 
 Another function is the `gradient/3` function that allows a transition from one color to another.

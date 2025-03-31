@@ -11,10 +11,10 @@ defmodule Fledex do
     use Fledex
     led_strip :strip_name, Kino do
       animation :john do
-        config = %{
+        config = [
           num_leds: 50,
           reversed: true
-        }
+        ]
 
         leds(50)
           |> rainbow(config)

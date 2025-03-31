@@ -21,8 +21,8 @@ defmodule Fledex.Animation.AnimatorBaseTest do
     end
 
     test "default_send_func" do
-      assert AnimatorBase.default_send_config_func(%{}) == %{}
-      assert AnimatorBase.default_send_config_func(%{trigger_name: 10}) == %{}
+      assert AnimatorBase.default_send_config_func(%{}) == []
+      assert AnimatorBase.default_send_config_func(%{trigger_name: 10}) == []
     end
   end
 end
