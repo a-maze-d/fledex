@@ -5,6 +5,7 @@
 defmodule Fledex.Color.KinoRender do
   import Fledex.Color.Names.Guards
 
+  alias Fledex.Color
   alias Fledex.Color.Types
   alias Fledex.Color.Utils
   alias Fledex.Leds
@@ -42,7 +43,7 @@ defmodule Fledex.Color.KinoRender do
   def to_leds(%__MODULE__{colors: colors}) do
     colors =
       Enum.map(colors, fn color ->
-        Utils.to_colorint(Utils.to_rgb(color))
+        Color.to_colorint(Utils.to_rgb(color))
       end)
 
     Leds.leds(

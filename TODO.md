@@ -42,11 +42,11 @@ Even though this library is published, there are things I still want to do befor
   - [x] the `Leds` rainbow function take currently a map, but it would be better to take a keyword list. (v0.5)
   - [x] Maybe even change the light function and move the offset and repeat to be opts parameters (v0.5)
   - [x] Use a keyword list for the Leds.send optional parameters (v0.5)
-  - [ ] have clear namespaces with protocols? THis could avoid some of the cyclic dependencies that we are seeing (v0.6) 
+  - [x] have `Fledex.Color` protocol for `to_colorint` conversion? This could avoid some of the cyclic dependencies that we are seeing (v0.5)
 - [ ] Enable Telemetry? (v0.7)
 - [ ] Missing functionality
   - [x] Add the possibility to clear the LEDs when initializing the LedsDriver. This should be a feature fo the Spi Driver (v0.5)
-  - [x] Create support for a coordinator (that can control individual animations and effects. (v0.5) 
+  - [x] Create support for a coordinator (that can control individual animations and effects). (v0.5) 
   - [x] Update effects to make use of the coordinator functionality by reporting back their state through PubSub (v0.5)
   - [ ] Update livebook examples how animations, effects, ... can be coordinated (v0.5)
   - [ ] Add a default `led_strip` driver that can be configured through the config (v0.6)
@@ -58,19 +58,14 @@ Even though this library is published, there are things I still want to do befor
     - [ ] Implement music beat through clustering
   - [ ] Define functions that are valid in the correct scope? (v0.7)
   - [ ] Create smartcells (v0.8)
-  - [ ] Do we need to have language packs that allows to adjust to other languages? it would be quite easy with some `defdelegate`  At least for: (v0.9)
-    - [ ] color names (but it might be massive and not sure where to get the names from),
-    - [ ] color functions
-    - [ ] components, 
-    - [ ] effects,
-    - [ ] ... 
+  - [ ] Do we need to have language packs that allows to adjust to other languages? it would be quite easy with some `defdelegate`  At least for: (v0.9). Probably "NO", but I will reflect a bit more before closing this one!
 - [ ] Increase consumption
   - [x] Use in school project (v0.4). The learnings:
     - [ ] setting up livebook (a really working version) on windows is anything than easy :-(Can we do something about it? Investigate (v0.7) 
     - [x] Reconfiguration of the strip is an important thing (see TODO item above)
-    - [ ] Useful to provide a full story about colors (additive / subtractive colors), hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up
-  - [ ] Create a video (v0.5)
+    - [ ] Useful to provide a full story about colors (additive / subtractive colors), hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.6)
   - [x] Talk on meetup (v0.5)
+  - [ ] Create a video (v0.6)
   - [ ] Migrate outstanding TODOs to github (v0.6?)
   - [ ] Publish/announce on Elixirforum (v0.6)
   - [ ] Get the library into nerves-livebook (v0.7)

@@ -5,6 +5,7 @@
 defmodule Fledex.Color.UtilsTest do
   use ExUnit.Case, async: true
 
+  alias Fledex.Color
   alias Fledex.Color.Conversion.CalcUtils
   alias Fledex.Color.Utils
 
@@ -22,7 +23,7 @@ defmodule Fledex.Color.UtilsTest do
 
   test "combine" do
     led = {0x11, 0x64, 0xC8}
-    assert Utils.to_colorint(led) == 0x1164C8
+    assert Color.to_colorint(led) == 0x1164C8
   end
 
   test "split into subpixels" do
@@ -47,14 +48,14 @@ defmodule Fledex.Color.UtilsTest do
     assert CalcUtils.nscale8({128, 128, 128}, CalcUtils.frac8(32, 85)) == {49, 49, 49}
     assert CalcUtils.nscale8({128, 128, 128}, CalcUtils.frac8(32, 85), false) == {48, 48, 48}
 
-    assert CalcUtils.nscale8(CalcUtils.to_colorint({128, 128, 128}), CalcUtils.frac8(32, 85)) ==
+    assert CalcUtils.nscale8(Color.to_colorint({128, 128, 128}), CalcUtils.frac8(32, 85)) ==
              3_223_857
   end
 
   test "convert to_colorint" do
-    assert Utils.to_colorint(0xFFEEDD) == 0xFFEEDD
-    assert Utils.to_colorint({0xFF, 0xEE, 0xDD}) == 0xFFEEDD
-    assert Utils.to_colorint(:red) == 0xFF0000
+    assert Color.to_colorint(0xFFEEDD) == 0xFFEEDD
+    assert Color.to_colorint({0xFF, 0xEE, 0xDD}) == 0xFFEEDD
+    assert Color.to_colorint(:red) == 0xFF0000
   end
 
   test "convert to_rgb" do

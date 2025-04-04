@@ -8,23 +8,22 @@ defmodule Fledex.Color.Utils do
   explanation of those functions:
   https://github.com/FastLED/FastLED/wiki/High-performance-math
   """
-  import Bitwise
   import Fledex.Color.Names.Guards
 
   alias Fledex.Color.Conversion.CalcUtils
   alias Fledex.Color.Names
   alias Fledex.Color.Types
 
-  @max_value 255
-  @doc """
-  This function converts a color to a single (color) integer value
-  """
-  @spec to_colorint(Types.color()) :: Types.colorint()
-  def to_colorint({r, g, b} = _color),
-    do: (min(r, @max_value) <<< 16) + (min(g, @max_value) <<< 8) + min(b, @max_value)
+  # @max_value 255
+  # @doc """
+  # This function converts a color to a single (color) integer value
+  # """
+  # @spec to_colorint(Types.color()) :: Types.colorint()
+  # def to_colorint({r, g, b} = _color),
+  #   do: (min(r, @max_value) <<< 16) + (min(g, @max_value) <<< 8) + min(b, @max_value)
 
-  def to_colorint(color) when is_integer(color), do: color
-  def to_colorint(color) when is_color_name(color), do: apply(Names, color, [:hex])
+  # def to_colorint(color) when is_integer(color), do: color
+  # def to_colorint(color) when is_color_name(color), do: apply(Names, color, [:hex])
 
   @doc """
   This function splits a color into it's rgb components

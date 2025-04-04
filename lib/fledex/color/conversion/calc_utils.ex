@@ -10,6 +10,7 @@ defmodule Fledex.Color.Conversion.CalcUtils do
   """
   @compile {:inline}
   import Bitwise
+  alias Fledex.Color
   alias Fledex.Color.Types
 
   @doc """
@@ -74,7 +75,7 @@ defmodule Fledex.Color.Conversion.CalcUtils do
   def nscale8(color, rgb, video) do
     split_into_subpixels(color)
     |> nscale8(rgb, video)
-    |> to_colorint()
+    |> Color.to_colorint()
   end
 
   @doc """
@@ -89,12 +90,12 @@ defmodule Fledex.Color.Conversion.CalcUtils do
     {r, g, b}
   end
 
-  @max_value 255
-  @doc """
-  This function converts a color to a single (color) integer value
-  """
-  def to_colorint({r, g, b} = _color),
-    do: (min(r, @max_value) <<< 16) + (min(g, @max_value) <<< 8) + min(b, @max_value)
+  # @max_value 255
+  # @doc """
+  # This function converts a color to a single (color) integer value
+  # """
+  # def to_colorint({r, g, b} = _color),
+  #   do: (min(r, @max_value) <<< 16) + (min(g, @max_value) <<< 8) + min(b, @max_value)
 
   @doc """
   This function adds the given subpixels `[{r1, g1, b1}, {r2, g2, b2}, ...]` together.

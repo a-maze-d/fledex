@@ -1,8 +1,9 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Color.Names.SVG do
+  alias Fledex.Color
   alias Fledex.Color.Conversion.Approximate
   alias Fledex.Color.Names.LoadUtils
 
@@ -31,7 +32,7 @@ defmodule Fledex.Color.Names.SVG do
         index: index,
         name: LoadUtils.convert_to_atom(name),
         descriptive_name: String.trim(name),
-        hex: LoadUtils.to_colorint(rgb),
+        hex: Color.to_colorint(rgb),
         rgb: rgb,
         # TODO: convert the rgb to other color spaces
         # {LoadUtils.to_byte(h), LoadUtils.to_byte(s1), LoadUtils.to_byte(l1)},

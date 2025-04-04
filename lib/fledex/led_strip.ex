@@ -20,10 +20,9 @@ defmodule Fledex.LedStrip do
 
   require Logger
 
-  require IEx
+  alias Fledex.Color
   alias Fledex.Color.Conversion.CalcUtils
   alias Fledex.Color.Types
-  alias Fledex.Color.Utils
   alias Fledex.Driver.Impl.Null
   alias Fledex.Driver.Manager
   alias Fledex.Utils.PubSub
@@ -443,7 +442,7 @@ defmodule Fledex.LedStrip do
     elems
     |> Enum.map(fn elem -> CalcUtils.split_into_subpixels(elem) end)
     |> apply_merge_strategy(merge_strategy)
-    |> Utils.to_colorint()
+    |> Color.to_colorint()
   end
 
   @doc false

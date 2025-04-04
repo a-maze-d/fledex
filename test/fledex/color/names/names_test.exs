@@ -5,6 +5,7 @@
 defmodule Fledex.Color.NamesTest do
   use ExUnit.Case
 
+  alias Fledex.Color
   alias Fledex.Color.Names
   alias Fledex.Color.Names.LoadUtils
   alias Fledex.Color.Names.Wiki
@@ -48,7 +49,7 @@ defmodule Fledex.Color.NamesTest do
       assert LoadUtils.to_byte("25%") == 63
       assert LoadUtils.a2i("12_b") == 12
       assert LoadUtils.clean("ab12_b") == "12"
-      assert LoadUtils.to_colorint({0x80, 0x80, 0x80}) == 0x808080
+      assert Color.to_colorint({0x80, 0x80, 0x80}) == 0x808080
     end
   end
 

@@ -18,6 +18,7 @@ defmodule Fledex.Leds do
   """
   require Logger
 
+  alias Fledex.Color
   alias Fledex.Color.Functions
   alias Fledex.Color.Types
   alias Fledex.Color.Utils
@@ -200,7 +201,7 @@ defmodule Fledex.Leds do
     offset_oneindex = offset + 1
 
     Enum.zip_with(offset_oneindex..(offset_oneindex + length(rgbs)), rgbs, fn index, rgb ->
-      {index, Utils.to_colorint(rgb)}
+      {index, Color.to_colorint(rgb)}
     end)
     |> Map.new()
   end
@@ -338,7 +339,7 @@ defmodule Fledex.Leds do
         when is_integer(rgb) or
                is_atom(rgb) or
                tuple_size(rgb) == 3 ->
-          __MODULE__.leds(1, %{1 => Utils.to_colorint(rgb)}, %{}, %{index: 2})
+          __MODULE__.leds(1, %{1 => Color.to_colorint(rgb)}, %{}, %{index: 2})
 
         # rgb when is_atom(rgb) -> __MODULE__.leds(1,%{ 1 => rgb}) |> __MODULE__.light(rgb)
         %__MODULE__{} = rgb ->
@@ -408,8 +409,8 @@ defmodule Fledex.Leds do
   The opts are currently not used, but are planned to
   be used for potential color correction (similar to `Fledex.Driver.Impl.Kino`)
   """
-  @spec to_markdown(t, map) :: String.t()
-  def to_markdown(leds, _opts \\ %{}) do
+  @spec to_markdown(t, keyword) :: String.t()
+  def to_markdown(leds, _opts \\ []) do
     leds
     |> Fledex.Leds.to_list()
     # |> Correction.apply_rgb_correction(config.color_correction)
