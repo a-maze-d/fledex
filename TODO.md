@@ -11,12 +11,13 @@ Even though this library is published, there are things I still want to do befor
 - [ ] Documentation
   - [x] Add Branching sections in the livebooks to separate things that don't need to be together? (v0.5)
   - [x] Update the README.md (v0.5)
-  - [ ] Add installation instructions (v0.5)
   - [x] Update the architectural overview to adjust to the new driver approach (v0.5)
   - [x] Update Cheatsheet with new driver approach (v0.5)
   - [x] Mark the livbooks so that it becomes clear what kind they are (internal, background, usage,...) (v0.5)
   - [x] Check that all livebooks are mentioned in the README.md (v0.5)
+  - [ ] Add installation instructions (v0.5)
   - [ ] change the doc structure? so that links don't get so easily broken? (v0.6)
+  - [ ] Useful to provide a full story about colors (additive / subtractive colors), hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.6)
 - [ ] Testing
   - [x] Perform an extra round of testing on hardware (v0.4)
   - [x] Fix the issue in the livebooks that `broadcast_trigger/1` gets called directly now, since the function gets imported (v0.4)
@@ -43,6 +44,7 @@ Even though this library is published, there are things I still want to do befor
   - [x] Maybe even change the light function and move the offset and repeat to be opts parameters (v0.5)
   - [x] Use a keyword list for the Leds.send optional parameters (v0.5)
   - [x] have `Fledex.Color` protocol for `to_colorint` conversion? This could avoid some of the cyclic dependencies that we are seeing (v0.5)
+  - [x] Remove the "it's taking more than 10sec" warning during compilation. We know the generation of the name files will take more time. (v0.5)
 - [ ] Enable Telemetry? (v0.7)
 - [ ] Missing functionality
   - [x] Add the possibility to clear the LEDs when initializing the LedsDriver. This should be a feature fo the Spi Driver (v0.5)
@@ -51,6 +53,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Update livebook examples how animations, effects, ... can be coordinated (v0.5)
   - [ ] Add a default `led_strip` driver that can be configured through the config (v0.6)
   - [ ] Connect everything into a supervision tree (to make it more robust) (v0.6)
+  - [ ] setting up livebook (a really working version) on windows is anything than easy :-(Can we do something about it? Investigate (v0.7) 
   - [ ] Clustering (v0.7)
     - [ ] Rethink the clusering and check whether the new livebook API endpoints might make it easier to cluster. Currently it seems to be quite complicated.
     - [ ] Provide examples on how to cluster
@@ -61,9 +64,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Do we need to have language packs that allows to adjust to other languages? it would be quite easy with some `defdelegate`  At least for: (v0.9). Probably "NO", but I will reflect a bit more before closing this one!
 - [ ] Increase consumption
   - [x] Use in school project (v0.4). The learnings:
-    - [ ] setting up livebook (a really working version) on windows is anything than easy :-(Can we do something about it? Investigate (v0.7) 
     - [x] Reconfiguration of the strip is an important thing (see TODO item above)
-    - [ ] Useful to provide a full story about colors (additive / subtractive colors), hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.6)
   - [x] Talk on meetup (v0.5)
   - [ ] Create a video (v0.6)
   - [ ] Migrate outstanding TODOs to github (v0.6?)
