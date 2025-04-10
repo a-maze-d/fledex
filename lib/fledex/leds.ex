@@ -443,7 +443,8 @@ defmodule Fledex.Leds do
   """
   @spec send(t, keyword) :: :ok | {:error, String.t()}
   def send(leds, opts \\ []) do
-    offset = Keyword.get(opts, :offset, 0) || 0 # someone might define a nil offset :-(
+    # someone might define a nil offset :-(
+    offset = Keyword.get(opts, :offset, 0) || 0
     rotate_left = Keyword.get(opts, :rotate_left, true)
     server_name = leds.opts.server_name || Keyword.get(opts, :server_name, Fledex.LedStrip)
     namespace = leds.opts.namespace || Keyword.get(opts, :namespace, :default)
