@@ -19,6 +19,7 @@ defmodule Fledex.Color.ColorTest do
       assert Fledex.Color.to_colorint(0xFFEEDD) == 0xFFEEDD
       assert Fledex.Color.to_colorint({0xFF, 0xEE, 0xDD}) == 0xFFEEDD
       assert Fledex.Color.to_colorint(:red) == 0xFF0000
+      assert Fledex.Color.to_colorint(%{rgb: 0xFFEEDD}) == 0xFFEEDD
     end
 
     test "convert to_rgb" do

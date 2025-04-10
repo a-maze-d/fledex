@@ -157,7 +157,7 @@ Before we can start with the weather data, we need to make sure that we can make
 :ssl.start()
 ```
 
-Now we can make the actual call. We do want to make this call in regular intervals (every 15 min), parse the response and publish the temperature through pubsub. To do this we create a small server. In a [later chapter](./9_fledex.jobs.livemd) we will see how we can use one of the `Fledex` services to do the scheduling.
+Now we can make the actual call. We do want to make this call in regular intervals (every 15 min), parse the response and publish the temperature through pubsub. To do this we create a small server. In a [later chapter](./9_fledex_jobs.livemd) we will see how we can use one of the `Fledex` services to do the scheduling.
 
 We start it with our URL (note, the parsing in the server is URL specific, so you can't simply change it to another site) and with our 15min refresh interval (specified in ms).
 

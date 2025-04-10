@@ -149,7 +149,8 @@ defmodule Fledex.MixProject do
         "livebooks/5_fledex_weather_example.livemd",
         "livebooks/6_fledex_dsl.livemd",
         "livebooks/7_fledex_effects.livemd",
-        "livebooks/8_fledex_component.livemd"
+        "livebooks/8_fledex_component.livemd",
+        "livebooks/9_fledex_jobs.livemd"
       ],
       groups_for_extras: [
         LiveBooks: ~r/livebooks/,
