@@ -1,13 +1,13 @@
-# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Driver.Impl.Spi do
   @behaviour Fledex.Driver.Interface
 
+  alias Fledex.Color
   alias Fledex.Color.Correction
   alias Fledex.Color.Types
-  alias Fledex.Color.Utils
 
   @impl true
   @spec configure(keyword) :: keyword
@@ -65,7 +65,7 @@ defmodule Fledex.Driver.Impl.Spi do
       leds
       |> Correction.apply_rgb_correction(Keyword.fetch!(config, :color_correction))
       |> Enum.reduce(<<>>, fn led, acc ->
-        {r, g, b} = Utils.to_rgb(led)
+        {r, g, b} = Color.to_rgb(led)
         acc <> <<r, g, b>>
       end)
 

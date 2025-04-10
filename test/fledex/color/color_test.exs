@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -14,7 +14,21 @@ defmodule Fledex.Color.ColorTest do
   alias Fledex.Color.Correction.Color
   alias Fledex.Color.Correction.Temperature
 
-  alias Fledex.Color.Utils
+  describe "color protocol tests" do
+    test "convert to_colorint" do
+      assert Fledex.Color.to_colorint(0xFFEEDD) == 0xFFEEDD
+      assert Fledex.Color.to_colorint({0xFF, 0xEE, 0xDD}) == 0xFFEEDD
+      assert Fledex.Color.to_colorint(:red) == 0xFF0000
+    end
+
+    test "convert to_rgb" do
+      assert Fledex.Color.to_rgb(%{rgb: 0x123456}) == {0x12, 0x34, 0x56}
+      assert Fledex.Color.to_rgb(%{rgb: {0x12, 0x34, 0x56}}) == {0x12, 0x34, 0x56}
+      assert Fledex.Color.to_rgb(:red) == {0xFF, 0x00, 0x00}
+      assert Fledex.Color.to_rgb(0x123456) == {0x12, 0x34, 0x56}
+      assert Fledex.Color.to_rgb({0x12, 0x34, 0x56}) == {0x12, 0x34, 0x56}
+    end
+  end
 
   describe "color correction tests" do
     test "no_color_correction" do
@@ -123,25 +137,25 @@ defmodule Fledex.Color.ColorTest do
       # #19CB97 	0.099 	0.795 	0.591 	162.4° 	163.4° 	0.696 	0.620 	0.795 	0.447 	0.495 	0.564 	0.875 	0.779 	0.800
       # #362698 	0.211 	0.149 	0.597 	248.3° 	247.3° 	0.448 	0.420 	0.597 	0.373 	0.319 	0.219 	0.750 	0.601 	0.533
       # #7E7EB8 	0.495 	0.493 	0.721 	240.5° 	240.4° 	0.228 	0.227 	0.721 	0.607 	0.570 	0.520 	0.316 	0.290 	0.135
-      assert Approximate.rgb2hsv(Utils.to_rgb(0xFFFFFF)) == {0, 0, 255}
-      assert Approximate.rgb2hsv(Utils.to_rgb(0x808080)) == {0, 0, 181}
-      assert Approximate.rgb2hsv(Utils.to_rgb(0x000000)) == {0, 0, 0}
-      assert Approximate.rgb2hsv(Utils.to_rgb(0xFF0000)) == {0, 255, 255}
-      assert Approximate.rgb2hsv(Utils.to_rgb(0xBFBF00)) == {63, 255, 255}
-      assert Approximate.rgb2hsv(Utils.to_rgb(0x008000)) == {96, 255, 181}
-      assert Approximate.rgb2hsv(Utils.to_rgb(0x80FFFF)) == {195, 74, 255}
-      assert Approximate.rgb2hsv(Utils.to_rgb(0x8080FF)) == {195, 74, 255}
-      assert Approximate.rgb2hsv(Utils.to_rgb(0xBF40BF)) == {0, 127, 255}
-      assert Approximate.rgb2hsv(Utils.to_rgb(0xA0A424)) == {71, 159, 255}
-      assert Approximate.rgb2hsv(Utils.to_rgb(0x411BEA)) == {182, 172, 255}
-      assert Approximate.rgb2hsv(Utils.to_rgb(0x1EAC41)) == {116, 168, 255}
-      assert Approximate.rgb2hsv(Utils.to_rgb(0xF0C80E)) == {43, 196, 255}
-      assert Approximate.rgb2hsv(Utils.to_rgb(0xB430E5)) == {248, 145, 255}
-      assert Approximate.rgb2hsv(Utils.to_rgb(0xED7651)) == {32, 111, 255}
-      assert Approximate.rgb2hsv(Utils.to_rgb(0xFEF888)) == {55, 69, 255}
-      assert Approximate.rgb2hsv(Utils.to_rgb(0x19C897)) == {147, 175, 255}
-      assert Approximate.rgb2hsv(Utils.to_rgb(0x362698)) == {172, 157, 252}
-      assert Approximate.rgb2hsv(Utils.to_rgb(0x7E7EB8)) == {160, 76, 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xFFFFFF)) == {0, 0, 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x808080)) == {0, 0, 181}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x000000)) == {0, 0, 0}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xFF0000)) == {0, 255, 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xBFBF00)) == {63, 255, 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x008000)) == {96, 255, 181}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x80FFFF)) == {195, 74, 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x8080FF)) == {195, 74, 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xBF40BF)) == {0, 127, 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xA0A424)) == {71, 159, 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x411BEA)) == {182, 172, 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x1EAC41)) == {116, 168, 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xF0C80E)) == {43, 196, 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xB430E5)) == {248, 145, 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xED7651)) == {32, 111, 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xFEF888)) == {55, 69, 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x19C897)) == {147, 175, 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x362698)) == {172, 157, 252}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x7E7EB8)) == {160, 76, 255}
     end
   end
 end

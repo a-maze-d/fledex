@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -7,7 +7,6 @@ defmodule Fledex.Color.KinoRender do
 
   alias Fledex.Color
   alias Fledex.Color.Types
-  alias Fledex.Color.Utils
   alias Fledex.Leds
 
   @doc """
@@ -43,7 +42,7 @@ defmodule Fledex.Color.KinoRender do
   def to_leds(%__MODULE__{colors: colors}) do
     colors =
       Enum.map(colors, fn color ->
-        Color.to_colorint(Utils.to_rgb(color))
+        Color.to_colorint(color)
       end)
 
     Leds.leds(

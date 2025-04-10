@@ -1,4 +1,4 @@
-# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -21,7 +21,6 @@ defmodule Fledex.Leds do
   alias Fledex.Color
   alias Fledex.Color.Functions
   alias Fledex.Color.Types
-  alias Fledex.Color.Utils
   alias Fledex.Effect.Rotation
   alias Fledex.LedStrip
 
@@ -220,8 +219,8 @@ defmodule Fledex.Leds do
     num_leds = opts[:num_leds] || leds.count
     offset = opts[:offset] || 0
 
-    start_color = Utils.to_rgb(start_color)
-    end_color = Utils.to_rgb(end_color)
+    start_color = Color.to_rgb(start_color)
+    end_color = Color.to_rgb(end_color)
 
     led_values =
       Functions.create_gradient_rgb(num_leds, start_color, end_color)

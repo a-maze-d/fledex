@@ -46,6 +46,8 @@ Even though this library is published, there are things I still want to do befor
   - [x] Use a keyword list for the Leds.send optional parameters (v0.5)
   - [x] have `Fledex.Color` protocol for `to_colorint` conversion? This could avoid some of the cyclic dependencies that we are seeing (v0.5)
   - [x] Remove the "it's taking more than 10sec" warning during compilation. We know the generation of the name files will take more time. (v0.5)
+  - [x] have a protocol for `to_rgb` too, or even reuse the `Fledex.Color` protocol? (v0.5)
+  - [ ] Clean up commented out code (v0.6)
   - [ ] Restructure the Animation code (v0.6)
     - [ ] `AnimatorBase` doesn't make too much sense. 
     - [ ] The `Animator.config_t` structure should at least partially be defined by the manager (at least the component should get it from there, since it's allowed to also add `:coordinator` and `:job` to it)
@@ -61,6 +63,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Add a default `led_strip` driver that can be configured through the config (v0.6)
   - [ ] Connect everything into a supervision tree (to make it more robust) (v0.6)
   - [ ] setting up livebook (a really working version) on windows is anything than easy :-(Can we do something about it? Investigate (v0.7) 
+  - [ ] Add support for WS2811/12/13/14/15 LED strips controlled through phase modulation.
   - [ ] Clustering (v0.7)
     - [ ] Rethink the clusering and check whether the new livebook API endpoints might make it easier to cluster. Currently it seems to be quite complicated.
     - [ ] Provide examples on how to cluster

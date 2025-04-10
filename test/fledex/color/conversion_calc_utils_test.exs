@@ -1,13 +1,12 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
-defmodule Fledex.Color.UtilsTest do
+defmodule Fledex.Color.Conversion.CalcUtilsTest do
   use ExUnit.Case, async: true
 
   alias Fledex.Color
   alias Fledex.Color.Conversion.CalcUtils
-  alias Fledex.Color.Utils
 
   test "average" do
     led = [{0x11, 0x64, 0xC8}, {0x11, 0x64, 0xC8}, {0x11, 0x64, 0xC8}]
@@ -19,11 +18,6 @@ defmodule Fledex.Color.UtilsTest do
     assert CalcUtils.cap(led) == {0x33, 0xFF, 0xFF}
     led = [{0x11, 0x64, 0xC8}, {0x11, 0x64, 0xC8}, {0x11, 0x64, 0xC8}]
     assert CalcUtils.cap(led, 0x66..0xFF) == {0x66, 0xFF, 0xFF}
-  end
-
-  test "combine" do
-    led = {0x11, 0x64, 0xC8}
-    assert Color.to_colorint(led) == 0x1164C8
   end
 
   test "split into subpixels" do
@@ -50,19 +44,5 @@ defmodule Fledex.Color.UtilsTest do
 
     assert CalcUtils.nscale8(Color.to_colorint({128, 128, 128}), CalcUtils.frac8(32, 85)) ==
              3_223_857
-  end
-
-  test "convert to_colorint" do
-    assert Color.to_colorint(0xFFEEDD) == 0xFFEEDD
-    assert Color.to_colorint({0xFF, 0xEE, 0xDD}) == 0xFFEEDD
-    assert Color.to_colorint(:red) == 0xFF0000
-  end
-
-  test "convert to_rgb" do
-    assert Utils.to_rgb(%{rgb: 0x123456}) == {0x12, 0x34, 0x56}
-    assert Utils.to_rgb(%{rgb: {0x12, 0x34, 0x56}}) == {0x12, 0x34, 0x56}
-    assert Utils.to_rgb(:red) == {0xFF, 0x00, 0x00}
-    assert Utils.to_rgb(0x123456) == {0x12, 0x34, 0x56}
-    assert Utils.to_rgb({0x12, 0x34, 0x56}) == {0x12, 0x34, 0x56}
   end
 end

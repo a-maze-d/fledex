@@ -1,4 +1,4 @@
-# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -7,7 +7,6 @@ defmodule Fledex.Effect.Dimming do
 
   alias Fledex.Color
   alias Fledex.Color.Conversion.CalcUtils
-  alias Fledex.Color.Utils
 
   def do_apply(leds, count, config, triggers, _context) do
     trigger_name = config[:trigger_name] || :default
@@ -19,7 +18,7 @@ defmodule Fledex.Effect.Dimming do
     leds =
       Enum.map(leds, fn led ->
         led
-        |> Utils.to_rgb()
+        |> Color.to_rgb()
         |> CalcUtils.nscale8(255 - step, false)
         |> Color.to_colorint()
       end)
