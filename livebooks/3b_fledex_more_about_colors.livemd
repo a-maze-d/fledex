@@ -18,7 +18,7 @@ Different drivers have different color characteristics. Therefore you might have
 
 ## Color Information
 
-Fledex has an extensive set of predefined colors from [Wikipedia](https://en.wikipedia.org/wiki/List_of_colors:_A%E2%80%93F). You can retrieve those names by calling
+Fledex has an extensive set of predefined colors from [Wikipedia](https://en.wikipedia.org/wiki/List_of_colors:_A%E2%80%93F), [CSS](https://drafts.csswg.org/css-color/#named-colors), [SVG](https://www.w3.org/TR/SVG11/types.html#ColorKeywords), and [RAL](https://en.wikipedia.org/wiki/List_of_RAL_colours).Apart from the last list (which is not so commonly used), they are all combined together to a single Names module. You can retrieve those names by calling:
 
 <!-- livebook:{"force_markdown":true} -->
 
@@ -26,7 +26,7 @@ Fledex has an extensive set of predefined colors from [Wikipedia](https://en.wik
 Fledex.Color.Names.names()
 ```
 
-You can also retrieve the complete data set by calling
+You can also retrieve the complete data set by calling:
 
 <!-- livebook:{"force_markdown":true} -->
 
@@ -34,7 +34,7 @@ You can also retrieve the complete data set by calling
 Fledex.Color.Names.colors()
 ```
 
-Here a list of all the colors:
+Here a list of all the colors (except the RAL colors, those can be found in `Fledex.Color.Names.RAL`):
 
 ```elixir
 Kino.DataTable.new(Fledex.Color.Names.colors(),
@@ -46,24 +46,24 @@ Kino.DataTable.new(Fledex.Color.Names.colors(),
 You can also retrieve the information from a specific color, like `:almond` in the following way
 
 * `almond/0`: Every color has it's own function and the :hex value (represented as integer) will be returned
-* `almond/1`: This allows the retrieve a specific representation. It should be noted, that the color functions (that are oftne just approximations), do not provide the same results. The values returned here are the ones as defined on the Wikipedia page:
+* `almond/1`: This allows the retrieve a specific representation. It should be noted, that the color functions (that are often just approximations), do not provide the same results. The values returned here are the ones as defined in their sources:
   * `:all`: This retrieves the full data set
   * `:hex`: This is the same as `almond/0`
   * `:rgb`: This retrieves an RGB struct, i.e. `{r, g, b}`
   * `:hsv`: This retrieves an HSV struct, i.e. `{h, s, v}`
   * `:hsl`: This retrieves an HSL struct, i.e. `{h, s, l}`
   * `:index`: The index of this color in the list of all colors
-  * `:desriptive_name`: a string with name (from this the Atom is derived)
-  * `:source`: Information where the color comes from, see Wikipedia for more details
+  * `:desriptive_name`: a string with name (we derive the `Atom` from it)
+  * `:source`: Information where the color comes from. Even the colors on Wikipedia are often coming from other sources.
 * `info/1` and `info/2`: They are convenience functions when you only have an atom as the color name. They map to the functions, thus `info(:almond)` is equal to `almond()` and `info(:almond, what)` is equal to `almond(what)`.
 
-In addition each color can also be used directly in an `Leds` sequence since it provides to convenience functions:
+In addition each color can also be used directly in an `Leds` sequence since it provides two convenience functions:
 
 * `almond(leds)` which takes an `Leds` sequence and adds the `:almond` color to it (at the next position). This is equivalent to:
   ```elixir
   leds |> Leds.light(almond(:hex))
   ```
-* `almond(leds, offset)` which takes an `Leds` sequence and an offset to specify where the led should be positioned. This is equivalent to:
+* `almond(leds, opts)` which takes an `Leds` sequence and an some other options, like the offset to specify where the led should be positioned. This is equivalent to:
   ```elixir
   leds |> Leds.light(almond(:hex), offset: offset)
   ```
@@ -74,7 +74,7 @@ This allows for a very natural way to define an led sequence. especially if we i
 import Fledex.Leds
 import Fledex.Color.Names
 
-leds(5) |> almond |> red |> green |> blue(5)
+leds(5) |> almond |> red |> green |> blue(offset: 5)
 ```
 
 ## Color Correction

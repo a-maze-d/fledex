@@ -29,13 +29,15 @@ alias Fledex.Utils.PubSub
 
 In the last project we created a clock. We could make a call to get the current time in every redraw loop. This approach is not possible for data that we are fetching from an external source. In this example we will create a weather display. We will get the information from an API.
 
-If we would take the same approach as in the clock example, we would make an API call every 500ms which probably will result in us getting blocked. It is completely unnecessary to make that many call, since the wheather is not changing that frequently.
+If we took the same approach as in the clock example, we would make an API call every 500ms which probably would result in us getting blocked. It is completely unnecessary to make that many call; the wheather doesn't change that frequently.
 
-What we will do is to check every 15 min what the latest weather news is.
+What we will do is to check every 15 min what the latest weather status is.
 
 There are plenty of Weather APIs on the internet, but most of them require to register which is not ideal for a public example. Therefore I decided to use [Open-Meteo](https://open-meteo.com/) which provides all we need.
 
-We need to decide for which location we want to get the weather. We use the coordinate for Budapest (`47.4729344`,`19.0468802`). Then we can make the call [`https://api.open-meteo.com/v1/forecast?latitude=47.4729344&longitude=19.0468802&current=temperature_2m`](https://api.open-meteo.com/v1/forecast?latitude=47.4729344&longitude=19.0468802&current=temperature_2m) to get data like the following:
+We need to decide for which location we want to get the weather. Since I'm living in Budapest I use it's coordinates (lat: `47.4729344`, lon: `19.0468802`). To figure out your own coordinates, you can use [Open Street Map](https://www.openstreetmap.org). Search for your location, right click on the exact position, right-click and select Query feature. Now the [URL](https://www.openstreetmap.org/query?lat=47.4729344&lon=19.0468802) will privide you with the `lat`-itude and `lon`-gitude coordinates.
+
+Then we can make the call to [`https://api.open-meteo.com/v1/forecast?latitude=47.4729344&longitude=19.0468802&current=temperature_2m`](https://api.open-meteo.com/v1/forecast?latitude=47.4729344&longitude=19.0468802&current=temperature_2m) to get the weather data that will look like the following:
 
 ```json
 {
@@ -72,11 +74,11 @@ Now it's time to prepare our led strip. First we define our strip and we set a v
 :ok
 ```
 
-Now we define two animations, the first one creates blue (below zero), green (zero), or red (above zero) indicators. The indicators have the length of the temperature and start from zero to either go to the left (negative) or the right (positive).
+Now we define two animations, the first one creates blue (below zero), green (zero), or red (above zero) indicators. The indicators have the length of the temperature and start from zero to either go to the left (negative) or the right (positive). The second animation is a helper that creates some lines every 5°C to make it easier to read the temperature.
 
 The temperature will be delivered to us as part of the trigger. We'll look at how we will get  this information in the section below.
 
-As and additional bonus, the thermometer is showing the full scale, if no proper measurement is received (arbitrarily high value of 100).
+As and additional bonus, the thermometer is showing the full scale, if no proper measurement is received (arbitrarily high value of 100), which can happen during the initialization phase.
 
 ```elixir
 Manager.register_config(:weather, %{
@@ -99,7 +101,7 @@ Manager.register_config(:weather, %{
           temp when temp == 100 ->
             {Leds.leds(61)
              |> Leds.light(:blue, offset: 1, repeat: 20)
-             |> Leds.light(:may_green)
+             |> Leds.light(:green)
              |> Leds.light(:red, offset: 22, repeat: 40), 1}
 
           temp when temp < 0 ->
@@ -138,9 +140,9 @@ Manager.register_config(:weather, %{
 })
 ```
 
-For testing we can send an arbitrary temperature value to our strip in the following way. This allows us to also see whether the strip has the correct behavior when the temperature is at zero (or even below) degree. It wouldn't be really practical if we need to wait until the outside temperature reaches those levels.
+For testing we can send an arbitrary temperature value to our strip. This allows us to also see whether the strip has the correct behavior when the temperature is at zero (or even below) degree. For testing it would be really unpractical if we need to wait until the outside temperature reaches those levels.
 
-Here we send a temperature value of -15.2 degree (which the strip should round to -15 degree)
+Here we send a temperature value of -15.2 degree (which the strip should round to -15 degree). Remember, we set the strip to update slowly and therefore it might (depending on when the next refresh will happen) take a little while before you see the change.
 
 ```elixir
 PubSub.broadcast_trigger(%{temperature: -15.2})
@@ -155,7 +157,9 @@ Before we can start with the weather data, we need to make sure that we can make
 :ssl.start()
 ```
 
-Now we can make the actual call. We do want to make this call in regular intervals (every 15 min), parse the response and publish the temperature through pubsub. To do this we create a small server. We start it with our URL (note, the parsing in the server is URL specific, so you can't simply change it to another site) and with our 15min refresh interval (specified in ms).
+Now we can make the actual call. We do want to make this call in regular intervals (every 15 min), parse the response and publish the temperature through pubsub. To do this we create a small server. In a [later chapter](./9_fledex.jobs.livemd) we will see how we can use one of the `Fledex` services to do the scheduling.
+
+We start it with our URL (note, the parsing in the server is URL specific, so you can't simply change it to another site) and with our 15min refresh interval (specified in ms).
 
 The server will extract the temperature and send it via pubsub to our update functions.
 
@@ -205,4 +209,19 @@ end
 
 ## Annotations
 
-* To decode wmo codes: https://www.nodc.noaa.gov/archive/arc0021/0002199/1.1/data/0-data/HTML/WMO-CODE/WMO4677.HTM
+If you want to be more fancy in your display, you could also add [other features](https://open-meteo.com/en/docs), like the general weather condition (called `weather_code`). For this the [wmo codes](https://www.nodc.noaa.gov/archive/arc0021/0002199/1.1/data/0-data/HTML/WMO-CODE/WMO4677.HTM) and their meaning might come in handy.
+
+Currently I see:
+
+```json
+...
+"current":{
+  ...
+  "weather_code":3
+  }
+...
+```
+
+meaning that "Clouds generally forming or developing"
+
+Now it's up to you to become creative. Happy experimenting :-)

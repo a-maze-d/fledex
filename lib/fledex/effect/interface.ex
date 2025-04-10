@@ -17,6 +17,7 @@ defmodule Fledex.Effect.Interface do
 
   alias Fledex.Color.Types
 
+  # TODO: decide on what to do with those.
   @typedoc """
   Typical states of an effect that should be published
 
@@ -48,7 +49,7 @@ defmodule Fledex.Effect.Interface do
   * The `config` are some settings that can be used to configure the effect
   * The `triggers` map contains all the triggers can that can be used by the effect. It
     does contain also the extra parameters passed in in previous calls (see below)
-  * The `context` is a tuple of `strip_name`, `animation_name` and effect `index`.
+  * The `context` is a map containing information of `strip_name`, `animation_name` and effect `index`.
 
   The function returns
 

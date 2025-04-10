@@ -24,7 +24,7 @@ The `Fledex.Leds` module allows you to easily define a sequence of LEDs. In this
 * defining individual LEDs (in sequence and out of sequence)
 * merging LED sequences
 * repeating an LED sequence
-* defining LEDs though a function (gradient & rainbow)
+* defining LEDs through a function (gradient & rainbow)
 * sending leds to a `Fledex.LedStrip`
 
 ## Color concepts
@@ -44,7 +44,7 @@ my_color2 = 2_928_612
 Fledex.Color.KinoRender.new([my_color1, my_color2])
 ```
 
-Fledex does also allow to specify an `{r, g, b}` triple (as defined in `Types.rgb`). Each color is again in the 0 to 255 range.
+Fledex does also allow to specify an `{r, g, b}` triple (as defined in `Types.rgb`). Each color is again in the 0 to 255 range and you can either write it as decimal or as hexadecimal number.
 
 ```elixir
 my_color3 = {0x2C, 0xAF, 0xE4}
@@ -84,7 +84,7 @@ leds = Leds.leds(30)
 
 Each LED in that sequence does not have any color assigned to it and therefore is (by definition) switched off (black).
 
-It is now possble to define individual LEDs in that sequence by simply specifying the color (through `Leds.light()` functions and chaining them together:
+It is now possble to define individual LEDs in that sequence by simply specifying the color through the `Leds.light()` functions and chaining them together:
 
 ```elixir
 leds =
@@ -94,7 +94,7 @@ leds =
   |> Leds.light(255)
 ```
 
-As can be seen by calling the `light` function we move an `index` to know which one we defined as last and we can thereby simply define the light one after the next. It should be noted that the leds are one-indexed.
+As can be seen, every time we call the `light` function we move an `index` to know which one we defined as last and we can thereby simply define the light one after the next. It should be noted that the leds are one-indexed.
 
 It is possible to define specific LEDs by specifying an offset. Let's extend our leds:
 
@@ -108,9 +108,9 @@ leds =
   |> Leds.light({0, 0, 0xFF})
 ```
 
-As seen, if we specify the offset of `10` and we continue to define colors without offset the next LED in the sequence will be defined (i.e `11`)
+As seen, if we specify the `offset: 10` and we continue to define colors without offset the next LED in the sequence will be defined (i.e with offset `11`)
 
-If you are curious, at the `Raw` result you can see how the deta is encoded.
+If you are curious, take a look at the `Raw` tab which shows how this is encoded:
 
 <!-- livebook:{"force_markdown":true} -->
 
@@ -122,9 +122,19 @@ If you are curious, at the `Raw` result you can see how the deta is encoded.
 }
 ```
 
-We have a `map` (`%{}`) with the `offset` as key and the color as value.
+We have a `map` (`%{}`) with the `offset` as key and the color as value. We also remember the position where we should insert the next light:
 
-It is possble to define a color with an invalid offset. i.e. which is outside the allowed range. This is not a problem. The information will be carried around, but will be ignored (take a look at the `Raw` data)
+<!-- livebook:{"force_markdown":true} -->
+
+```elixir
+%Fledex.Leds{
+  ...
+  meta: %{index: 13}
+  ...
+}
+```
+
+It is possble to define a color with an invalid offset. i.e. which is outside the allowed range. This is not a problem. The information will be carried around, but will be ignored . Take a look at the `Raw` data of the next example where we define a light at `offset: 40` even tough we only have 30 leds:
 
 ```elixir
 leds =
@@ -132,9 +142,11 @@ leds =
   |> Leds.light(:green, offset: 40)
 ```
 
+It's important to remember that the information is retained, since in some circumstances, it  is possible that it might become visible again (like changing the led count through `Fledex.Leds.set_count`)
+
 ## Merging LED sequences
 
-Quite commonly there comes up the need to define an LED sequence as a combination of serveral sequences. This can easily be done by passing `Leds` as if it were a single LED
+It is quite commonly that you want to define an LED sequence as a combination of serveral other sequences. This can easily be done by passing `Leds` as if it were a single light:
 
 ```elixir
 leds_sub =
@@ -144,13 +156,15 @@ leds_sub =
 
 leds =
   Leds.leds(30)
+  # define the red-green once
   |> Leds.light(leds_sub)
+  # define the red-green a second time with an offset
   |> Leds.light(leds_sub, offset: 5)
 ```
 
 ## Repeating an LED sequence
 
-It is possble to define a sequence of LEDs by repeating it. If you want to have 5 red LEDs you define a single LED and instruct it to be repeated 5 times. This would look like this (note the first 5 is the offset which needs to be specified and the second specifies the repetition factor):
+It is possble to define a sequence of LEDs by repeating it. If you want to have 5 red LEDs you define a single LED and instruct it to be repeated 5 times. This would look like this:
 
 ```elixir
 leds =
@@ -173,9 +187,11 @@ leds =
 
 ## Definining LEDs through a function
 
-When you want to create a color sequence that is more complex, then this can also be achieved through some definition functions.
+When you want to create a color sequence that is more complex, then this can also be achieved through some functions.
 
 If, for example, you want to create a rainbow pattern over 10 LEDs, you can do so by using the `rainbow/2` function.
+
+Note: If you don't specify the nubmer of leds, all leds in the sequence will be used (here it woudl be all 30 leds)
 
 ```elixir
 leds =
@@ -191,7 +207,7 @@ leds =
   |> Leds.gradient(:red, :blue)
 ```
 
-`repeat/2` is another function that will take the already defined sequence (and `Leds` size `x`) and repeats it `y` times. Hence, the returned led sequence size will be: `size = x * y`.
+`repeat/2` is another function that will take the already defined sequence (size `x`) and repeats it `y` times. Hence, the newly returned led sequence size will be: `size = x * y`.
 
 ```elixir
 Leds.leds(10)
@@ -199,7 +215,7 @@ Leds.leds(10)
 |> Leds.repeat(3)
 ```
 
-## Sending LEDs to a led-strip
+## Sending LEDs to an led-strip
 
 Once we have defined our Leds, we can send them to our `Fledex.LedStrip`. This is not
 difficult, but it's such a common task that the Leds module provides the convenience

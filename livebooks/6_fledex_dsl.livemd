@@ -19,7 +19,10 @@ Mix.install([
 
 We now define our animations with our DSL with the following steps:
 
-* First we have to `use Fledex` in order to import `Fledex`, to load our DSL macros (`led_strip` and `animation`), and to import `Fledex.Leds`. This means we won't write `Leds` in fron of functions. By default this will also start the `Fledex.Animation.Manager` if it's not already running which will take care of all the animation coordinations.
+* First we have to `use Fledex` in order to 
+  * load our `Fledex` DSL (like `led_strip`,`animation` and the like) and
+  * to import commonly used functions, like `Fledex.Leds`, `Fledex.Color.Names`. This means we won't write `Leds` in fron of functions anymore.
+  * to start (by default) the `Fledex.Animation.Manager` if it's not already running, who will take care of all the animation coordinations.
 
 ```elixir
 use Fledex
@@ -27,12 +30,13 @@ use Fledex
 
 ## The clock
 
+We now go back to our [clock example](./4_fledex_clock_example.livemd) and rewrite it with our  DSL:
+
 * We define a new strip with a name (`:clock`), and configure it (we use the `Kino`
   default driver for display). This will internally create a new `Fledex.LedStrip` 
   server (if it's not already running) that will control the strip. Its server name will
   be identical to the `led_strip` name.
-* Then within this strip we define several `animation`s that correspond to an animatio
-  (and will use internally the `Fledex.Animation.Animator`). Each animation is identified
+* Then within this strip we define several `animation`s (which will internally use the `Fledex.Animation.Animator`). Each animation is identified
   by its own name (`:help`, `:hour`, `:minute`, `:second`).
 * Within each animation we define a function that will be executed repeatedly.
 * Inside that function we can define one or several `Leds`, either directly or through 
@@ -40,29 +44,36 @@ use Fledex
   trigger data (data that comes into the animation function). An explanation of what 
   we are doing in our example here will be given after the code.
 
-It is also possble to define some other configurations (like the `send_config_func` as we have done in the "[Fledex Clock Example](./4_fledex_clock_example.livemd)") but we will look at this a bit later.
+It is also possble to define some other configurations (like the `send_config_func` that we used in the "[Fledex Clock Example](./4_fledex_clock_example.livemd)") but we don't need it right now.
 
 ```elixir
 led_strip :clock, Kino do
+  # 1.
   static :help do
     leds(5) |> light(davy_s_grey()) |> repeat(12)
   end
 
+  # 2.
   animation :hour do
     _triggers ->
       %{hour: hour, minute: _minute, second: _second} = Time.utc_now() |> Time.add(1, :hour)
+      # 3.
       leds(24) |> light(blue(), offset: hour + 1)
   end
 
+  # 2.
   animation :minute do
     _triggers ->
       %{hour: _hour, minute: minute, second: _second} = Time.utc_now() |> Time.add(1, :hour)
+      # 3.
       leds(60) |> light(:may_green, offset: minute + 1)
   end
 
+  # 2.
   animation :second do
     _triggers ->
       %{hour: _hour, minute: _minute, second: second} = Time.utc_now() |> Time.add(1, :hour)
+      # 3.
       leds(60) |> light(:red, offset: second + 1)
   end
 end
@@ -70,33 +81,28 @@ end
 
 The above code should result in an animation displaying the clock.Now it's time to look at the different animation parts and how they work.
 
-We first define a `static` animation (one that doesn't animate). This animation does not get any triggers and will only be called once during the initalization (since it's static). Notice that this function gets no argument (we don't have the trailing `_triggers ->` part). It is used to make it easier to read the time by having a dash every 5 steps and those do not change over time. The markers are repeating in a regular pattern, so we only define the first one and then repeat it with the `repeat/2` function 12 times.
+1. We first define a `static` animation (one that doesn't animate). This animation does not get any triggers and will only be called once during the initalization (since it's static). Notice that this function gets no argument (we don't have the trailing `_triggers ->` part that you find in the other parts). It is used to make it easier to read the time by having a dash every 5 steps and those do not change over time. The markers are repeating in a regular pattern, so we only define the first one and then repeat it with the `repeat/2` function 12 times.
+2. For all other animations we make a call to the system time (`Time.utc_now()`) and therefore don't require the `_trigger` information. We shift the result to the right timezone (we add 1 hour, for UTC+1). We pattern match the result, depending on the animation into `hour`, `minute`, or `second`.
+3. We then define a sequence of `Leds` of the right length (`24` for `hour`, and `60` for `minute` and `second`). We switch-on only a single light in some color at the correct position (with the offset corresponding to `hour`, `minute` or `second`)
 
-For all other animations we make a call to the system time (`Time.utc_now()`) and therefore don't require the `_trigger` information. We shift the result to the right timezone (we add 1 hour, for UTC+1).
+**Notes:**
 
-We pattern match the result, depending on the animation into `hour`, `minute`, or `second`. Note: the code is a bit extra bloated to pattern match it every time into all 3 and to comment out the ones we don't need, but that is just to highlight that we have all 3 elements but we are only interested in one of them.
-
-Exapmle: For the second indicator the following would have been enough:
-
-<!-- livebook:{"force_markdown":true} -->
-
-```elixir
-  animation :second do
-    _triggers ->
+1. in classical Erlang/Elixir style the underscore (`_`) in `_triggers` indicates that the variable is not used.
+2. The DSL allows you to remove the `_trigger ->` part in an animation if you don't need it.
+3. The code could have been more compact by also just matching the part that we are interested in. Also considering the previous point the `:second` indicator could have been defined like this:
+   ```elixir
+   animation :second do
       %{second: second} = Time.utc_now() |> Time.add(1, :hour)
       leds(60) |> light(:red, offset: second + 1)
-  end
-```
-
-We then define a sequence of `Leds` of the right length (`24` for `hour`, and `60` for `minute` and `second`). We switch-on only a single light in some color at the correct position (with the offset corresponding to `hour`, `minute` or `second`)
-
-Note: in the clock example we defined a static sequence of `Leds` and offsetted it. This requires the definition of a `send_config_func`. We will look on how to do it with the DSL as a next step.
+   end
+   ```
+4. In the clock example we defined a static sequence of `Leds` and offsetted it. This required the definition of a `send_config_func`. We will look on how to do it with the DSL as a next step.
 
 ## Clock (with send function)
 
-We are now implementing the above example, but demonstrating on how the `:second`, `:minute`, and `:hour` indicators can be implemented in exactly the same way as we did in chapter 4, i.e. with a send function that shifts the red marker depending on the time.
+We are now implementing the above example, but demonstrating on how the `:second`, `:minute`, and `:hour` indicators can be implemented in exactly the same way as we did in [chapter 4](./4_fledex_clock_example.livemd), i.e. with a send function that shifts the red marker depending on the time.
 
-We also take the ocasion to demonstrate on how you can define a second strip, by giving it a new name (`:clock2`). To demonstrate that it's really a new stip this clock here displays the time in UTC (we don't add the extra hour of offset). Look carefully at the blue hour indicator.
+We also take the occasion to demonstrate on how you can define a second strip, by giving it a new name (`:clock2`). To demonstrate that it's really a new stip this clock here displays the time in UTC (we don't add the extra hour of offset). Look carefully at the blue hour indicator.
 
 Also, the above strip should continue to run and a new strip will appear below the code. Had we called the strip the same as above (i.e. `:clock`), then the above output would have stopped updating and a new one would appear here.
 
@@ -111,7 +117,7 @@ led_strip :clock2, Kino do
   animation :hour,
     send_config: fn _triggers ->
       %{hour: hour, minute: _minute, second: _second} = Time.utc_now()
-      %{offset: hour, rotate_left: false}
+      [offset: hour, rotate_left: false]
     end do
     _triggers ->
       leds(24) |> light(blue())
@@ -120,7 +126,7 @@ led_strip :clock2, Kino do
   animation :minute,
     send_config: fn _triggers ->
       %{hour: _hour, minute: minute, second: _second} = Time.utc_now()
-      %{offset: minute, rotate_left: false}
+      [offset: minute, rotate_left: false]
     end do
     _triggers ->
       leds(60) |> light(:may_green)
@@ -129,7 +135,7 @@ led_strip :clock2, Kino do
   animation :second,
     send_config: fn _triggers ->
       %{hour: _hour, minute: _minute, second: second} = Time.utc_now()
-      %{offset: second, rotate_left: false}
+      [offset: second, rotate_left: false]
     end do
     _triggers ->
       leds(60) |> light(:red)
@@ -139,7 +145,7 @@ end
 
 ## The weather app
 
-We now implement the [weather app](./5_fledex_weather_example.livemd) (indicating the temperature) we implemented in chapter 5.
+We now implement the [weather app](./5_fledex_weather_example.livemd) (indicating the temperature) we implemented in chapter 5 by using our DSL.
 
 ```elixir
 led_strip :weather, Kino do

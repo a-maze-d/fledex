@@ -15,9 +15,10 @@ Even though this library is published, there are things I still want to do befor
   - [x] Update Cheatsheet with new driver approach (v0.5)
   - [x] Mark the livbooks so that it becomes clear what kind they are (internal, background, usage,...) (v0.5)
   - [x] Check that all livebooks are mentioned in the README.md (v0.5)
-  - [ ] Add installation instructions (v0.5)
+  - [ ] Add installation instructions (v0.6)
+  - [ ] Add information about color correction (section 3b) (v0.6)
   - [ ] change the doc structure? so that links don't get so easily broken? (v0.6)
-  - [ ] Useful to provide a full story about colors (additive / subtractive colors), hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.6)
+  - [ ] Useful to provide a full story about colors (additive / subtractive colors), hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.6/0.7)
 - [ ] Testing
   - [x] Perform an extra round of testing on hardware (v0.4)
   - [x] Fix the issue in the livebooks that `broadcast_trigger/1` gets called directly now, since the function gets imported (v0.4)
@@ -45,12 +46,18 @@ Even though this library is published, there are things I still want to do befor
   - [x] Use a keyword list for the Leds.send optional parameters (v0.5)
   - [x] have `Fledex.Color` protocol for `to_colorint` conversion? This could avoid some of the cyclic dependencies that we are seeing (v0.5)
   - [x] Remove the "it's taking more than 10sec" warning during compilation. We know the generation of the name files will take more time. (v0.5)
+  - [ ] Restructure the Animation code (v0.6)
+    - [ ] `AnimatorBase` doesn't make too much sense. 
+    - [ ] The `Animator.config_t` structure should at least partially be defined by the manager (at least the component should get it from there, since it's allowed to also add `:coordinator` and `:job` to it)
+    - [ ] We probably want to remove some of the `optional` attributes in the `Animator.config_t` structure
+    - [ ] Does the `AnimatorInterface` still make sense?
+  - [ ] Do we want to create a Utily class for Components, so that the name creation is simplified? (v0.6)
 - [ ] Enable Telemetry? (v0.7)
 - [ ] Missing functionality
   - [x] Add the possibility to clear the LEDs when initializing the LedsDriver. This should be a feature fo the Spi Driver (v0.5)
   - [x] Create support for a coordinator (that can control individual animations and effects). (v0.5) 
   - [x] Update effects to make use of the coordinator functionality by reporting back their state through PubSub (v0.5)
-  - [ ] Update livebook examples how animations, effects, ... can be coordinated (v0.5)
+  - [x] Update livebook examples how animations, effects, ... can be coordinated (v0.5)
   - [ ] Add a default `led_strip` driver that can be configured through the config (v0.6)
   - [ ] Connect everything into a supervision tree (to make it more robust) (v0.6)
   - [ ] setting up livebook (a really working version) on windows is anything than easy :-(Can we do something about it? Investigate (v0.7) 

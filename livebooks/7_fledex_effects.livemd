@@ -16,7 +16,16 @@ Mix.install([
 
 ## Introduction
 
-In this chapter we will look at some effects that we can apply to an animation. Effects are simply applied by wrapping the `animation` marco into an `effect` macro. But before we do so we firs need to load our framework (and we define some aliases that will come in handy a bit later).
+> [!Warning]
+> 
+> This version contains a big change in how effects should behave and interact.
+> This is still work in progress and you might run into issues. The next version
+> should fix those issues and update the documentation accordingly. Still you 
+> can get an understanding by walking through this livebook.
+> 
+> TODO: remove this once fixed!
+
+In this chapter we will look at some effects that we can apply to an animation. Effects are simply applied by wrapping the `animation` marco into an `effect` macro. But before we do so we first need to load our framework (and we define some aliases that will come in handy a bit later).
 
 ```elixir
 alias Fledex.Effect.Rotation
@@ -110,56 +119,73 @@ end
 
 It is maybe nice to use pre-exisiting effects, but it's much more exciting to create your own effect. In this example we are looking on how to do that.
 
-You might be wondering what an effect is. It's simply a module with a `@behaviour Fledex.Effect.Interface` implementing the simple `apply/4` function. The function takes 4 parameters
+You might be wondering what an effect is. It's simply a module with a `@behaviour Fledex.Effect.Interface`. If you `use Fledex.Effect.Interface` you only need to implement the simple `apply/5` function. The function takes 5 parameters
 
 * a `list` of `colorint`s, e.g. `[0xff0000, 0x00ff00, 0x0000ff]`
 * a length of the list passed in as first argument. This is to avoid to walk through the list to figure this out.
 * a keyword list with `config`uration parameters. They are the ones you specified in the `effect` macro. As an effect implementer, you can decide what kind of parameters are permitted. There is one parameter that will be populated by the `Fledex.Animation.Animator` if it's not specified, which is the `:trigger_name`. It is the trigger that drives your effect.
 * a `triggers` map containing the various triggers (like the strip counter, or some other triggers as we have seen in our weather example)
+* a `context` map containing information what the effect will manipulate. It contains information about the, `led_strip` name, the `animation` name, and the `effect` index. To start with you can ignore it.
 
-Let's start to define our own module and the function. The simplest implementation is to simply return the leds array, the triggers, and `:static` as state (since nothing is changing over time)
+The function returns
+
+* a list of LEDs (color integers),
+* the new count of the list (which can be smaller than the initial count),
+* and a map of (potentially modified) `triggers`. This also allows to retain some state between each call of the filter.
+
+The most simplest filter is the one that simply returns the passed in parameters:
+
+<!-- livebook:{"force_markdown":true} -->
+
+```elixir
+  def apply(leds, count, _config, trigggers, _context) do
+    {leds, count, triggers}
+  end
+```
+
+Here the full code:
 
 ```elixir
 defmodule LivebookEffect1 do
-  @behaviour Fledex.Effect.Interface
-
-  alias Fledex.Effect.Interface
+  use Fledex.Effect.Interface
 
   @impl true
   @spec apply(
           leds :: [Types.colorint()],
           count :: non_neg_integer,
           config :: keyword,
-          triggers :: map
+          triggers :: map,
+          context :: map
         ) :: {list(Types.colorint()), non_neg_integer, map}
-  def apply(leds, count, _config, triggers) do
+  def apply(leds, count, _config, triggers, _context) do
     {leds, count, triggers}
   end
 end
 ```
 
-This is of course not very exciting, since effect has no effect and is thereby useless. But it's a good starting point.
+This is of course not very exciting, since
 
-From the `@spec` we can see that we have two alternative return values, either just the leds or a tuple with leds and a map. The map is the trigger map, that can be used to carry state between different execution rounds. In this example we won't make use of this though.
+* defining an effect that does nothing is useless and
+* defining an effect has no effect if you don't usee it. 
+  But it's a good starting point.
 
-Now let's create a new effect. What about going crazy and to randomize the leds?
+Now let's create a new effect that does something. What about going crazy and to randomize the leds?
 
 This is very easy to accomplish, we only need to call the `Enum.shuffle/1` function.
 
 ```elixir
 defmodule LivebookEffect2 do
-  @behaviour Fledex.Effect.Interface
-
-  alias Fledex.Effect.Interface
+  use Fledex.Effect.Interface
 
   @impl true
   @spec apply(
           leds :: [Types.colorint()],
           count :: non_neg_integer,
           config :: keyword,
-          triggers :: map
+          triggers :: map,
+          context :: map
         ) :: {list(Types.colorint()), non_neg_integer, map}
-  def apply(leds, count, _config, triggers) do
+  def apply(leds, count, _config, triggers, _context) do
     {Enum.shuffle(leds), count, triggers}
   end
 end

@@ -24,7 +24,7 @@ alias Fledex.LedStrip
 
 ## Intro
 
-The goal of this project is to create a clock that displays its hour, minute and second on the trip. We use the kino driver as output and we limit the amount of leds to a reasonable number.
+The goal of this project is to create a clock that displays its hour, minute and second on the strip. We use the `Kino` driver as output and we limit the amount of leds to a reasonable number.
 Therefore we can't really display every second and every minute. We can get a bit creative in how we display it.
 
 But before we get there, we first initiate our led strip.
@@ -44,7 +44,7 @@ Then we modify the led strip to update with a very low frequency. Our clock only
 
 ## Defining our clock
 
-We now register our animations for the `:clock` led strip. We define 4 animations. One for the seconds, minutes, and hours and one as help to make it easier to read the lock by having an indicator in every 5 intervals.
+We now register our animations for the `:clock` led strip. We define 4 animations. One as visual help to make it easier to read the clock by having an indicator every 5 intervals and one each for the seconds, minutes, and hours.
 
 Each animation consists of two elements:
 
@@ -66,7 +66,7 @@ config = %{
       # we work with utc times and adjust, so we don't need to load a timezone library
       %{hour: _hour, minute: _minute, second: second} = Time.utc_now() |> Time.add(1, :hour)
       # Logger.info("#{second}")
-      %{offset: second, rotate_left: false}
+      [offset: second, rotate_left: false]
     end
   },
   minutes: %{
@@ -78,7 +78,7 @@ config = %{
       # we work with utc times and adjust, so we don't need to load a timezone library
       %{hour: _hour, minute: minute, second: _second} = Time.utc_now() |> Time.add(1, :hour)
       # Logger.info("#{second}")
-      %{offset: minute, rotate_left: false}
+      [offset: minute, rotate_left: false]
     end
   },
   hours: %{
@@ -90,7 +90,7 @@ config = %{
       # we work with utc times and adjust, so we don't need to load a timezone library
       %{hour: hour, minute: _minute, second: _second} = Time.utc_now() |> Time.add(1, :hour)
       # Logger.info("#{second}")
-      %{offset: hour, rotate_left: false}
+      [offset: hour, rotate_left: false]
     end
   },
   help: %{
@@ -113,3 +113,5 @@ Manager.register_config(:clock, config)
 ```
 
 If you are searching for your led strip then scoll up. It's displayed where you have registered your led strip with the `Fledex.Animation.Manager`.
+
+That's it, this wasn't too difficult, but continue reading, it will get even easier :-)

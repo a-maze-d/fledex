@@ -52,7 +52,7 @@ defmodule HelperFunctions do
   end
 
   def send_config(triggers) do
-    %{offset: triggers[:john]}
+    [offset: triggers[:john]]
   end
 end
 ```
@@ -63,7 +63,7 @@ Now it's time to define our first animation by using the `Fledex.Animation.Manag
 
 We call our led strip `:john` (it has to be an atom). In this example we will only use the simple kino driver (and configure it with defaults) and thereby display the result within our livebook.
 
-We then define an animation configuration that consists of a map with they key being the name of the animation and the value being the configuration of that animation. Each animation configuration needs to specify the `:type` as `:animation`, because (as we will see later) other types exist, and a `:def_func` that defines our animation (potentially with an additional `:send_config_func` as shown here. We'll look at this in more detail in a later section).
+We then define an animation configuration that consists of a map with the key being the name of the animation and the value being the configuration of that animation. Each animation configuration needs to specify the `:type` as `:animation`, because (as we will see later) other types exist, and a `:def_func` that defines our animation (potentially with an additional `:send_config_func` as shown here. We'll look at this in more detail in a later section).
 
 ```elixir
 Manager.register_strip(:john, [{Kino, []}], [])
@@ -83,6 +83,8 @@ We can now redefine our animation by registering different functions. Here we de
 
 Note: we are starting to use color names instead of defining it through an integer. If you want to learn more, then take a small detour to the [Color livebook](./3b_fledex_more_about_colors.livemd)
 
+The strip has been defined above, and is shown above, so when you redefine it you will have to look above too :-)
+
 ```elixir
 import Bitwise
 
@@ -94,7 +96,7 @@ defmodule HelperFunctions2 do
 
   def send_config(triggers) do
     slow_offset = rem(triggers[:john] || 0 >>> 5, 50)
-    %{offset: slow_offset}
+    [offset: slow_offset]
   end
 end
 
@@ -122,7 +124,7 @@ defmodule HelperFunctions3 do
 
   def send_config(triggers) do
     faster_offset = 50 - rem(triggers[:john] || 0 >>> 2, 50)
-    %{offset: faster_offset}
+    [offset: faster_offset]
   end
 end
 
@@ -142,7 +144,7 @@ Manager.register_config(:john, %{
 
 ## Use of anonymous functions
 
-It is also possible to use an anonymous function during the definition which avoids to create a separate module. Here we redefine our above definition, but this time we define `:doe` with an anonymous function. To really see that we have changed the definition we define the leds  as all blue. In addition we change the `send_config_func` to animate the dots even faster.
+It is also possible to use an anonymous function during the definition which avoids to create a separate module. Here we redefine our above definition, but this time we define `:doe` with an anonymous function. To really see that we have changed the definition we define the leds as all blue. In addition we change the `send_config_func` to animate the dots even faster.
 
 The advantage of using the anonymous functions is that you don't get any compilation error, that occures if you recompile the module. Try it out by reevaluating the below definition several times and then doing the same thing with the previous definition.
 
@@ -162,7 +164,7 @@ Manager.register_config(:john, %{
     end,
     send_config_func: fn triggers ->
       faster_offset = 50 - rem(triggers[:john] || 0 >>> 1, 50)
-      %{offset: faster_offset}
+      [offset: faster_offset]
     end
   }
 })

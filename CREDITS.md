@@ -41,6 +41,9 @@ Urls:
 * https://en.wikipedia.org/wiki/List_of_colors:_A%E2%80%93F
 * https://en.wikipedia.org/wiki/List_of_colors:_G%E2%80%93M
 * https://en.wikipedia.org/wiki/List_of_colors:_N%E2%80%93Z
+* https://drafts.csswg.org/css-color/#named-colors
+* https://www.w3.org/TR/SVG11/types.html#ColorKeywords
+* https://en.wikipedia.org/wiki/List_of_RAL_colours
 
 The color names and attributes have been extracted from Wikipedia and W3C standards
 and been converted to a csv file and can be found in the files: [wiki_colors.csv](lib/color/names/wiki/wiki_colors.csv), [css_colors.csv](lib/color/names/css/css_colors.csv), [svg_colors.csv](lib/color/names/svg/svg_colors.csv), and [ral_colors.csv](lib/color/names/ral/ral_colors.csv).
