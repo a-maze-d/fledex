@@ -270,10 +270,10 @@ defmodule Fledex.Animation.Manager do
   end
 
   @spec shutdown_animators(%{atom => module}, atom, [atom]) :: :ok
-  defp shutdown_animators(_impls, strip_name, dropped_animations) do
+  defp shutdown_animators(impls, strip_name, dropped_animations) do
     Enum.each(dropped_animations, fn animation_name ->
-      # TODO: replace with impls.animator.stop(strip_name, animator_name)
-      GenServer.stop(Utils.build_name(strip_name, :animator, animation_name), :normal)
+      impls.animator.shutdown(strip_name, animation_name)
+      # GenServer.stop(Utils.build_name(strip_name, :animator, animation_name), :normal)
     end)
   end
 

@@ -41,11 +41,7 @@ defmodule Fledex.Animation.Animator do
    some wait pattern, the trigger counter (or some other timer logic) should be used
 
    Both of them can be set by defining an appropriate function and setting and resetting a reference at will
-
-   This module does not define any functions on its own, because the interface is defined
-   by `Fledex.Animation.AnimatorBase`.
   """
-  # use Fledex.Animation.AnimatorBase
   use GenServer
 
   require Logger
@@ -75,7 +71,10 @@ defmodule Fledex.Animation.Animator do
 
   # MARK: client side
   # TODO move the doc from the interface
-  @doc false
+  @doc """
+  Create a new animation (with a given name and configuration) for the led strip
+  with the specified name.
+  """
   @spec start_link(config :: config_t, strip_name :: atom, animation_name :: atom) ::
           GenServer.on_start()
   def start_link(config, strip_name, animation_name) do
@@ -85,7 +84,17 @@ defmodule Fledex.Animation.Animator do
       )
   end
 
-  @doc false
+  @doc """
+  (Re-)Configure this animation. You will have to implement this function on server side.
+  This will look something like the following:
+  ```elixir
+    @spec handle_cast({:config, config_t}, state_t) :: {:noreply, state_t}
+    def handle_cast({:config, config}, state) do
+      # do something here
+      {:noreply, state}
+    end
+  ```
+  """
   @spec config(atom, atom, config_t) :: :ok
   def config(strip_name, animation_name, config) do
     GenServer.cast(
@@ -94,7 +103,14 @@ defmodule Fledex.Animation.Animator do
     )
   end
 
-  @doc false
+  @doc """
+  Update the configuration of an effect at runtime
+
+  Sometimes you want to change the configuration of an effect not only at definition time,
+  but aiso at runtime.
+  It is possible to apply the configuration change to ALL effects of the animator, which
+  can be convenient especially if you want to enable/disable all effects at once.
+  """
   @spec update_effect(atom, atom, :all | pos_integer, keyword) :: :ok
   def update_effect(strip_name, animation_name, what, config_update) do
     GenServer.cast(
@@ -103,7 +119,11 @@ defmodule Fledex.Animation.Animator do
     )
   end
 
-  @doc false
+  @doc """
+  When the animation is no long required, this function should be called. This will
+  call (by default) GenServer.stop. The animation can implement the `terminate/2`
+  function if necessary.
+  """
   @spec shutdown(atom, atom) :: :ok
   def shutdown(strip_name, animation_name) do
     GenServer.stop(

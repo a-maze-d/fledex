@@ -24,7 +24,7 @@ Even though this library is published, there are things I still want to do befor
   - [x] Clean up commented out code (v0.6)
   - [ ] Restructure the Animation code (v0.6)
     - [x] `AnimatorBase` doesn't make too much sense. 
-    - [ ] Review documentation
+    - [x] Review documentation
     - [ ] The `Animator.config_t` structure should at least partially be defined by the manager (at least the component should get it from there, since it's allowed to also add `:coordinator` and `:job` to it)
     - [ ] We probably want to remove some of the `optional` attributes in the `Animator.config_t` structure
     - [x] Does the `AnimatorInterface` still make sense? No, break out into a Utils module

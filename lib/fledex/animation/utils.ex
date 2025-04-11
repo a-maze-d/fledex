@@ -12,7 +12,7 @@ defmodule Fledex.Animation.Utils do
   animators that have been removed. We do not keep a reference, but only a config
   Therefore the animator needs to adhere to this naming convention to properly be shut down.
   It is the responsibility of the Animator to set the servername correctly. The
-  `Fledex.Animation.AnimatorBase` is doing this by default.
+  `Fledex.Animation.Animator` is doing this by default.
   """
   @spec build_name(atom, :animator | :job | :coordinator, atom) :: atom
   def build_name(strip_name, type, animation_name)
