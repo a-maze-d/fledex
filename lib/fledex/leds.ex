@@ -271,9 +271,6 @@ defmodule Fledex.Leds do
   the sequence.
   """
   @spec light(t, Types.color() | t) :: t
-  # def light(leds, rgb) do
-  #   do_update(leds, rgb)
-  # end
   def light(%__MODULE__{meta: meta} = leds, rgb) do
     index = meta[:index] || 1
     index = max(index, 1)
@@ -463,21 +460,6 @@ defmodule Fledex.Leds do
       _na -> 0
     end
   end
-
-  # @doc """
-  # Helper function mainy intended for internal use to rotate the sequence of values by an `offset`.
-
-  # The rotation can happen with the offset to the left or to the right.
-  # """
-  # @spec rotate(list(Types.colorint), pos_integer, boolean) :: list(Types.colorint)
-  # def rotate(vals, offset, rotate_left \\ true)
-  # def rotate(vals, 0, _rotate_left), do: vals
-  # def rotate(vals, offset, rotate_left) do
-  #   count = Enum.count(vals)
-  #   offset = rem(offset, count)
-  #   offset = if rotate_left, do: offset, else: count-offset
-  #   Enum.slide(vals, 0..rem(offset-1 + count, count), count)
-  # end
 
   defimpl Kino.Render, for: Fledex.Leds do
     @moduledoc """

@@ -69,9 +69,4 @@ defmodule Fledex.Color.Names.LoadUtils do
   def clean(integer_string) do
     String.replace(integer_string, ~r/[^0-9]/, "")
   end
-
-  # @max_value 255
-  # def to_colorint({r, g, b} = _color) do
-  #   (min(r, @max_value) <<< 16) + (min(g, @max_value) <<< 8) + min(b, @max_value)
-  # end
 end

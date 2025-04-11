@@ -31,16 +31,6 @@ defmodule Fledex.Driver.Manager do
   """
   @type driver_t :: [{driver :: module, config :: keyword()}]
 
-  # @doc false
-  # @spec init_config(keyword) :: driver_t
-  # def init_config(init_args) do
-  #   %{
-  #     # merge_strategy: init_args[:merge_strategy] || :avg,
-  #     driver_modules: define_drivers(init_args[:driver_modules]),
-  #     config: init_args[:config] || %{}
-  #   }
-  # end
-
   @doc false
   @spec init_drivers(list({module, keyword})) :: list({module, any})
   def init_drivers(drivers) do
@@ -141,21 +131,6 @@ defmodule Fledex.Driver.Manager do
 
     :ok
   end
-
-  # @default_driver_modules [Null]
-  # @spec define_drivers(nil | module | [module]) :: [module]
-  # defp define_drivers(nil) do
-  #   # Logger.warning("No driver_modules defined/ #{inspect @default_driver_modules} will be used")
-  #   define_drivers(@default_driver_modules)
-  # end
-  # defp define_drivers(driver_modules) when is_list(driver_modules) do
-  #   drivers = Enum.filter(driver_modules, fn driver -> validate_driver(driver) end)
-  #   if length(drivers) > 0, do: drivers, else: @default_driver_modules
-  # end
-  # defp define_drivers(driver_modules) do
-  #   Logger.warning("driver_modules is not a list")
-  #   define_drivers([driver_modules])
-  # end
 
   def remove_invalid_drivers(drivers) do
     Enum.filter(drivers, fn {driver_module, _driver_config} ->

@@ -21,7 +21,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Add more error handling scenarios (v0.6)
   - [ ] Add tests for the Clock and Thermometer components (v0.6)
 - [ ] Cleanup
-  - [ ] Clean up commented out code (v0.6)
+  - [x] Clean up commented out code (v0.6)
   - [ ] Restructure the Animation code (v0.6)
     - [ ] `AnimatorBase` doesn't make too much sense. 
     - [ ] The `Animator.config_t` structure should at least partially be defined by the manager (at least the component should get it from there, since it's allowed to also add `:coordinator` and `:job` to it)

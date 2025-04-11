@@ -59,7 +59,7 @@ defmodule Fledex.Color.Names do
 
   alias Fledex.Color.Names.Types
 
-  # List of modules that define coulours that should be loaded
+  # List of modules that define coulors that should be loaded
   # Note: if there is an overlap between the lists, i.e. the same color name
   #       appears twice, then only the first definition will be used.
   #       Thus, the different color modules should be sorted accordingly

@@ -93,14 +93,6 @@ defmodule Fledex.Color.Names.Dsl do
       @spec names :: list(color_names_t)
       def names, do: @color_names
 
-      # @doc ~S"""
-      # Retrieve information about the color with the given name
-      # """
-      # @spec info(name :: Types.color_names_t(), what :: Types.color_props_t()) :: Types.color_vals_t()
-      # def info(name, what \\ :hex)
-      # def info(name, what) when is_color_name(name), do: apply(__MODULE__, name, [what])
-      # def info(_name, _what), do: nil
-
       @base16 16
       for color <- colors do
         name = color.name

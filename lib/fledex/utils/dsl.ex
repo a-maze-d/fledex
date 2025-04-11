@@ -17,11 +17,6 @@ defmodule Fledex.Utils.Dsl do
     :effect
   ]
 
-  # @spec fledex_config :: %{atom => module}
-  # def fledex_config do
-  #   @fledex_config
-  # end
-
   @spec create_config(atom, atom, (map -> Leds.t()), keyword | nil) :: Manager.configs_t()
   def create_config(name, type, def_func, options)
       when is_atom(name) and is_atom(type) and

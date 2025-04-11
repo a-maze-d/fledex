@@ -27,8 +27,6 @@ defmodule Fledex.ManagerTestUtils do
     end
   end
 
-  # def get_manager_config, do: get_manager_config(:animations, :all)
-  # def get_manager_config(strip), do: get_manager_config(:animations, strip)
   def get_animator_config(strip_name, animation_name) do
     pid = GenServer.whereis(AnimatorInterface.build_name(strip_name, :animator, animation_name))
     :sys.get_state(pid)

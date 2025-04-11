@@ -90,13 +90,6 @@ defmodule Fledex.Color.Conversion.CalcUtils do
     {r, g, b}
   end
 
-  # @max_value 255
-  # @doc """
-  # This function converts a color to a single (color) integer value
-  # """
-  # def to_colorint({r, g, b} = _color),
-  #   do: (min(r, @max_value) <<< 16) + (min(g, @max_value) <<< 8) + min(b, @max_value)
-
   @doc """
   This function adds the given subpixels `[{r1, g1, b1}, {r2, g2, b2}, ...]` together.
   The result {r1+r2+..., g1+g2+..., b1+b2+...} is probably outside of the standard
