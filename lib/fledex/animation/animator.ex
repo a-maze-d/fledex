@@ -171,7 +171,7 @@ defmodule Fledex.Animation.Animator do
     {:reply, {:ok, state}, state}
   end
 
-@impl GenServer
+  @impl GenServer
   @spec handle_info({:trigger, map}, state_t) :: {:noreply, state_t}
   def handle_info({:trigger, triggers}, %{strip_name: strip_name} = state)
       when is_map_key(triggers, strip_name) do
