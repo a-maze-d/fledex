@@ -9,6 +9,7 @@ Even though this library is published, there are things I still want to do befor
 
 # Tasks
 - [ ] Documentation
+  - [ ] Add a livebook with coordinator examples (v0.6)
   - [ ] Update the cheatsheet (v0.6)
     - [ ] Coordinator missing
     - [ ] version number wrong
@@ -18,6 +19,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Useful to provide a full story about colors (additive / subtractive colors), hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.6/0.7)
 - [ ] Testing
   - [ ] Add more error handling scenarios (v0.6)
+  - [ ] Add tests for the Clock and Thermometer components (v0.6)
 - [ ] Cleanup
   - [ ] Clean up commented out code (v0.6)
   - [ ] Restructure the Animation code (v0.6)
