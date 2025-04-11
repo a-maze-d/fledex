@@ -1,4 +1,4 @@
-# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -45,11 +45,13 @@ defmodule Fledex.Animation.Animator do
    This module does not define any functions on its own, because the interface is defined
    by `Fledex.Animation.AnimatorBase`.
   """
-  use Fledex.Animation.AnimatorBase
+  # use Fledex.Animation.AnimatorBase
+  use GenServer
 
   require Logger
 
-  alias Fledex.Animation.AnimatorBase
+  alias Fledex.Animation.Utils
+
   alias Fledex.Leds
   alias Fledex.LedStrip
   alias Fledex.Utils.PubSub
@@ -70,6 +72,46 @@ defmodule Fledex.Animation.Animator do
           :strip_name => atom,
           :animation_name => atom
         }
+
+  # MARK: client side
+  # TODO move the doc from the interface
+  @doc false
+  @spec start_link(config :: config_t, strip_name :: atom, animation_name :: atom) ::
+          GenServer.on_start()
+  def start_link(config, strip_name, animation_name) do
+    {:ok, _pid} =
+      GenServer.start_link(__MODULE__, {config, strip_name, animation_name},
+        name: Utils.build_name(strip_name, :animator, animation_name)
+      )
+  end
+
+  @doc false
+  @spec config(atom, atom, config_t) :: :ok
+  def config(strip_name, animation_name, config) do
+    GenServer.cast(
+      Utils.build_name(strip_name, :animator, animation_name),
+      {:config, config}
+    )
+  end
+
+  @doc false
+  @spec update_effect(atom, atom, :all | pos_integer, keyword) :: :ok
+  def update_effect(strip_name, animation_name, what, config_update) do
+    GenServer.cast(
+      Utils.build_name(strip_name, :animator, animation_name),
+      {:update_effect, what, config_update}
+    )
+  end
+
+  @doc false
+  @spec shutdown(atom, atom) :: :ok
+  def shutdown(strip_name, animation_name) do
+    GenServer.stop(
+      Utils.build_name(strip_name, :animator, animation_name),
+      :normal
+    )
+  end
+
   ### MARK: server side
   @impl GenServer
   @spec init({config_t, atom, atom}) :: {:ok, state_t, {:continue, :paint_once}}
@@ -77,8 +119,8 @@ defmodule Fledex.Animation.Animator do
     state = %{
       triggers: %{},
       type: :animation,
-      def_func: &AnimatorBase.default_def_func/1,
-      options: [send_config: &AnimatorBase.default_send_config_func/1],
+      def_func: &Utils.default_def_func/1,
+      options: [send_config: &Utils.default_send_config_func/1],
       effects: [],
       strip_name: strip_name,
       animation_name: animation_name
@@ -104,6 +146,12 @@ defmodule Fledex.Animation.Animator do
   end
 
   @impl GenServer
+  @spec handle_call(:info, {pid, any}, state_t) :: {:reply, {:ok, map}, state_t}
+  def handle_call(:info, _from, state) do
+    {:reply, {:ok, state}, state}
+  end
+
+@impl GenServer
   @spec handle_info({:trigger, map}, state_t) :: {:noreply, state_t}
   def handle_info({:trigger, triggers}, %{strip_name: strip_name} = state)
       when is_map_key(triggers, strip_name) do
@@ -131,7 +179,7 @@ defmodule Fledex.Animation.Animator do
          } = state
        ) do
     # IO.puts("Update_Leds1: Key: #{Keyword.has_key?(options, :send_config_func)}")
-    send_config_func = options[:send_config] || (&AnimatorBase.default_send_config_func/1)
+    send_config_func = options[:send_config] || (&Utils.default_send_config_func/1)
     # IO.puts("Options: #{inspect options}")
     # this is for compatibility reasons. if only a send_config_func is defined
     # in the options list, then no options are defined. In that case we need to define
@@ -200,7 +248,7 @@ defmodule Fledex.Animation.Animator do
     %{
       type: config[:type] || state.type,
       triggers: Map.merge(state.triggers, config[:triggers] || state[:triggers]),
-      def_func: Map.get(config, :def_func, &AnimatorBase.default_def_func/1),
+      def_func: Map.get(config, :def_func, &Utils.default_def_func/1),
       options: update_options(config[:options], config[:send_config_func]),
       effects: update_effects(state.effects, config[:effects], state.strip_name),
       # not to be updated

@@ -1,4 +1,4 @@
-# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -17,7 +17,7 @@ defmodule Fledex.Animation.AnimatorTest do
   require Logger
 
   alias Fledex.Animation.Animator
-  alias Fledex.Animation.AnimatorInterface
+  alias Fledex.Animation.Utils
   alias Fledex.Driver.Impl.Null
   alias Fledex.Effect.Rotation
   alias Fledex.Effect.Wanish
@@ -316,7 +316,7 @@ defmodule Fledex.Animation.AnimatorTest do
       animation_name = :animation_testB
       {:ok, pid} = Animator.start_link(%{type: :static}, strip_name, animation_name)
       assert Process.alive?(pid)
-      GenServer.stop(AnimatorInterface.build_name(strip_name, :animator, animation_name), :normal)
+      GenServer.stop(Utils.build_name(strip_name, :animator, animation_name), :normal)
       assert not Process.alive?(pid)
       GenServer.stop(driver, :normal)
     end
@@ -359,13 +359,13 @@ defmodule Fledex.Animation.AnimatorTest do
     end
 
     test "enable animation without effects" do
-      alias Fledex.Animation.AnimatorBase
+      alias Fledex.Animation.Utils
 
       state = %{
         triggers: %{},
         type: :animation,
-        def_func: &AnimatorBase.default_def_func/1,
-        options: [send_config: &AnimatorBase.default_send_config_func/1],
+        def_func: &Utils.default_def_func/1,
+        options: [send_config: &Utils.default_send_config_func/1],
         effects: [],
         strip_name: :strip_name,
         animation_name: :animation_name
@@ -379,15 +379,16 @@ defmodule Fledex.Animation.AnimatorTest do
 
     test "enable animation with effects" do
       import ExUnit.CaptureLog
-      alias Fledex.Animation.AnimatorBase
+      alias Fledex.Animation.Utils
+
       effect = Fledex.Animation.TestEffect
       config = []
 
       state = %{
         triggers: %{},
         type: :animation,
-        def_func: &AnimatorBase.default_def_func/1,
-        options: [send_config: &AnimatorBase.default_send_config_func/1],
+        def_func: &Utils.default_def_func/1,
+        options: [send_config: &Utils.default_send_config_func/1],
         effects: [{effect, config}],
         strip_name: :strip_name,
         animation_name: :animation_name

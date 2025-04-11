@@ -1,4 +1,4 @@
-# Copyright 2024, Matthias Reik <fledex@reik.org>
+# Copyright 2024-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 defmodule Fledex.Animation.Coordinator do
@@ -6,7 +6,7 @@ defmodule Fledex.Animation.Coordinator do
 
   require Logger
 
-  alias Fledex.Animation.AnimatorInterface
+  alias Fledex.Animation.Utils
   alias Fledex.Utils.PubSub
 
   @callback start_link(strip_name :: atom, coordinator_name :: atom, configs :: keyword) ::
@@ -42,14 +42,14 @@ defmodule Fledex.Animation.Coordinator do
   def start_link(strip_name, animation_name, configs) do
     {:ok, _pid} =
       GenServer.start_link(__MODULE__, {strip_name, animation_name, configs},
-        name: AnimatorInterface.build_name(strip_name, :coordinator, animation_name)
+        name: Utils.build_name(strip_name, :coordinator, animation_name)
       )
   end
 
   @spec config(atom, atom, config_t) :: :ok
   def config(strip_name, animation_name, config) do
     GenServer.cast(
-      AnimatorInterface.build_name(strip_name, :coordinator, animation_name),
+      Utils.build_name(strip_name, :coordinator, animation_name),
       {:config, config}
     )
   end
@@ -57,7 +57,7 @@ defmodule Fledex.Animation.Coordinator do
   @spec shutdown(atom, atom) :: :ok
   def shutdown(strip_name, coordinator_name) do
     GenServer.stop(
-      AnimatorInterface.build_name(strip_name, :coordinator, coordinator_name),
+      Utils.build_name(strip_name, :coordinator, coordinator_name),
       :normal
     )
   end

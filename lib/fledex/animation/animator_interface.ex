@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -52,19 +52,4 @@ defmodule Fledex.Animation.AnimatorInterface do
   function if necessary.
   """
   @callback shutdown(strip_name :: atom, animation_name :: atom) :: :ok
-
-  @doc """
-  This utility function will create an atomic name for the combination of strip name and
-  animation name. This is used to name the animator. It is important that we do
-  have a naming convention, because we would otherwise have a hard time to shutdown
-  animators that have been removed. We do not keep a reference, but only a config
-  Therefore the animator needs to adhere to this naming convention to properly be shut down.
-  It is the responsibility of the Animator to set the servername correctly. The
-  `Fledex.Animation.AnimatorBase` is doing this by default.
-  """
-  @spec build_name(atom, :animator | :job | :coordinator, atom) :: atom
-  def build_name(strip_name, type, animation_name)
-      when is_atom(strip_name) and is_atom(animation_name) do
-    Module.concat([strip_name, type, animation_name])
-  end
 end
