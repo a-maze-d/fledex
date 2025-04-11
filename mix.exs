@@ -128,6 +128,8 @@ defmodule Fledex.MixProject do
       source_ref: "v#{@version}",
       source_url: @source_url,
       main: "readme-1",
+      logo: "fledex_logo.png",
+      favicon: "favicon.png",
       extras: [
         "README.md",
         "SECURITY.md",
