@@ -445,7 +445,7 @@ defmodule Fledex.Animation.AnimatorTest do
         animation_name: :animation_name
       }
 
-      assert {:ok, state} == Animator.handle_call(:info, self(), state)
+      assert {:reply, {:ok, state}, state} == Animator.handle_call(:info, self(), state)
     end
   end
 end
