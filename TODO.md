@@ -20,18 +20,21 @@ Even though this library is published, there are things I still want to do befor
 - [ ] Testing
   - [ ] Add more error handling scenarios (v0.6)
   - [ ] Add tests for the Clock and Thermometer components (v0.6)
-- [ ] Cleanup
+- [x] Cleanup
   - [x] Clean up commented out code (v0.6)
-  - [ ] Restructure the Animation code (v0.6)
+  - [x] Restructure the Animation code (v0.6)
     - [x] `AnimatorBase` doesn't make too much sense. 
     - [x] Review documentation
-    - [ ] The `Animator.config_t` structure should at least partially be defined by the manager (at least the component should get it from there, since it's allowed to also add `:coordinator` and `:job` to it)
-    - [ ] We probably want to remove some of the `optional` attributes in the `Animator.config_t` structure
+    - [x] The `Animator.config_t` structure should at least partially be defined by the manager (at least the component should get it from there, since it's allowed to also add `:coordinator` and `:job` to it). This was just an oversight, fixed now!
+    - [x] We probably want to remove some of the `optional` attributes in the `Animator.config_t` structure
+    - [x] Rename the Manager.config_t() type (remove the plural s)
     - [x] Does the `AnimatorInterface` still make sense? No, break out into a Utils module
-  - [ ] Do we want to create a Utily class for Components, so that the name creation is simplified? (v0.6)
+  - [x] Do we want to create a Utily class for Components, so that the name creation is simplified? (v0.6)
 - [ ] Enable Telemetry? (v0.7)
 - [ ] Missing functionality
-  - [ ] Add a default `led_strip` driver that can be configured through the config (v0.6)
+  - [/] Add a default `led_strip` driver that can be configured through the config (v0.6)
+        I experimented with this idea, but it really doesn't give a real benefit. Therefore
+        dropped it again.
   - [ ] Connect everything into a supervision tree (to make it more robust) (v0.6)
   - [ ] setting up livebook (a really working version) on windows is anything than easy :-( Can we do something about it? Investigate (v0.7) 
   - [ ] Add support for WS2811/12/13/14/15 LED strips controlled through phase modulation.

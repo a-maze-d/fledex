@@ -8,13 +8,13 @@ defmodule Fledex.Component.Interface do
   that a component is always an animation.
   """
 
-  alias Fledex.Animation.Animator
+  alias Fledex.Animation.Manager
 
   @doc """
   This function will be called during initialization of a component. The various
   settings are passed in as options.
-  This function can return any valid `t:Fledex.Animation.Animator.config_t` structure which will
+  This function can return any valid `t:Fledex.Animation.Manager.config_t` structure which will
   be passed to the `Fledex.Animation.Manager`.
   """
-  @callback configure(atom, keyword) :: %{atom => Animator.config_t()}
+  @callback configure(atom, keyword) :: Manager.config_t()
 end

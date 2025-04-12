@@ -5,10 +5,7 @@ defmodule Fledex.Component.Clock do
   @behaviour Fledex.Component.Interface
 
   alias Fledex.Component.Dot
-
-  defp create_name(base, child) when is_atom(base) and is_atom(child) do
-    String.to_atom("#{Atom.to_string(base)}_#{Atom.to_string(child)}")
-  end
+  alias Fledex.Component.Utils
 
   @impl true
   def configure(name, options) do
@@ -39,7 +36,7 @@ defmodule Fledex.Component.Clock do
         trigger_name: trigger_hour
       )
 
-      static create_name(name, :helper) do
+      static Utils.create_name(name, :helper) do
         leds(5) |> light(helper_color) |> repeat(12)
       end
     end
@@ -50,9 +47,9 @@ defmodule Fledex.Component.Clock do
 
   defp split_trigger(trigger_name) when is_atom(trigger_name) do
     {
-      create_name(trigger_name, :hour),
-      create_name(trigger_name, :minute),
-      create_name(trigger_name, :second)
+      Utils.create_name(trigger_name, :hour),
+      Utils.create_name(trigger_name, :minute),
+      Utils.create_name(trigger_name, :second)
     }
   end
 end

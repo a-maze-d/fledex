@@ -57,7 +57,7 @@ Fledex.Utils.PubSub.broadcast(:fledex, "trigger", {:trigger, %{temperature: 17.2
 
 The question now is just "what is a component"?
 
-The component is simply a module that implements the `@behaviour Fledex.Component.Interface`. Only a single `configure/2` function is required that returns a `Fledex.Animation.Manager.configs_t` structure and thus can define anything you normaly would define within the led_strip macro, e.g. through the `animation`, `static`, ... macros.
+The component is simply a module that implements the `@behaviour Fledex.Component.Interface`. Only a single `configure/2` function is required that returns a `Fledex.Animation.Manager.config_t` structure and thus can define anything you normaly would define within the led_strip macro, e.g. through the `animation`, `static`, ... macros.
 
 To get the correct behaviour the component gets 2 parameters:
 

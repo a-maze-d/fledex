@@ -14,12 +14,12 @@ defmodule Fledex.Component.Thermometer do
   @behaviour Fledex.Component.Interface
 
   alias Fledex.Color.Names
+  alias Fledex.Component.Utils
   alias Fledex.Leds
 
   @impl true
-  # @spec configure(atom, keyword) :: %{atom => Animator.config_t()}
   def configure(name, options) when is_atom(name) and is_list(options) do
-    name_helper = String.to_atom("#{name}.helper")
+    name_helper = Utils.create_name(name, :helper)
 
     case Keyword.keyword?(options) do
       true ->

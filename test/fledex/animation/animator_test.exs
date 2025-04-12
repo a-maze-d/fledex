@@ -120,6 +120,12 @@ defmodule Fledex.Animation.AnimatorTest do
       LedStrip.define_namespace(strip_name, animation_name)
       {:noreply, _new_state} = Animator.handle_info({:trigger, triggers}, state)
     end
+
+    test "reconfigure effects", %{strip_name: strip_name, pid: pid} do
+      animation_name = :update_effect
+      LedStrip.define_namespace(strip_name, animation_name)
+      Animator.update_effect(strip_name, animation_name, :all, enable: true)
+    end
   end
 
   describe "test triggers" do
@@ -419,6 +425,27 @@ defmodule Fledex.Animation.AnimatorTest do
                assert [{module, config} | []] = state.effects
                assert module.enabled?(config) == false
              end) =~ "No effect found at index 2"
+    end
+  end
+
+  describe "debug functions" do
+    test "get state" do
+      alias Fledex.Animation.Utils
+
+      effect = Fledex.Animation.TestEffect
+      config = []
+
+      state = %{
+        triggers: %{},
+        type: :animation,
+        def_func: &Utils.default_def_func/1,
+        options: [send_config: &Utils.default_send_config_func/1],
+        effects: [{effect, config}],
+        strip_name: :strip_name,
+        animation_name: :animation_name
+      }
+
+      assert {:ok, state} == Animator.handle_call(:info, self(), state)
     end
   end
 end

@@ -53,10 +53,10 @@ defmodule Fledex.Animation.Animator do
   alias Fledex.Utils.PubSub
 
   @type config_t :: %{
-          optional(:type) => :animation | :static,
-          optional(:def_func) => (map -> Leds.t()),
-          optional(:options) => keyword | nil,
-          optional(:effects) => [{module, keyword}]
+          :type => :animation | :static,
+          :def_func => (map -> Leds.t()),
+          :options => keyword | [],
+          :effects => [{module, keyword}]
         }
 
   @type state_t :: %{
@@ -70,7 +70,6 @@ defmodule Fledex.Animation.Animator do
         }
 
   # MARK: client side
-  # TODO move the doc from the interface
   @doc """
   Create a new animation (with a given name and configuration) for the led strip
   with the specified name.

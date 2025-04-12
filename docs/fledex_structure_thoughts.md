@@ -4,6 +4,10 @@ Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 SPDX-License-Identifier: Apache-2.0
 -->
 
+> [!CAUTION]
+> Some of the information here is slightly outdated, because the implementation has
+> evolved over time, but the basic concepts are still valid.
+
 # animation, static, component
 The animation macro should return a tuple with at least
 

@@ -26,10 +26,9 @@ defmodule Fledex.Animation.Manager do
   alias Fledex.Animation.Animator
   alias Fledex.Animation.Coordinator
   alias Fledex.Animation.JobScheduler
-  alias Fledex.Animation.Utils
   alias Fledex.LedStrip
 
-  @type configs_t :: %{
+  @type config_t :: %{
           atom => Animator.config_t() | JobScheduler.config_t() | Coordinator.config_t()
         }
 
@@ -273,7 +272,6 @@ defmodule Fledex.Animation.Manager do
   defp shutdown_animators(impls, strip_name, dropped_animations) do
     Enum.each(dropped_animations, fn animation_name ->
       impls.animator.shutdown(strip_name, animation_name)
-      # GenServer.stop(Utils.build_name(strip_name, :animator, animation_name), :normal)
     end)
   end
 

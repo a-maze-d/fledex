@@ -15,9 +15,9 @@ defmodule Fledex.Animation.Coordinator do
   @callback shutdown(atom, atom) :: :ok
 
   @type config_t :: %{
-          optional(:type) => :coordinator,
-          optional(:options) => keyword,
-          optional(:func) => (any, map, keyword -> keyword)
+          :type => :coordinator,
+          :options => keyword,
+          :func => (any, map, keyword -> keyword)
         }
   @typep state_t :: %__MODULE__{
            options: keyword,
