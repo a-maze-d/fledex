@@ -121,7 +121,7 @@ defmodule Fledex.Animation.AnimatorTest do
       {:noreply, _new_state} = Animator.handle_info({:trigger, triggers}, state)
     end
 
-    test "reconfigure effects", %{strip_name: strip_name, pid: pid} do
+    test "reconfigure effects", %{strip_name: strip_name} do
       animation_name = :update_effect
       LedStrip.define_namespace(strip_name, animation_name)
       Animator.update_effect(strip_name, animation_name, :all, enable: true)
