@@ -1,0 +1,256 @@
+<!--
+Copyright 2023, Matthias Reik <fledex@reik.org>
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
+<!-- livebook:{"file_entries":[{"name":"Cone-response-de.svg","type":"attachment"}]} -->
+
+# Licht und Farben
+
+```elixir
+Mix.install([
+  {:fledex, "~>0.5"}
+])
+```
+
+## Section
+
+Wir definieren noch ein paar Kleinigkeiten, momentan nicht so interessant was das macht.
+
+```elixir
+import Fledex.Leds
+import Fledex.Color.Names
+
+:ok
+```
+
+## Einleitung
+
+Das Thema Licht und Farben ist ein recht schwierig und sehr kompliziert. Selbst die Wissenschaft hat es noch nicht zu 100% entschluesselt.
+
+Es kann deshalb nicht innerhalb einer Stunde abgehandelt werden. Wir werden das Thema zwar richtig, aber stark vereinfacht abhandeln und uns vor Allem auf die Teile konzentrieren die fuer unsere Experimente wichtig sind.
+
+Falls es Fragen gibt werden die aber gerne beantwortet.
+
+## Die Grundlagen - Was ist Licht?
+
+Licht ist eine elektromagenetische Welle die sich mit Lichtgeschwindigkeit ausbreitet.
+
+Wir werden diesen einzelnen beschreibenden Satz in die verschiedenen Element aufspalten:
+
+* Was ist eine `Welle`?
+* Warum `elektromagnetisch`? Was ist das eigentlich?
+* Und was ist eigentlich die `Lichtgeschwindigkeit`?
+
+### Welle
+
+Wir kennen Wellen von Wasserwellen (wenn man einen Stein ins Wasser wirft) oder Schallwellen (wenn man einen Ton hoert). Ihnen gemeinsam ist die Ausbreitung und die Auf- und Abbewegung des Mediums (Wasser oder Luft).
+Die Anzahl der Auf- und Abbewegungen pro Sekunde nennt man `Frequenz` (gemessen in Herz `Hz`) ist die Eigenschaft der Welle. Haeufig misst man die Abstaende zwischen den Bergen und Taelern und nennt sie `Wellenlaenge` (gemessen in Metern `m`)
+Es ist erwaehnenswert, dass es mehrerer Arten von Wellen gibt, nicht nur die die sich auf- und abbewegen.
+
+Auch Licht kann als Welle beschrieben werden.
+
+### elektromagnetisch
+
+Elektromagnetisch wird die Welle genannt weil sie aus gekoppelten elektrischen und magnetischen Feldern entsteht.
+
+Ein Draht, den man zu einer Spule formt und mit Strom speist, produziert ein magnetisches Feld (ein Magnet entsteht). Andererseits fliesst ein Strom in einem Draht wenn man einen Magneten ueber den Draht bewegt.
+
+Sprich, der Strom kreiert einen Mageneten und der Magnet kreiert einen Strom, der wiederum einen Magneten kreirt, ... . Dieses Wechselspiel laesst eine Elektromagnetische Welle entstehen.
+
+### Lichtgeschwindigkeit
+
+Die Lichtgeschwindigkeit ist die Geschwindigkeit die das Licht (im Vakuum) hat, etwa `300 000 km/s` (genau `299 792 458 m/s`). Es ist eine physikalische Konstante und aendert sich nicht. Das resultiert in oft unerwarteten Effecten.
+
+Wir kennen die Geschwindigkeit ganz genau, weil das Meter (`m`) als ein Bruchteil der Lichtgeschwindigkeit definiert ist (seit 2019). Das Meter war bis dahin (seit 1791) so definiert dass der Aequator `40 000 km` enspricht.
+
+## Grundlagen - Was ist das sichtbare Licht?
+
+Als Licht wird die elektromagnetische Strahlung der Sonne bezeichnet, aber wir Menschen konnen nicht den gesamten Bereich sehen, sonder nur den bereich zwischen etwa `380 nm` und `750 nm`. Wellenlaengen ausserhalb dieses Bereiches sind fuer uns nicht sichtbar, aber manche Tiere koennen sie wahrnehmen. Diese Bereiche nennen wir Ultraviolett und Infrarot:
+
+<table class="wikitable float-right" style="text-align:center; font-size:90%;">
+    <caption>Projektion einiger Farben und derer Spektralbereiche in den RGB Farbraum. (<a
+            href="https://de.wikipedia.org/wiki/Licht#Licht_als_elektromagnetische_Welle">Wikipedia</a>) </caption>
+    <tbody>
+        <tr>
+            <th style="text-align:left">Farbname </th>
+            <th>Wellenl&auml;nge </th>
+            <th>Frequenz </th>
+        </tr>
+        <tr style="background:#2F00AA;">
+            <th style="text-align:left" rowspan="2">violett </th>
+            <td style="color:white">380–400&nbsp;nm </td>
+            <td style="color:white">749–789&nbsp;THz </td>
+        </tr>
+        <tr style="background:#2F00CC;">
+            <td style="color:white">400–425&nbsp;nm </td>
+            <td style="color:white">705–749&nbsp;THz </td>
+        </tr>
+        <tr style="background:#2F00EE;">
+            <th style="text-align:left">indigo </th>
+            <td style="color:white">425–450&nbsp;nm </td>
+            <td style="color:white">666–705&nbsp;THz </td>
+        </tr>
+        <tr style="background:#1F00FF;">
+            <th style="text-align:left" rowspan="4">blau </th>
+            <td style="color:white">450–460&nbsp;nm </td>
+            <td style="color:white">652–666&nbsp;THz </td>
+        </tr>
+        <tr style="background:#0000ff;">
+            <td style="color:white">460–465&nbsp;nm </td>
+            <td style="color:white">645–652&nbsp;THz </td>
+        </tr>
+        <tr style="background:#0087ff;">
+            <td style="color:white">465–470&nbsp;nm </td>
+            <td style="color:white">638–645&nbsp;THz </td>
+        </tr>
+        <tr style="background:#00a9ff;">
+            <td>470–475&nbsp;nm </td>
+            <td>631–638&nbsp;THz </td>
+        </tr>
+        <tr style="background:#00d2ff;">
+            <th style="text-align:left" rowspan="2">t&uuml;rkis </th>
+            <td>475–485&nbsp;nm </td>
+            <td>618–631&nbsp;THz </td>
+        </tr>
+        <tr style="background:#00fff5;">
+            <td>485–500&nbsp;nm </td>
+            <td>600–618&nbsp;THz </td>
+        </tr>
+        <tr style="background:#00ffb2;">
+            <th style="text-align:left" rowspan="4">gr&uuml;n </th>
+            <td>500–520&nbsp;nm </td>
+            <td>577–600&nbsp;THz </td>
+        </tr>
+        <tr style="background:#00ff6c;">
+            <td>520–540&nbsp;nm </td>
+            <td>555–577&nbsp;THz </td>
+        </tr>
+        <tr style="background:#48ff00;">
+            <td>540–550&nbsp;nm </td>
+            <td>545–555&nbsp;THz </td>
+        </tr>
+        <tr style="background:#9cff00;">
+            <td>550–560&nbsp;nm </td>
+            <td>535–545&nbsp;THz </td>
+        </tr>
+        <tr style="background:#cbff00;">
+            <th style="text-align: left" rowspan="4">gelb </th>
+            <td>560–565&nbsp;nm </td>
+            <td>531–535&nbsp;THz </td>
+        </tr>
+        <tr style="background:#e9ff00;">
+            <td>565–570&nbsp;nm </td>
+            <td>526–531&nbsp;THz </td>
+        </tr>
+        <tr style="background:#FFff00;">
+            <td>570–575&nbsp;nm </td>
+            <td>521–526&nbsp;THz </td>
+        </tr>
+        <tr style="background:#ffd700">
+            <td>575–580&nbsp;nm </td>
+            <td>517–521&nbsp;THz </td>
+        </tr>
+        <tr style="background:#ffb300;">
+            <th style="text-align:left" rowspan="3">orange </th>
+            <td>580–590&nbsp;nm </td>
+            <td>508–517&nbsp;THz </td>
+        </tr>
+        <tr style="background:#ff9200;">
+            <td>590–595&nbsp;nm </td>
+            <td>504–508&nbsp;THz </td>
+        </tr>
+        <tr style="background:#ff7f00;">
+            <td>595–600&nbsp;nm </td>
+            <td>500–504&nbsp;THz </td>
+        </tr>
+        <tr style="background:#ff5c00;">
+            <th style="text-align:left" rowspan="5">rot </th>
+            <td>600–605&nbsp;nm </td>
+            <td>496–500&nbsp;THz </td>
+        </tr>
+        <tr style="background:#ff3b00;">
+            <td style="color:white">605–610&nbsp;nm </td>
+            <td style="color:white">491–496&nbsp;THz </td>
+        </tr>
+        <tr style="background:#ff0000;">
+            <td style="color:white">610–615&nbsp;nm </td>
+            <td style="color:white">487–491&nbsp;THz </td>
+        </tr>
+        <tr style="background:#F70033;">
+            <td style="color:white">615–620&nbsp;nm </td>
+            <td style="color:white">484–487&nbsp;THz </td>
+        </tr>
+        <tr style="background:#EE0044;">
+            <td style="color:white">620–780&nbsp;nm </td>
+            <td style="color:white">384–484&nbsp;THz </td>
+        </tr>
+    </tbody>
+</table>
+
+**Anmerkungen:**
+
+* Ein Nanometer (`1 nm`) entspricht einem milliardstel Meter (`0,000 000 001 m`)
+* Ein Teraherz (`1 THz`) entspricht einer Trillion Herz (`1 000 000 000 000 Hz`) oder Schwingungen pro Sekunde.
+
+## Grundlagen - Wie nehmen wir Licht war?
+
+Natuerlich nehmen wir Licht mit unseren Augen war, aber was passiert im Auge?
+Fuer's "Farbsehen" braucht man mindestens 2 verschieden Rezeptoren die bei unterschiedlichen Wellenlaengen auf das einfallende Licht reagieren.
+
+Das menschliche Auge besteht (vereinfacht) aus sogenannten Staebchen und Zaepfchen:
+
+* Die **Staebchen** sind sehr breitbandig und fuer das Nachtsehen verantwortlich (sie sind sehr empfindlich, koennen keine Farbe sehen).
+* Die **Zaepfchen** gibt es in 3 Typen die auf unterschiedliche Wellenlaengen ansprechen (L = rot, M = gruen und S = blau). Sie erlauben unserem Gehirn das Farbsehen.
+
+Hier die Empfindlichkeit der Staebchen und Zaepfchen:
+
+<!-- livebook:{"break_markdown":true} -->
+
+![](files/Cone-response-de.svg)
+
+<!-- livebook:{"break_markdown":true} -->
+
+Der Mensch kann aber nicht nur die Regenbogenfarben (monochromatisches Licht) sehen, sondern auch Mischfarben. <span style="background:#ff00ff;">Magenta</span> ist z.B. nicht im Regenbogen zu finden da es eine Mischfarbe aus Rot und Blau ist, die im Regenbogen nicht dicht beieinander liegen. Gelb ist auch eine Mischfarbe, allerdings von Rot und Gruen welche nebeneinander liegen, weshalb man Gelb im Regenbogen sieht.
+
+## Farbmischung
+
+Man unterscheidet von 2 Arten der Farbmischung: die additive und die subtractive Farbmischung.
+Die Art haengt von der Farbmischung wie Lichtfarben (Wellenlängen) herausgefiltert (subtraktiv) oder kombiniert (additiv) werden.
+
+### Subtraktive Farbmischung
+
+Wenn Licht auf ein Blatt Papier faellt wird das (weisse) Licht reflektiert. Wenn wir mit einem roten Stift eine Linie malen dann erscheint die Linie rot weil nur die Farbe reflektiert wird und alle anderen Farbanteile herausgefiltert werden. 
+Malen wir jetzt mit einem Blauen Stift auf die Rote Linie, dann wird die Linie schwarz sein, da der Rote Stift alle Farbanteile ausser dem Roten absorbiert under der Blaue Stift alle Farbanteile ausser dem Blauen. Im Endeffekt bleibt kein Farbantail mehr uebrig.
+
+Das ist die **subtraktive Farbmischung** (wir fangen mit Weiss an und ziehen davon Farben ab).
+
+### Additive Farbmischung
+
+Wenn wir eine rote Lampe haben dann wird nur das Licht mit der roten Wellenlaenge ausgesendet. Wenn wir jetzt auch noch eine blaue Lampe haben und sie an auf die Rote legen (Ich weiss, das ist etwas schwierig, aber wenn man weit genug weg ist, reicht es wenn die Lampen dicht genug beieinander sind), dann werden sowohl die roten als auch die blauen Wellenlaengen ausgesendet. Die zwei Farben mischen sich.
+
+Das ist die **additive Farbmischung** (wir fangen mit Schwarz an und legen Farben drauf).
+
+> [!NOTE]
+> Mit unserer Lichterkette wenden wir nur die additive Farbmischung an
+
+## Los geht's!
+
+In unserer Lichterkette haben wir 3 Grundfarben: Rot, Gruen und Blau. Jede dieser Grundfarben kann eine Intensitaet von `0`-`255` annehmen das ergibt insgesamt $256^3 = 16 777 216 \approx 16,7$ Millionen Farben.
+
+```elixir
+leds(5)
+```
+
+```elixir
+leds(5) |> red() |> green() |> blue()
+```
+
+```elixir
+leds(5) |> light({255, 0, 0}) |> light({0, 255, 0}) |> light({0, 0, 255})
+```
+
+```elixir
+leds(5) |> light({255, 0, 0}) |> light({0, 255, 0}) |> light({0, 0, 255}) |> light({255, 0, 255})
+```
