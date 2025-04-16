@@ -27,7 +27,7 @@ import Fledex.Color.Names
 
 ## Einleitung
 
-Das Thema Licht und Farben ist ein recht schwierig und sehr kompliziert. Selbst die Wissenschaft hat es noch nicht zu 100% entschlüsselt.
+Das Thema Licht und Farben ist recht schwierig und sehr kompliziert. Selbst die Wissenschaft hat es noch nicht zu 100% entschlüsselt.
 
 Es kann deshalb nicht innerhalb einer Stunde abgehandelt werden. Wir werden das Thema zwar richtig, aber stark vereinfacht abhandeln und uns vor Allem auf die Teile konzentrieren die für unsere Experimente wichtig sind.
 
@@ -37,7 +37,7 @@ Falls es Fragen gibt werden die aber gerne beantwortet.
 
 Licht ist eine elektromagenetische Welle die sich mit Lichtgeschwindigkeit ausbreitet.
 
-Wir werden diesen einzelnen beschreibenden Satz in die verschiedenen Element aufspalten:
+Wir werden diesen beschreibenden Satz in seine verschiedenen Element aufspalten und stellen uns die folgenden Fragen:
 
 * Was ist eine `Welle`?
 * Warum `elektromagnetisch`? Was ist das eigentlich?
@@ -46,14 +46,14 @@ Wir werden diesen einzelnen beschreibenden Satz in die verschiedenen Element auf
 ### Welle
 
 Wir kennen Wellen von Wasserwellen (wenn man einen Stein ins Wasser wirft) oder Schallwellen (wenn man einen Ton hört). Ihnen gemeinsam ist die Ausbreitung und die Auf- und Abbewegung des Mediums (Wasser oder Luft).
-Die Anzahl der Auf- und Abbewegungen pro Sekunde nennt man `Frequenz` (gemessen in Herz `Hz`) ist die Eigenschaft der Welle. Häufig misst man die Abstände zwischen den Bergen und Tälern und nennt sie `Wellenlänge` (gemessen in Metern `m`)
-Es ist erwähnenswert, dass es mehrerer Arten von Wellen gibt, nicht nur die die sich auf- und abbewegen.
+Die Anzahl der Auf- und Abbewegungen pro Sekunde nennt man `Frequenz` (gemessen in Herz `Hz`) und ist eine Eigenschaft der Welle. Häufig misst man die Abstände zwischen den Bergen und Tälern und nennt sie `Wellenlänge` (gemessen in Metern `m`)
+Es ist erwähnenswert, dass es mehrerer Arten von Wellen gibt, nicht nur die die sich auf- und abbewegen. Das Prinzip ist aber das Gleiche.
 
 Auch Licht kann als Welle beschrieben werden.
 
 ### elektromagnetisch
 
-Elektromagnetisch wird die Welle genannt weil sie aus gekoppelten elektrischen und magnetischen Feldern entsteht.
+Elektromagnetisch wird die Welle genannt weil sie aus gekoppelten elektrischen und magnetischen Feldern besteht.
 
 Ein Draht, den man zu einer Spule formt und mit Strom speist, produziert ein magnetisches Feld (ein Magnet entsteht). Andererseits fliesst ein Strom in einem Draht wenn man einen Magneten über den Draht bewegt.
 
@@ -61,7 +61,7 @@ Sprich, der Strom kreiert einen Mageneten und der Magnet kreiert einen Strom, de
 
 ### Lichtgeschwindigkeit
 
-Die Lichtgeschwindigkeit ist die Geschwindigkeit die das Licht (im Vakuum) hat, etwa `300 000 km/s` (genau `299 792 458 m/s`). Es ist eine physikalische Konstante und ändert sich nicht. Das resultiert in oft unerwarteten Effecten.
+Die Lichtgeschwindigkeit ist die Geschwindigkeit die das Licht (im Vakuum) hat, etwa `300 000 km/s` (genau `299 792 458 m/s`). Es ist eine physikalische Konstante und ändert sich nicht. Das resultiert in oft unerwarteten Effekten.
 
 Wir kennen die Geschwindigkeit ganz genau, weil das Meter (`m`) als ein Bruchteil der Lichtgeschwindigkeit definiert ist (seit 2019). Das Meter war bis dahin (seit 1791) so definiert dass der Äquator `40 000 km` enspricht.
 
@@ -201,7 +201,7 @@ Für's "Farbsehen" braucht man mindestens 2 verschieden Rezeptoren die bei unter
 
 Das menschliche Auge besteht (vereinfacht) aus sogenannten Stäbchen und Zäpfchen:
 
-* Die **Stäbchen** sind sehr breitbandig und für das Nachtsehen verantwortlich (sie sind sehr empfindlich, können keine Farbe sehen).
+* Die **Stäbchen** sind sehr breitbandig und für das Nachtsehen verantwortlich (sie sind sehr empfindlich, können aber keine Farbe sehen).
 * Die **Zäpfchen** gibt es in 3 Typen die auf unterschiedliche Wellenlängen ansprechen (L = rot, M = grün und S = blau). Sie erlauben unserem Gehirn das Farbsehen.
 
 Hier die Empfindlichkeit der Stäbchen und Zäpfchen:
@@ -223,7 +223,7 @@ Die Art hängt von der Farbmischung wie Lichtfarben (Wellenlängen) herausgefilt
 
 Wenn Licht auf ein Blatt Papier fällt wird das (weisse) Licht reflektiert. Wenn wir mit einem roten Stift eine Linie malen dann erscheint die Linie rot weil nur die Farbe reflektiert wird und alle anderen Farbanteile herausgefiltert werden.
 ![](files/subtractive_light2.svg)
-Malen wir jetzt mit einem Blauen Stift auf die Rote Linie, dann wird die Linie schwarz sein, da der Rote Stift alle Farbanteile ausser dem Roten absorbiert under der Blaue Stift alle Farbanteile ausser dem Blauen. Im Endeffekt bleibt kein Farbantail mehr übrig. Damit wird es sieht es schwarz aus.
+Malen wir jetzt mit einem Blauen Stift auf die Rote Linie, dann wird die Linie schwarz sein, da der Rote Stift alle Farbanteile ausser dem Roten absorbiert under der Blaue Stift alle Farbanteile ausser dem Blauen. Im Endeffekt bleibt kein Farbantail mehr übrig. Damit sieht es schwarz aus.
 
 ![](files/subtractive_light.svg)
 
@@ -264,12 +264,12 @@ Wir können die Farben auch mit unseren 3 Grundfarben `{r, g, b}` und ihren Inte
 leds(5) |> light({255, 0, 0}) |> light({0, 255, 0}) |> light({0, 0, 255})
 ```
 
-Das erlaubt uns jetzt auch beliebige Mischfarben zu definieren indem wir die Intensitäten der 3 Grundfarben angeben. Unser Magenta kann also definiert werden als Mischung aus rot und grün `{255, 0, 255}`.
+Das erlaubt uns jetzt auch beliebige Mischfarben zu definieren indem wir die Intensitäten der 3 Grundfarben angeben. Unser Magenta kann also definiert werden als Mischung aus rot und blau `{255, 0, 255}`.
 
 ```elixir
 leds(5) |> light({255, 0, 0}) |> light({0, 255, 0}) |> light({0, 0, 255}) |> light({255, 0, 255})
 ```
 
-So, jetzt bist du dran mit den Farben zu spielen. Welche interesante Farben kannst du entdecken?
+So, jetzt bist du dran mit den Farben zu spielen. Welche interesanten Mischfarben kannst du entdecken?
 
-Als nächsten Schritt werden wir uns Animationenen anschauen
+Als nächsten Schritt werden wir uns Animationenen anschauen.
