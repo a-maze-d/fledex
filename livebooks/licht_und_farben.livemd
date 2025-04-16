@@ -4,7 +4,7 @@ Copyright 2023, Matthias Reik <fledex@reik.org>
 SPDX-License-Identifier: Apache-2.0
 -->
 
-<!-- livebook:{"file_entries":[{"name":"Cone-response-de.svg","type":"attachment"}]} -->
+<!-- livebook:{"file_entries":[{"name":"Cone-response-de.svg","type":"attachment"},{"name":"additive_light.svg","type":"attachment"},{"name":"subtractive_light.svg","type":"attachment"},{"name":"subtractive_light2.svg","type":"attachment"}]} -->
 
 # Licht und Farben
 
@@ -14,9 +14,9 @@ Mix.install([
 ])
 ```
 
-## Section
+## Vorbereitung
 
-Wir definieren noch ein paar Kleinigkeiten, momentan nicht so interessant was das macht.
+Wir definieren ein paar Kleinigkeiten. Wir brauchen nicht zu verstehen was das eigentlich ist. Es hilft uns weiter unten dass wir ein paar Experimente machen können.
 
 ```elixir
 import Fledex.Leds
@@ -27,9 +27,9 @@ import Fledex.Color.Names
 
 ## Einleitung
 
-Das Thema Licht und Farben ist ein recht schwierig und sehr kompliziert. Selbst die Wissenschaft hat es noch nicht zu 100% entschluesselt.
+Das Thema Licht und Farben ist ein recht schwierig und sehr kompliziert. Selbst die Wissenschaft hat es noch nicht zu 100% entschlüsselt.
 
-Es kann deshalb nicht innerhalb einer Stunde abgehandelt werden. Wir werden das Thema zwar richtig, aber stark vereinfacht abhandeln und uns vor Allem auf die Teile konzentrieren die fuer unsere Experimente wichtig sind.
+Es kann deshalb nicht innerhalb einer Stunde abgehandelt werden. Wir werden das Thema zwar richtig, aber stark vereinfacht abhandeln und uns vor Allem auf die Teile konzentrieren die für unsere Experimente wichtig sind.
 
 Falls es Fragen gibt werden die aber gerne beantwortet.
 
@@ -45,9 +45,9 @@ Wir werden diesen einzelnen beschreibenden Satz in die verschiedenen Element auf
 
 ### Welle
 
-Wir kennen Wellen von Wasserwellen (wenn man einen Stein ins Wasser wirft) oder Schallwellen (wenn man einen Ton hoert). Ihnen gemeinsam ist die Ausbreitung und die Auf- und Abbewegung des Mediums (Wasser oder Luft).
-Die Anzahl der Auf- und Abbewegungen pro Sekunde nennt man `Frequenz` (gemessen in Herz `Hz`) ist die Eigenschaft der Welle. Haeufig misst man die Abstaende zwischen den Bergen und Taelern und nennt sie `Wellenlaenge` (gemessen in Metern `m`)
-Es ist erwaehnenswert, dass es mehrerer Arten von Wellen gibt, nicht nur die die sich auf- und abbewegen.
+Wir kennen Wellen von Wasserwellen (wenn man einen Stein ins Wasser wirft) oder Schallwellen (wenn man einen Ton hört). Ihnen gemeinsam ist die Ausbreitung und die Auf- und Abbewegung des Mediums (Wasser oder Luft).
+Die Anzahl der Auf- und Abbewegungen pro Sekunde nennt man `Frequenz` (gemessen in Herz `Hz`) ist die Eigenschaft der Welle. Häufig misst man die Abstände zwischen den Bergen und Tälern und nennt sie `Wellenlänge` (gemessen in Metern `m`)
+Es ist erwähnenswert, dass es mehrerer Arten von Wellen gibt, nicht nur die die sich auf- und abbewegen.
 
 Auch Licht kann als Welle beschrieben werden.
 
@@ -55,19 +55,19 @@ Auch Licht kann als Welle beschrieben werden.
 
 Elektromagnetisch wird die Welle genannt weil sie aus gekoppelten elektrischen und magnetischen Feldern entsteht.
 
-Ein Draht, den man zu einer Spule formt und mit Strom speist, produziert ein magnetisches Feld (ein Magnet entsteht). Andererseits fliesst ein Strom in einem Draht wenn man einen Magneten ueber den Draht bewegt.
+Ein Draht, den man zu einer Spule formt und mit Strom speist, produziert ein magnetisches Feld (ein Magnet entsteht). Andererseits fliesst ein Strom in einem Draht wenn man einen Magneten über den Draht bewegt.
 
-Sprich, der Strom kreiert einen Mageneten und der Magnet kreiert einen Strom, der wiederum einen Magneten kreirt, ... . Dieses Wechselspiel laesst eine Elektromagnetische Welle entstehen.
+Sprich, der Strom kreiert einen Mageneten und der Magnet kreiert einen Strom, der wiederum einen Magneten kreirt, ... . Dieses Wechselspiel lässt eine Elektromagnetische Welle entstehen.
 
 ### Lichtgeschwindigkeit
 
-Die Lichtgeschwindigkeit ist die Geschwindigkeit die das Licht (im Vakuum) hat, etwa `300 000 km/s` (genau `299 792 458 m/s`). Es ist eine physikalische Konstante und aendert sich nicht. Das resultiert in oft unerwarteten Effecten.
+Die Lichtgeschwindigkeit ist die Geschwindigkeit die das Licht (im Vakuum) hat, etwa `300 000 km/s` (genau `299 792 458 m/s`). Es ist eine physikalische Konstante und ändert sich nicht. Das resultiert in oft unerwarteten Effecten.
 
-Wir kennen die Geschwindigkeit ganz genau, weil das Meter (`m`) als ein Bruchteil der Lichtgeschwindigkeit definiert ist (seit 2019). Das Meter war bis dahin (seit 1791) so definiert dass der Aequator `40 000 km` enspricht.
+Wir kennen die Geschwindigkeit ganz genau, weil das Meter (`m`) als ein Bruchteil der Lichtgeschwindigkeit definiert ist (seit 2019). Das Meter war bis dahin (seit 1791) so definiert dass der Äquator `40 000 km` enspricht.
 
 ## Grundlagen - Was ist das sichtbare Licht?
 
-Als Licht wird die elektromagnetische Strahlung der Sonne bezeichnet, aber wir Menschen konnen nicht den gesamten Bereich sehen, sonder nur den bereich zwischen etwa `380 nm` und `750 nm`. Wellenlaengen ausserhalb dieses Bereiches sind fuer uns nicht sichtbar, aber manche Tiere koennen sie wahrnehmen. Diese Bereiche nennen wir Ultraviolett und Infrarot:
+Als Licht wird die elektromagnetische Strahlung der Sonne bezeichnet, aber wir Menschen konnen nicht den gesamten Bereich sehen, sonder nur den bereich zwischen etwa `380 nm` und `750 nm`. Wellenlängen ausserhalb dieses Bereiches sind für uns nicht sichtbar, aber manche Tiere können sie wahrnehmen. Diese Bereiche nennen wir Ultraviolett und Infrarot:
 
 <table class="wikitable float-right" style="text-align:center; font-size:90%;">
     <caption>Projektion einiger Farben und derer Spektralbereiche in den RGB Farbraum. (<a
@@ -196,15 +196,15 @@ Als Licht wird die elektromagnetische Strahlung der Sonne bezeichnet, aber wir M
 
 ## Grundlagen - Wie nehmen wir Licht war?
 
-Natuerlich nehmen wir Licht mit unseren Augen war, aber was passiert im Auge?
-Fuer's "Farbsehen" braucht man mindestens 2 verschieden Rezeptoren die bei unterschiedlichen Wellenlaengen auf das einfallende Licht reagieren.
+Natürlich nehmen wir Licht mit unseren Augen war, aber was passiert im Auge?
+Für's "Farbsehen" braucht man mindestens 2 verschieden Rezeptoren die bei unterschiedlichen Wellenlängen auf das einfallende Licht reagieren.
 
-Das menschliche Auge besteht (vereinfacht) aus sogenannten Staebchen und Zaepfchen:
+Das menschliche Auge besteht (vereinfacht) aus sogenannten Stäbchen und Zäpfchen:
 
-* Die **Staebchen** sind sehr breitbandig und fuer das Nachtsehen verantwortlich (sie sind sehr empfindlich, koennen keine Farbe sehen).
-* Die **Zaepfchen** gibt es in 3 Typen die auf unterschiedliche Wellenlaengen ansprechen (L = rot, M = gruen und S = blau). Sie erlauben unserem Gehirn das Farbsehen.
+* Die **Stäbchen** sind sehr breitbandig und für das Nachtsehen verantwortlich (sie sind sehr empfindlich, können keine Farbe sehen).
+* Die **Zäpfchen** gibt es in 3 Typen die auf unterschiedliche Wellenlängen ansprechen (L = rot, M = grün und S = blau). Sie erlauben unserem Gehirn das Farbsehen.
 
-Hier die Empfindlichkeit der Staebchen und Zaepfchen:
+Hier die Empfindlichkeit der Stäbchen und Zäpfchen:
 
 <!-- livebook:{"break_markdown":true} -->
 
@@ -212,23 +212,28 @@ Hier die Empfindlichkeit der Staebchen und Zaepfchen:
 
 <!-- livebook:{"break_markdown":true} -->
 
-Der Mensch kann aber nicht nur die Regenbogenfarben (monochromatisches Licht) sehen, sondern auch Mischfarben. <span style="background:#ff00ff;">Magenta</span> ist z.B. nicht im Regenbogen zu finden da es eine Mischfarbe aus Rot und Blau ist, die im Regenbogen nicht dicht beieinander liegen. Gelb ist auch eine Mischfarbe, allerdings von Rot und Gruen welche nebeneinander liegen, weshalb man Gelb im Regenbogen sieht.
+Der Mensch kann aber nicht nur die Regenbogenfarben (monochromatisches Licht) sehen, sondern auch Mischfarben. <span style="background:#ff00ff;">Magenta</span> ist z.B. nicht im Regenbogen zu finden da es eine Mischfarbe aus Rot und Blau ist, die im Regenbogen nicht dicht beieinander liegen. Gelb ist auch eine Mischfarbe, allerdings von Rot und Grün welche nebeneinander liegen, weshalb man Gelb im Regenbogen sieht.
 
 ## Farbmischung
 
-Man unterscheidet von 2 Arten der Farbmischung: die additive und die subtractive Farbmischung.
-Die Art haengt von der Farbmischung wie Lichtfarben (Wellenlängen) herausgefiltert (subtraktiv) oder kombiniert (additiv) werden.
+Man unterscheidet von 2 Arten der Farbmischung: die additive und die subtraktive Farbmischung.
+Die Art hängt von der Farbmischung wie Lichtfarben (Wellenlängen) herausgefiltert (subtraktiv) oder kombiniert (additiv) werden.
 
 ### Subtraktive Farbmischung
 
-Wenn Licht auf ein Blatt Papier faellt wird das (weisse) Licht reflektiert. Wenn wir mit einem roten Stift eine Linie malen dann erscheint die Linie rot weil nur die Farbe reflektiert wird und alle anderen Farbanteile herausgefiltert werden. 
-Malen wir jetzt mit einem Blauen Stift auf die Rote Linie, dann wird die Linie schwarz sein, da der Rote Stift alle Farbanteile ausser dem Roten absorbiert under der Blaue Stift alle Farbanteile ausser dem Blauen. Im Endeffekt bleibt kein Farbantail mehr uebrig.
+Wenn Licht auf ein Blatt Papier fällt wird das (weisse) Licht reflektiert. Wenn wir mit einem roten Stift eine Linie malen dann erscheint die Linie rot weil nur die Farbe reflektiert wird und alle anderen Farbanteile herausgefiltert werden.
+![](files/subtractive_light2.svg)
+Malen wir jetzt mit einem Blauen Stift auf die Rote Linie, dann wird die Linie schwarz sein, da der Rote Stift alle Farbanteile ausser dem Roten absorbiert under der Blaue Stift alle Farbanteile ausser dem Blauen. Im Endeffekt bleibt kein Farbantail mehr übrig. Damit wird es sieht es schwarz aus.
+
+![](files/subtractive_light.svg)
 
 Das ist die **subtraktive Farbmischung** (wir fangen mit Weiss an und ziehen davon Farben ab).
 
 ### Additive Farbmischung
 
-Wenn wir eine rote Lampe haben dann wird nur das Licht mit der roten Wellenlaenge ausgesendet. Wenn wir jetzt auch noch eine blaue Lampe haben und sie an auf die Rote legen (Ich weiss, das ist etwas schwierig, aber wenn man weit genug weg ist, reicht es wenn die Lampen dicht genug beieinander sind), dann werden sowohl die roten als auch die blauen Wellenlaengen ausgesendet. Die zwei Farben mischen sich.
+Wenn wir eine rote Lampe haben dann wird nur das Licht mit der roten Wellenlänge ausgesendet. Wenn wir jetzt auch noch eine blaue Lampe haben und sie an auf die Rote legen (Ich weiss, das ist etwas schwierig, aber wenn man weit genug weg ist, reicht es wenn die Lampen dicht genug beieinander sind), dann werden sowohl die roten als auch die blauen Wellenlängen ausgesendet. Die zwei Farben mischen sich. Wenn man dann auch noch eine grüne Lampe hinzufügt, dann sieht es etwa wie folgt aus.
+
+![](files/additive_light.svg)
 
 Das ist die **additive Farbmischung** (wir fangen mit Schwarz an und legen Farben drauf).
 
@@ -237,20 +242,34 @@ Das ist die **additive Farbmischung** (wir fangen mit Schwarz an und legen Farbe
 
 ## Los geht's!
 
-In unserer Lichterkette haben wir 3 Grundfarben: Rot, Gruen und Blau. Jede dieser Grundfarben kann eine Intensitaet von `0`-`255` annehmen das ergibt insgesamt $256^3 = 16 777 216 \approx 16,7$ Millionen Farben.
+In unserer Lichterkette haben wir 3 Grundfarben: Rot, Grün und Blau. Jede dieser Grundfarben kann eine Intensität von `0`-`255` annehmen das ergibt insgesamt $256^3 = 256 \times 256 \times 256 = 16 777 216 \approx 16,7$ Millionen Farben.
+
+Wir können das gleich mal ausprobieren. Klicke dafür in jedem Code-Block auf `Evaluate` und das Ergenis erscheint darunter.
+
+Wir definieren zuerst mal eine Sequenz bestehend aus 5 LEDs. Alle haben keine Farbe (schwarz).
 
 ```elixir
 leds(5)
 ```
 
+Jetzt definieren wir die ersten 3 LEDs als rot (`red`), grün (`green`) und blau (`blue`)
+
 ```elixir
 leds(5) |> red() |> green() |> blue()
 ```
+
+Wir können die Farben auch mit unseren 3 Grundfarben `{r, g, b}` und ihren Intensitäten  (von `0` - `255`) angeben. Bei Rot haben wir nur einen roten Anteil, die anderen Farben leuchten nicht. Wir definieren also: `rot = {255, 0, 0}`. Die anderen Farben werden entsprechend definiert: `grün = {0, 255, 0}`, `blau = {0, 0, 255}`.
 
 ```elixir
 leds(5) |> light({255, 0, 0}) |> light({0, 255, 0}) |> light({0, 0, 255})
 ```
 
+Das erlaubt uns jetzt auch beliebige Mischfarben zu definieren indem wir die Intensitäten der 3 Grundfarben angeben. Unser Magenta kann also definiert werden als Mischung aus rot und grün `{255, 0, 255}`.
+
 ```elixir
 leds(5) |> light({255, 0, 0}) |> light({0, 255, 0}) |> light({0, 0, 255}) |> light({255, 0, 255})
 ```
+
+So, jetzt bist du dran mit den Farben zu spielen. Welche interesante Farben kannst du entdecken?
+
+Als nächsten Schritt werden wir uns Animationenen anschauen
