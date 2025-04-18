@@ -58,7 +58,7 @@ The below drawings try to make it clear on how you have to look at your RPI. You
 
 The direct connection (especially with short conncetions) will probably work, because the allowed tolerance for a HIGH signal and will still be above the required 2V. Any signal above 2V is considered as HIGH (= binary a 1) and any signal below 0.8V is considered as LOW (= binary a 0). 
 
-![direct connection](hardware.drawio.svg "Direct connection")
+![direct connection](assets/hardware.drawio.svg "Direct connection")
 
 ## Connection via a Level Shifter
 It is better to use a level shifter to properly translate between the 3.3V signals and the required 5V signals.
@@ -72,7 +72,7 @@ You have to do the following steps:
 3. Enable the output by connecting the OE pin to the LV pin
 4. Connect all the Ground lines to the GND pin.
 
-![Connection with Level shifter](hardware-Page-2.drawio.svg)
+![Connection with Level shifter](assets/hardware-Page-2.drawio.svg)
 
 ## Additional Information
 ### Pin information:

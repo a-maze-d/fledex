@@ -1,0 +1,11 @@
+<!-- livebook:{"file_entries":[{"name":"hardware.drawio.svg","type":"attachment"}]} -->
+
+# Schule: Hardware Erklaerung
+
+## Section
+
+```elixir
+
+```
+
+![](assets/hardware.drawio.svg)

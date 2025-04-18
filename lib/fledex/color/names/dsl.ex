@@ -41,10 +41,6 @@ defmodule Fledex.Color.Names.Dsl do
             converter: converter,
             module: module
           ] do
-      @moduledoc ~S"""
-      Do not use this module directly, but use Fledex.Color.Names instead
-      """
-
       alias Fledex.Color.Names.Types
       alias Fledex.Leds
 

@@ -127,9 +127,14 @@ defmodule Fledex.MixProject do
     [
       source_ref: "v#{@version}",
       source_url: @source_url,
+      assets: %{ "assets" => "assets",
+        "docs/assets" => "assets",
+        "livebooks/school/assets" => "assets"
+      },
       main: "readme-1",
-      logo: "fledex_logo.png",
-      favicon: "favicon.png",
+      logo: "assets/fledex_logo.svg",
+      favicon: "assets/favicon.png",
+      authors: ["a-maze-d"],
       extras: [
         "README.md",
         "SECURITY.md",
@@ -152,7 +157,9 @@ defmodule Fledex.MixProject do
         "livebooks/6_fledex_dsl.livemd",
         "livebooks/7_fledex_effects.livemd",
         "livebooks/8_fledex_component.livemd",
-        "livebooks/9_fledex_jobs.livemd"
+        "livebooks/9_fledex_jobs.livemd",
+        "livebooks/school/licht_und_farben.livemd",
+        "livebooks/school/hardware_erklaerung.livemd"
       ],
       groups_for_extras: [
         LiveBooks: ~r/livebooks/,
@@ -188,7 +195,7 @@ defmodule Fledex.MixProject do
 
   defp aliases do
     [
-      docs: ["docs", &copy_doc_images/1],
+      # docs: ["docs", &copy_doc_images/1],
       # test: ["coveralls.html"],
       reuse: [&run_reuse/1]
     ]
@@ -199,16 +206,16 @@ defmodule Fledex.MixProject do
     IO.puts(response)
   end
 
-  defp copy_doc_images(_) do
-    images = [
-      {"fledex_logo.svg", "fledex_logo.svg"},
-      {"docs/architecture.drawio.svg", "doc/architecture.drawio.svg"},
-      {"docs/hardware.drawio.svg", "doc/hardware.drawio.svg"},
-      {"docs/hardware-Page-2.drawio.svg", "doc/hardware-Page-2.drawio.svg"}
-    ]
+  # defp copy_doc_images(_) do
+  #   images = [
+  #     {"fledex_logo.svg", "fledex_logo.svg"},
+  #     {"docs/architecture.drawio.svg", "doc/architecture.drawio.svg"},
+  #     {"docs/hardware.drawio.svg", "doc/hardware.drawio.svg"},
+  #     {"docs/hardware-Page-2.drawio.svg", "doc/hardware-Page-2.drawio.svg"}
+  #   ]
 
-    Enum.each(images, fn {from, to} ->
-      File.cp(from, to, on_conflict: fn _source, _destination -> true end)
-    end)
-  end
+  #   Enum.each(images, fn {from, to} ->
+  #     File.cp(from, to, on_conflict: fn _source, _destination -> true end)
+  #   end)
+  # end
 end

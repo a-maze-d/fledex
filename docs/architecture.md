@@ -9,7 +9,7 @@ This document gives a rough overview over the architecture of Fledex. We first w
 look at the low level aspects (the different drivers) and then work our way up the 
 stack.
 
-![Architecture Diagram](./architecture.drawio.svg)
+![Architecture Diagram](assets/architecture.drawio.svg)
 
 # The drivers
 The main interface to talk to the "hardware" is the `Fledex.LedStrip`. It takes the

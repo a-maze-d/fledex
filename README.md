@@ -13,7 +13,7 @@ SPDX-License-Identifier: Apache-2.0
 [![Coverage Status](https://coveralls.io/repos/github/a-maze-d/fledex/badge.svg?branch=main)](https://coveralls.io/github/a-maze-d/fledex?branch=main)
 [![Downloads](https://img.shields.io/hexpm/dt/fledex.svg)](https://hex.pm/packages/fledex)
 
-<img alt="Fledex" src="fledex_logo.svg" width=100/>
+<img alt="Fledex" src="assets/fledex_logo.svg" width=100/>
 
 Fledex is a small [Elixir](https://elixir-lang.org/) library It really is intended for educational purposes.
 It is written for a RaspberryPi Zero W running [Nerves](https://nerves-project.org/) especially with a [Nerves-Livebook](https://hexdocs.pm/nerves/getting-started.html#nerves-livebook), but you could use it without Nerves or Livebook.
@@ -99,10 +99,29 @@ There is also a rich set of support functionality to make the definition of LED 
 Take a look at the [Livebook examples](README.md#livebook) on how to use the DSL. Note: the livebooks do present also the internals how the library works. As a first step you can skip those.
 
 ## Livebook
-As mentioned above, the library works well in conjunction with Livebook so you probably want to take your first steps with it. You can find some [livebooks](livebooks/README.md) files that show you how to use the library in a notebook (with and without hardware). You should be able to do most of your development on a computer (emulating the LED strip with a `Fledex.Driver.Impl.Kino`) before adjusting it to the real hardware (with the `Fledex.Driver.Impl.Spi`). On real hardware you can even run it with serveral drivers at the same time.
+As mentioned above, the library works well in conjunction with [Livebook](https://livebook.dev/) so you probably want to take your first steps with it. You can find some [livebooks](livebooks/README.md) files that show you how to use the library in a notebook (with and without hardware). You should be able to do most of your development on a computer (emulating the LED strip with a `Fledex.Driver.Impl.Kino` driver) before adjusting it to the real hardware (with the `Fledex.Driver.Impl.Spi` driver). On real hardware you can even run it with serveral drivers at the same time.
 
 # Nerves-Livebook
-TODO: Add more info...
+To run Fledex in a [Nerves-Livebook](https://github.com/nerves-livebook/nerves_livebook) is not quite as easy, because you can't dynamically add libraries. You can only use those libraries that have been added while building the nerves ROM.
+
+Thus, you will have to clone the repository and add in the `mix.exs` file `fledex` as a new dependency.
+
+```elixir
+defp deps do
+  [
+    ...
+    {:fledex, "~>0.5}
+  ]
+```
+
+Then you fetch the dependencies and recompile the project (adjust the `MIX_TARGET` to your hardware, here a Raspberry Pi Zero W is used):
+```shell
+export MIX_TARGET=rpi0
+mix deps.get
+mix compile
+```
+
+Once done you follow the [standard installation instructions](https://github.com/nerves-livebook/nerves_livebook?tab=readme-ov-file#burning-the-firmware-for-devices-that-boot-from-microsd)
 
 ## Further Docs
 you can find some further documentation in the `docs` folder about:
@@ -110,7 +129,7 @@ you can find some further documentation in the `docs` folder about:
 * An Overview over the [Architecture](docs/architecture.md)
 * How to setup and connect real [Hardware](docs/hardware.md)
 * You might find in the folder also some temporary documenation with some thoughts, but I delete them again, once they have fulfilled their purpose, except for: 
-* A bit of history with the [Project Plan](docs/project_plan.md) as created with my son, since it's a nostalgic document
+* A bit of history with the [Project Plan](docs/project_plan.md) as created with my son, since it's a nostalgic document (partially in German)
 
 ## Known Limitations
 If you want to run this library in nerves-livebook, you currently have to compile your own livebook with the library included in your `mix.exs` file, since you can't add any libraries that are not already bundled.

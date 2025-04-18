@@ -2,6 +2,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 defmodule Fledex.Color.Names.Wiki do
+  @moduledoc ~S"""
+  Do not use this module directly, but use Fledex.Color.Names instead
+  """
+
   alias Fledex.Color.Names.WikiUtils
 
   @external_resource Path.dirname(__DIR__) <> "/wiki/wiki_colors.csv"

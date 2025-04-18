@@ -3,6 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Color.Names.SVG do
+  @moduledoc ~S"""
+  Do not use this module directly, but use Fledex.Color.Names instead
+  """
   alias Fledex.Color
   alias Fledex.Color.Conversion.Approximate
   alias Fledex.Color.Names.LoadUtils

@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <!-- livebook:{"file_entries":[{"name":"Cone-response-de.svg","type":"attachment"},{"name":"additive_light.svg","type":"attachment"},{"name":"subtractive_light.svg","type":"attachment"},{"name":"subtractive_light2.svg","type":"attachment"}]} -->
 
-# Licht und Farben
+# Schule: Licht und Farben
 
 ```elixir
 Mix.install([
@@ -208,7 +208,7 @@ Hier die Empfindlichkeit der Stäbchen und Zäpfchen:
 
 <!-- livebook:{"break_markdown":true} -->
 
-![](files/Cone-response-de.svg)
+![](assets/Cone-response-de.svg)
 
 <!-- livebook:{"break_markdown":true} -->
 
@@ -222,10 +222,10 @@ Die Art hängt von der Farbmischung wie Lichtfarben (Wellenlängen) herausgefilt
 ### Subtraktive Farbmischung
 
 Wenn Licht auf ein Blatt Papier fällt wird das (weisse) Licht reflektiert. Wenn wir mit einem roten Stift eine Linie malen dann erscheint die Linie rot weil nur die Farbe reflektiert wird und alle anderen Farbanteile herausgefiltert werden.
-![](files/subtractive_light2.svg)
+![](assets/subtractive_light2.svg)
 Malen wir jetzt mit einem Blauen Stift auf die Rote Linie, dann wird die Linie schwarz sein, da der Rote Stift alle Farbanteile ausser dem Roten absorbiert under der Blaue Stift alle Farbanteile ausser dem Blauen. Im Endeffekt bleibt kein Farbantail mehr übrig. Damit sieht es schwarz aus.
 
-![](files/subtractive_light.svg)
+![](assets/subtractive_light.svg)
 
 Das ist die **subtraktive Farbmischung** (wir fangen mit Weiss an und ziehen davon Farben ab).
 
@@ -233,7 +233,7 @@ Das ist die **subtraktive Farbmischung** (wir fangen mit Weiss an und ziehen dav
 
 Wenn wir eine rote Lampe haben dann wird nur das Licht mit der roten Wellenlänge ausgesendet. Wenn wir jetzt auch noch eine blaue Lampe haben und sie an auf die Rote legen (Ich weiss, das ist etwas schwierig, aber wenn man weit genug weg ist, reicht es wenn die Lampen dicht genug beieinander sind), dann werden sowohl die roten als auch die blauen Wellenlängen ausgesendet. Die zwei Farben mischen sich. Wenn man dann auch noch eine grüne Lampe hinzufügt, dann sieht es etwa wie folgt aus.
 
-![](files/additive_light.svg)
+![](assets/additive_light.svg)
 
 Das ist die **additive Farbmischung** (wir fangen mit Schwarz an und legen Farben drauf).
 
@@ -270,6 +270,6 @@ Das erlaubt uns jetzt auch beliebige Mischfarben zu definieren indem wir die Int
 leds(5) |> light({255, 0, 0}) |> light({0, 255, 0}) |> light({0, 0, 255}) |> light({255, 0, 255})
 ```
 
-So, jetzt bist du dran mit den Farben zu spielen. Welche interesanten Mischfarben kannst du entdecken?
+## Experimentiere!
 
-Als nächsten Schritt werden wir uns Animationenen anschauen.
+So, jetzt bist du dran mit den Farben zu spielen. Welche interesanten Mischfarben kannst du entdecken?

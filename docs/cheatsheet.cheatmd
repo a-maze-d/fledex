@@ -18,7 +18,7 @@ Before you can use Fledex, you need to install the library. Either as a dependen
 
 ```elixir
 Mix.install([
-  {:fledex, "~>0.4"}
+  {:fledex, "~>0.5"}
 ])
 ```
 
