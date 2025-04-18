@@ -127,7 +127,8 @@ defmodule Fledex.MixProject do
     [
       source_ref: "v#{@version}",
       source_url: @source_url,
-      assets: %{ "assets" => "assets",
+      assets: %{
+        "assets" => "assets",
         "docs/assets" => "assets",
         "livebooks/school/assets" => "assets"
       },
