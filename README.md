@@ -12,6 +12,7 @@ SPDX-License-Identifier: Apache-2.0
 [![REUSE status](https://api.reuse.software/badge/github.com/a-maze-d/fledex)](https://api.reuse.software/info/github.com/a-maze-d/fledex)
 [![Coverage Status](https://coveralls.io/repos/github/a-maze-d/fledex/badge.svg?branch=main)](https://coveralls.io/github/a-maze-d/fledex?branch=main)
 [![Downloads](https://img.shields.io/hexpm/dt/fledex.svg)](https://hex.pm/packages/fledex)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/a-maze-d/fledex/badge)](https://scorecard.dev/viewer/?uri=github.com/a-maze-d/fledex)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/10474/badge)](https://www.bestpractices.dev/projects/10474)
 
 <img alt="Fledex" src="assets/fledex_logo.svg" width=100/>
