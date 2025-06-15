@@ -101,7 +101,7 @@ defmodule Fledex.MixProject do
       {:mox, "~> 1.1", only: [:test]},
 
       # documentation
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:ex_doc, git: "https://github.com/a-maze-d/ex_doc", branch: "copy_doc", only: :dev, runtime: false}, #">= 0.0.0", only: :dev, runtime: false},
       # documentation coverage is a great idea, but there are several major issues:
       # * The file inch_ex/lib/inch_ex/docs.ex#L74 needs to look like the following to not
       #   throw an error: `"location" => "#{inspect source}:#{inspect anno}"`
@@ -116,7 +116,11 @@ defmodule Fledex.MixProject do
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.18", only: :test},
       # required by excoveralls
-      {:castore, "~> 1.0", only: :test}
+      {:castore, "~> 1.0", only: :test},
+      # check licenses by calling `mix licenses` disabled by default (because the
+      # library is not well maintained and throws some warnings), but when we want
+      # to check licenses we can enable it easily.
+      # {:licensir, "~>0.7.0", only: :test}
       # we are not a phoenix app, but can still reveal some interesting stuff.
       # leaving it out by default though
       # {:sobelow, "~> 0.13", only: [:test, :dev], runtime: false}
@@ -190,7 +194,8 @@ defmodule Fledex.MixProject do
       groups_for_docs: [
         Guards: & &1[:guard],
         "Color Names": & &1[:color_name]
-      ]
+      ],
+      copy_doc_decorator: fn doc, {_m, _f, _a} -> doc end
     ]
   end
 

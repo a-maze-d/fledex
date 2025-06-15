@@ -47,6 +47,8 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Define functions that are valid in the correct scope? (v0.7)
   - [ ] Create smartcells (v0.8)
   - [ ] Do we need to have language packs that allows to adjust to other languages? it would be quite easy with some `defdelegate`  At least for: (v0.9). Probably "NO", but I will reflect a bit more before closing this one!
+- [x] Bugs:
+  - [x] The documentation is not perfect. The defdelegate works fine, but attaching the documentation does not always work. It sometimes refers to the original file which I don't really want (v0.6?)
 - [ ] Increase consumption
   - [ ] Create a video (v0.6)
   - [ ] Migrate outstanding TODOs to github (v0.6?)

@@ -88,13 +88,16 @@ defmodule Fledex.Color.Names do
     end)
 
   for {module, name} <- module_names do
-    @doc Fledex.Color.Names.DocUtils.extract_doc(module, name, 1)
+    # Note: This requires my hacked version of ex_doc!!!
+    # Note2: we use the arity = 1 version, because the function has a
+    #        default parameter, the arity=0 version has no documentation!
+    @doc copy: {module, name, 1}
     @doc color_name: true
     defdelegate unquote(name)(), to: module
     @doc false
-    defdelegate unquote(name)(param), to: module
+    defdelegate unquote(name)(what_or_leds), to: module
     @doc false
-    defdelegate unquote(name)(param, opts), to: module
+    defdelegate unquote(name)(what_or_leds, opts), to: module
   end
 
   @typedoc """

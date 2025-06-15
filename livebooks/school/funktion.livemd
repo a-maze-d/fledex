@@ -1,0 +1,69 @@
+<!--
+Copyright 2023, Matthias Reik <fledex@reik.org>
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
+<!-- livebook:{"file_entries":[{"name":"rectangle.drawio.svg","type":"attachment"}]} -->
+
+# Schule: Was ist eine Funktion?
+
+## Wie berechnet man den Umfang eines Rechtecks?
+
+Wenn wir ein Rechteck mit den Seitenlängen a und b haben
+
+![](files/rectangle.drawio.svg)
+
+dann berechnen wir den Umfang wie folgt: wir zählen alle Seitenlängen zusammen und nachdem immer 2 Seiten gleich lang sind ergibt sich der Umfang als:
+
+$$
+\begin{aligned}
+U = 2 \times a + 2 \times b
+\end{aligned}
+$$
+Wir konnten den Umfang berechnen, ohne dass wir die genaue Seitenlänge kennen. Wir verwenden die 2 Variablen $a$ und $b$. Wir können jetzt den Umfang ($U$) eines beliebigen Rechtecks berechnen indem wir die genauen Seitenlängen für unsere Variablen eingeben. Zum Beispiel mit $a = 3cm$, $b = 2cm$ ergibt sich:
+
+$$
+\begin{aligned}
+U & = 2 \times a & + & 2 \times b\\
+  & = 2 \times 3cm & + & 2 \times 2cm\\
+  & = 6cm & + & 4cm\\
+  & = 10cm
+\end{aligned}
+$$
+
+Die Umfangsberechnung nennt man eine Funktion. Am Anfang kennen wir noch nicht die Seitenlängen, aber wir können Trotzdem den Umfang (mit den Variablen) angeben.
+
+Das Gleiche können wir auch mit einem Kreis machen, oder der Berechnung der Fläche.
+
+Beim Programmieren machen wir genau das Gleiche. Wir definieren Funktionen (mit Variablen) und das Ergebnis hängt von den Variablen ab. Die Berechnung kann sehr einfach oder sehr kompliziert sein. Das Ergebnis wird immer das Gleiche sein, wenn man die gleichen Variablen verwendet (so wie bei unserer Umfangsberechnung auch)
+
+Lass uns diese Funktionen definieren (mit `def`). Wir müssen dazu zuerst ein `module` definieren (mit `defmodule`) welches hilft um Funktionen zu gruppieren.
+
+```elixir
+defmodule Rechteck do
+  def berechne_umfang(a, b) do
+    2 * a + 2 * b
+  end
+
+  def berechne_flaeche(a, b) do
+    a * b
+  end
+end
+
+defmodule Kreis do
+  def berechne_umfang(r) do
+    :math.pi() * r ** 2
+  end
+
+  def berechne_flaeche(r) do
+    2 * :math.pi() * r
+  end
+end
+```
+
+Jetzt haben wir die Funktionen definiert, so dass wir sie verwenden können. Hier wieder unser Beispiel von oben:
+
+```elixir
+Rechteck.berechne_umfang(3, 2)
+```
