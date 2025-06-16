@@ -31,4 +31,13 @@ defmodule Fledex.ManagerTestUtils do
     pid = GenServer.whereis(Utils.build_name(strip_name, :animator, animation_name))
     :sys.get_state(pid)
   end
+
+  def stop_if_running(name, reason \\ :normal) do
+    pid = Process.whereis(name)
+    if pid != nil do
+      GenServer.stop(pid, reason)
+    end
+  end
+
+
 end

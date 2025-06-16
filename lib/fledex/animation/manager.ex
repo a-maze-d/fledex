@@ -52,7 +52,7 @@ defmodule Fledex.Animation.Manager do
   # end
 
   def child_spec(_init_arg) do
-    IO.puts("providing child spec..")
+    # IO.puts("providing child spec..")
     %{
       id: __MODULE__,
       start: {__MODULE__, :start_link, []}
@@ -148,7 +148,7 @@ defmodule Fledex.Animation.Manager do
   @impl GenServer
   @spec init(keyword) :: {:ok, state_t}
   def init(opts) do
-    IO.puts("starting #{__MODULE__} ...")
+    # IO.puts("starting #{__MODULE__} ...")
     state = %{
       animations: %{},
       coordinators: %{},
@@ -219,7 +219,7 @@ defmodule Fledex.Animation.Manager do
   @impl GenServer
   @spec terminate(atom, state_t) :: :ok
   def terminate(_reason, state) do
-    IO.puts("... shutting down #{__MODULE__}")
+    # IO.puts("... shutting down #{__MODULE__}")
     strip_names = Map.keys(state.animations)
 
     state =

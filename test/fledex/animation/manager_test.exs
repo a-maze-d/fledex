@@ -12,19 +12,26 @@ defmodule Fledex.Animation.ManagerTest do
   alias Fledex.ManagerTestUtils
   alias Quantum
 
-  @strip_name :test_strip
   setup do
-    {:ok, pid} =
-      start_supervised(%{
-        id: Manager,
-        start: {Manager, :start_link, []}
-      })
-
-    Manager.register_strip(@strip_name, [{Null, []}], [])
-    %{pid: pid, strip_name: @strip_name}
+    on_exit(fn ->
+      ManagerTestUtils.stop_if_running(Manager)
+    end)
   end
-
+  @strip_name :test_strip
   describe "init" do
+    setup do
+      # {:ok, pid} = Manager.start_link(no_supervision: true)
+        {:ok, pid} = start_supervised(%{
+          id: Manager,
+          start: {Manager, :start_link, []}
+        })
+
+      Manager.register_strip(@strip_name, [{Null, []}], [])
+      on_exit(fn -> Manager.stop() end)
+
+      %{pid: pid, strip_name: @strip_name}
+    end
+
     test "don't double start", %{pid: pid} do
       assert pid == GenServer.whereis(Manager)
       assert {:ok, pid} == Manager.start_link()
@@ -32,6 +39,17 @@ defmodule Fledex.Animation.ManagerTest do
   end
 
   describe "client functions" do
+    setup do
+      {:ok, pid} = start_supervised(%{
+          id: Manager,
+          start: {Manager, :start_link, []}
+        })
+
+      Manager.register_strip(@strip_name, [{Null, []}], [])
+
+      %{pid: pid, strip_name: @strip_name}
+    end
+
     test "register/unregister led_strip", %{strip_name: strip_name} do
       config = ManagerTestUtils.get_manager_config()
       assert Map.keys(config) == [strip_name]
@@ -279,6 +297,10 @@ defmodule Fledex.Animation.ManagerTest2 do
 
   alias Fledex.Animation.Manager
   alias Fledex.Driver.Impl.Null
+
+  setup do
+    on_exit(fn -> Manager.stop() end)
+  end
 
   describe "Animation with wrong type" do
     test "register animation with a broken animation type" do
