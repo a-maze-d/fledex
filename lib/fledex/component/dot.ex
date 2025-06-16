@@ -7,7 +7,7 @@ defmodule Fledex.Component.Dot do
 
   @impl true
   def configure(name, options) when is_atom(name) and is_list(options) do
-    use Fledex
+    use Fledex, dont_start: true
     color = Keyword.fetch!(options, :color)
     count = Keyword.fetch!(options, :count)
     trigger_name = Keyword.fetch!(options, :trigger_name)

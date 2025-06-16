@@ -7,6 +7,7 @@ defmodule Fledex.Utils.Dsl do
 
   alias Fledex.Animation.Manager
   alias Fledex.Leds
+  alias Fledex.Supervisor
 
   @fledex_macros [
     :animation,
@@ -105,34 +106,16 @@ defmodule Fledex.Utils.Dsl do
   @spec init(keyword) :: :ok | {:ok, pid()}
   def init(opts) do
     # let's start our animation manager. The manager makes sure only one will be started
-    if Keyword.get(opts, :dont_start, false) do
+    if Keyword.get(opts, :dont_start, false) == true do
       :ok
     else
-      # starting Fledex.Animation.Manager as child process of Kino if we operate in a Kino env
-      # (which I think we currently always do due to the Kino driver dependency :-()
-      # TODO: investigate more
-      # case kino_env?() do
-      #   true -> Kino.start_child({Manager, opts})
-      #   false ->
-      Manager.start_link(opts)
-      # end
+      if Keyword.get(opts, :no_supervisor, false) == true do
+        Manager.start_link(opts)
+      else
+        Supervisor.start_link(opts)
+      end
     end
   end
-
-  # @spec kino_env? :: boolean
-  # defp kino_env? do
-  #   case Code.ensure_compiled(Kino.Supervisor) do
-  #     {:error, :nofile} ->
-  #       false
-
-  #     {:module, _} ->
-  #       true
-
-  #     x ->
-  #       Logger.warning("Unknown env error #{inspect(x)}")
-  #       false
-  #   end
-  # end
 
   def create_job(name, pattern, options, function) do
     %{

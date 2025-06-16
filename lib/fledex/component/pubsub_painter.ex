@@ -8,7 +8,7 @@ defmodule Fledex.Component.PubSubPainter do
   def configure(name, options) do
     trigger_name = Keyword.get(options, :trigger_name, :pixel_data)
 
-    use Fledex
+    use Fledex, dont_start: true
 
     animation name do
       %{^trigger_name => {_leds, count}} = triggers when is_integer(count) ->

@@ -51,6 +51,13 @@ defmodule Fledex.Animation.Manager do
   #   }
   # end
 
+  def child_spec(_init_arg) do
+    IO.puts("providing child spec..")
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, []}
+    }
+  end
   ### MARK: client side
   @doc """
   This starts a new `Fledex.Animation.Manager`. Only a single animation manager will be started
@@ -63,6 +70,13 @@ defmodule Fledex.Animation.Manager do
     # we should only have a single server running. Therefore we check whether need to do something
     # or if the server is already running
     pid = GenServer.whereis(__MODULE__)
+
+    # starting Fledex.Animation.Manager as child process of Kino if we operate in a Kino env
+    # (which I think we currently always do due to the Kino driver dependency :-()
+    # TODO: investigate more
+    #       The Kino.DynamicSupervisor is just the name of the DynamicSupervisor that
+    #       is started by Kino. So if we start one in our application we should be fine :-)
+    #       We still would need to check on the impact on Tests
 
     if pid == nil do
       GenServer.start_link(__MODULE__, opts, name: __MODULE__)
@@ -109,17 +123,32 @@ defmodule Fledex.Animation.Manager do
     GenServer.call(__MODULE__, {:register_config, strip_name, configs})
   end
 
+  @doc """
+  This function stops the server gracefully
+  """
+  @spec stop(reason :: term(), timeout()) :: :ok
+  def stop(reason \\ :normal, timeout \\ :infinity) do
+    pid = Process.whereis(__MODULE__)
+    if pid != nil do
+    #   children = DynamicSupervisor.which_children(Kino.DynamicSupervisor)
+    #   if children == [] do
+        GenServer.stop(__MODULE__, reason, timeout)
+      # else
+      #   Enum.each(children, fn {:undefined,child_pid, _, _} ->
+      #     IO.puts("stopping child " <> inspect child_pid)
+      #     DynamicSupervisor.terminate_child(Kino.DynamicSupervisor, child_pid)
+      #   end)
+      # end
+    end
+    :ok
+  end
+
+
   ### MARK: server side
   @impl GenServer
   @spec init(keyword) :: {:ok, state_t}
   def init(opts) do
-    # children = [
-    #   {DynamicSupervisor, strategy: :one_for_one, name: Manager.LedStrips},
-    #   {DynamicSupervisor, strategy: :one_for_one, name: Manager.Animations},
-    #   {DynamicSupervisor, strategy: :one_for_one, name: Manager.Coordinators},
-    #   Job
-    # ]
-    # Supervisor.start_link(children, strategy: :one_for_one)
+    IO.puts("starting #{__MODULE__} ...")
     state = %{
       animations: %{},
       coordinators: %{},
@@ -132,9 +161,15 @@ defmodule Fledex.Animation.Manager do
       }
     }
 
-    state.impls.job_scheduler.start_link()
-
+    # state.impls.job_scheduler.start_link()
     {:ok, state}
+  end
+
+  @impl GenServer
+  def handle_call({:reset, opt}, _pid, state) do
+    _state = terminate(:normal, state)
+    {:ok, state} = init(opt)
+    {:reply, :ok, state}
   end
 
   @impl GenServer
@@ -184,6 +219,7 @@ defmodule Fledex.Animation.Manager do
   @impl GenServer
   @spec terminate(atom, state_t) :: :ok
   def terminate(_reason, state) do
+    IO.puts("... shutting down #{__MODULE__}")
     strip_names = Map.keys(state.animations)
 
     state =
