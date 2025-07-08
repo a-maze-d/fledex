@@ -58,7 +58,8 @@ defmodule Fledex.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger] ++ extra_applications(Mix.env()),
+      extra_applications:
+        [:logger, :wx, :observer, :runtime_tools] ++ extra_applications(Mix.env()),
       mod: {Fledex.Application, []}
     ]
   end
@@ -98,10 +99,11 @@ defmodule Fledex.MixProject do
 
       # testing
       {:circuits_sim, "~> 0.1.0", only: [:dev, :test]},
-      {:mox, "~> 1.1", only: [:test]},
 
       # documentation
-      {:ex_doc, git: "https://github.com/a-maze-d/ex_doc", branch: "copy_doc", only: :dev, runtime: false}, #">= 0.0.0", only: :dev, runtime: false},
+      # ">= 0.0.0", only: :dev, runtime: false},
+      {:ex_doc,
+       git: "https://github.com/a-maze-d/ex_doc", branch: "copy_doc", only: :dev, runtime: false},
       # documentation coverage is a great idea, but there are several major issues:
       # * The file inch_ex/lib/inch_ex/docs.ex#L74 needs to look like the following to not
       #   throw an error: `"location" => "#{inspect source}:#{inspect anno}"`
@@ -116,7 +118,7 @@ defmodule Fledex.MixProject do
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.18", only: :test},
       # required by excoveralls
-      {:castore, "~> 1.0", only: :test},
+      {:castore, "~> 1.0", only: :test}
       # check licenses by calling `mix licenses` disabled by default (because the
       # library is not well maintained and throws some warnings), but when we want
       # to check licenses we can enable it easily.

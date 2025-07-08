@@ -1,4 +1,4 @@
-# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -20,6 +20,7 @@ defmodule Fledex.LedStrip do
 
   require Logger
 
+  alias Fledex.Animation.Utils
   alias Fledex.Color
   alias Fledex.Color.Conversion.CalcUtils
   alias Fledex.Color.Types
@@ -27,6 +28,7 @@ defmodule Fledex.LedStrip do
   alias Fledex.Driver.Manager
   alias Fledex.Utils.PubSub
 
+  @type start_link_response :: :ignore | {:error, any} | {:ok, pid}
   @typep timer_t :: %{
            disabled: boolean,
            counter: pos_integer,
@@ -37,6 +39,7 @@ defmodule Fledex.LedStrip do
            ref: reference | nil
          }
   @typep config_t :: %{
+           group_leader: pid | nil,
            merge_strategy: atom,
            timer: timer_t
          }
@@ -48,8 +51,6 @@ defmodule Fledex.LedStrip do
            namespaces: map
          }
 
-  @type start_link_response :: :ignore | {:error, any} | {:ok, pid}
-
   @default_update_timeout 50
   @config_mappings %{
     timer_disabled: [:timer, :disabled],
@@ -58,9 +59,11 @@ defmodule Fledex.LedStrip do
     timer_update_func: [:timer, :update_func],
     timer_only_dirty_update: [:timer, :only_dirty_update],
     timer_is_dirty: [:timer, :is_dirty],
-    merge_strategy: [:merge_strategy]
+    merge_strategy: [:merge_strategy],
+    group_leader: [:group_leader]
   }
 
+  @name &Utils.via_tuple/3
   # client code
   @doc """
   This starts the server controlling a specfic led strip. It is possible
@@ -86,7 +89,7 @@ defmodule Fledex.LedStrip do
   * With several drivers and global config: `start_link(:name, [{Spi, []}, {Spi, dev: "spidev0.1"}], timer_only_dirty_update: true)`
   """
   @spec start_link(atom, module | {module, keyword} | [{module, keyword}], keyword) ::
-          start_link_response
+          LedStrip.start_link_response()
   def start_link(strip_name, driver \\ Null, global_config \\ [])
 
   def start_link(strip_name, driver, global_config)
@@ -101,11 +104,16 @@ defmodule Fledex.LedStrip do
 
   def start_link(strip_name, drivers, global_config)
       when is_list(drivers) and is_list(global_config) do
+    # IO.puts("starting the led strip #{inspect strip_name}...")
     drivers = Manager.remove_invalid_drivers(drivers)
 
-    case Process.whereis(strip_name) do
+    case whereis(strip_name) do
       nil ->
-        GenServer.start_link(__MODULE__, {strip_name, drivers, global_config}, name: strip_name)
+        GenServer.start_link(
+          __MODULE__,
+          {strip_name, drivers, global_config},
+          name: @name.(strip_name, :led_strip, :none)
+        )
 
       pid ->
         {:ok, pid}
@@ -117,13 +125,27 @@ defmodule Fledex.LedStrip do
      "Unexpected arguments #{inspect(strip_name)}, #{inspect(drivers)}, #{inspect(global_config)}"}
   end
 
+  def whereis(strip_name) do
+    case Registry.lookup(
+           Fledex.Supervisor.Utils.worker_registry(),
+           {strip_name, :led_strip, :none}
+         ) do
+      [] ->
+        nil
+
+      [{pid, _value}] ->
+        # IO.puts("led_strip exists: #{inspect {pid, value}}")
+        pid
+    end
+  end
+
   @doc """
   Define a new namespace
   """
   @spec define_namespace(atom, atom) :: :ok | {:error, String.t()}
   def define_namespace(strip_name, namespace) do
     # Logger.info("defining namespace: #{strip_name}-#{namespace}")
-    GenServer.call(strip_name, {:define_namespace, namespace})
+    GenServer.call(@name.(strip_name, :led_strip, :none), {:define_namespace, namespace})
   end
 
   @doc """
@@ -131,7 +153,7 @@ defmodule Fledex.LedStrip do
   """
   @spec drop_namespace(atom, atom) :: :ok
   def drop_namespace(strip_name, namespace) do
-    GenServer.call(strip_name, {:drop_namespace, namespace})
+    GenServer.call(@name.(strip_name, :led_strip, :none), {:drop_namespace, namespace})
   end
 
   @doc """
@@ -139,7 +161,7 @@ defmodule Fledex.LedStrip do
   """
   @spec exist_namespace(atom, atom) :: boolean
   def exist_namespace(strip_name, namespace) do
-    GenServer.call(strip_name, {:exist_namespace, namespace})
+    GenServer.call(@name.(strip_name, :led_strip, :none), {:exist_namespace, namespace})
   end
 
   @doc """
@@ -152,7 +174,8 @@ defmodule Fledex.LedStrip do
   """
   @spec set_leds(atom, atom, list(pos_integer)) :: :ok | {:error, String.t()}
   def set_leds(strip_name, namespace, leds) do
-    GenServer.call(strip_name, {:set_leds, namespace, leds})
+    # IO.puts("setting leds for #{inspect {strip_name, namespace, leds}}")
+    GenServer.call(@name.(strip_name, :led_strip, :none), {:set_leds, namespace, leds})
   end
 
   @doc """
@@ -161,7 +184,7 @@ defmodule Fledex.LedStrip do
   """
   @spec change_config(atom, keyword) :: {:ok, [keyword]}
   def change_config(strip_name, global_config) do
-    GenServer.call(strip_name, {:change_config, global_config})
+    GenServer.call(@name.(strip_name, :led_strip, :none), {:change_config, global_config})
   end
 
   @doc """
@@ -179,13 +202,13 @@ defmodule Fledex.LedStrip do
   end
 
   def reinit(strip_name, drivers, strip_config) do
-    GenServer.call(strip_name, {:reinit, drivers, strip_config})
+    GenServer.call(@name.(strip_name, :led_strip, :none), {:reinit, drivers, strip_config})
     :ok
   end
 
   @spec stop(GenServer.server()) :: :ok
   def stop(strip_name) do
-    GenServer.stop(strip_name)
+    GenServer.stop(@name.(strip_name, :led_strip, :none))
   end
 
   # server code
@@ -193,6 +216,9 @@ defmodule Fledex.LedStrip do
   @spec init({atom, list({module, keyword}), keyword}) :: {:ok, state_t} | {:stop, String.t()}
   def init({strip_name, drivers, global_config})
       when is_atom(strip_name) and is_list(drivers) and is_list(global_config) do
+    # make sure we call the terminate function whenever possible
+    Process.flag(:trap_exit, true)
+
     {
       :ok,
       init_state(strip_name, drivers, global_config)
@@ -211,11 +237,12 @@ defmodule Fledex.LedStrip do
              is_list(drivers) and
              is_list(global_config) do
     config = Keyword.delete(global_config, :namespaces)
+    config = init_config(config)
 
     %{
       strip_name: strip_name,
-      config: init_config(config),
-      drivers: Manager.init_drivers(drivers),
+      config: config,
+      drivers: Manager.init_drivers(drivers, config),
       # led_strip: Manager.init_config(init_args[:led_strip] || %{}),
       namespaces: Keyword.get(global_config, :namespaces, %{})
     }
@@ -224,6 +251,7 @@ defmodule Fledex.LedStrip do
   @spec init_config(keyword) :: config_t
   def init_config(updates) do
     base = %{
+      group_leader: nil,
       merge_strategy: :cap,
       timer: %{
         disabled: false,
@@ -322,6 +350,7 @@ defmodule Fledex.LedStrip do
   @spec handle_call({:set_leds, atom, list(Types.colorint())}, {pid, any}, state_t) ::
           {:reply, :ok | {:error, String.t()}, state_t}
   def handle_call({:set_leds, name, leds}, _from, %{namespaces: namespaces} = state) do
+    # IO.puts("server received leds")
     state = put_in(state, [:config, :timer, :is_dirty], true)
 
     case Map.has_key?(namespaces, name) do
@@ -340,7 +369,7 @@ defmodule Fledex.LedStrip do
           {:reply, :ok, state_t}
   def handle_call({:reinit, drivers, config}, _from, state) do
     {updated_config, _rets} = update_config(state.config, config)
-    updated_drivers = Manager.reinit(state.drivers, drivers)
+    updated_drivers = Manager.reinit(state.drivers, drivers, updated_config)
 
     {:reply, :ok,
      %{

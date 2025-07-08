@@ -1,4 +1,4 @@
-# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -9,11 +9,11 @@ defmodule Fledex.Driver.Impl.NullTest do
 
   describe "null driver basic tests" do
     test "init" do
-      assert Null.init([]) == []
+      assert Null.init([], %{}) == []
     end
 
     test "reinit" do
-      assert Null.reinit([], []) == []
+      assert Null.reinit([], [], %{}) == []
     end
 
     test "transfer" do

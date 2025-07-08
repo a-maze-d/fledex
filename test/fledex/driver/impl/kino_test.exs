@@ -1,4 +1,4 @@
-# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -12,20 +12,20 @@ defmodule Fledex.Driver.Impl.KinoTest do
 
   describe "null driver basic tests" do
     test "default init" do
-      config = Kino.init([])
+      config = Kino.init([], %{})
       assert Keyword.fetch!(config, :update_freq) == 1
       assert Keyword.fetch!(config, :frame) != nil
       assert Keyword.fetch!(config, :color_correction) == Correction.no_color_correction()
     end
 
     test "reinit" do
-      config = Kino.init([])
-      config_reinit = Kino.reinit(config, [])
+      config = Kino.init([], %{})
+      config_reinit = Kino.reinit(config, [], %{})
       assert Keyword.fetch!(config, :frame) != Keyword.fetch!(config_reinit, :frame)
     end
 
     test "transfer" do
-      config = Kino.init([])
+      config = Kino.init([], %{})
       leds = [0xFF0000, 0x00FF00, 0x0000FF]
       {response_config, _response_other} = Kino.transfer(leds, 0, config)
       assert response_config == config

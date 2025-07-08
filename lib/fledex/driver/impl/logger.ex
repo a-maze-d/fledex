@@ -1,4 +1,4 @@
-# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -36,14 +36,14 @@ defmodule Fledex.Driver.Impl.Logger do
   end
 
   @impl true
-  @spec init(keyword) :: keyword
-  def init(config) do
+  @spec init(keyword, keyword) :: keyword
+  def init(config, _global_config) do
     configure(config)
   end
 
   @impl true
-  @spec reinit(keyword, keyword) :: keyword
-  def reinit(old_config, new_config) do
+  @spec reinit(keyword, keyword, keyword) :: keyword
+  def reinit(old_config, new_config, _global_config) do
     Keyword.merge(old_config, new_config)
   end
 

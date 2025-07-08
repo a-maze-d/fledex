@@ -1,4 +1,4 @@
-# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -37,7 +37,7 @@ defmodule Fledex.Driver.Interface do
   the driver. The driver can decide what to do with them. The returned map is a
   configuration that gets passed to any of the other driver functions.
   """
-  @callback init(module_init_args :: keyword) :: keyword
+  @callback init(module_config :: keyword, global_config :: keyword) :: keyword
   @doc """
   In some cases it is necessary to reinitialize the driver when a new LED strip
   is defined (see the `Fledex.Driver.Impl.Kino` as an example). The
@@ -45,10 +45,16 @@ defmodule Fledex.Driver.Interface do
   to do anything, then simply return the passed in keyword list, i.e.:
 
   ```elixir
-  def reinit(_old_module_config, new_module_config), do: new_module_config
+  def reinit(_old_module_config, new_module_config, _global_config), do: new_module_config
   ```
   """
-  @callback reinit(old_module_config :: keyword, new_module_config :: keyword) :: keyword
+  # TODO: Check whether this function is actually necessary, since we are now
+  #        setting the group leader. Probably still doesn't hurt though.
+  @callback reinit(
+              old_module_config :: keyword,
+              new_module_config :: keyword,
+              global_config :: keyword
+            ) :: keyword
   @doc """
   This is the main function where we transfer the LED information to the "hardware"
   The `leds` is a list of integers, (color codes of the form `0xrrggbb` if written in

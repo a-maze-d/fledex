@@ -1,4 +1,4 @@
-# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -12,7 +12,7 @@ defmodule Fledex.Driver.Impl.SpiTest do
     test "default init" do
       # we can only test the default device, since only that one has a
       # simulator configured.
-      config = Spi.init([])
+      config = Spi.init([], [])
       assert Keyword.fetch!(config, :dev) == "spidev0.0"
       assert Keyword.fetch!(config, :mode) == 0
       assert Keyword.fetch!(config, :bits_per_word) == 8
@@ -51,7 +51,7 @@ defmodule Fledex.Driver.Impl.SpiTest do
     end
 
     test "clear_leds" do
-      config = Spi.init([])
+      config = Spi.init([], [])
       Spi.clear_leds(0, config, &test_zero_transfer/3)
       Spi.clear_leds(100, config, &test_100_transfer/3)
       Spi.clear_leds({100, 0xFF0000}, config, &test_100red_transfer/3)
@@ -60,13 +60,13 @@ defmodule Fledex.Driver.Impl.SpiTest do
     end
 
     test "reinit" do
-      config = Spi.init([])
-      assert config == Spi.reinit(config, [])
+      config = Spi.init([], [])
+      assert config == Spi.reinit(config, [], [])
       :ok = Spi.terminate(:normal, config)
     end
 
     test "transfer" do
-      driver = Spi.init([])
+      driver = Spi.init([], [])
       leds = [0xFF0000, 0x00FF00, 0x0000FF]
       {driver_response, response} = Spi.transfer(leds, 0, driver)
       assert response == <<255, 0, 0, 0, 255, 0, 0, 0, 255>>
@@ -74,7 +74,7 @@ defmodule Fledex.Driver.Impl.SpiTest do
     end
 
     test "terminate" do
-      driver = Spi.init([])
+      driver = Spi.init([], [])
       assert :ok == Spi.terminate(:normal, driver)
     end
   end

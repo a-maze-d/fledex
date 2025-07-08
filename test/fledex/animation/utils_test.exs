@@ -10,8 +10,8 @@ defmodule Fledex.Animation.UtilsTest do
 
   describe "util functions" do
     test "ensure correct naming" do
-      assert Utils.build_name(:testA, :animator, :testB) ==
-               :"Elixir.testA.animator.testB"
+      assert Utils.via_tuple(:testA, :animator, :testB) ==
+               {:via, Registry, {Fledex.Supervisor.WorkersRegistry, {:testA, :animator, :testB}}}
     end
 
     test "default_def_func" do

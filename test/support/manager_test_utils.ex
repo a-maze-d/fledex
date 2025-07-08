@@ -28,16 +28,19 @@ defmodule Fledex.ManagerTestUtils do
   end
 
   def get_animator_config(strip_name, animation_name) do
-    pid = GenServer.whereis(Utils.build_name(strip_name, :animator, animation_name))
+    pid = GenServer.whereis(Utils.via_tuple(strip_name, :animator, animation_name))
     :sys.get_state(pid)
   end
 
+  @spec whereis(atom, :animator | :job | :coordinator | :led_strip, atom) :: GenServer.name()
+  def whereis(strip_name, type, animation_name \\ :none),
+    do: GenServer.whereis(Utils.via_tuple(strip_name, type, animation_name))
+
   def stop_if_running(name, reason \\ :normal) do
     pid = Process.whereis(name)
+
     if pid != nil do
       GenServer.stop(pid, reason)
     end
   end
-
-
 end

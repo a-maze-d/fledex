@@ -1,4 +1,4 @@
-# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -11,8 +11,14 @@ defmodule Fledex.LedStripTest do
   alias Fledex.Driver.Impl.Logger
   alias Fledex.Driver.Impl.Null
   alias Fledex.LedStrip
+  alias Fledex.Supervisor.AnimationSystem
 
   # doctest LedStrip
+
+  setup do
+    {:ok, _pid} = start_supervised(AnimationSystem.child_spec())
+    :ok
+  end
 
   describe "test init" do
     test "init_args are correctly set (disable timer)" do
@@ -343,12 +349,12 @@ defmodule Fledex.LedStripTest.TestDriver do
     config
   end
 
-  def init(config) do
+  def init(config, _global_config) do
     assert Keyword.get(config, :test, nil) == 123
     Keyword.put_new(config, :test2, 321)
   end
 
-  def reinit(old_config, new_config) do
+  def reinit(old_config, new_config, _global_config) do
     assert Keyword.get(old_config, :test2, nil) == 123
     old_config = Keyword.put_new(old_config, :test3, "abc")
     Keyword.merge(old_config, new_config)
@@ -374,8 +380,14 @@ defmodule Fledex.LedStripTestSync do
   alias Fledex.Driver.Impl.Null
   alias Fledex.Driver.Impl.Spi
   alias Fledex.LedStrip
+  alias Fledex.Supervisor.AnimationSystem
+  alias Fledex.Supervisor.WorkerSupervisor
 
-  @namespace :namespace
+  setup do
+    start_supervised(AnimationSystem.child_spec())
+    :ok
+  end
+
   describe "startup tests" do
     test "start server with custom parameters" do
       assert {:ok, pid} = LedStrip.start_link(:test_strip_name, {Null, []}, timer_disabled: true)
@@ -399,80 +411,49 @@ defmodule Fledex.LedStripTestSync do
     end
 
     test "start server a second time" do
-      {:ok, pid} = LedStrip.start_link(:test_strip_name1)
-      assert {:ok, pid} == LedStrip.start_link(:test_strip_name1)
-      :ok = GenServer.stop(pid)
+      {:ok, pid} = WorkerSupervisor.start_led_strip(:test_strip_name1)
+
+      # {:ok, pid} = LedStrip.start_link(:test_strip_name1)
+      assert {:ok, pid} == WorkerSupervisor.start_led_strip(:test_strip_name1)
+      # assert {:ok, pid} == LedStrip.start_link(:test_strip_name1)
     end
   end
 
   describe "test LedStrip client APIs" do
-    @strip_name :test_strip
+    @strip_name :strip_name
+    @namespace :namespace
+
     setup do
-      Mox.set_mox_global()
-
-      driver =
-        Mox.defmock(Fledex.Driver.Mock, for: Fledex.Driver.Interface, moduledoc: false)
-        |> Mox.expect(:init, fn configs ->
-          assert Keyword.get(configs, :test, nil) == 123
-          Keyword.put_new(configs, :test2, 321)
-        end)
-        |> Mox.expect(:configure, 3, fn config -> config end)
-        |> Mox.expect(:reinit, 3, fn old_config, new_config ->
-          assert Keyword.get(old_config, :test2, nil) == 321
-          old_config = Keyword.put_new(old_config, :test3, "abc")
-          Keyword.merge(old_config, new_config)
-        end)
-        |> Mox.expect(:terminate, fn reason, config ->
-          assert reason == :normal
-          assert Keyword.get(config, :test, nil) == 123
-          assert Keyword.get(config, :test2, nil) == 321
-          assert Keyword.get(config, :test3, nil) == "abc"
-          :ok
-        end)
-
-      {:ok, pid} =
-        start_supervised(%{
-          id: LedStrip,
-          start:
-            {LedStrip, :start_link,
-             [
-               @strip_name,
-               {
-                 driver,
-                 [test: 123]
-               },
-               [timer_disabled: true]
-             ]}
-        })
-
-      %{strip_name: @strip_name, driver: driver, pid: pid}
+      start_supervised(AnimationSystem.child_spec())
+      :ok
     end
 
-    test "client API calls", %{strip_name: strip_name, driver: driver, pid: pid} do
+    test "client API calls" do
+      {:ok, pid} = WorkerSupervisor.start_led_strip(@strip_name, [{Null, []}], [])
+
       # we only make sure that they are correctly wired to the server side calls
       # that are tested independently
-      assert :ok == LedStrip.define_namespace(strip_name, @namespace)
-      assert true == LedStrip.exist_namespace(strip_name, @namespace)
-      assert false == LedStrip.exist_namespace(strip_name, :non_existent)
-      assert :ok == LedStrip.set_leds(strip_name, @namespace, [0xFF0000, 0x00FF00, 0x0000FF])
+      assert :ok == LedStrip.define_namespace(@strip_name, @namespace)
+      assert LedStrip.exist_namespace(@strip_name, @namespace)
+      assert not LedStrip.exist_namespace(@strip_name, :non_existent)
+      assert :ok == LedStrip.set_leds(@strip_name, @namespace, [0xFF0000, 0x00FF00, 0x0000FF])
 
       # successful config change
-      assert {:ok, timer_counter: 0} = LedStrip.change_config(strip_name, timer_counter: 1)
+      assert {:ok, timer_counter: 0} = LedStrip.change_config(@strip_name, timer_counter: 1)
       assert %{config: %{timer: %{counter: 1}}} = :sys.get_state(pid)
 
       # unsuccessful config change
       assert capture_log(fn ->
-               assert {:ok, []} = LedStrip.change_config(strip_name, counter: 2)
+               assert {:ok, []} = LedStrip.change_config(@strip_name, counter: 2)
              end) =~ "Unknown config key (:counter with value 2) was specified"
 
       assert %{config: %{timer: %{counter: 1}}} = :sys.get_state(pid)
 
       # test all 3 reinit functions (they all lead to the same result)
       # This is the reason why we expect the configure and reinit to be called 3 times
-      assert :ok == LedStrip.reinit(strip_name, driver, [])
-      assert :ok == LedStrip.reinit(strip_name, {driver, []}, [])
-      assert :ok == LedStrip.reinit(strip_name, [{driver, []}], [])
-      assert :ok == GenServer.stop(strip_name)
+      assert :ok == LedStrip.reinit(@strip_name, Null, [])
+      assert :ok == LedStrip.reinit(@strip_name, {Null, []}, [])
+      assert :ok == LedStrip.reinit(@strip_name, [{Null, []}], [])
     end
   end
 end

@@ -23,6 +23,8 @@ defmodule Fledex.Animation.AnimatorTest do
   alias Fledex.Effect.Wanish
   alias Fledex.Leds
   alias Fledex.LedStrip
+  alias Fledex.Supervisor.AnimationSystem
+  alias Fledex.Supervisor.WorkerSupervisor
 
   def default_def_func(_triggers) do
     Leds.leds(30)
@@ -47,11 +49,13 @@ defmodule Fledex.Animation.AnimatorTest do
 
   @strip_name :test_strip
   setup do
-    {:ok, pid} =
-      start_supervised(%{
-        id: LedStrip,
-        start: {LedStrip, :start_link, [@strip_name, Null]}
-      })
+    # {:ok, pid} =
+    start_supervised(AnimationSystem.child_spec())
+    {:ok, pid} = WorkerSupervisor.start_led_strip(@strip_name, Null, [])
+    # start_supervised(%{
+    #   id: LedStrip,
+    #   start: {LedStrip, :start_link, [@strip_name, Null]}
+    # })
 
     %{strip_name: @strip_name, pid: pid}
   end
@@ -322,7 +326,7 @@ defmodule Fledex.Animation.AnimatorTest do
       animation_name = :animation_testB
       {:ok, pid} = Animator.start_link(%{type: :static}, strip_name, animation_name)
       assert Process.alive?(pid)
-      GenServer.stop(Utils.build_name(strip_name, :animator, animation_name), :normal)
+      Animator.shutdown(strip_name, animation_name)
       assert not Process.alive?(pid)
       GenServer.stop(driver, :normal)
     end

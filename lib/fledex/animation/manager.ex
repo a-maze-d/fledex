@@ -1,4 +1,4 @@
-# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -27,6 +27,7 @@ defmodule Fledex.Animation.Manager do
   alias Fledex.Animation.Coordinator
   alias Fledex.Animation.JobScheduler
   alias Fledex.LedStrip
+  alias Fledex.Supervisor.WorkerSupervisor
 
   @type config_t :: %{
           atom => Animator.config_t() | JobScheduler.config_t() | Coordinator.config_t()
@@ -36,28 +37,16 @@ defmodule Fledex.Animation.Manager do
            animations: %{atom => Animator.config_t()},
            coordinators: %{atom => Coordinator.config_t()},
            jobs: %{atom => JobScheduler.config_t()},
-           impls: %{
-             job_scheduler: module,
-             animator: module,
-             led_strip: module,
-             coordinator: module
-           }
          }
 
-  # def child_spec(args) do
-  #   %{
-  #     id: Manager,
-  #     start: {Manager, :start_link, [args]}
-  #   }
-  # end
-
-  def child_spec(_init_arg) do
+  def child_spec(init_args) do
     # IO.puts("providing child spec..")
     %{
       id: __MODULE__,
-      start: {__MODULE__, :start_link, []}
+      start: {__MODULE__, :start_link, init_args}
     }
   end
+
   ### MARK: client side
   @doc """
   This starts a new `Fledex.Animation.Manager`. Only a single animation manager will be started
@@ -67,21 +56,10 @@ defmodule Fledex.Animation.Manager do
   """
   @spec start_link(keyword) :: {:ok, pid()}
   def start_link(opts \\ []) do
-    # we should only have a single server running. Therefore we check whether need to do something
-    # or if the server is already running
-    pid = GenServer.whereis(__MODULE__)
-
-    # starting Fledex.Animation.Manager as child process of Kino if we operate in a Kino env
-    # (which I think we currently always do due to the Kino driver dependency :-()
-    # TODO: investigate more
-    #       The Kino.DynamicSupervisor is just the name of the DynamicSupervisor that
-    #       is started by Kino. So if we start one in our application we should be fine :-)
-    #       We still would need to check on the impact on Tests
-
-    if pid == nil do
-      GenServer.start_link(__MODULE__, opts, name: __MODULE__)
-    else
-      {:ok, pid}
+    # GenServer.start_link(__MODULE__, opts, name: __MODULE__)
+    case GenServer.start_link(__MODULE__, opts, name: __MODULE__) do
+      {:ok, pid} -> {:ok, pid}
+      {:error, {:already_started, pid}} -> {:ok, pid}
     end
   end
 
@@ -93,6 +71,8 @@ defmodule Fledex.Animation.Manager do
   """
   @spec register_strip(atom, [{module, keyword}], keyword) :: :ok
   def register_strip(strip_name, drivers, strip_config) do
+    strip_config = Keyword.put_new(strip_config, :group_leader, Process.group_leader())
+
     # Logger.debug("register strip: #{strip_name}")
     GenServer.call(__MODULE__, {:register_strip, strip_name, drivers, strip_config})
   end
@@ -123,53 +103,21 @@ defmodule Fledex.Animation.Manager do
     GenServer.call(__MODULE__, {:register_config, strip_name, configs})
   end
 
-  @doc """
-  This function stops the server gracefully
-  """
-  @spec stop(reason :: term(), timeout()) :: :ok
-  def stop(reason \\ :normal, timeout \\ :infinity) do
-    pid = Process.whereis(__MODULE__)
-    if pid != nil do
-    #   children = DynamicSupervisor.which_children(Kino.DynamicSupervisor)
-    #   if children == [] do
-        GenServer.stop(__MODULE__, reason, timeout)
-      # else
-      #   Enum.each(children, fn {:undefined,child_pid, _, _} ->
-      #     IO.puts("stopping child " <> inspect child_pid)
-      #     DynamicSupervisor.terminate_child(Kino.DynamicSupervisor, child_pid)
-      #   end)
-      # end
-    end
-    :ok
-  end
-
-
   ### MARK: server side
   @impl GenServer
   @spec init(keyword) :: {:ok, state_t}
-  def init(opts) do
+  def init(_opts) do
+    # ensure that the terminate function is called (whenever possible)
+    Process.flag(:trap_exit, true)
+
     # IO.puts("starting #{__MODULE__} ...")
     state = %{
       animations: %{},
       coordinators: %{},
       jobs: %{},
-      impls: %{
-        job_scheduler: Keyword.get(opts, :job_scheduler, JobScheduler),
-        animator: Keyword.get(opts, :animator, Animator),
-        led_strip: Keyword.get(opts, :led_strip, LedStrip),
-        coordinator: Keyword.get(opts, :coordinator, Coordinator)
-      }
     }
 
-    # state.impls.job_scheduler.start_link()
     {:ok, state}
-  end
-
-  @impl GenServer
-  def handle_call({:reset, opt}, _pid, state) do
-    _state = terminate(:normal, state)
-    {:ok, state} = init(opt)
-    {:reply, :ok, state}
   end
 
   @impl GenServer
@@ -181,16 +129,15 @@ defmodule Fledex.Animation.Manager do
           {:reply, :ok, state_t}
   def handle_call({:register_strip, strip_name, drivers, strip_config}, _pid, state)
       when is_atom(strip_name) do
-    pid = Process.whereis(strip_name)
-
-    if pid == nil do
-      {:reply, :ok, register_strip(state, strip_name, drivers, strip_config)}
-    else
+    if led_strip_registered?(strip_name, state) do
+      # TODO: Check whether this is really necessary after all the refactoring
       # we have a bit of a problem when using the kino driver, since it will not be reinitialized
       # when calling this function again (and thereby we don't get any frame/display).
       # Therefore we add here an extra step to reinitiate the the drivers while registering the strip.
-      state.impls.led_strip.reinit(strip_name, drivers, strip_config)
+      LedStrip.reinit(strip_name, drivers, strip_config)
       {:reply, :ok, state}
+    else
+      {:reply, :ok, register_strip(state, strip_name, drivers, strip_config)}
     end
   end
 
@@ -222,12 +169,10 @@ defmodule Fledex.Animation.Manager do
     # IO.puts("... shutting down #{__MODULE__}")
     strip_names = Map.keys(state.animations)
 
-    state =
-      Enum.reduce(strip_names, state, fn strip_name, state ->
+    _state = Enum.reduce(strip_names, state, fn strip_name, state ->
         unregister_strip(state, strip_name)
       end)
-
-    state.impls.job_scheduler.stop()
+    :ok
   end
 
   ### MARK: private functions
@@ -254,8 +199,7 @@ defmodule Fledex.Animation.Manager do
 
   @spec register_strip(state_t, atom, [{module, keyword}], keyword) :: state_t
   defp register_strip(state, strip_name, drivers, strip_config) do
-    # Logger.info("registering led_strip: #{strip_name}")
-    {:ok, _pid} = state.impls.led_strip.start_link(strip_name, drivers, strip_config)
+    _result = WorkerSupervisor.start_led_strip(strip_name, drivers, strip_config)
 
     %{
       state
@@ -269,14 +213,13 @@ defmodule Fledex.Animation.Manager do
   defp unregister_strip(state, strip_name) do
     # Logger.info("unregistering led_strip_ #{strip_name}")
     shutdown_coordinators(
-      state.impls,
       strip_name,
       Map.keys(state.coordinators[strip_name] || %{})
     )
 
-    shutdown_jobs(state.impls, strip_name, Map.keys(state.jobs[strip_name] || %{}))
-    shutdown_animators(state.impls, strip_name, Map.keys(state.animations[strip_name] || %{}))
-    state.impls.led_strip.stop(strip_name)
+    shutdown_jobs(strip_name, Map.keys(state.jobs[strip_name] || %{}))
+    shutdown_animators(strip_name, Map.keys(state.animations[strip_name] || %{}))
+    LedStrip.stop(strip_name)
 
     %{
       state
@@ -288,7 +231,7 @@ defmodule Fledex.Animation.Manager do
 
   @spec register_animations(state_t, atom, map) :: state_t
   defp register_animations(state, strip_name, configs) do
-    # Logger.info("defining config for #{strip_name}, animations: #{inspect Map.keys(configs)}")
+    # Logger.debug(("defining config for #{strip_name}, animations: #{inspect Map.keys(configs)}")
 
     # configs is a list of registration structs.
     # we check the current state and drop any animator we didn't receive
@@ -296,32 +239,32 @@ defmodule Fledex.Animation.Manager do
     # and we create any new filter_configanimator
     {dropped, updated, created} = filter_configs(Map.get(state.animations, strip_name), configs)
 
-    # Logger.info("#{inspect dropped}, #{inspect present}")
-    shutdown_animators(state.impls, strip_name, dropped)
-    update_animators(state.impls, strip_name, updated)
-    create_animators(state.impls, strip_name, created)
+    # Logger.debug("updating config: #{inspect {dropped, updated, created}}")
+    shutdown_animators(strip_name, dropped)
+    update_animators(strip_name, updated)
+    create_animators(strip_name, created)
 
     %{state | animations: Map.put(state.animations, strip_name, configs)}
   end
 
-  @spec shutdown_animators(%{atom => module}, atom, [atom]) :: :ok
-  defp shutdown_animators(impls, strip_name, dropped_animations) do
+  @spec shutdown_animators(atom, [atom]) :: :ok
+  defp shutdown_animators(strip_name, dropped_animations) do
     Enum.each(dropped_animations, fn animation_name ->
-      impls.animator.shutdown(strip_name, animation_name)
+      Animator.shutdown(strip_name, animation_name)
     end)
   end
 
-  @spec update_animators(%{atom => module}, atom, map) :: :ok
-  defp update_animators(impls, strip_name, animations) do
+  @spec update_animators(atom, map) :: :ok
+  defp update_animators(strip_name, animations) do
     Enum.each(animations, fn {animation_name, config} ->
-      impls.animator.config(strip_name, animation_name, config)
+      Animator.config(strip_name, animation_name, config)
     end)
   end
 
-  @spec create_animators(%{atom => module}, atom, map) :: :ok
-  defp create_animators(impls, strip_name, created_animations) do
+  @spec create_animators(atom, map) :: :ok
+  defp create_animators(strip_name, created_animations) do
     Enum.each(created_animations, fn {animation_name, config} ->
-      {:ok, _pid} = impls.animator.start_link(config, strip_name, animation_name)
+      WorkerSupervisor.start_animation(strip_name, animation_name, config)
     end)
   end
 
@@ -354,64 +297,68 @@ defmodule Fledex.Animation.Manager do
     {dropped, updated, created} =
       filter_configs(Map.get(state.coordinators, strip_name), coordinators)
 
-    shutdown_coordinators(state.impls, strip_name, dropped)
-    update_coordinators(state.impls, strip_name, updated)
-    create_coordinators(state.impls, strip_name, created)
+    shutdown_coordinators(strip_name, dropped)
+    update_coordinators(strip_name, updated)
+    create_coordinators(strip_name, created)
 
     %{state | coordinators: Map.put(state.coordinators, strip_name, coordinators)}
   end
 
-  @spec create_coordinators(%{atom => module}, atom, map) :: :ok
-  defp create_coordinators(impls, strip_name, created_coordinators) do
+  @spec create_coordinators(atom, map) :: :ok
+  defp create_coordinators(strip_name, created_coordinators) do
     Enum.each(created_coordinators, fn {coordinator_name, config} ->
-      {:ok, _pid} = impls.coordinator.start_link(strip_name, coordinator_name, config)
+      WorkerSupervisor.start_coordinator(strip_name, coordinator_name, config)
     end)
   end
 
-  @spec update_coordinators(%{atom => module}, atom, map) :: :ok
-  defp update_coordinators(impls, strip_name, coordinators) do
+  @spec update_coordinators(atom, map) :: :ok
+  defp update_coordinators(strip_name, coordinators) do
     Enum.each(coordinators, fn {coordinator_name, config} ->
-      impls.coordinator.config(strip_name, coordinator_name, config)
+      Coordinator.config(strip_name, coordinator_name, config)
     end)
   end
 
-  defp shutdown_coordinators(impls, strip_name, coordinator_names) do
+  defp shutdown_coordinators(strip_name, coordinator_names) do
     Enum.each(coordinator_names, fn coordinator_name ->
-      impls.coordinator.shutdown(strip_name, coordinator_name)
+      :ok = Coordinator.shutdown(strip_name, coordinator_name)
     end)
   end
 
   defp register_jobs(state, strip_name, jobs) do
     {dropped, updated, created} = filter_configs(Map.get(state.jobs, strip_name), jobs)
 
-    shutdown_jobs(state.impls, strip_name, dropped)
-    update_jobs(state.impls, strip_name, updated)
-    create_jobs(state.impls, strip_name, created)
+    shutdown_jobs(strip_name, dropped)
+    update_jobs(strip_name, updated)
+    create_jobs(strip_name, created)
 
     %{state | jobs: Map.put(state.jobs, strip_name, jobs)}
   end
 
-  defp shutdown_jobs(impls, _strip_name, job_names) do
+  defp shutdown_jobs(_strip_name, job_names) do
     Enum.each(job_names, fn job_name ->
-      impls.job_scheduler.delete_job(job_name)
+      JobScheduler.delete_job(job_name)
     end)
   end
 
-  defp update_jobs(impls, strip_name, jobs) do
+  defp update_jobs(strip_name, jobs) do
     Enum.each(jobs, fn {job, job_config} ->
-      impls.job_scheduler.delete_job(job)
+      JobScheduler.delete_job(job)
 
-      impls.job_scheduler.create_job(job, job_config, strip_name)
-      |> impls.job_scheduler.add_job()
+      JobScheduler.create_job(job, job_config, strip_name)
+      |> JobScheduler.add_job()
     end)
   end
 
-  defp create_jobs(impls, strip_name, jobs) do
+  defp create_jobs(strip_name, jobs) do
     Enum.each(jobs, fn {job, job_config} ->
-      impls.job_scheduler.create_job(job, job_config, strip_name)
-      |> impls.job_scheduler.add_job()
+      JobScheduler.create_job(job, job_config, strip_name)
+      |> JobScheduler.add_job()
 
-      if Keyword.get(job_config.options, :run_once, false), do: impls.job_scheduler.run_job(job)
+      if Keyword.get(job_config.options, :run_once, false), do: JobScheduler.run_job(job)
     end)
+  end
+
+  defp led_strip_registered?(strip_name, state) when is_atom(strip_name) do
+    Map.has_key?(state.animations, strip_name)
   end
 end

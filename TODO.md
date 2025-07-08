@@ -37,6 +37,19 @@ Even though this library is published, there are things I still want to do befor
         I experimented with this idea, but it really doesn't give a real benefit. Therefore
         dropped it again.
   - [ ] Connect everything into a supervision tree (to make it more robust) (v0.6)
+    - [ ] handle all the TODOs
+    - [ ] add documentation
+    - [ ] add negative tests (killing some service)
+    - [ ] cleanup the via_tuple stuff once coordinator is done (move Utils to Supervisor?)
+    - [ ] align the `terminate`, `shutdown`, `stop` functions to be consistent
+    - [ ] Create commit log
+    - [ ] Cleanup code from commented out stuff
+    - [ ] Cleanup code from debug stuff
+    - [ ] decide on what to do with the color stuff that seems to be broken with the new Elixir version
+    - [ ] extra round of testing
+    - [ ] check specs, Credo, ...
+    - [ ] we start things through the Supervisor, but we don't shut things down through it
+  - [ ] should the `:config` driver not only return the config but the strip_name too?
   - [ ] setting up livebook (a really working version) on windows is anything than easy :-( Can we do something about it? Investigate (v0.7) 
   - [ ] Add support for WS2811/12/13/14/15 LED strips controlled through phase modulation.
   - [ ] Clustering (v0.7)

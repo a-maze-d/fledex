@@ -11,7 +11,6 @@
     ],
 
     "skip_files": [
-        "deps/mox/lib/mox.ex",
         "lib/fledex/component/thermometer.ex",
         "lib/fledex/component/clock.ex",
         "test"

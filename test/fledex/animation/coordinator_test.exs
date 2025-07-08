@@ -1,10 +1,11 @@
-# Copyright 2024, Matthias Reik <fledex@reik.org>
+# Copyright 2024-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Animation.CoordinatorTest do
   alias ExUnit.CaptureLog
   alias Fledex.Animation.Coordinator
+  alias Fledex.Supervisor.AnimationSystem
   alias Fledex.Utils.PubSub
 
   use ExUnit.Case
@@ -15,6 +16,11 @@ defmodule Fledex.Animation.CoordinatorTest do
     # wait a bit to allow the `Registry` to register/deregister our subscription
     Process.sleep(50)
     subscribers
+  end
+
+  setup do
+    start_supervised(AnimationSystem.child_spec())
+    :ok
   end
 
   describe "test client functions" do

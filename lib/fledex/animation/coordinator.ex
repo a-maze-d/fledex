@@ -9,10 +9,10 @@ defmodule Fledex.Animation.Coordinator do
   alias Fledex.Animation.Utils
   alias Fledex.Utils.PubSub
 
-  @callback start_link(strip_name :: atom, coordinator_name :: atom, configs :: keyword) ::
-              GenServer.on_start()
-  @callback config(atom, atom, config_t) :: :ok
-  @callback shutdown(atom, atom) :: :ok
+  # @callback start_link(strip_name :: atom, coordinator_name :: atom, configs :: keyword) ::
+  #             GenServer.on_start()
+  # @callback config(atom, atom, config_t) :: :ok
+  # @callback shutdown(atom, atom) :: :ok
 
   @type config_t :: %{
           :type => :coordinator,
@@ -36,20 +36,22 @@ defmodule Fledex.Animation.Coordinator do
             strip_name: :default,
             coordinator_name: :default
 
+  @name &Utils.via_tuple/3
+
   # MARK: client side
   @spec start_link(strip_name :: atom, coordinator_name :: atom, configs :: keyword) ::
           GenServer.on_start()
   def start_link(strip_name, animation_name, configs) do
     {:ok, _pid} =
       GenServer.start_link(__MODULE__, {strip_name, animation_name, configs},
-        name: Utils.build_name(strip_name, :coordinator, animation_name)
+        name: @name.(strip_name, :coordinator, animation_name)
       )
   end
 
   @spec config(atom, atom, config_t) :: :ok
   def config(strip_name, animation_name, config) do
     GenServer.cast(
-      Utils.build_name(strip_name, :coordinator, animation_name),
+      @name.(strip_name, :coordinator, animation_name),
       {:config, config}
     )
   end
@@ -57,7 +59,7 @@ defmodule Fledex.Animation.Coordinator do
   @spec shutdown(atom, atom) :: :ok
   def shutdown(strip_name, coordinator_name) do
     GenServer.stop(
-      Utils.build_name(strip_name, :coordinator, coordinator_name),
+      @name.(strip_name, :coordinator, coordinator_name),
       :normal
     )
   end
@@ -66,6 +68,9 @@ defmodule Fledex.Animation.Coordinator do
   @impl GenServer
   @spec init({atom, atom, config_t}) :: {:ok, state_t}
   def init({strip_name, coordinator_name, configs}) do
+    # make sure we call the terminate function whenever possible
+    Process.flag(:trap_exit, true)
+
     state = %__MODULE__{
       options: Map.get(configs, :options, []),
       func: Map.get(configs, :func, &__MODULE__.default_func/3),

@@ -52,6 +52,8 @@ defmodule Fledex.Animation.Animator do
   alias Fledex.LedStrip
   alias Fledex.Utils.PubSub
 
+  @name &Utils.via_tuple/3
+
   @type config_t :: %{
           :type => :animation | :static,
           :def_func => (map -> Leds.t()),
@@ -77,10 +79,10 @@ defmodule Fledex.Animation.Animator do
   @spec start_link(config :: config_t, strip_name :: atom, animation_name :: atom) ::
           GenServer.on_start()
   def start_link(config, strip_name, animation_name) do
-    {:ok, _pid} =
-      GenServer.start_link(__MODULE__, {config, strip_name, animation_name},
-        name: Utils.build_name(strip_name, :animator, animation_name)
-      )
+    # IO.puts("starting animation #{inspect {strip_name, animation_name}}...")
+    GenServer.start_link(__MODULE__, {config, strip_name, animation_name},
+      name: @name.(strip_name, :animator, animation_name)
+    )
   end
 
   @doc """
@@ -97,7 +99,7 @@ defmodule Fledex.Animation.Animator do
   @spec config(atom, atom, config_t) :: :ok
   def config(strip_name, animation_name, config) do
     GenServer.cast(
-      Utils.build_name(strip_name, :animator, animation_name),
+      @name.(strip_name, :animator, animation_name),
       {:config, config}
     )
   end
@@ -113,7 +115,7 @@ defmodule Fledex.Animation.Animator do
   @spec update_effect(atom, atom, :all | pos_integer, keyword) :: :ok
   def update_effect(strip_name, animation_name, what, config_update) do
     GenServer.cast(
-      Utils.build_name(strip_name, :animator, animation_name),
+      @name.(strip_name, :animator, animation_name),
       {:update_effect, what, config_update}
     )
   end
@@ -126,7 +128,7 @@ defmodule Fledex.Animation.Animator do
   @spec shutdown(atom, atom) :: :ok
   def shutdown(strip_name, animation_name) do
     GenServer.stop(
-      Utils.build_name(strip_name, :animator, animation_name),
+      @name.(strip_name, :animator, animation_name),
       :normal
     )
   end
@@ -135,6 +137,9 @@ defmodule Fledex.Animation.Animator do
   @impl GenServer
   @spec init({config_t, atom, atom}) :: {:ok, state_t, {:continue, :paint_once}}
   def init({init_args, strip_name, animation_name}) do
+    # make sure we call the terminate function whenever possible
+    Process.flag(:trap_exit, true)
+
     state = %{
       triggers: %{},
       type: :animation,
@@ -155,6 +160,7 @@ defmodule Fledex.Animation.Animator do
       :static -> :ok
     end
 
+    # IO.puts("animation started!")
     {:ok, state, {:continue, :paint_once}}
   end
 
@@ -197,9 +203,8 @@ defmodule Fledex.Animation.Animator do
            triggers: triggers
          } = state
        ) do
-    # IO.puts("Update_Leds1: Key: #{Keyword.has_key?(options, :send_config_func)}")
+
     send_config_func = options[:send_config] || (&Utils.default_send_config_func/1)
-    # IO.puts("Options: #{inspect options}")
     # this is for compatibility reasons. if only a send_config_func is defined
     # in the options list, then no options are defined. In that case we need to define
     # the options as being nil to call the def_func/1 instead of the def_func/2 function
@@ -217,6 +222,7 @@ defmodule Fledex.Animation.Animator do
 
     # independent on the configs say we want to ensure we use the correct namespace (animation_name)
     # and server_name (strip_name). Therefore we inject it
+    # TODO: I think there is no point anymore to use the send function
     leds = Leds.set_led_strip_info(leds, animation_name, strip_name)
     {config, triggers} = send_config_func.(triggers) |> get_with_triggers(triggers)
     Leds.send(leds, config)
@@ -355,6 +361,7 @@ defmodule Fledex.Animation.Animator do
           type: type
         } = _state
       ) do
+    # IO.puts("shutting down animation #{inspect {strip_name, animation_name, type}}...")
     case type do
       :animation -> PubSub.unsubscribe(PubSub.app(), PubSub.channel_trigger())
       # nothing to do, since we haven't been subscribed
