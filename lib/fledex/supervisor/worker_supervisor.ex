@@ -40,6 +40,7 @@ defmodule Fledex.Supervisor.WorkerSupervisor do
       }
     )
   end
+
   def start_coordinator(strip_name, coordinator_name, config) do
     # IO.puts("starting corrdinator (1)... #{inspect {strip_name, coordinator_name, config}}")
     DynamicSupervisor.start_child(

@@ -240,10 +240,11 @@ defmodule Fledex.Animation.ManagerTest do
       start_supervised(AnimationSystem.child_spec())
       Manager.register_strip(@strip_name, [{Null, []}], [])
       %{strip_name: @strip_name}
-
     end
-    test "create coordinator", %{strip_name: strip_name}    do
+
+    test "create coordinator", %{strip_name: strip_name} do
       use Fledex, dont_start: true
+
       config1 =
         led_strip strip_name, :config do
           coordinator :coord1, [] do
@@ -254,8 +255,10 @@ defmodule Fledex.Animation.ManagerTest do
       :ok = Manager.register_config(strip_name, config1)
       assert ManagerTestUtils.whereis(strip_name, :coordinator, :coord1) != nil
     end
-    test "update coordinator", %{strip_name: strip_name}    do
+
+    test "update coordinator", %{strip_name: strip_name} do
       use Fledex, dont_start: true
+
       config1 =
         led_strip strip_name, :config do
           coordinator :coord1, [] do
@@ -282,8 +285,10 @@ defmodule Fledex.Animation.ManagerTest do
       assert ManagerTestUtils.whereis(strip_name, :coordinator, :coord1) != nil
       assert ManagerTestUtils.whereis(strip_name, :coordinator, :coord2) != nil
     end
-    test "delete coordinator", %{strip_name: strip_name}    do
+
+    test "delete coordinator", %{strip_name: strip_name} do
       use Fledex, dont_start: true
+
       config1 =
         led_strip strip_name, :config do
           coordinator :coord1, [] do

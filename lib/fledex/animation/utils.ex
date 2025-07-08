@@ -15,6 +15,7 @@ defmodule Fledex.Animation.Utils do
   It is the responsibility of the Animator to set the servername correctly. The
   `Fledex.Animation.Animator` is doing this by default.
   """
+
   # @spec build_name(atom, :animator | :job | :coordinator | :led_strip, atom) :: GenServer.name()
   # def build_name(strip_name, type, animation_name)
   #     when is_atom(strip_name) and is_atom(animation_name) do

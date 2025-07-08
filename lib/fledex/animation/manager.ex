@@ -36,7 +36,7 @@ defmodule Fledex.Animation.Manager do
   @typep state_t :: %{
            animations: %{atom => Animator.config_t()},
            coordinators: %{atom => Coordinator.config_t()},
-           jobs: %{atom => JobScheduler.config_t()},
+           jobs: %{atom => JobScheduler.config_t()}
          }
 
   def child_spec(init_args) do
@@ -114,7 +114,7 @@ defmodule Fledex.Animation.Manager do
     state = %{
       animations: %{},
       coordinators: %{},
-      jobs: %{},
+      jobs: %{}
     }
 
     {:ok, state}
@@ -169,9 +169,11 @@ defmodule Fledex.Animation.Manager do
     # IO.puts("... shutting down #{__MODULE__}")
     strip_names = Map.keys(state.animations)
 
-    _state = Enum.reduce(strip_names, state, fn strip_name, state ->
+    _state =
+      Enum.reduce(strip_names, state, fn strip_name, state ->
         unregister_strip(state, strip_name)
       end)
+
     :ok
   end
 

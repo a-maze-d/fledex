@@ -203,7 +203,6 @@ defmodule Fledex.Animation.Animator do
            triggers: triggers
          } = state
        ) do
-
     send_config_func = options[:send_config] || (&Utils.default_send_config_func/1)
     # this is for compatibility reasons. if only a send_config_func is defined
     # in the options list, then no options are defined. In that case we need to define
