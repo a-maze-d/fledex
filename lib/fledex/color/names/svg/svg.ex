@@ -18,7 +18,6 @@ defmodule Fledex.Color.Names.SVG do
     drop: 1,
     splitter_opts: [separator: ~r/\s+/, split_opts: [trim: true]],
     converter: fn all ->
-      # IO.puts(inspect all)
       [index, name, r, g, b] =
         case all do
           [index, name, r, g, b] -> [index, name, r, g, b]

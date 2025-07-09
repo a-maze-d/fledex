@@ -203,7 +203,6 @@ defmodule Fledex.Animation.AnimatorTest do
     end
 
     def assert_logs(logs) do
-      # IO.puts(logs)
       logs
       # we start with some simple transformation and cleanup of the log lines to
       # get to what really interests us
@@ -225,14 +224,12 @@ defmodule Fledex.Animation.AnimatorTest do
             # this happens when we are not yet fully set up. Thus we ignore the first one
             acc
           else
-            # IO.puts("#{acc.send}, #{acc.wait}, #{acc.led}: #{line}")
             assert acc.send == acc.led - 1
             assert acc.trigger == trigger
             %{acc | send: acc.send + 1}
           end
 
         {"led", trigger} ->
-          # IO.puts("#{acc.send}, #{acc.wait}, #{acc.led}: #{line}")
           assert acc.led == acc.send
           if acc.trigger != 0, do: assert(acc.trigger + 1 == trigger)
           %{acc | led: acc.led + 1, trigger: trigger}

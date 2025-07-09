@@ -380,7 +380,6 @@ defmodule Fledex.Test do
           end
         end
 
-      # IO.puts("job: #{inspect config}")
       assert %{john: %{type: :animation}, john_job: %{type: :job, pattern: "* * * * * *"}} =
                config
     end

@@ -52,7 +52,6 @@ defmodule Fledex.Driver.Impl.Kino do
   @impl true
   @spec transfer(list(Types.colorint()), pos_integer, keyword) :: {keyword, any}
   def transfer(leds, counter, config) do
-    # IO.puts(inspect Keyword.fetch!(config, :frame))
     if rem(counter, Keyword.fetch!(config, :update_freq)) == 0 and length(leds) > 0 do
       output =
         leds
@@ -62,7 +61,6 @@ defmodule Fledex.Driver.Impl.Kino do
           acc <> "<span style=\"color: ##{hex}\">" <> @block <> "</span>"
         end)
 
-      # IO.puts("correct group leader? #{inspect Process.group_leader()}")
       :ok =
         Kino.Frame.render(
           Keyword.fetch!(config, :frame),

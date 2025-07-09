@@ -17,16 +17,6 @@ defmodule Fledex.Animation.JobScheduler do
           func: (-> any)
         }
 
-  # @callback start_link() ::
-  #         {:ok, pid}
-  #         | {:error, {:already_started, pid}}
-  #         | {:error, term}
-  # @callback stop() :: :ok
-  # @callback create_job(atom, config_t, atom) :: job
-  # @callback add_job(job) :: :ok
-  # @callback run_job(atom) :: :ok
-  # @callback delete_job(atom) :: :ok
-
   def config(opts \\ []) do
     # the start_link function is auto-generated, so we are adding
     # the log here. It gets called just before we start the server

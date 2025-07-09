@@ -17,7 +17,6 @@ defmodule Fledex.Supervisor.WorkerSupervisor do
     do: DynamicSupervisor.init(strategy: :one_for_one)
 
   def start_animation(strip_name, animation_name, config) do
-    # IO.puts("Supervisor asked to start animation... #{inspect {strip_name, animation_name}}")
     DynamicSupervisor.start_child(
       Utils.worker_supervisor(),
       %{
@@ -42,7 +41,6 @@ defmodule Fledex.Supervisor.WorkerSupervisor do
   end
 
   def start_coordinator(strip_name, coordinator_name, config) do
-    # IO.puts("starting corrdinator (1)... #{inspect {strip_name, coordinator_name, config}}")
     DynamicSupervisor.start_child(
       Utils.worker_supervisor(),
       %{

@@ -40,7 +40,6 @@ defmodule Fledex.Animation.Manager do
          }
 
   def child_spec(init_args) do
-    # IO.puts("providing child spec..")
     %{
       id: __MODULE__,
       start: {__MODULE__, :start_link, init_args}
@@ -112,7 +111,6 @@ defmodule Fledex.Animation.Manager do
     # ensure that the terminate function is called (whenever possible)
     Process.flag(:trap_exit, true)
 
-    # IO.puts("starting #{__MODULE__} ...")
     state = %{
       animations: %{},
       coordinators: %{},

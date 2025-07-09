@@ -104,7 +104,6 @@ defmodule Fledex.LedStrip do
 
   def start_link(strip_name, drivers, global_config)
       when is_list(drivers) and is_list(global_config) do
-    # IO.puts("starting the led strip #{inspect strip_name}...")
     drivers = Manager.remove_invalid_drivers(drivers)
 
     case whereis(strip_name) do
@@ -134,7 +133,6 @@ defmodule Fledex.LedStrip do
         nil
 
       [{pid, _value}] ->
-        # IO.puts("led_strip exists: #{inspect {pid, value}}")
         pid
     end
   end
@@ -174,7 +172,6 @@ defmodule Fledex.LedStrip do
   """
   @spec set_leds(atom, atom, list(pos_integer)) :: :ok | {:error, String.t()}
   def set_leds(strip_name, namespace, leds) do
-    # IO.puts("setting leds for #{inspect {strip_name, namespace, leds}}")
     GenServer.call(@name.(strip_name, :led_strip, :none), {:set_leds, namespace, leds})
   end
 
@@ -358,7 +355,6 @@ defmodule Fledex.LedStrip do
   @spec handle_call({:set_leds, atom, list(Types.colorint())}, {pid, any}, state_t) ::
           {:reply, :ok | {:error, String.t()}, state_t}
   def handle_call({:set_leds, name, leds}, _from, %{namespaces: namespaces} = state) do
-    # IO.puts("server received leds")
     state = put_in(state, [:config, :timer, :is_dirty], true)
 
     case Map.has_key?(namespaces, name) do
