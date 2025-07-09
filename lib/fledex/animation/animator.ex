@@ -79,7 +79,6 @@ defmodule Fledex.Animation.Animator do
   @spec start_link(config :: config_t, strip_name :: atom, animation_name :: atom) ::
           GenServer.on_start()
   def start_link(config, strip_name, animation_name) do
-    # IO.puts("starting animation #{inspect {strip_name, animation_name}}...")
     GenServer.start_link(__MODULE__, {config, strip_name, animation_name},
       name: @name.(strip_name, :animator, animation_name)
     )
@@ -137,6 +136,8 @@ defmodule Fledex.Animation.Animator do
   @impl GenServer
   @spec init({config_t, atom, atom}) :: {:ok, state_t, {:continue, :paint_once}}
   def init({init_args, strip_name, animation_name}) do
+    Logger.debug("starting animation: #{inspect {strip_name, animation_name}}", %{strip_name: strip_name, animation_name: animation_name, type: init_args[:type] || :animation})
+
     # make sure we call the terminate function whenever possible
     Process.flag(:trap_exit, true)
 
@@ -360,7 +361,11 @@ defmodule Fledex.Animation.Animator do
           type: type
         } = _state
       ) do
-    # IO.puts("shutting down animation #{inspect {strip_name, animation_name, type}}...")
+    Logger.debug(
+      "shutting down animation #{inspect {strip_name, animation_name}}",
+      %{strip_name: strip_name, animation_name: animation_name, type: type}
+    )
+
     case type do
       :animation -> PubSub.unsubscribe(PubSub.app(), PubSub.channel_trigger())
       # nothing to do, since we haven't been subscribed

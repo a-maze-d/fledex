@@ -107,6 +107,8 @@ defmodule Fledex.Animation.Manager do
   @impl GenServer
   @spec init(keyword) :: {:ok, state_t}
   def init(_opts) do
+    Logger.debug("starting Animation.Manager")
+
     # ensure that the terminate function is called (whenever possible)
     Process.flag(:trap_exit, true)
 
@@ -165,7 +167,7 @@ defmodule Fledex.Animation.Manager do
   @impl GenServer
   @spec terminate(atom, state_t) :: :ok
   def terminate(_reason, state) do
-    # IO.puts("... shutting down #{__MODULE__}")
+    Logger.debug("shutting down Animation.Manager")
     strip_names = Map.keys(state.animations)
 
     _state =

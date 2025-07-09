@@ -5,6 +5,8 @@
 defmodule Fledex.Animation.JobScheduler do
   use Quantum, otp_app: __MODULE__
 
+  require Logger
+
   alias Quantum.Job
 
   @opaque job :: Job.t()
@@ -17,8 +19,14 @@ defmodule Fledex.Animation.JobScheduler do
         }
 
   def config(opts \\ []) do
+    # the start_link function is auto-generated, so we are adding
+    # the log here. It gets called just before we start the server
+    # note it's on client and not server side. Also we can't observe
+    # the shutdown.
+    Logger.debug("starting Animation.Manager")
+
     Quantum.scheduler_config(opts, __MODULE__, __MODULE__)
-    |> Keyword.put(:debug_logging, false)
+    # |> Keyword.put(:debug_logging, false)
   end
 
   @spec create_job(atom, Interace.config_t(), atom) :: Interface.job()

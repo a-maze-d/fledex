@@ -30,18 +30,20 @@ Even though this library is published, there are things I still want to do befor
     - [x] We probably want to remove some of the `optional` attributes in the `Animator.config_t` structure
     - [x] Rename the Manager.config_t() type (remove the plural s)
     - [x] Does the `AnimatorInterface` still make sense? No, break out into a Utils module
+    - [ ] align the `terminate`, `shutdown`, `stop` functions to be consistent
+    - [ ] cleanup the via_tuple stuff once coordinator is done (move Utils to Supervisor?)
   - [x] Do we want to create a Utily class for Components, so that the name creation is simplified? (v0.6)
+  - [ ] enable testing with more elixir versions 
 - [ ] Enable Telemetry? (v0.7)
 - [ ] Missing functionality
   - [/] Add a default `led_strip` driver that can be configured through the config (v0.6)
         I experimented with this idea, but it really doesn't give a real benefit. Therefore
         dropped it again.
   - [ ] Connect everything into a supervision tree (to make it more robust) (v0.6)
-    - [ ] handle all the TODOs
+    - [x] handle all the TODOs (done, for those related to the supervisor changes)
+    - [x] Add logs to starting/shutting down of processes
     - [ ] add documentation
     - [ ] add negative tests (killing some service)
-    - [ ] cleanup the via_tuple stuff once coordinator is done (move Utils to Supervisor?)
-    - [ ] align the `terminate`, `shutdown`, `stop` functions to be consistent
     - [ ] Create commit log
     - [ ] Cleanup code from commented out stuff
     - [ ] Cleanup code from debug stuff

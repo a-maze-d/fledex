@@ -5,6 +5,8 @@
 defmodule Fledex.Supervisor.AnimationSystem do
   use Supervisor
 
+  require Logger
+
   alias Fledex.Animation.JobScheduler
   alias Fledex.Animation.Manager
   alias Fledex.Supervisor.Utils
@@ -26,6 +28,8 @@ defmodule Fledex.Supervisor.AnimationSystem do
 
   @impl true
   def init(init_args) do
+    Logger.debug("starting AnimationSystem")
+
     children = [
       {Registry, keys: :unique, name: Utils.worker_registry()},
       {DynamicSupervisor, strategy: :one_for_one, name: Utils.worker_supervisor()},
