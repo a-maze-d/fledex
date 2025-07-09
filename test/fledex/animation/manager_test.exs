@@ -234,7 +234,6 @@ defmodule Fledex.Animation.ManagerTest do
     end
   end
 
-  # TODO: test teh calling of the coordinator fucntion
   describe "test coordinators" do
     setup do
       start_supervised(AnimationSystem.child_spec())

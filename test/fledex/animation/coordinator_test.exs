@@ -13,8 +13,6 @@ defmodule Fledex.Animation.CoordinatorTest do
   @spec subscribers() :: [{pid(), Registry.value()}]
   defp subscribers do
     subscribers = Registry.lookup(PubSub.app(), PubSub.channel_state())
-    # wait a bit to allow the `Registry` to register/deregister our subscription
-    Process.sleep(50)
     subscribers
   end
 
@@ -31,9 +29,21 @@ defmodule Fledex.Animation.CoordinatorTest do
       assert :ok =
                Coordinator.config(:strip_name, :coordinator_name, %{
                  type: :coordinator,
-                 options: [],
-                 func: fn _broadcast_state, _context, options -> options end
+                 options: [counter: 0],
+                 func: fn _broadcast_state, _context, options ->
+                   Keyword.update!(options, :counter, fn old_val -> old_val + 1 end)
+                  end
                })
+
+      %Coordinator{options: options1} = :sys.get_state(pid)
+      counter_1 = Keyword.fetch!(options1, :counter)
+      assert counter_1 == 0
+
+      PubSub.broadcast_state(:stop_start, %{})
+
+      %Coordinator{options: options2} = :sys.get_state(pid)
+      counter_2 = Keyword.fetch!(options2, :counter)
+      assert counter_2 == counter_1 + 1
 
       assert :ok = Coordinator.shutdown(:strip_name, :coordinator_name)
       assert Process.alive?(pid) == false

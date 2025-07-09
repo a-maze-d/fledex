@@ -48,8 +48,6 @@ defmodule Fledex.Driver.Interface do
   def reinit(_old_module_config, new_module_config, _global_config), do: new_module_config
   ```
   """
-  # TODO: Check whether this function is actually necessary, since we are now
-  #        setting the group leader. Probably still doesn't hurt though.
   @callback reinit(
               old_module_config :: keyword,
               new_module_config :: keyword,

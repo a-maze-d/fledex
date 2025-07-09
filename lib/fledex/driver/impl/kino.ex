@@ -8,8 +8,6 @@ defmodule Fledex.Driver.Impl.Kino do
   alias Fledex.Color.Correction
   alias Fledex.Color.Types
 
-  # TODO: review this
-  # we update as often as the driver updates us
   @default_update_freq 1
   @base16 16
   @block <<"\u2588">>

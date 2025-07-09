@@ -68,35 +68,6 @@ defmodule Fledex.Test do
       assert :erlang.fun_info(&red/0)
     end
 
-    # TODO: bring back
-    # test "simple led strip macro" do
-    #   Fledex.MockJobScheduler
-    #   |> allow(self(), fn -> GenServer.whereis(Manager) end)
-    #   |> expect(:start_link, fn -> :ok end)
-    #   |> expect(:stop, fn -> :ok end)
-
-    #   # ensure our servers are not started
-    #   assert GenServer.whereis(@server_name) == nil
-    #   assert GenServer.whereis(Manager) == nil
-
-    #   opts = [supervisor: :none, job_scheduler: Fledex.MockJobScheduler]
-    #   use Fledex, opts
-
-    #   led_strip @server_name, Kino do
-    #     # we don't define here anything
-    #   end
-
-    #   # did the correct servers get started?
-    #   assert GenServer.whereis(@server_name) != nil
-    #   assert GenServer.whereis(Manager) != nil
-
-    #   # cleanup
-    #   Manager.stop()
-
-    #   # assert GenServer.whereis(@server_name) == nil
-    #   # assert GenServer.whereis(Manager) == nil
-    # end
-
     test "simple animation macro" do
       use Fledex, dont_start: true
 

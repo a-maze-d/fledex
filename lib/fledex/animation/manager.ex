@@ -130,7 +130,6 @@ defmodule Fledex.Animation.Manager do
   def handle_call({:register_strip, strip_name, drivers, strip_config}, _pid, state)
       when is_atom(strip_name) do
     if led_strip_registered?(strip_name, state) do
-      # TODO: Check whether this is really necessary after all the refactoring
       # we have a bit of a problem when using the kino driver, since it will not be reinitialized
       # when calling this function again (and thereby we don't get any frame/display).
       # Therefore we add here an extra step to reinitiate the the drivers while registering the strip.
