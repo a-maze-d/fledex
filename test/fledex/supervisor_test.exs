@@ -1,3 +1,7 @@
+# Copyright 2025, Matthias Reik <fledex@reik.org>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 defmodule Fledex.SupervisorTest do
   use ExUnit.Case
 
