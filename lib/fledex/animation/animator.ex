@@ -135,11 +135,11 @@ defmodule Fledex.Animation.Animator do
   ### MARK: server side
   @impl GenServer
   @spec init({config_t, atom, atom}) :: {:ok, state_t, {:continue, :paint_once}}
-  def init({init_args, strip_name, animation_name}) do
+  def init({%{type: type} = init_args, strip_name, animation_name}) do
     Logger.debug("starting animation: #{inspect({strip_name, animation_name})}", %{
       strip_name: strip_name,
       animation_name: animation_name,
-      type: init_args[:type] || :animation
+      type: type
     })
 
     # make sure we call the terminate function whenever possible

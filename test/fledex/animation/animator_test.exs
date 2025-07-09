@@ -79,7 +79,7 @@ defmodule Fledex.Animation.AnimatorTest do
     end
 
     test "default funcs" do
-      init_args = %{}
+      init_args = %{type: :animation}
 
       {:ok, state, {:continue, :paint_once}} =
         Animator.init({init_args, :test_strip, :test_animation})
@@ -89,7 +89,7 @@ defmodule Fledex.Animation.AnimatorTest do
     end
 
     test "config applied correctly (none_set)" do
-      init_args = %{}
+      init_args = %{type: :animation}
 
       {:ok, state, {:continue, :paint_once}} =
         Animator.init({init_args, :test_strip, :test_animation})
@@ -249,6 +249,7 @@ defmodule Fledex.Animation.AnimatorTest do
 
     def start_server(strip_name) do
       init_args = %{
+        type: :animation,
         def_func: &logging_def_func/1,
         options: [send_config: &logging_send_config_func/1]
       }
@@ -313,7 +314,7 @@ defmodule Fledex.Animation.AnimatorTest do
       strip_name = :shutdown_testA
       {:ok, driver} = LedStrip.start_link(strip_name, Null)
       animation_name = :animation_testA
-      {:ok, pid} = Animator.start_link(%{}, strip_name, animation_name)
+      {:ok, pid} = Animator.start_link(%{type: :animation}, strip_name, animation_name)
       assert Process.alive?(pid)
       Animator.shutdown(strip_name, animation_name)
       assert not Process.alive?(pid)
