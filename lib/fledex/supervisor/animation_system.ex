@@ -28,7 +28,8 @@ defmodule Fledex.Supervisor.AnimationSystem do
 
   @impl true
   @spec init(keyword) ::
-      {:ok, {Supervisor.sup_flags(), [Supervisor.child_spec() | :supervisor.child_spec()]}} | :ignore
+          {:ok, {Supervisor.sup_flags(), [Supervisor.child_spec() | :supervisor.child_spec()]}}
+          | :ignore
   def init(init_args) do
     Logger.debug("starting AnimationSystem")
 
