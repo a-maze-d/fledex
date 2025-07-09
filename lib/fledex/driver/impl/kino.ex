@@ -24,7 +24,7 @@ defmodule Fledex.Driver.Impl.Kino do
   end
 
   @impl true
-  @spec init(keyword, keyword) :: keyword
+  @spec init(keyword, map) :: keyword
   def init(config, global_config) do
     set_group_leader(global_config)
     configure(config)
@@ -38,7 +38,7 @@ defmodule Fledex.Driver.Impl.Kino do
   end
 
   @impl true
-  @spec reinit(keyword, keyword, keyword) :: keyword
+  @spec reinit(keyword, keyword, map) :: keyword
   # def reinit(_old_config, new_config, _global_config), do: new_config
   def reinit(old_config, new_config, global_config) do
     set_group_leader(global_config)

@@ -27,6 +27,8 @@ defmodule Fledex.Supervisor.AnimationSystem do
   end
 
   @impl true
+  @spec init(keyword) ::
+      {:ok, {Supervisor.sup_flags(), [Supervisor.child_spec() | :supervisor.child_spec()]}} | :ignore
   def init(init_args) do
     Logger.debug("starting AnimationSystem")
 
@@ -38,6 +40,6 @@ defmodule Fledex.Supervisor.AnimationSystem do
       {Manager, init_args}
     ]
 
-    Supervisor.init(children, strategy: :one_for_one, name: __MODULE__)
+    Supervisor.init(children, strategy: :one_for_one)
   end
 end

@@ -37,7 +37,7 @@ defmodule Fledex.Driver.Interface do
   the driver. The driver can decide what to do with them. The returned map is a
   configuration that gets passed to any of the other driver functions.
   """
-  @callback init(module_config :: keyword, global_config :: keyword) :: keyword
+  @callback init(module_config :: keyword, global_config :: map) :: keyword
   @doc """
   In some cases it is necessary to reinitialize the driver when a new LED strip
   is defined (see the `Fledex.Driver.Impl.Kino` as an example). The
@@ -51,7 +51,7 @@ defmodule Fledex.Driver.Interface do
   @callback reinit(
               old_module_config :: keyword,
               new_module_config :: keyword,
-              global_config :: keyword
+              global_config :: map
             ) :: keyword
   @doc """
   This is the main function where we transfer the LED information to the "hardware"

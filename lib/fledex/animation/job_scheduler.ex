@@ -9,14 +9,23 @@ defmodule Fledex.Animation.JobScheduler do
 
   alias Quantum.Job
 
-  @opaque job :: Job.t()
-
+  @type job :: Job.t()
   @type config_t :: %{
           type: :job,
           pattern: Crontab.CronExpression.t(),
           options: keyword,
           func: (-> any)
         }
+
+  # @callback start_link() ::
+  #         {:ok, pid}
+  #         | {:error, {:already_started, pid}}
+  #         | {:error, term}
+  # @callback stop() :: :ok
+  # @callback create_job(atom, config_t, atom) :: job
+  # @callback add_job(job) :: :ok
+  # @callback run_job(atom) :: :ok
+  # @callback delete_job(atom) :: :ok
 
   def config(opts \\ []) do
     # the start_link function is auto-generated, so we are adding
@@ -29,7 +38,7 @@ defmodule Fledex.Animation.JobScheduler do
     # |> Keyword.put(:debug_logging, false)
   end
 
-  @spec create_job(atom, Interace.config_t(), atom) :: Interface.job()
+  @spec create_job(atom, config_t(), atom) :: job()
   def create_job(job, job_config, _strip_name) do
     new_job([])
     |> Job.set_name(job)

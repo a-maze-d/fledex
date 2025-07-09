@@ -9,11 +9,6 @@ defmodule Fledex.Animation.Coordinator do
   alias Fledex.Animation.Utils
   alias Fledex.Utils.PubSub
 
-  # @callback start_link(strip_name :: atom, coordinator_name :: atom, configs :: keyword) ::
-  #             GenServer.on_start()
-  # @callback config(atom, atom, config_t) :: :ok
-  # @callback shutdown(atom, atom) :: :ok
-
   @type config_t :: %{
           :type => :coordinator,
           :options => keyword,

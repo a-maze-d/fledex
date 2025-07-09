@@ -32,7 +32,7 @@ defmodule Fledex.Driver.Manager do
   @type driver_t :: [{driver :: module, config :: keyword()}]
 
   @doc false
-  @spec init_drivers(list({module, keyword}), keyword) :: list({module, any})
+  @spec init_drivers(list({module, keyword}), map) :: list({module, any})
   def init_drivers(drivers, global_config) do
     drivers = remove_invalid_drivers(drivers)
 
@@ -51,7 +51,7 @@ defmodule Fledex.Driver.Manager do
   end
 
   @doc false
-  @spec reinit(driver_t, driver_t, keyword) :: driver_t
+  @spec reinit(driver_t, driver_t, map) :: driver_t
   def reinit(old_drivers, [], global_config) do
     reinit(old_drivers, [{Null, []}], global_config)
   end

@@ -89,7 +89,7 @@ defmodule Fledex.LedStrip do
   * With several drivers and global config: `start_link(:name, [{Spi, []}, {Spi, dev: "spidev0.1"}], timer_only_dirty_update: true)`
   """
   @spec start_link(atom, module | {module, keyword} | [{module, keyword}], keyword) ::
-          LedStrip.start_link_response()
+          start_link_response()
   def start_link(strip_name, driver \\ Null, global_config \\ [])
 
   def start_link(strip_name, driver, global_config)
@@ -274,6 +274,7 @@ defmodule Fledex.LedStrip do
     config
   end
 
+  @spec update_config(base :: map, updates :: keyword) :: {map, keyword}
   defp update_config(base, updates) do
     Enum.reduce(updates, {base, []}, fn {key, value}, {config, rets} ->
       case key do

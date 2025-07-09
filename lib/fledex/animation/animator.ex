@@ -165,7 +165,6 @@ defmodule Fledex.Animation.Animator do
       :static -> :ok
     end
 
-    # IO.puts("animation started!")
     {:ok, state, {:continue, :paint_once}}
   end
 

@@ -36,13 +36,13 @@ defmodule Fledex.Driver.Impl.Logger do
   end
 
   @impl true
-  @spec init(keyword, keyword) :: keyword
+  @spec init(keyword, map) :: keyword
   def init(config, _global_config) do
     configure(config)
   end
 
   @impl true
-  @spec reinit(keyword, keyword, keyword) :: keyword
+  @spec reinit(keyword, keyword, map) :: keyword
   def reinit(old_config, new_config, _global_config) do
     Keyword.merge(old_config, new_config)
   end
