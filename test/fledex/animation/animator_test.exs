@@ -49,13 +49,8 @@ defmodule Fledex.Animation.AnimatorTest do
 
   @strip_name :test_strip
   setup do
-    # {:ok, pid} =
     start_supervised(AnimationSystem.child_spec())
     {:ok, pid} = WorkerSupervisor.start_led_strip(@strip_name, Null, [])
-    # start_supervised(%{
-    #   id: LedStrip,
-    #   start: {LedStrip, :start_link, [@strip_name, Null]}
-    # })
 
     %{strip_name: @strip_name, pid: pid}
   end
