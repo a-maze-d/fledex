@@ -32,7 +32,7 @@ defmodule Fledex.Animation.CoordinatorTest do
                  options: [counter: 0],
                  func: fn _broadcast_state, _context, options ->
                    Keyword.update!(options, :counter, fn old_val -> old_val + 1 end)
-                  end
+                 end
                })
 
       %Coordinator{options: options1} = :sys.get_state(pid)
