@@ -7,5 +7,4 @@ import Config
 import_config "config_#{Mix.env()}.exs"
 
 config :logger, level: :info
-config :fledex, Fledex.Animation.JobScheduler,
-  debug_logging: false
+config :fledex, Fledex.Animation.JobScheduler, debug_logging: false

@@ -136,7 +136,11 @@ defmodule Fledex.Animation.Animator do
   @impl GenServer
   @spec init({config_t, atom, atom}) :: {:ok, state_t, {:continue, :paint_once}}
   def init({init_args, strip_name, animation_name}) do
-    Logger.debug("starting animation: #{inspect {strip_name, animation_name}}", %{strip_name: strip_name, animation_name: animation_name, type: init_args[:type] || :animation})
+    Logger.debug("starting animation: #{inspect({strip_name, animation_name})}", %{
+      strip_name: strip_name,
+      animation_name: animation_name,
+      type: init_args[:type] || :animation
+    })
 
     # make sure we call the terminate function whenever possible
     Process.flag(:trap_exit, true)
@@ -362,7 +366,7 @@ defmodule Fledex.Animation.Animator do
         } = _state
       ) do
     Logger.debug(
-      "shutting down animation #{inspect {strip_name, animation_name}}",
+      "shutting down animation #{inspect({strip_name, animation_name})}",
       %{strip_name: strip_name, animation_name: animation_name, type: type}
     )
 

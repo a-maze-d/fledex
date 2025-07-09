@@ -216,7 +216,11 @@ defmodule Fledex.LedStrip do
   @spec init({atom, list({module, keyword}), keyword}) :: {:ok, state_t} | {:stop, String.t()}
   def init({strip_name, drivers, global_config})
       when is_atom(strip_name) and is_list(drivers) and is_list(global_config) do
-    Logger.debug("starting led_strip: #{strip_name}", %{strip_name: strip_name, drivers: drivers, global_config: global_config})
+    Logger.debug("starting led_strip: #{strip_name}", %{
+      strip_name: strip_name,
+      drivers: drivers,
+      global_config: global_config
+    })
 
     # make sure we call the terminate function whenever possible
     Process.flag(:trap_exit, true)

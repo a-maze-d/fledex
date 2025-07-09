@@ -69,7 +69,7 @@ defmodule Fledex.Animation.Coordinator do
   @spec init({atom, atom, config_t}) :: {:ok, state_t}
   def init({strip_name, coordinator_name, configs}) do
     Logger.debug(
-      "starting coordinator: #{inspect {strip_name, coordinator_name}}",
+      "starting coordinator: #{inspect({strip_name, coordinator_name})}",
       %{strip_name: strip_name, coordinator_name: coordinator_name, configs: configs}
     )
 
@@ -119,9 +119,10 @@ defmodule Fledex.Animation.Coordinator do
   @impl GenServer
   def terminate(_reason, %{strip_name: strip_name, coordinator_name: coordinator_name} = _state) do
     Logger.debug(
-      "shutting down coordinator: #{inspect {strip_name, coordinator_name}}",
+      "shutting down coordinator: #{inspect({strip_name, coordinator_name})}",
       %{strip_name: strip_name, coordinator_name: coordinator_name}
     )
+
     PubSub.unsubscribe(PubSub.app(), PubSub.channel_state())
   end
 end
