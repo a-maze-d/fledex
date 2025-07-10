@@ -1,3 +1,7 @@
+# Copyright 2025
+#
+# SPDX-License-Identifier: Apache-2.0
+
 repos:
 - repo: https://github.com/gitleaks/gitleaks
   rev: v8.16.3
