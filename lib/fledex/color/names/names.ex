@@ -66,9 +66,9 @@ defmodule Fledex.Color.Names do
   #       You can still call the alternative color definition by going
   #       to the defining module directly.
   @modules [
-    Fledex.Color.Names.Wiki,
-    Fledex.Color.Names.CSS,
-    Fledex.Color.Names.SVG
+    Fledex.Color.Names.Wiki
+    # Fledex.Color.Names.CSS,
+    # Fledex.Color.Names.SVG
     # we intentionally do not include RAL colors
     # FLedex.Color.Names.RAL,
   ]
@@ -78,7 +78,7 @@ defmodule Fledex.Color.Names do
 
   {module_names, _seen} =
     Enum.reduce(@modules, {module_names, seen}, fn module, {module_names, seen} ->
-      Enum.reduce(module.names, {module_names, seen}, fn name, {module_names, seen} ->
+      Enum.reduce(module.names(), {module_names, seen}, fn name, {module_names, seen} ->
         if name in seen do
           {module_names, seen}
         else
@@ -106,7 +106,7 @@ defmodule Fledex.Color.Names do
   @type color_names_t ::
           unquote(
             Enum.flat_map(@modules, fn module ->
-              module.names
+              module.names()
             end)
             |> Enum.uniq()
             |> Enum.sort()
