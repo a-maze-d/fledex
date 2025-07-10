@@ -66,9 +66,9 @@ defmodule Fledex.Color.Names do
   #       You can still call the alternative color definition by going
   #       to the defining module directly.
   @modules [
-    Fledex.Color.Names.Wiki
-    # Fledex.Color.Names.CSS,
-    # Fledex.Color.Names.SVG
+    Fledex.Color.Names.Wiki,
+    Fledex.Color.Names.CSS,
+    Fledex.Color.Names.SVG
     # we intentionally do not include RAL colors
     # FLedex.Color.Names.RAL,
   ]
@@ -134,7 +134,7 @@ defmodule Fledex.Color.Names do
   @spec names :: list(color_names_t)
   def names do
     Enum.flat_map(@modules, fn module ->
-      module.names
+      module.names()
     end)
   end
 

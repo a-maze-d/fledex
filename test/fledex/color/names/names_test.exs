@@ -24,9 +24,9 @@ defmodule Fledex.Color.NamesTest do
           __MODULE__
         )
 
-      assert colors != []
+      assert colors != %{}
 
-      assert Enum.slice(Names.colors(), 828..828) == [
+      assert Map.get(colors, :vermilion2) ==
                %{
                  hex: 14_235_678,
                  hsl: {5, 193, 122},
@@ -36,9 +36,8 @@ defmodule Fledex.Color.NamesTest do
                  rgb: {216, 56, 30},
                  descriptive_name: "Vermilion2",
                  source: "",
-                 module: Fledex.Color.Names.Wiki
+                 module: __MODULE__
                }
-             ]
     end
 
     test "helper functions" do

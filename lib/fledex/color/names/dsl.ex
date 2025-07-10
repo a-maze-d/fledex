@@ -55,13 +55,13 @@ defmodule Fledex.Color.Names.Dsl do
         )
 
       @colors colors
-      @color_names Enum.map(@colors, fn %{name: name} = _colorinfo -> name end)
+      @color_names Map.keys(@colors)
       @typedoc """
       The allowed color names
       """
       @type color_names_t ::
               unquote(
-                @color_names
+                Map.keys(@colors)
                 |> Enum.map_join(" | ", &inspect/1)
                 |> Code.string_to_quoted!()
               )
@@ -70,14 +70,15 @@ defmodule Fledex.Color.Names.Dsl do
       Check whether the atom is a valid color name
       """
       @doc guard: true
-      defguard is_color_name(atom) when atom in @color_names
+      defguard is_color_name(atom) when is_atom(atom) and is_map_key(@colors, atom)
 
       @doc ~S"""
       Get all the data about the predefined colors
       """
       @spec colors :: list(Types.color_struct_t())
       def colors do
-        @colors
+        # TODO: maybe changes it to a map?
+        Map.values(@colors)
       end
 
       @doc ~S"""
@@ -87,11 +88,10 @@ defmodule Fledex.Color.Names.Dsl do
       name (see also the description at the top and take a look at this [example livebook](3b_fledex_more_about_colors.livemd))
       """
       @spec names :: list(color_names_t)
-      def names, do: @color_names
+      def names, do: Map.keys(@colors)
 
       @base16 16
-      for color <- colors do
-        name = color.name
+      for {name, color} <- colors do
         {r, g, b} = color.rgb
 
         hex =

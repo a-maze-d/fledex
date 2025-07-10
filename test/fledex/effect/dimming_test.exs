@@ -40,9 +40,9 @@ defmodule Fledex.Effect.DimmingTest do
       assert returned_leds == {[0x7E0000, 0x007E00, 0x00007E], 3, triggers}
 
       triggers = %{default: 258}
-      returned_leds = Dimming.apply(leds, 3, [divisor: 2], triggers, @context)
+      {leds, _count, _triggers} = Dimming.apply(leds, 3, [divisor: 2], triggers, @context)
 
-      assert returned_leds != [0x7E0000, 0x007E00, 0x00007E]
+      assert [0x7E0000, 0x007E00, 0x00007E] != leds
     end
   end
 end
