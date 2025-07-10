@@ -20,15 +20,12 @@ jobs:
     strategy:
       matrix:
         include:
-          - elixir: 1.15.8
-            otp: 25.3.2.9
-
-          - elixir: 1.18.4
-            otp: 27.3
-
-          - elixir: 1.18.4
-            otp: 28.0.1
-            lint: true
+          - elixir: 1.16.x
+            otp: 26
+          - elixir: 1.17.x
+            otp: 27
+          - elixir: 1.18.x
+            otp: 27
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
