@@ -35,3 +35,5 @@ fledex-*.tar
 # backup files
 /docs/*.bkp
 
+# tool versions
+.tool-versions

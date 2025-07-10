@@ -43,7 +43,8 @@ end
 The smoothest way is to use the Fledex DSL which defines some functions and macros. To enable them you need to `use Fledex`. This will (by default) start the animation manager (`Fledex.Animation.Manager`) through which all led definitions are routed. But don't worry, you won't really see it.
 
 **Note:** by enabling the DSL through the `use Fledex` call, the most important modules 
-are imported: `Fledex.Leds`, `Fledex.LedStrip`, `Fledex.Utils.PubSub`, `Fledex.Color.Names`, or aliased (the different drivers all part of the `FledexDriver.Impl` namespace). We will see a bit later what functionality those modules provide.
+are imported: `Fledex.Leds`, `Fledex.LedStrip`, `Fledex.Utils.PubSub`, `Fledex.Color.Names`, or aliased (the different drivers all part of the `FledexDriver.Impl` namespace). We will see a bit later what functionality those modules provide. 
+**Note:** this could lead to the issue that you run into conflict with other libraries (like `Kino`). In that case just use the full module qualifier and prefix it with `Elixir.`
 
 As a next step you define an LED strip through the `led_strip` macro. While defining the led strip you need to decide on how you want to talk to your strip; you need an appropriate driver.  There are several ways on how you can address your LED strip. The most common ways are through an SPI bus (`Fledex.Driver.Impl.Spi`) or through Kino (`Fledex.Driver.Impl.Kino`) as a simulated LED strip in [Livebook](https://livebook.dev/). It is possible to adjust the settings of the drivers, or even define several drivers at the same time.
 
