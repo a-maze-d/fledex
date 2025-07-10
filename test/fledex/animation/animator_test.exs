@@ -308,7 +308,7 @@ defmodule Fledex.Animation.AnimatorTest do
       animation_name = :animation_testA
       {:ok, pid} = Animator.start_link(%{type: :animation}, strip_name, animation_name)
       assert Process.alive?(pid)
-      Animator.shutdown(strip_name, animation_name)
+      Animator.stop(strip_name, animation_name)
       assert not Process.alive?(pid)
       GenServer.stop(driver, :normal)
     end
@@ -319,7 +319,7 @@ defmodule Fledex.Animation.AnimatorTest do
       animation_name = :animation_testB
       {:ok, pid} = Animator.start_link(%{type: :static}, strip_name, animation_name)
       assert Process.alive?(pid)
-      Animator.shutdown(strip_name, animation_name)
+      Animator.stop(strip_name, animation_name)
       assert not Process.alive?(pid)
       GenServer.stop(driver, :normal)
     end

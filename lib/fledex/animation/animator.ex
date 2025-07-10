@@ -124,8 +124,8 @@ defmodule Fledex.Animation.Animator do
   call (by default) GenServer.stop. The animation can implement the `terminate/2`
   function if necessary.
   """
-  @spec shutdown(atom, atom) :: :ok
-  def shutdown(strip_name, animation_name) do
+  @spec stop(atom, atom) :: :ok
+  def stop(strip_name, animation_name) do
     GenServer.stop(
       @name.(strip_name, :animator, animation_name),
       :normal

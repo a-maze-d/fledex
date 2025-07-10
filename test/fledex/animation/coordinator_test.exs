@@ -45,7 +45,7 @@ defmodule Fledex.Animation.CoordinatorTest do
       counter_2 = Keyword.fetch!(options2, :counter)
       assert counter_2 == counter_1 + 1
 
-      assert :ok = Coordinator.shutdown(:strip_name, :coordinator_name)
+      assert :ok = Coordinator.stop(:strip_name, :coordinator_name)
       assert Process.alive?(pid) == false
     end
   end

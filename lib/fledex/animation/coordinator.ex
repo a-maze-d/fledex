@@ -50,8 +50,8 @@ defmodule Fledex.Animation.Coordinator do
     )
   end
 
-  @spec shutdown(atom, atom) :: :ok
-  def shutdown(strip_name, coordinator_name) do
+  @spec stop(atom, atom) :: :ok
+  def stop(strip_name, coordinator_name) do
     GenServer.stop(
       @name.(strip_name, :coordinator, coordinator_name),
       :normal

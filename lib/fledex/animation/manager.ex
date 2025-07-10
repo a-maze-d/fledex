@@ -220,7 +220,7 @@ defmodule Fledex.Animation.Manager do
 
     shutdown_jobs(strip_name, Map.keys(state.jobs[strip_name] || %{}))
     shutdown_animators(strip_name, Map.keys(state.animations[strip_name] || %{}))
-    LedStrip.stop(strip_name)
+    :ok = LedStrip.stop(strip_name)
 
     %{
       state
@@ -251,7 +251,7 @@ defmodule Fledex.Animation.Manager do
   @spec shutdown_animators(atom, [atom]) :: :ok
   defp shutdown_animators(strip_name, dropped_animations) do
     Enum.each(dropped_animations, fn animation_name ->
-      Animator.shutdown(strip_name, animation_name)
+      :ok = Animator.stop(strip_name, animation_name)
     end)
   end
 
@@ -321,7 +321,7 @@ defmodule Fledex.Animation.Manager do
 
   defp shutdown_coordinators(strip_name, coordinator_names) do
     Enum.each(coordinator_names, fn coordinator_name ->
-      :ok = Coordinator.shutdown(strip_name, coordinator_name)
+      :ok = Coordinator.stop(strip_name, coordinator_name)
     end)
   end
 

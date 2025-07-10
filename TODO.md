@@ -30,11 +30,11 @@ Even though this library is published, there are things I still want to do befor
     - [x] We probably want to remove some of the `optional` attributes in the `Animator.config_t` structure
     - [x] Rename the Manager.config_t() type (remove the plural s)
     - [x] Does the `AnimatorInterface` still make sense? No, break out into a Utils module
-    - [ ] align the `terminate`, `shutdown`, `stop` functions to be consistent
-    - [ ] cleanup the via_tuple stuff once coordinator is done (move Utils to Supervisor?)
   - [x] Do we want to create a Utily class for Components, so that the name creation is simplified? (v0.6)
   - [x] enable testing with more elixir versions 
     - [x] decide on what to do with the color stuff that seems to be broken with the new- Elixir version
+  - [x] align the `terminate`, `shutdown`, `stop` functions to be consistent
+  - [ ] cleanup the via_tuple stuff once coordinator is done (move Utils to Supervisor?)
   - [ ] Do we really need to use the `Leds.send` function in the `Animator`?
 - [ ] Missing functionality
   - [/] Add a default `led_strip` driver that can be configured through the config (v0.6)
