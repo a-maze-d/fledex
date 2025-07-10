@@ -117,14 +117,17 @@ defmodule Fledex.Utils.Dsl do
   end
 
   defp start_system(opts) do
+    # TODO: document the options
+    log_level = Keyword.get(opts, :log_level, :info)
     supervisor = Keyword.get(opts, :supervisor, :app)
-    opts = Keyword.drop(opts, [:supervisor])
+    opts = Keyword.drop(opts, [:supervisor, :log_level])
+
+    Logger.configure(level: log_level)
 
     case supervisor do
       :none ->
         AnimationSystem.start_link(opts)
 
-      # Manager.start_link(opts)
       :app ->
         DynamicSupervisor.start_child(Fledex.DynamicSupervisor, AnimationSystem.child_spec(opts))
 
@@ -133,6 +136,9 @@ defmodule Fledex.Utils.Dsl do
 
       {:dynamic, name} ->
         DynamicSupervisor.start_child(name, AnimationSystem.child_spec(opts))
+
+        # {:module, module} ->
+        #   module.start_link(AnimationSystem.child_spec(opts))
     end
   end
 

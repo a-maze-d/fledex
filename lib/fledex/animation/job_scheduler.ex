@@ -17,17 +17,6 @@ defmodule Fledex.Animation.JobScheduler do
           func: (-> any)
         }
 
-  def config(opts \\ []) do
-    # the start_link function is auto-generated, so we are adding
-    # the log here. It gets called just before we start the server
-    # note it's on client and not server side. Also we can't observe
-    # the shutdown.
-    Logger.debug("starting Animation.Manager")
-
-    Quantum.scheduler_config(opts, __MODULE__, __MODULE__)
-    # |> Keyword.put(:debug_logging, false)
-  end
-
   @spec create_job(atom, config_t(), atom) :: job()
   def create_job(job, job_config, _strip_name) do
     new_job([])
@@ -36,5 +25,11 @@ defmodule Fledex.Animation.JobScheduler do
     |> Job.set_task(job_config.func)
     |> Job.set_timezone(Keyword.get(job_config.options, :timezone, :utc))
     |> Job.set_overlap(Keyword.get(job_config.options, :overlap, false))
+  end
+
+  @impl true
+  def init(opts) do
+    Logger.debug("starting JobScheduler ")
+    opts
   end
 end
