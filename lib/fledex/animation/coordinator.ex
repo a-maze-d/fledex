@@ -16,9 +16,8 @@ defmodule Fledex.Animation.Coordinator do
         }
   @typep state_t :: %__MODULE__{
            options: keyword,
-           func:
-             (broadcast_state :: any, context :: map(), options :: keyword() ->
-                new_options :: keyword()),
+           func: (broadcast_state :: any, context :: map(), options :: keyword() ->
+                    new_options :: keyword()),
            strip_name: atom,
            coordinator_name: atom
          }

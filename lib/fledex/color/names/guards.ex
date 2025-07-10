@@ -16,4 +16,8 @@ defmodule Fledex.Color.Names.Guards do
            when Wiki.is_color_name(atom) or
                   CSS.is_color_name(atom) or
                   SVG.is_color_name(atom)
+
+  #  or
+  # CSS.is_color_name(atom) or
+  # SVG.is_color_name(atom)
 end

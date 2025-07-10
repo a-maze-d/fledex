@@ -23,7 +23,8 @@ defmodule Fledex.Color.Names.LoadUtils do
     |> Stream.map(fn line -> converter.(line) end)
     |> Stream.map(fn map -> Map.put(map, :module, module) end)
     |> Stream.filter(fn element -> String.match?(element.descriptive_name, names_pattern) end)
-    |> Enum.to_list()
+    |> Enum.map(fn color -> {color.name, color} end)
+    |> Map.new()
   end
 
   def line_splitter(index, line, opts) do

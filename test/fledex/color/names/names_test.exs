@@ -24,9 +24,9 @@ defmodule Fledex.Color.NamesTest do
           __MODULE__
         )
 
-      assert colors != []
+      assert colors != %{}
 
-      assert Enum.slice(Names.colors(), 828..828) == [
+      assert Map.get(colors, :vermilion2) ==
                %{
                  hex: 14_235_678,
                  hsl: {5, 193, 122},
@@ -36,9 +36,8 @@ defmodule Fledex.Color.NamesTest do
                  rgb: {216, 56, 30},
                  descriptive_name: "Vermilion2",
                  source: "",
-                 module: Fledex.Color.Names.Wiki
+                 module: __MODULE__
                }
-             ]
     end
 
     test "helper functions" do
@@ -93,7 +92,8 @@ defmodule Fledex.Color.NamesTest do
       assert "" == Names.vermilion2(:source)
       assert "Crayola" == Names.absolute_zero(:source)
 
-      assert :vermilion2 in Names.names()
+      assert Enum.find_index(Names.names(), fn x -> x == :vermilion2 end) != nil
+      assert Enum.find_index(Names.colors(), fn x -> x.name == :vermilion2 end) != nil
     end
 
     test "test quick access functions (with atom)" do

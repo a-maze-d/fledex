@@ -78,7 +78,7 @@ defmodule Fledex.Color.Names do
 
   {module_names, _seen} =
     Enum.reduce(@modules, {module_names, seen}, fn module, {module_names, seen} ->
-      Enum.reduce(module.names, {module_names, seen}, fn name, {module_names, seen} ->
+      Enum.reduce(module.names(), {module_names, seen}, fn name, {module_names, seen} ->
         if name in seen do
           {module_names, seen}
         else
@@ -106,7 +106,7 @@ defmodule Fledex.Color.Names do
   @type color_names_t ::
           unquote(
             Enum.flat_map(@modules, fn module ->
-              module.names
+              module.names()
             end)
             |> Enum.uniq()
             |> Enum.sort()
@@ -120,7 +120,7 @@ defmodule Fledex.Color.Names do
   @spec colors :: list(Types.color_struct_t())
   def colors do
     Enum.flat_map(@modules, fn module ->
-      module.colors
+      module.colors()
     end)
     |> Enum.uniq_by(fn color -> color.name end)
   end
@@ -134,8 +134,9 @@ defmodule Fledex.Color.Names do
   @spec names :: list(color_names_t)
   def names do
     Enum.flat_map(@modules, fn module ->
-      module.names
+      module.names()
     end)
+    |> Enum.uniq()
   end
 
   @doc """
