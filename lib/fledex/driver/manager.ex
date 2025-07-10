@@ -1,4 +1,4 @@
-# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -32,8 +32,8 @@ defmodule Fledex.Driver.Manager do
   @type driver_t :: [{driver :: module, config :: keyword()}]
 
   @doc false
-  @spec init_drivers(list({module, keyword})) :: list({module, any})
-  def init_drivers(drivers) do
+  @spec init_drivers(list({module, keyword}), map) :: list({module, any})
+  def init_drivers(drivers, global_config) do
     drivers = remove_invalid_drivers(drivers)
 
     drivers =
@@ -45,18 +45,18 @@ defmodule Fledex.Driver.Manager do
 
     for {module, module_config} <- drivers do
       # Logger.trace("Creating driver: #{inspect module}")
-      config = module.init(module_config)
+      config = module.init(module_config, global_config)
       {module, config}
     end
   end
 
   @doc false
-  @spec reinit(driver_t, driver_t) :: driver_t
-  def reinit(old_drivers, []) do
-    reinit(old_drivers, [{Null, []}])
+  @spec reinit(driver_t, driver_t, map) :: driver_t
+  def reinit(old_drivers, [], global_config) do
+    reinit(old_drivers, [{Null, []}], global_config)
   end
 
-  def reinit(old_drivers, new_drivers) do
+  def reinit(old_drivers, new_drivers, global_config) do
     new_drivers = Enum.sort(new_drivers)
 
     case same_drivers(old_drivers, new_drivers) do
@@ -73,7 +73,7 @@ defmodule Fledex.Driver.Manager do
             # It is the responsibility of the reinit function to "merge" the old and
             # new config to ensure extra parameters are preserved.
             new_config = old_module.configure(new_config)
-            config = old_module.reinit(old_config, new_config)
+            config = old_module.reinit(old_config, new_config, global_config)
             {old_module, config}
           end)
 
@@ -84,15 +84,21 @@ defmodule Fledex.Driver.Manager do
 
         extra_drivers =
           case old_drivers_length < new_drivers_length do
-            true -> init_drivers(Enum.slice(new_drivers, old_drivers_length..new_drivers_length))
-            false -> []
+            true ->
+              init_drivers(
+                Enum.slice(new_drivers, old_drivers_length..new_drivers_length),
+                global_config
+              )
+
+            false ->
+              []
           end
 
         extra_drivers ++ drivers
 
       false ->
         terminate(:normal, old_drivers)
-        init_drivers(new_drivers)
+        init_drivers(new_drivers, global_config)
     end
   end
 

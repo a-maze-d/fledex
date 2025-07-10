@@ -66,5 +66,5 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Check for transitive compilation dependencies
-      run: mix xref graph --label compile-connected --fail-above 18
+      run: mix xref graph --label compile-connected --fail-above 21
 

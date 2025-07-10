@@ -25,8 +25,8 @@ defmodule Fledex.Driver.Impl.Spi do
   end
 
   @impl true
-  @spec init(keyword) :: keyword
-  def init(config) do
+  @spec init(keyword, map) :: keyword
+  def init(config, _global_config) do
     {clear_leds, config} = Keyword.pop(config, :clear_leds, 0)
     config = configure(config)
     config = Keyword.put(config, :ref, open_spi(config))
@@ -34,10 +34,10 @@ defmodule Fledex.Driver.Impl.Spi do
   end
 
   @impl true
-  @spec reinit(keyword, keyword) :: keyword
-  def reinit(old_config, new_config) do
+  @spec reinit(keyword, keyword, map) :: keyword
+  def reinit(old_config, new_config, _global_config) do
     config = Keyword.merge(old_config, new_config)
-    # Maybe the following code coudl be optimized
+    # Maybe the following code could be optimized
     # to only reopen the port if it's necessary. But this is safe
     :ok = terminate(:normal, old_config)
     Keyword.put(config, :ref, open_spi(config))

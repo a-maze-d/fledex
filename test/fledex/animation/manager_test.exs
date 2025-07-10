@@ -1,69 +1,55 @@
-# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Animation.ManagerTest do
   use ExUnit.Case, async: false
 
-  import Mox
-
+  alias Fledex.Animation.JobScheduler
   alias Fledex.Animation.Manager
   alias Fledex.Driver.Impl.Null
   alias Fledex.ManagerTestUtils
+  alias Fledex.Supervisor.AnimationSystem
   alias Quantum
 
-  setup do
-    on_exit(fn ->
-      ManagerTestUtils.stop_if_running(Manager)
-    end)
-  end
   @strip_name :test_strip
   describe "init" do
     setup do
-      # {:ok, pid} = Manager.start_link(no_supervision: true)
-        {:ok, pid} = start_supervised(%{
-          id: Manager,
-          start: {Manager, :start_link, []}
-        })
-
+      start_supervised(AnimationSystem.child_spec())
       Manager.register_strip(@strip_name, [{Null, []}], [])
-      on_exit(fn -> Manager.stop() end)
+      pid = Process.whereis(Manager)
 
       %{pid: pid, strip_name: @strip_name}
     end
 
     test "don't double start", %{pid: pid} do
-      assert pid == GenServer.whereis(Manager)
       assert {:ok, pid} == Manager.start_link()
     end
   end
 
   describe "client functions" do
     setup do
-      {:ok, pid} = start_supervised(%{
-          id: Manager,
-          start: {Manager, :start_link, []}
-        })
+      start_supervised(AnimationSystem.child_spec())
 
       Manager.register_strip(@strip_name, [{Null, []}], [])
 
-      %{pid: pid, strip_name: @strip_name}
+      %{strip_name: @strip_name}
     end
 
     test "register/unregister led_strip", %{strip_name: strip_name} do
       config = ManagerTestUtils.get_manager_config()
       assert Map.keys(config) == [strip_name]
-      assert GenServer.whereis(strip_name) != nil
+      assert ManagerTestUtils.whereis(strip_name, :led_strip) != nil
 
       Manager.unregister_strip(strip_name)
       config = ManagerTestUtils.get_manager_config()
       assert Map.keys(config) == []
-      assert GenServer.whereis(strip_name) == nil
+      assert ManagerTestUtils.whereis(strip_name, :led_strip) == nil
 
       Manager.register_strip(strip_name, [{Null, []}], [])
       config = ManagerTestUtils.get_manager_config()
       assert Map.keys(config) == [strip_name]
-      assert GenServer.whereis(strip_name) != nil
+      assert ManagerTestUtils.whereis(strip_name, :led_strip) != nil
     end
 
     test "register/unregister 2 led_strips", %{strip_name: strip_name} do
@@ -77,25 +63,24 @@ defmodule Fledex.Animation.ManagerTest do
     end
 
     test "re-register led_strip", %{strip_name: strip_name} do
-      pid = GenServer.whereis(strip_name)
+      pid = ManagerTestUtils.whereis(strip_name, :led_strip)
       assert pid != nil
       Manager.register_strip(strip_name, [{Null, []}], [])
-      pid2 = GenServer.whereis(strip_name)
+      pid2 = ManagerTestUtils.whereis(strip_name, :led_strip)
       assert pid == pid2
     end
 
     test "register animation", %{strip_name: strip_name} do
       config = %{
-        t1: %{type: :animation},
-        t2: %{type: :animation}
+        t11: %{type: :animation},
+        t12: %{type: :animation}
       }
 
       Manager.register_config(strip_name, config)
       assert config == ManagerTestUtils.get_manager_config(strip_name)
 
       Enum.each(Map.keys(config), fn key ->
-        assert GenServer.whereis(String.to_atom("Elixir.#{strip_name}.#{:animator}.#{key}")) !=
-                 nil
+        assert ManagerTestUtils.whereis(strip_name, :animator, key) != nil
       end)
     end
 
@@ -106,7 +91,7 @@ defmodule Fledex.Animation.ManagerTest do
       }
 
       Manager.register_config(strip_name, config)
-      assert GenServer.whereis(String.to_atom("Elixir.#{strip_name}.#{:animator}.#{:t2}")) != nil
+      assert ManagerTestUtils.whereis(strip_name, :animator, :t2) != nil
 
       config2 = %{
         t1: %{type: :animation},
@@ -116,23 +101,21 @@ defmodule Fledex.Animation.ManagerTest do
       Manager.register_config(strip_name, config2)
       assert config2 == ManagerTestUtils.get_manager_config(strip_name)
 
-      assert GenServer.whereis(String.to_atom("Elixir.#{strip_name}.#{:animator}.#{:t2}")) == nil
+      assert ManagerTestUtils.whereis(strip_name, :animator, :t2) == nil
 
       Enum.each(Map.keys(config2), fn key ->
-        assert GenServer.whereis(String.to_atom("Elixir.#{strip_name}.#{:animator}.#{key}")) !=
-                 nil
+        assert ManagerTestUtils.whereis(strip_name, :animator, key) != nil
       end)
     end
   end
 
   describe "test jobs" do
-    test "add job" do
-      Fledex.MockJobScheduler
-      |> expect(:create_job, fn _name, _schedule, _strip_name ->
-        Quantum.Job.new(Quantum.scheduler_config([], Fledex.MockJobScheduler, JobScheduler))
-      end)
-      |> expect(:add_job, fn _job -> :ok end)
+    setup do
+      start_supervised(AnimationSystem.child_spec())
+      :ok
+    end
 
+    test "add job" do
       use Fledex, dont_start: true
 
       config =
@@ -142,133 +125,148 @@ defmodule Fledex.Animation.ManagerTest do
           end
         end
 
-      state = %{
-        jobs: %{},
-        animations: %{},
-        coordinators: %{},
-        impls: %{
-          job_scheduler: Fledex.MockJobScheduler,
-          led_strip: Fledex.LedStrip
-        }
-      }
+      Manager.register_strip(:john, [{Null, []}], [])
+      Manager.register_config(:john, config)
 
-      {:reply, :ok, state} =
-        Manager.handle_call({:register_strip, :john, [{Null, []}], []}, self(), state)
+      assert ManagerTestUtils.get_manager_config(:jobs, :john) == config
+      assert length(JobScheduler.jobs()) == 1
+    end
 
-      {:reply, :ok, _state} =
-        Manager.handle_call({:register_config, :john, config}, self(), state)
+    test "change job" do
+      use Fledex, dont_start: true
 
-      Mox.verify!()
+      before_config =
+        led_strip :john, :config do
+          job :before_timer, ~e[1 * * * * * *]e do
+            :ok
+          end
+        end
+
+      after_config =
+        led_strip :john, :config do
+          job :after_timer, ~e[1 * * * * * *]e do
+            :ok
+          end
+        end
+
+      Manager.register_strip(:john, [{Null, []}], [])
+      Manager.register_config(:john, before_config)
+
+      jobs = ManagerTestUtils.get_manager_config(:jobs, :john)
+      assert Map.has_key?(jobs, :before_timer)
+      assert not Map.has_key?(jobs, :after_timer)
+      jobs = JobScheduler.jobs()
+      assert length(jobs) == 1
+      assert Keyword.has_key?(jobs, :before_timer)
+      assert not Keyword.has_key?(jobs, :after_timer)
+
+      Manager.register_config(:john, after_config)
+
+      jobs = ManagerTestUtils.get_manager_config(:jobs, :john)
+      assert not Map.has_key?(jobs, :before_timer)
+      assert Map.has_key?(jobs, :after_timer)
+      jobs = JobScheduler.jobs()
+      assert length(jobs) == 1
+      assert not Keyword.has_key?(jobs, :before_timer)
+      assert Keyword.has_key?(jobs, :after_timer)
     end
 
     test "update job" do
-      Fledex.MockJobScheduler
-      |> expect(:delete_job, fn _name -> :ok end)
-      |> expect(:create_job, fn _name, _schedule, _strip_name ->
-        Quantum.Job.new(Quantum.scheduler_config([], Fledex.MockJobScheduler, JobScheduler))
-      end)
-      |> expect(:add_job, fn _job -> :ok end)
-
       use Fledex, dont_start: true
 
-      config =
+      before_config =
+        led_strip :john, :config do
+          job :timer, ~e[2 * * * * * *]e do
+            :ok
+          end
+        end
+
+      after_config =
         led_strip :john, :config do
           job :timer, ~e[1 * * * * * *]e do
             :ok
           end
         end
 
-      state = %{
-        animations: %{john: %{}},
-        coordinators: %{john: %{}},
-        jobs: %{
-          john: %{
-            timer: %{
-              type: :job,
-              pattern: ~e[* * * * * * *]e,
-              options: [],
-              func: fn -> :ok end
-            }
-          }
-        },
-        impls: %{
-          job_scheduler: Fledex.MockJobScheduler,
-          led_strip: Fledex.LedStrip
-        }
-      }
+      Manager.register_strip(:john, [{Null, []}], [])
+      Manager.register_config(:john, before_config)
 
-      {:reply, :ok, _state} =
-        Manager.handle_call({:register_config, :john, config}, self(), state)
+      jobs1 = ManagerTestUtils.get_manager_config(:jobs, :john)
+      assert Map.has_key?(jobs1, :timer)
+      jobs1 = JobScheduler.jobs()
+      assert length(jobs1) == 1
+      assert Keyword.has_key?(jobs1, :timer)
 
-      Mox.verify!()
+      Manager.register_config(:john, after_config)
+
+      jobs2 = ManagerTestUtils.get_manager_config(:jobs, :john)
+      assert Map.has_key?(jobs2, :timer)
+      jobs2 = JobScheduler.jobs()
+      assert length(jobs2) == 1
+      assert Keyword.has_key?(jobs2, :timer)
+
+      schedule1 = Keyword.fetch!(jobs1, :timer) |> Map.fetch!(:schedule)
+      schedule2 = Keyword.fetch!(jobs2, :timer) |> Map.fetch!(:schedule)
+      assert schedule1 != schedule2
     end
 
     test "delete job" do
-      Fledex.MockJobScheduler
-      |> expect(:delete_job, fn _name -> :ok end)
-
       use Fledex, dont_start: true
 
-      config =
+      before_config =
+        led_strip :john, :config do
+          job :before_timer, ~e[* * * * * * *]e do
+            :ok
+          end
+        end
+
+      after_config =
         led_strip :john, :config do
         end
 
-      state = %{
-        animations: %{john: %{}},
-        coordinators: %{john: %{}},
-        jobs: %{
-          john: %{
-            timer: %{
-              type: :job,
-              pattern: ~e[* * * * * * *]e,
-              options: [],
-              func: fn -> :ok end
-            }
-          }
-        },
-        impls: %{
-          job_scheduler: Fledex.MockJobScheduler,
-          led_strip: Fledex.LedStrip,
-          coordinator: Fledex.Animation.Coordinator,
-          animator: Fledex.Animation.Animator
-        }
-      }
+      Manager.register_strip(:john, [{Null, []}], [])
+      Manager.register_config(:john, before_config)
 
-      {:reply, :ok, _state} =
-        Manager.handle_call({:register_config, :john, config}, self(), state)
+      assert length(JobScheduler.jobs()) == 1
 
-      Mox.verify!()
+      Manager.register_config(:john, after_config)
+      assert Enum.empty?(JobScheduler.jobs())
     end
   end
 
   describe "test coordinators" do
-    test "dispatching" do
-      Fledex.MockCoordinator
-      |> expect(:start_link, fn :john, :coord1, _opts -> {:ok, {self()}} end)
-      |> expect(:start_link, fn :john, :coord2, _opts -> {:ok, {self()}} end)
-      |> expect(:config, fn :john, :coord1, _config -> :ok end)
-      |> expect(:shutdown, 2, fn :john, _coordinator -> :ok end)
+    setup do
+      start_supervised(AnimationSystem.child_spec())
+      Manager.register_strip(@strip_name, [{Null, []}], [])
+      %{strip_name: @strip_name}
+    end
 
+    test "create coordinator", %{strip_name: strip_name} do
       use Fledex, dont_start: true
 
-      state = %{
-        animations: %{john: %{}},
-        coordinators: %{john: %{}},
-        jobs: %{john: %{}},
-        impls: %{
-          coordinator: Fledex.MockCoordinator
-        }
-      }
+      config1 =
+        led_strip strip_name, :config do
+          coordinator :coord1, [] do
+            {_state, _context, opts} -> Keyword.put(opts, :test1, true)
+          end
+        end
+
+      :ok = Manager.register_config(strip_name, config1)
+      assert ManagerTestUtils.whereis(strip_name, :coordinator, :coord1) != nil
+    end
+
+    test "update coordinator", %{strip_name: strip_name} do
+      use Fledex, dont_start: true
 
       config1 =
-        led_strip :john, :config do
+        led_strip strip_name, :config do
           coordinator :coord1, [] do
             {_state, _context, opts} -> Keyword.put(opts, :test1, true)
           end
         end
 
       config2 =
-        led_strip :john, :config do
+        led_strip strip_name, :config do
           coordinator :coord1 do
             {_state, _context, opts} -> Keyword.put(opts, :test2, true)
           end
@@ -278,16 +276,34 @@ defmodule Fledex.Animation.ManagerTest do
           end
         end
 
-      config3 =
-        led_strip :john, :config do
+      :ok = Manager.register_config(strip_name, config1)
+      assert ManagerTestUtils.whereis(strip_name, :coordinator, :coord1) != nil
+      assert ManagerTestUtils.whereis(strip_name, :coordinator, :coord2) == nil
+
+      :ok = Manager.register_config(strip_name, config2)
+      assert ManagerTestUtils.whereis(strip_name, :coordinator, :coord1) != nil
+      assert ManagerTestUtils.whereis(strip_name, :coordinator, :coord2) != nil
+    end
+
+    test "delete coordinator", %{strip_name: strip_name} do
+      use Fledex, dont_start: true
+
+      config1 =
+        led_strip strip_name, :config do
+          coordinator :coord1, [] do
+            {_state, _context, opts} -> Keyword.put(opts, :test1, true)
+          end
         end
 
-      from = {self(), :ok}
-      {:reply, :ok, state} = Manager.handle_call({:register_config, :john, config1}, from, state)
-      {:reply, :ok, state} = Manager.handle_call({:register_config, :john, config2}, from, state)
-      {:reply, :ok, _state} = Manager.handle_call({:register_config, :john, config3}, from, state)
+      config2 =
+        led_strip strip_name, :config do
+        end
 
-      Mox.verify!()
+      :ok = Manager.register_config(strip_name, config1)
+      assert ManagerTestUtils.whereis(strip_name, :coordinator, :coord1) != nil
+
+      :ok = Manager.register_config(strip_name, config2)
+      assert ManagerTestUtils.whereis(strip_name, :coordinator, :coord1) == nil
     end
   end
 end
@@ -297,14 +313,15 @@ defmodule Fledex.Animation.ManagerTest2 do
 
   alias Fledex.Animation.Manager
   alias Fledex.Driver.Impl.Null
+  alias Fledex.Supervisor.AnimationSystem
 
   setup do
-    on_exit(fn -> Manager.stop() end)
+    {:ok, _pid} = start_supervised(AnimationSystem.child_spec())
+    :ok
   end
 
   describe "Animation with wrong type" do
     test "register animation with a broken animation type" do
-      {:ok, pid} = Manager.start_link()
       :ok = Manager.register_strip(:some_strip, [{Null, []}], [])
 
       config = %{
@@ -316,7 +333,6 @@ defmodule Fledex.Animation.ManagerTest2 do
       response = Manager.register_config(:some_strip, config)
 
       assert response == {:error, "An unknown type was encountered #{inspect(config)}"}
-      Process.exit(pid, :normal)
     end
   end
 end

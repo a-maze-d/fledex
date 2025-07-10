@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -40,7 +40,7 @@ defmodule Fledex.Effect.RotationTest do
       leds = [0xFF0000, 0x00FF00, 0x0000FF]
       triggers = %{default: 1}
 
-      returned_leds = Rotation.apply(leds, 3, [divisor: 2], triggers, @context)
+      returned_leds = Rotation.apply(leds, 3, [divisor: 2, publish: false], triggers, @context)
 
       assert returned_leds == {[0xFF0000, 0x00FF00, 0x0000FF], 3, triggers}
 
@@ -54,7 +54,8 @@ defmodule Fledex.Effect.RotationTest do
       leds = [0xFF0000, 0x00FF00, 0x0000FF]
       triggers = %{default: 1}
 
-      returned_leds = Rotation.apply(leds, 3, [divisor: 2, stretch: 6], triggers, @context)
+      returned_leds =
+        Rotation.apply(leds, 3, [divisor: 2, stretch: 6, publish: false], triggers, @context)
 
       assert returned_leds ==
                {[0xFF0000, 0x00FF00, 0x0000FF, 0x000000, 0x000000, 0x000000], 6, triggers}

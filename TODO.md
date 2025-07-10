@@ -30,13 +30,28 @@ Even though this library is published, there are things I still want to do befor
     - [x] We probably want to remove some of the `optional` attributes in the `Animator.config_t` structure
     - [x] Rename the Manager.config_t() type (remove the plural s)
     - [x] Does the `AnimatorInterface` still make sense? No, break out into a Utils module
+    - [ ] align the `terminate`, `shutdown`, `stop` functions to be consistent
+    - [ ] cleanup the via_tuple stuff once coordinator is done (move Utils to Supervisor?)
   - [x] Do we want to create a Utily class for Components, so that the name creation is simplified? (v0.6)
+  - [ ] enable testing with more elixir versions 
 - [ ] Enable Telemetry? (v0.7)
 - [ ] Missing functionality
   - [/] Add a default `led_strip` driver that can be configured through the config (v0.6)
         I experimented with this idea, but it really doesn't give a real benefit. Therefore
         dropped it again.
   - [ ] Connect everything into a supervision tree (to make it more robust) (v0.6)
+    - [x] handle all the TODOs (done, for those related to the supervisor changes)
+    - [x] Add logs to starting/shutting down of processes
+    - [ ] add documentation
+    - [ ] add negative tests (killing some service)
+    - [ ] Create commit log
+    - [ ] Cleanup code from commented out stuff
+    - [ ] Cleanup code from debug stuff
+    - [ ] decide on what to do with the color stuff that seems to be broken with the new Elixir version
+    - [ ] extra round of testing
+    - [ ] check specs, Credo, ...
+    - [ ] we start things through the Supervisor, but we don't shut things down through it
+  - [ ] should the `:config` driver not only return the config but the strip_name too?
   - [ ] setting up livebook (a really working version) on windows is anything than easy :-( Can we do something about it? Investigate (v0.7) 
   - [ ] Add support for WS2811/12/13/14/15 LED strips controlled through phase modulation.
   - [ ] Clustering (v0.7)

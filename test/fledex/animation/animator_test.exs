@@ -23,6 +23,8 @@ defmodule Fledex.Animation.AnimatorTest do
   alias Fledex.Effect.Wanish
   alias Fledex.Leds
   alias Fledex.LedStrip
+  alias Fledex.Supervisor.AnimationSystem
+  alias Fledex.Supervisor.WorkerSupervisor
 
   def default_def_func(_triggers) do
     Leds.leds(30)
@@ -47,11 +49,8 @@ defmodule Fledex.Animation.AnimatorTest do
 
   @strip_name :test_strip
   setup do
-    {:ok, pid} =
-      start_supervised(%{
-        id: LedStrip,
-        start: {LedStrip, :start_link, [@strip_name, Null]}
-      })
+    start_supervised(AnimationSystem.child_spec())
+    {:ok, pid} = WorkerSupervisor.start_led_strip(@strip_name, Null, [])
 
     %{strip_name: @strip_name, pid: pid}
   end
@@ -75,7 +74,7 @@ defmodule Fledex.Animation.AnimatorTest do
     end
 
     test "default funcs" do
-      init_args = %{}
+      init_args = %{type: :animation}
 
       {:ok, state, {:continue, :paint_once}} =
         Animator.init({init_args, :test_strip, :test_animation})
@@ -85,7 +84,7 @@ defmodule Fledex.Animation.AnimatorTest do
     end
 
     test "config applied correctly (none_set)" do
-      init_args = %{}
+      init_args = %{type: :animation}
 
       {:ok, state, {:continue, :paint_once}} =
         Animator.init({init_args, :test_strip, :test_animation})
@@ -199,7 +198,6 @@ defmodule Fledex.Animation.AnimatorTest do
     end
 
     def assert_logs(logs) do
-      # IO.puts(logs)
       logs
       # we start with some simple transformation and cleanup of the log lines to
       # get to what really interests us
@@ -221,14 +219,12 @@ defmodule Fledex.Animation.AnimatorTest do
             # this happens when we are not yet fully set up. Thus we ignore the first one
             acc
           else
-            # IO.puts("#{acc.send}, #{acc.wait}, #{acc.led}: #{line}")
             assert acc.send == acc.led - 1
             assert acc.trigger == trigger
             %{acc | send: acc.send + 1}
           end
 
         {"led", trigger} ->
-          # IO.puts("#{acc.send}, #{acc.wait}, #{acc.led}: #{line}")
           assert acc.led == acc.send
           if acc.trigger != 0, do: assert(acc.trigger + 1 == trigger)
           %{acc | led: acc.led + 1, trigger: trigger}
@@ -245,6 +241,7 @@ defmodule Fledex.Animation.AnimatorTest do
 
     def start_server(strip_name) do
       init_args = %{
+        type: :animation,
         def_func: &logging_def_func/1,
         options: [send_config: &logging_send_config_func/1]
       }
@@ -309,7 +306,7 @@ defmodule Fledex.Animation.AnimatorTest do
       strip_name = :shutdown_testA
       {:ok, driver} = LedStrip.start_link(strip_name, Null)
       animation_name = :animation_testA
-      {:ok, pid} = Animator.start_link(%{}, strip_name, animation_name)
+      {:ok, pid} = Animator.start_link(%{type: :animation}, strip_name, animation_name)
       assert Process.alive?(pid)
       Animator.shutdown(strip_name, animation_name)
       assert not Process.alive?(pid)
@@ -322,7 +319,7 @@ defmodule Fledex.Animation.AnimatorTest do
       animation_name = :animation_testB
       {:ok, pid} = Animator.start_link(%{type: :static}, strip_name, animation_name)
       assert Process.alive?(pid)
-      GenServer.stop(Utils.build_name(strip_name, :animator, animation_name), :normal)
+      Animator.shutdown(strip_name, animation_name)
       assert not Process.alive?(pid)
       GenServer.stop(driver, :normal)
     end

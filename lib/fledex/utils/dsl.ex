@@ -1,4 +1,4 @@
-# Copyright 2024, Matthias Reik <fledex@reik.org>
+# Copyright 2024-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -7,7 +7,7 @@ defmodule Fledex.Utils.Dsl do
 
   alias Fledex.Animation.Manager
   alias Fledex.Leds
-  alias Fledex.Supervisor
+  alias Fledex.Supervisor.AnimationSystem
 
   @fledex_macros [
     :animation,
@@ -95,12 +95,8 @@ defmodule Fledex.Utils.Dsl do
   end
 
   def configure_strip(strip_name, drivers, strip_options, config) when is_list(drivers) do
-    # if is_atom(strip_options) and strip_options == :config do
-    #   config
-    # else
     Manager.register_strip(strip_name, drivers, strip_options)
     Manager.register_config(strip_name, config)
-    # end
   end
 
   @spec init(keyword) :: :ok | {:ok, pid()}
@@ -109,11 +105,34 @@ defmodule Fledex.Utils.Dsl do
     if Keyword.get(opts, :dont_start, false) == true do
       :ok
     else
-      if Keyword.get(opts, :no_supervisor, false) == true do
-        Manager.start_link(opts)
-      else
-        Supervisor.start_link(opts)
+      case start_system(opts) do
+        {:ok, pid} ->
+          {:ok, pid}
+
+        {:error, {:already_started, pid}} ->
+          {:ok, pid}
+          # other -> other
       end
+    end
+  end
+
+  defp start_system(opts) do
+    supervisor = Keyword.get(opts, :supervisor, :app)
+    opts = Keyword.drop(opts, [:supervisor])
+
+    case supervisor do
+      :none ->
+        AnimationSystem.start_link(opts)
+
+      # Manager.start_link(opts)
+      :app ->
+        DynamicSupervisor.start_child(Fledex.DynamicSupervisor, AnimationSystem.child_spec(opts))
+
+      :kino ->
+        Kino.start_child(AnimationSystem.child_spec(opts))
+
+      {:dynamic, name} ->
+        DynamicSupervisor.start_child(name, AnimationSystem.child_spec(opts))
     end
   end
 

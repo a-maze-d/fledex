@@ -1,4 +1,4 @@
-# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -10,6 +10,7 @@ defmodule Fledex.Effect.Rotation do
 
   def do_apply(leds, count, config, triggers, context) do
     left = Keyword.get(config, :direction, :left) != :right
+    publish = Keyword.get(config, :publish, true)
     trigger_name = Keyword.get(config, :trigger_name, :default)
     offset = triggers[trigger_name] || 0
     divisor = Keyword.get(config, :divisor, 1)
@@ -17,7 +18,7 @@ defmodule Fledex.Effect.Rotation do
     {leds, count} = stretch({leds, count}, stretch)
     offset = trunc(offset / divisor)
     remainder = rem(offset, count)
-    _ignore = if remainder == 0, do: PubSub.broadcast_state(:stop_start, context)
+    _ignore = if publish and remainder == 0, do: PubSub.broadcast_state(:stop_start, context)
     {rotate(leds, count, remainder, left), count, triggers}
   end
 

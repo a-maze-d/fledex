@@ -1,4 +1,4 @@
-# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -8,7 +8,6 @@ defmodule Fledex.Driver.Impl.Kino do
   alias Fledex.Color.Correction
   alias Fledex.Color.Types
 
-  # we update as often as the driver updates us
   @default_update_freq 1
   @base16 16
   @block <<"\u2588">>
@@ -25,14 +24,25 @@ defmodule Fledex.Driver.Impl.Kino do
   end
 
   @impl true
-  @spec init(keyword) :: keyword
-  def init(init_args) do
-    configure(init_args)
+  @spec init(keyword, map) :: keyword
+  def init(config, global_config) do
+    set_group_leader(global_config)
+    configure(config)
+  end
+
+  defp set_group_leader(global_config) do
+    # we need to ensure that we set the correct group leader, otherwise
+    # the output will might go the wrong direction.
+    group_leader = Map.get(global_config, :group_leader, Process.group_leader())
+    Process.group_leader(self(), group_leader)
   end
 
   @impl true
-  @spec reinit(keyword, keyword) :: keyword
-  def reinit(old_config, new_config) do
+  @spec reinit(keyword, keyword, map) :: keyword
+  # def reinit(_old_config, new_config, _global_config), do: new_config
+  def reinit(old_config, new_config, global_config) do
+    set_group_leader(global_config)
+
     Keyword.merge(
       old_config,
       Keyword.put(new_config, :frame, Kino.Frame.new() |> Kino.render())
@@ -51,7 +61,11 @@ defmodule Fledex.Driver.Impl.Kino do
           acc <> "<span style=\"color: ##{hex}\">" <> @block <> "</span>"
         end)
 
-      :ok = Kino.Frame.render(Keyword.fetch!(config, :frame), Kino.Markdown.new(output))
+      :ok =
+        Kino.Frame.render(
+          Keyword.fetch!(config, :frame),
+          Kino.Markdown.new(output)
+        )
     end
 
     {config, :ok}

@@ -7,7 +7,6 @@ defmodule Fledex.Utils.GuardsTest do
   import Fledex.Utils.Guards
 
   def create_in_range_case(line) do
-    # IO.puts("line: #{inspect line}")
     line
     |> String.split(",")
     |> Enum.map(fn item -> convert!(item) end)
@@ -35,14 +34,11 @@ defmodule Fledex.Utils.GuardsTest do
 
     test "test all combinations", %{cases: cases} do
       Enum.each(cases, fn {value, inverted, min, max, expected} ->
-        # IO.puts("case #{inspect {value, inverted, min, max, expected}}")
         case value do
           _x when is_in_range(value, inverted, min, max) ->
-            # IO.puts("in_range")
             assert(expected)
 
           _x when not is_in_range(value, inverted, min, max) ->
-            # IO.puts("NOT in_range")
             assert(not expected)
         end
       end)
