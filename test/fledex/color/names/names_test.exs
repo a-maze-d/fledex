@@ -92,7 +92,8 @@ defmodule Fledex.Color.NamesTest do
       assert "" == Names.vermilion2(:source)
       assert "Crayola" == Names.absolute_zero(:source)
 
-      assert :vermilion2 in Names.names()
+      assert Enum.find_index(Names.names(), fn x -> x == :vermilion2 end) != nil
+      assert Enum.find_index(Names.colors(), fn x -> x.name == :vermilion2 end) != nil
     end
 
     test "test quick access functions (with atom)" do

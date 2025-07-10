@@ -120,7 +120,7 @@ defmodule Fledex.Color.Names do
   @spec colors :: list(Types.color_struct_t())
   def colors do
     Enum.flat_map(@modules, fn module ->
-      module.colors
+      module.colors()
     end)
     |> Enum.uniq_by(fn color -> color.name end)
   end
@@ -136,6 +136,7 @@ defmodule Fledex.Color.Names do
     Enum.flat_map(@modules, fn module ->
       module.names()
     end)
+    |> Enum.uniq()
   end
 
   @doc """
