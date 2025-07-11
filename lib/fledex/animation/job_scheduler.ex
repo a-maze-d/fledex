@@ -10,6 +10,16 @@ defmodule Fledex.Animation.JobScheduler do
   alias Quantum.Job
 
   @type job :: Job.t()
+  @typedoc """
+  The configuration of a job.
+
+  * `:type`: This must be `:job`
+  * `:pattern`: This is the crontab pattern describing when to trigger the job
+  * `:options`: Some options to finetune the job
+  ** `:timezone`: default `UTC`
+  ** `:overlap`: whether jobs are allowed to overlap (if execution is longer than the interval between runs)
+  * `:func`: The function that will be executed when the job runs.
+  """
   @type config_t :: %{
           type: :job,
           pattern: Crontab.CronExpression.t(),
@@ -17,6 +27,13 @@ defmodule Fledex.Animation.JobScheduler do
           func: (-> any)
         }
 
+  @doc """
+  creates a new job
+
+  **Note:** The job name is NOT unique across led strips. It's your
+  responsibility to avoid interferences (the strip_name is currently
+  not used, but this might change in the future)
+  """
   @spec create_job(atom, config_t(), atom) :: job()
   def create_job(job, job_config, _strip_name) do
     new_job([])
@@ -27,7 +44,9 @@ defmodule Fledex.Animation.JobScheduler do
     |> Job.set_overlap(Keyword.get(job_config.options, :overlap, false))
   end
 
+  # MARK server side
   @impl true
+  @spec init(keyword) :: keyword
   def init(opts) do
     Logger.debug("starting JobScheduler ")
     opts

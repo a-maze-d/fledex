@@ -125,6 +125,8 @@ defmodule Fledex.Animation.Coordinator do
   end
 
   @impl GenServer
+  @spec terminate(reason, state :: term()) :: term()
+        when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(_reason, %{strip_name: strip_name, coordinator_name: coordinator_name} = _state) do
     Logger.debug(
       "shutting down coordinator: #{inspect({strip_name, coordinator_name})}",

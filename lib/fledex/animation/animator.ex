@@ -51,6 +51,13 @@ defmodule Fledex.Animation.Animator do
   alias Fledex.Supervisor.Utils
   alias Fledex.Utils.PubSub
 
+  @typedoc """
+  The configuration of an animator.
+  * `:type`: whether we have an `:animation` or a `:static` element. A static element can not be animated, but otherwise everything else is the same.
+  * `:def_func`: defines a function that returns the definition of an led sequence. It takes a map as input that can contain trigger information (like the led strip refresh counter)
+  * `:options`: a set up options that can be specified with the animation
+  * `:effects`: a list of effects (see `Fledex.Effect.*` with their configurations. For static elements that will not have any effect, since the display will not be refreshed.
+  """
   @type config_t :: %{
           :type => :animation | :static,
           :def_func => (map -> Leds.t()),
@@ -58,17 +65,18 @@ defmodule Fledex.Animation.Animator do
           :effects => [{module, keyword}]
         }
 
-  @type state_t :: %{
-          :triggers => map,
-          :type => :animation | :static,
-          :def_func => (map -> Leds.t()),
-          :options => keyword | nil,
-          :effects => [{module, keyword}],
-          :strip_name => atom,
-          :animation_name => atom
-        }
+  @typep state_t :: %{
+           :triggers => map,
+           :type => :animation | :static,
+           :def_func => (map -> Leds.t()),
+           :options => keyword | nil,
+           :effects => [{module, keyword}],
+           :strip_name => atom,
+           :animation_name => atom
+         }
 
   # MARK: client side
+
   @doc """
   Create a new animation (with a given name and configuration) for the led strip
   with the specified name.
@@ -117,9 +125,7 @@ defmodule Fledex.Animation.Animator do
   end
 
   @doc """
-  When the animation is no long required, this function should be called. This will
-  call (by default) GenServer.stop. The animation can implement the `terminate/2`
-  function if necessary.
+  When the animation is no long required, this function should be called.
   """
   @spec stop(atom, atom) :: :ok
   def stop(strip_name, animation_name) do

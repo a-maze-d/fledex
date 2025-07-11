@@ -32,6 +32,9 @@ defmodule Fledex.Supervisor.Utils do
   """
   def workers_supervisor, do: @supervisor
 
+  @doc """
+  used to register the workers with the registry
+  """
   @spec via_tuple(atom, :animator | :job | :coordinator | :led_strip, atom) :: GenServer.name()
   def via_tuple(strip_name, type, animation_name),
     do: {:via, Registry, {@registry, {strip_name, type, animation_name}}}
