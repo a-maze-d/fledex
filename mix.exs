@@ -183,7 +183,7 @@ defmodule Fledex.MixProject do
         Core: [
           Fledex,
           Fledex.LedStrip,
-          Fledex.Leds,
+          Fledex.Leds
         ],
         Animation: ~r/Fledex.Animation/,
         Effect: ~r/Fledex.Effect/,
