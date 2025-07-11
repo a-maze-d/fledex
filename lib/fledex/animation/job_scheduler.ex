@@ -1,7 +1,7 @@
 # Copyright 2024-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
-# MARK: Quantum
+
 defmodule Fledex.Animation.JobScheduler do
   use Quantum, otp_app: __MODULE__
 

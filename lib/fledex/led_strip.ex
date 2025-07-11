@@ -180,7 +180,10 @@ defmodule Fledex.LedStrip do
   """
   @spec change_config(atom, keyword) :: {:ok, [keyword]}
   def change_config(strip_name, global_config) do
-    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :none), {:change_config, global_config})
+    GenServer.call(
+      Utils.via_tuple(strip_name, :led_strip, :none),
+      {:change_config, global_config}
+    )
   end
 
   @doc """
@@ -198,7 +201,11 @@ defmodule Fledex.LedStrip do
   end
 
   def reinit(strip_name, drivers, strip_config) do
-    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :none), {:reinit, drivers, strip_config})
+    GenServer.call(
+      Utils.via_tuple(strip_name, :led_strip, :none),
+      {:reinit, drivers, strip_config}
+    )
+
     :ok
   end
 

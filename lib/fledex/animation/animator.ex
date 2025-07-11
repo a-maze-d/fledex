@@ -68,19 +68,6 @@ defmodule Fledex.Animation.Animator do
           :animation_name => atom
         }
 
-  @doc false
-  @default_leds Leds.leds()
-  @spec default_def_func(map) :: Leds.t()
-  def default_def_func(_triggers) do
-    @default_leds
-  end
-
-  @doc false
-  @spec default_send_config_func(map) :: []
-  def default_send_config_func(_triggers) do
-    []
-  end
-
   # MARK: client side
   @doc """
   Create a new animation (with a given name and configuration) for the led strip
@@ -206,6 +193,74 @@ defmodule Fledex.Animation.Animator do
     {:noreply, %{state | triggers: Map.merge(state.triggers, triggers)}}
   end
 
+  @impl GenServer
+  @spec handle_cast({:config, config_t}, state_t) :: {:noreply, state_t}
+  def handle_cast({:config, config}, state) do
+    state = update_config(state, config)
+
+    {:noreply, update_leds(state)}
+  end
+
+  @impl GenServer
+  @spec handle_cast({:update_effect, :all | pos_integer, keyword}, state_t) :: {:noreply, state_t}
+  def handle_cast({:update_effect, :all, config_updates}, state) do
+    effects = Enum.map(state.effects, fn effect -> update_effect(effect, config_updates) end)
+    {:noreply, %{state | effects: effects}}
+  end
+
+  def handle_cast({:update_effect, what, config_updates}, %{effects: effects} = state)
+      when is_integer(what) and what > 0 do
+    {:noreply,
+     %{
+       state
+       | effects:
+           update_effect_at(effects, what, config_updates, %{
+             strip_name: state.strip_name,
+             animation_name: state.animation_name
+           })
+     }}
+  end
+
+  @impl GenServer
+  @spec terminate(reason, state :: state_t) :: :ok
+        when reason: :normal | :shutdown | {:shutdown, term()} | term()
+  def terminate(
+        _reason,
+        %{
+          strip_name: strip_name,
+          animation_name: animation_name,
+          type: type
+        } = _state
+      ) do
+    Logger.debug(
+      "shutting down animation #{inspect({strip_name, animation_name})}",
+      %{strip_name: strip_name, animation_name: animation_name, type: type}
+    )
+
+    case type do
+      :animation -> PubSub.unsubscribe(PubSub.channel_trigger())
+      # nothing to do, since we haven't been subscribed
+      :static -> :ok
+    end
+
+    LedStrip.drop_namespace(strip_name, animation_name)
+  end
+
+  # MARK: public helper functions
+  @doc false
+  @default_leds Leds.leds()
+  @spec default_def_func(map) :: Leds.t()
+  def default_def_func(_triggers) do
+    @default_leds
+  end
+
+  @doc false
+  @spec default_send_config_func(map) :: []
+  def default_send_config_func(_triggers) do
+    []
+  end
+
+  # MARK: private helper functions
   @spec update_leds(state_t) :: state_t
   defp update_leds(
          %{
@@ -241,34 +296,6 @@ defmodule Fledex.Animation.Animator do
     %{state | triggers: triggers}
   end
 
-  @spec call_def_func(fun, %{atom: any}, keyword) :: Leds.t() | {Leds.t(), %{atom: any}}
-  defp call_def_func(def_func, triggers, options)
-
-  defp call_def_func(def_func, triggers, _options) when is_function(def_func, 1),
-    do: def_func.(triggers)
-
-  defp call_def_func(def_func, triggers, options) when is_function(def_func, 2),
-    do: def_func.(triggers, options)
-
-  @spec apply_effects(Leds.t(), [{module, map}], map, map) :: {Leds.t(), map}
-  def apply_effects(leds, effects, triggers, context) do
-    count = leds.count
-
-    {led_list, led_count, triggers} =
-      Enum.zip_reduce(
-        1..length(effects)//1,
-        Enum.reverse(effects),
-        {Leds.to_list(leds), count, triggers},
-        fn index, {effect, config}, {leds, count, triggers} ->
-          context = Map.put(context, :effect, index)
-          {leds, count, triggers} = effect.apply(leds, count, config, triggers, context)
-          {leds, count, triggers}
-        end
-      )
-
-    {Leds.leds(led_count, led_list, %{}), triggers}
-  end
-
   # the response can be with or without trigger, we ensure that it's always with a trigger,
   # in the worst case with the original triggers.
   @spec get_with_triggers(response :: any | {any, map}, orig_triggers :: map) :: {any, map}
@@ -279,9 +306,17 @@ defmodule Fledex.Animation.Animator do
     end
   end
 
-  @doc false
+  @spec call_def_func(fun, %{atom: any}, keyword) :: Leds.t() | {Leds.t(), %{atom: any}}
+  defp call_def_func(def_func, triggers, options)
+
+  defp call_def_func(def_func, triggers, _options) when is_function(def_func, 1),
+    do: def_func.(triggers)
+
+  defp call_def_func(def_func, triggers, options) when is_function(def_func, 2),
+    do: def_func.(triggers, options)
+
   @spec update_config(state_t, config_t) :: state_t
-  def update_config(state, config) do
+  defp update_config(state, config) do
     %{
       type: config[:type] || state.type,
       triggers: Map.merge(state.triggers, config[:triggers] || state[:triggers]),
@@ -296,9 +331,9 @@ defmodule Fledex.Animation.Animator do
   end
 
   @spec update_options(keyword | nil, fun | nil) :: keyword
-  def update_options(options, nil), do: options
+  defp update_options(options, nil), do: options
 
-  def update_options(options, send_config_func) do
+  defp update_options(options, send_config_func) do
     Keyword.put(options || [], :send_config, send_config_func)
   end
 
@@ -309,34 +344,6 @@ defmodule Fledex.Animation.Animator do
     Enum.map(effects, fn {module, configs} ->
       {module, Keyword.put_new(configs, :trigger_name, strip_name)}
     end)
-  end
-
-  @impl GenServer
-  @spec handle_cast({:config, config_t}, state_t) :: {:noreply, state_t}
-  def handle_cast({:config, config}, state) do
-    state = update_config(state, config)
-
-    {:noreply, update_leds(state)}
-  end
-
-  @impl GenServer
-  @spec handle_cast({:update_effect, :all | pos_integer, keyword}, state_t) :: {:noreply, state_t}
-  def handle_cast({:update_effect, :all, config_updates}, state) do
-    effects = Enum.map(state.effects, fn effect -> update_effect(effect, config_updates) end)
-    {:noreply, %{state | effects: effects}}
-  end
-
-  def handle_cast({:update_effect, what, config_updates}, %{effects: effects} = state)
-      when is_integer(what) and what > 0 do
-    {:noreply,
-     %{
-       state
-       | effects:
-           update_effect_at(effects, what, config_updates, %{
-             strip_name: state.strip_name,
-             animation_name: state.animation_name
-           })
-     }}
   end
 
   @spec update_effect_at(list({module, config_t}), pos_integer(), keyword, map) :: [
@@ -362,28 +369,22 @@ defmodule Fledex.Animation.Animator do
     {module, Keyword.merge(config, config_updates)}
   end
 
-  @impl GenServer
-  @spec terminate(reason, state :: state_t) :: :ok
-        when reason: :normal | :shutdown | {:shutdown, term()} | term()
-  def terminate(
-        _reason,
-        %{
-          strip_name: strip_name,
-          animation_name: animation_name,
-          type: type
-        } = _state
-      ) do
-    Logger.debug(
-      "shutting down animation #{inspect({strip_name, animation_name})}",
-      %{strip_name: strip_name, animation_name: animation_name, type: type}
-    )
+  @spec apply_effects(Leds.t(), [{module, map}], map, map) :: {Leds.t(), map}
+  defp apply_effects(leds, effects, triggers, context) do
+    count = leds.count
 
-    case type do
-      :animation -> PubSub.unsubscribe(PubSub.channel_trigger())
-      # nothing to do, since we haven't been subscribed
-      :static -> :ok
-    end
+    {led_list, led_count, triggers} =
+      Enum.zip_reduce(
+        1..length(effects)//1,
+        Enum.reverse(effects),
+        {Leds.to_list(leds), count, triggers},
+        fn index, {effect, config}, {leds, count, triggers} ->
+          context = Map.put(context, :effect, index)
+          {leds, count, triggers} = effect.apply(leds, count, config, triggers, context)
+          {leds, count, triggers}
+        end
+      )
 
-    LedStrip.drop_namespace(strip_name, animation_name)
+    {Leds.leds(led_count, led_list, %{}), triggers}
   end
 end

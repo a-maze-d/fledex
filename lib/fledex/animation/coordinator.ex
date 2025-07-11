@@ -22,9 +22,6 @@ defmodule Fledex.Animation.Coordinator do
            coordinator_name: atom
          }
 
-  @spec default_func(any, map, keyword) :: keyword
-  def default_func(_broadcast_state, _context, options), do: options
-
   defstruct options: [],
             func: &__MODULE__.default_func/3,
             strip_name: :default,
@@ -117,4 +114,11 @@ defmodule Fledex.Animation.Coordinator do
 
     PubSub.unsubscribe(PubSub.channel_state())
   end
+
+  # MARK: public helper functions
+  @doc false
+  @spec default_func(any, map, keyword) :: keyword
+  def default_func(_broadcast_state, _context, options), do: options
+
+
 end

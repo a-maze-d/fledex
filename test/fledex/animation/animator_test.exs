@@ -64,6 +64,7 @@ defmodule Fledex.Animation.AnimatorTest do
       assert Animator.default_send_config_func(%{trigger_name: 10}) == []
     end
   end
+
   describe "init" do
     test "config applied correctly (all set)" do
       init_args = %{
@@ -371,7 +372,6 @@ defmodule Fledex.Animation.AnimatorTest do
     end
 
     test "enable animation without effects" do
-
       state = %{
         triggers: %{},
         type: :animation,
@@ -434,7 +434,6 @@ defmodule Fledex.Animation.AnimatorTest do
 
   describe "debug functions" do
     test "get state" do
-
       effect = Fledex.Animation.TestEffect
       config = []
 
