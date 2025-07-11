@@ -20,12 +20,12 @@ defmodule Fledex.LedStrip do
 
   require Logger
 
-  alias Fledex.Animation.Utils
   alias Fledex.Color
   alias Fledex.Color.Conversion.CalcUtils
   alias Fledex.Color.Types
   alias Fledex.Driver.Impl.Null
   alias Fledex.Driver.Manager
+  alias Fledex.Supervisor.Utils
   alias Fledex.Utils.PubSub
 
   @type start_link_response :: :ignore | {:error, any} | {:ok, pid}
@@ -89,7 +89,7 @@ defmodule Fledex.LedStrip do
   * With several drivers and global config: `start_link(:name, [{Spi, []}, {Spi, dev: "spidev0.1"}], timer_only_dirty_update: true)`
   """
   @spec start_link(atom, module | {module, keyword} | [{module, keyword}], keyword) ::
-          start_link_response()
+          GenServer.on_start()
   def start_link(strip_name, driver \\ Null, global_config \\ [])
 
   def start_link(strip_name, driver, global_config)

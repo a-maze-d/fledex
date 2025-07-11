@@ -6,7 +6,7 @@ defmodule Fledex.Animation.Coordinator do
 
   require Logger
 
-  alias Fledex.Animation.Utils
+  alias Fledex.Supervisor.Utils
   alias Fledex.Utils.PubSub
 
   @type config_t :: %{
@@ -33,7 +33,7 @@ defmodule Fledex.Animation.Coordinator do
   @name &Utils.via_tuple/3
 
   # MARK: client side
-  @spec start_link(strip_name :: atom, coordinator_name :: atom, configs :: keyword) ::
+  @spec start_link(strip_name :: atom, coordinator_name :: atom, configs :: config_t) ::
           GenServer.on_start()
   def start_link(strip_name, animation_name, configs) do
     {:ok, _pid} =
@@ -77,7 +77,7 @@ defmodule Fledex.Animation.Coordinator do
       coordinator_name: coordinator_name
     }
 
-    :ok = PubSub.subscribe(PubSub.app(), PubSub.channel_state())
+    :ok = PubSub.subscribe(PubSub.channel_state())
     {:ok, state}
   end
 
@@ -117,6 +117,6 @@ defmodule Fledex.Animation.Coordinator do
       %{strip_name: strip_name, coordinator_name: coordinator_name}
     )
 
-    PubSub.unsubscribe(PubSub.app(), PubSub.channel_state())
+    PubSub.unsubscribe(PubSub.channel_state())
   end
 end

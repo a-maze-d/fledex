@@ -47,12 +47,12 @@ defmodule Fledex.Animation.Animator do
   require Logger
 
   alias Fledex.Animation.Utils
-
   alias Fledex.Leds
   alias Fledex.LedStrip
+  alias Fledex.Supervisor.Utils, as: SubUtils
   alias Fledex.Utils.PubSub
 
-  @name &Utils.via_tuple/3
+  @name &SubUtils.via_tuple/3
 
   @type config_t :: %{
           :type => :animation | :static,
@@ -76,10 +76,10 @@ defmodule Fledex.Animation.Animator do
   Create a new animation (with a given name and configuration) for the led strip
   with the specified name.
   """
-  @spec start_link(config :: config_t, strip_name :: atom, animation_name :: atom) ::
+  @spec start_link(strip_name :: atom, animation_name :: atom, config :: config_t) ::
           GenServer.on_start()
-  def start_link(config, strip_name, animation_name) do
-    GenServer.start_link(__MODULE__, {config, strip_name, animation_name},
+  def start_link(strip_name, animation_name, config) do
+    GenServer.start_link(__MODULE__, {strip_name, animation_name, config},
       name: @name.(strip_name, :animator, animation_name)
     )
   end
@@ -134,8 +134,8 @@ defmodule Fledex.Animation.Animator do
 
   ### MARK: server side
   @impl GenServer
-  @spec init({config_t, atom, atom}) :: {:ok, state_t, {:continue, :paint_once}}
-  def init({%{type: type} = init_args, strip_name, animation_name}) do
+  @spec init({atom, atom, config_t}) :: {:ok, state_t, {:continue, :paint_once}}
+  def init({strip_name, animation_name, %{type: type} = init_args}) do
     Logger.debug("starting animation: #{inspect({strip_name, animation_name})}", %{
       strip_name: strip_name,
       animation_name: animation_name,
@@ -160,7 +160,7 @@ defmodule Fledex.Animation.Animator do
     :ok = LedStrip.define_namespace(state.strip_name, state.animation_name)
 
     case state.type do
-      :animation -> :ok = PubSub.subscribe(PubSub.app(), PubSub.channel_trigger())
+      :animation -> :ok = PubSub.subscribe(PubSub.channel_trigger())
       # we don't subscribe because we paint only once
       :static -> :ok
     end
@@ -369,7 +369,7 @@ defmodule Fledex.Animation.Animator do
     )
 
     case type do
-      :animation -> PubSub.unsubscribe(PubSub.app(), PubSub.channel_trigger())
+      :animation -> PubSub.unsubscribe(PubSub.channel_trigger())
       # nothing to do, since we haven't been subscribed
       :static -> :ok
     end

@@ -5,10 +5,12 @@
 defmodule Fledex.SupervisorTest do
   use ExUnit.Case
 
+  alias Fledex.Animation.Animator
+  alias Fledex.Animation.Coordinator
   alias Fledex.Animation.Manager
+  alias Fledex.LedStrip
   alias Fledex.Supervisor.AnimationSystem
   alias Fledex.Supervisor.Utils
-  alias Fledex.Supervisor.WorkerSupervisor
 
   describe "animation system" do
     test "start in supervisor" do
@@ -31,12 +33,55 @@ defmodule Fledex.SupervisorTest do
     end
   end
 
-  describe "worker supervisor" do
-    test "start stop" do
-      {:ok, pid} = WorkerSupervisor.start_link([])
-      assert pid != nil
+  def count_workers do
+    DynamicSupervisor.count_children(Utils.workers_supervisor())
+    |> Map.get(:workers)
+  end
 
-      GenServer.stop(pid, :normal)
+  @test_strip :test_strip
+  @test_anim :my_anim
+  @test_coord :my_coordinator
+  describe "workers" do
+    setup do
+      start_supervised(AnimationSystem.child_spec([]))
+      :ok
+    end
+
+    test "ensure correct naming for workers" do
+      assert Utils.via_tuple(:testA, :animator, :testB) ==
+               {:via, Registry, {Fledex.Supervisor.WorkersRegistry, {:testA, :animator, :testB}}}
+    end
+
+    test "led strip worker" do
+      assert count_workers() == 0
+      AnimationSystem.start_led_strip(@test_strip)
+      assert count_workers() == 1
+      LedStrip.stop(@test_strip)
+      assert count_workers() == 0
+    end
+
+    test "animation worker" do
+      # the animation requires an led strip
+      assert count_workers() == 0
+      AnimationSystem.start_led_strip(@test_strip)
+
+      assert count_workers() == 1
+      AnimationSystem.start_animation(@test_strip, @test_anim, %{type: :animation})
+      assert count_workers() == 2
+      Animator.stop(@test_strip, @test_anim)
+      assert count_workers() == 1
+
+      # cleanup
+      LedStrip.stop(@test_strip)
+      assert count_workers() == 0
+    end
+
+    test "coordinator worker" do
+      assert count_workers() == 0
+      AnimationSystem.start_coordinator(@test_strip, @test_coord, %{func: fn _, _, _ -> :ok end})
+      assert count_workers() == 1
+      Coordinator.stop(@test_strip, @test_coord)
+      assert count_workers() == 0
     end
   end
 

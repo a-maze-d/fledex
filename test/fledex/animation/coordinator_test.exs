@@ -6,13 +6,14 @@ defmodule Fledex.Animation.CoordinatorTest do
   alias ExUnit.CaptureLog
   alias Fledex.Animation.Coordinator
   alias Fledex.Supervisor.AnimationSystem
+  alias Fledex.Supervisor.Utils
   alias Fledex.Utils.PubSub
 
   use ExUnit.Case
 
   @spec subscribers() :: [{pid(), Registry.value()}]
   defp subscribers do
-    subscribers = Registry.lookup(PubSub.app(), PubSub.channel_state())
+    subscribers = Registry.lookup(Utils.pubsub_name(), PubSub.channel_state())
     subscribers
   end
 

@@ -27,7 +27,7 @@ defmodule Fledex.Animation.Manager do
   alias Fledex.Animation.Coordinator
   alias Fledex.Animation.JobScheduler
   alias Fledex.LedStrip
-  alias Fledex.Supervisor.WorkerSupervisor
+  alias Fledex.Supervisor.AnimationSystem
 
   @type config_t :: %{
           atom => Animator.config_t() | JobScheduler.config_t() | Coordinator.config_t()
@@ -200,7 +200,7 @@ defmodule Fledex.Animation.Manager do
 
   @spec register_strip(state_t, atom, [{module, keyword}], keyword) :: state_t
   defp register_strip(state, strip_name, drivers, strip_config) do
-    _result = WorkerSupervisor.start_led_strip(strip_name, drivers, strip_config)
+    _result = AnimationSystem.start_led_strip(strip_name, drivers, strip_config)
 
     %{
       state
@@ -265,7 +265,7 @@ defmodule Fledex.Animation.Manager do
   @spec create_animators(atom, map) :: :ok
   defp create_animators(strip_name, created_animations) do
     Enum.each(created_animations, fn {animation_name, config} ->
-      WorkerSupervisor.start_animation(strip_name, animation_name, config)
+      AnimationSystem.start_animation(strip_name, animation_name, config)
     end)
   end
 
@@ -308,7 +308,7 @@ defmodule Fledex.Animation.Manager do
   @spec create_coordinators(atom, map) :: :ok
   defp create_coordinators(strip_name, created_coordinators) do
     Enum.each(created_coordinators, fn {coordinator_name, config} ->
-      WorkerSupervisor.start_coordinator(strip_name, coordinator_name, config)
+      AnimationSystem.start_coordinator(strip_name, coordinator_name, config)
     end)
   end
 

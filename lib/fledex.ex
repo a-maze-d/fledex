@@ -37,11 +37,21 @@ defmodule Fledex do
   @doc """
   By `use`-ing this module, the `Fledex` macros are made available.
 
-  This macro does also import `Crontab.CronExpression`, `Fledex.Leds`, `Fledex.Color.Names`,
-  and `Fledex.Utils.PubSub`. Therefore the functions from those modules are directly
-  available without namespace.
+  This macro does also import `Fledex.Leds`, `Fledex.Utils.PubSub`, `Fledex.Color.Names`, and `Crontab.CronExpression`. Therefore the functions from those modules are directly
+  available without namespace, the drivers part of the `FledexDriver.Impl` namespace are all aliased.
 
-  Take a look at the various [livebook examples](readme-2.html) on how to use the Fledex macros
+  **Note:** this could lead to a conflict with other libraries (like the `Kino`-driver with the `Kino`-library). In that case just use the fully qualified module name and prefix it even with `Elixir.`, i.e. `Elixir.Kino` if you want to use the `Kino`-library.
+
+  Take a look at the various [livebook examples](readme-2.html) for more details on how to use the Fledex library and macros.
+
+  When calling `use Fledex` you can specify a couple of options:
+  * `:dont_start`: This will prevent from the `Fledex.Supervisor.AnimationSystem` from being started. **Note::** this will not stop the `AnimationSystem` if it was already started by someone else.
+  * `:supervisor`: specifies how we want to supervise it. The options are:
+  ** `:none`: We will start the `Fledex.Supervisor.AnimationSystem` but without hanging in a supervision tree
+  ** `:app`: We add the `Fledex.Supervisor.AnimationSystem` to the application supervisr. You need to ensure that you have started the fledex application (done automatically if you run `iex -S mix` from the fledex project)
+  ** `:kino`: The `Fledex.Supervisor.AnimationSystem` will be added to the `Kino` session supervisor. The AnimationSystem will terminate when the livebook session terminates.
+  ** `{:dynamic, name}`: The `Fledex.Supervisor.AnimationSystem` will be added as a child process to the `DynamicSupervisor` with the given `name`.
+  * `:log_level`: specifies the log level if none is already specified. This is important if Fledex is not started as application
   """
   @spec __using__(keyword) :: Macro.t()
   defmacro __using__(opts) do

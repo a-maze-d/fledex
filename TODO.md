@@ -34,16 +34,17 @@ Even though this library is published, there are things I still want to do befor
   - [x] enable testing with more elixir versions 
     - [x] decide on what to do with the color stuff that seems to be broken with the new- Elixir version
   - [x] align the `terminate`, `shutdown`, `stop` functions to be consistent
-  - [ ] cleanup the via_tuple stuff once coordinator is done (move Utils to Supervisor?)
+  - [x] cleanup the argument order to be more consistent between Animator, Coordinator and LedStrip
+  - [x] Remove the `WorkerSupervisor`. It doesn't seem to have any value anymroe
+  - [x] cleanup the via_tuple stuff once coordinator is done (move Utils to Supervisor? yes moved)
   - [ ] Do we really need to use the `Leds.send` function in the `Animator`?
 - [ ] Missing functionality
   - [/] Add a default `led_strip` driver that can be configured through the config (v0.6)
-        I experimented with this idea, but it really doesn't give a real benefit. Therefore
-        dropped it again.
+        I experimented with this idea, but it really doesn't give a real benefit. Therefore dropped it again.
   - [ ] Connect everything into a supervision tree (to make it more robust) (v0.6)
     - [x] handle all the TODOs (done, for those related to the supervisor changes)
     - [x] Add logs to starting/shutting down of processes
-    - [ ] add documentation
+    - [ ] add documentation (livebook, `@doc`, `@module_doc`)
     - [ ] add negative tests (killing some service)
     - [x] Create commit log
     - [x] Cleanup code from commented out stuff

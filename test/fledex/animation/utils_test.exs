@@ -9,11 +9,6 @@ defmodule Fledex.Animation.UtilsTest do
   alias Fledex.Leds
 
   describe "util functions" do
-    test "ensure correct naming" do
-      assert Utils.via_tuple(:testA, :animator, :testB) ==
-               {:via, Registry, {Fledex.Supervisor.WorkersRegistry, {:testA, :animator, :testB}}}
-    end
-
     test "default_def_func" do
       assert Utils.default_def_func(%{}) == Leds.leds()
       assert Utils.default_def_func(%{trigger_name: 10}) == Leds.leds()
