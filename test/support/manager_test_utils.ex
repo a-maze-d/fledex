@@ -4,7 +4,7 @@
 
 defmodule Fledex.ManagerTestUtils do
   alias Fledex.Animation.Manager
-  alias Fledex.Animation.Utils
+  alias Fledex.Supervisor.Utils
 
   def get_manager_config, do: get_manager_config(:animations, :all)
   def get_manager_config(strip), do: get_manager_config(:animations, strip)

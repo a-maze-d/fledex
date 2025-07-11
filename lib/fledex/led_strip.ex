@@ -20,12 +20,12 @@ defmodule Fledex.LedStrip do
 
   require Logger
 
-  alias Fledex.Animation.Utils
   alias Fledex.Color
   alias Fledex.Color.Conversion.CalcUtils
   alias Fledex.Color.Types
   alias Fledex.Driver.Impl.Null
   alias Fledex.Driver.Manager
+  alias Fledex.Supervisor.Utils
   alias Fledex.Utils.PubSub
 
   @type start_link_response :: :ignore | {:error, any} | {:ok, pid}
@@ -63,7 +63,6 @@ defmodule Fledex.LedStrip do
     group_leader: [:group_leader]
   }
 
-  @name &Utils.via_tuple/3
   # client code
   @doc """
   This starts the server controlling a specfic led strip. It is possible
@@ -89,7 +88,7 @@ defmodule Fledex.LedStrip do
   * With several drivers and global config: `start_link(:name, [{Spi, []}, {Spi, dev: "spidev0.1"}], timer_only_dirty_update: true)`
   """
   @spec start_link(atom, module | {module, keyword} | [{module, keyword}], keyword) ::
-          start_link_response()
+          GenServer.on_start()
   def start_link(strip_name, driver \\ Null, global_config \\ [])
 
   def start_link(strip_name, driver, global_config)
@@ -111,7 +110,7 @@ defmodule Fledex.LedStrip do
         GenServer.start_link(
           __MODULE__,
           {strip_name, drivers, global_config},
-          name: @name.(strip_name, :led_strip, :none)
+          name: Utils.via_tuple(strip_name, :led_strip, :none)
         )
 
       pid ->
@@ -126,7 +125,7 @@ defmodule Fledex.LedStrip do
 
   def whereis(strip_name) do
     case Registry.lookup(
-           Fledex.Supervisor.Utils.worker_registry(),
+           Utils.worker_registry(),
            {strip_name, :led_strip, :none}
          ) do
       [] ->
@@ -143,7 +142,7 @@ defmodule Fledex.LedStrip do
   @spec define_namespace(atom, atom) :: :ok | {:error, String.t()}
   def define_namespace(strip_name, namespace) do
     # Logger.info("defining namespace: #{strip_name}-#{namespace}")
-    GenServer.call(@name.(strip_name, :led_strip, :none), {:define_namespace, namespace})
+    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :none), {:define_namespace, namespace})
   end
 
   @doc """
@@ -151,7 +150,7 @@ defmodule Fledex.LedStrip do
   """
   @spec drop_namespace(atom, atom) :: :ok
   def drop_namespace(strip_name, namespace) do
-    GenServer.call(@name.(strip_name, :led_strip, :none), {:drop_namespace, namespace})
+    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :none), {:drop_namespace, namespace})
   end
 
   @doc """
@@ -159,7 +158,7 @@ defmodule Fledex.LedStrip do
   """
   @spec exist_namespace(atom, atom) :: boolean
   def exist_namespace(strip_name, namespace) do
-    GenServer.call(@name.(strip_name, :led_strip, :none), {:exist_namespace, namespace})
+    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :none), {:exist_namespace, namespace})
   end
 
   @doc """
@@ -172,7 +171,7 @@ defmodule Fledex.LedStrip do
   """
   @spec set_leds(atom, atom, list(pos_integer)) :: :ok | {:error, String.t()}
   def set_leds(strip_name, namespace, leds) do
-    GenServer.call(@name.(strip_name, :led_strip, :none), {:set_leds, namespace, leds})
+    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :none), {:set_leds, namespace, leds})
   end
 
   @doc """
@@ -181,7 +180,10 @@ defmodule Fledex.LedStrip do
   """
   @spec change_config(atom, keyword) :: {:ok, [keyword]}
   def change_config(strip_name, global_config) do
-    GenServer.call(@name.(strip_name, :led_strip, :none), {:change_config, global_config})
+    GenServer.call(
+      Utils.via_tuple(strip_name, :led_strip, :none),
+      {:change_config, global_config}
+    )
   end
 
   @doc """
@@ -199,13 +201,17 @@ defmodule Fledex.LedStrip do
   end
 
   def reinit(strip_name, drivers, strip_config) do
-    GenServer.call(@name.(strip_name, :led_strip, :none), {:reinit, drivers, strip_config})
+    GenServer.call(
+      Utils.via_tuple(strip_name, :led_strip, :none),
+      {:reinit, drivers, strip_config}
+    )
+
     :ok
   end
 
   @spec stop(GenServer.server()) :: :ok
   def stop(strip_name) do
-    GenServer.stop(@name.(strip_name, :led_strip, :none))
+    GenServer.stop(Utils.via_tuple(strip_name, :led_strip, :none))
   end
 
   # server code

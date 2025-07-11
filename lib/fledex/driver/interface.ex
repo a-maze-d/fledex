@@ -66,7 +66,7 @@ defmodule Fledex.Driver.Interface do
               {config :: keyword, response :: any}
 
   @doc """
-  THe terminate functions gets called when we dispose of the led strip. This the place
+  The terminate functions gets called when we dispose of the led strip. This the place
   where the driver can perform some cleanup (e.g.: close some channels)
   """
   @callback terminate(reason, config :: keyword) :: :ok

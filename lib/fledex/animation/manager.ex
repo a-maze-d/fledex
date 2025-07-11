@@ -27,7 +27,7 @@ defmodule Fledex.Animation.Manager do
   alias Fledex.Animation.Coordinator
   alias Fledex.Animation.JobScheduler
   alias Fledex.LedStrip
-  alias Fledex.Supervisor.WorkerSupervisor
+  alias Fledex.Supervisor.AnimationSystem
 
   @type config_t :: %{
           atom => Animator.config_t() | JobScheduler.config_t() | Coordinator.config_t()
@@ -39,6 +39,11 @@ defmodule Fledex.Animation.Manager do
            jobs: %{atom => JobScheduler.config_t()}
          }
 
+  @doc """
+  provides a child_spec of this module so that it can easily be added to
+  a supervision tree.
+  """
+  @spec child_spec(keyword) :: Supervisor.child_spec()
   def child_spec(init_args) do
     %{
       id: __MODULE__,
@@ -176,9 +181,12 @@ defmodule Fledex.Animation.Manager do
     :ok
   end
 
-  ### MARK: private functions
+  ### MARK: public helper functions
+
+  ### MARK: private helper fucntions
   # we split the "animation" into the different aspects
   # animations, coordinators and (cron)jobs
+  @spec split_config(map) :: {map, map, map}
   defp split_config(config) do
     {coordinators, rest} =
       Map.split_with(config, fn {_key, value} -> value.type == :coordinator end)
@@ -200,7 +208,7 @@ defmodule Fledex.Animation.Manager do
 
   @spec register_strip(state_t, atom, [{module, keyword}], keyword) :: state_t
   defp register_strip(state, strip_name, drivers, strip_config) do
-    _result = WorkerSupervisor.start_led_strip(strip_name, drivers, strip_config)
+    _result = AnimationSystem.start_led_strip(strip_name, drivers, strip_config)
 
     %{
       state
@@ -220,7 +228,7 @@ defmodule Fledex.Animation.Manager do
 
     shutdown_jobs(strip_name, Map.keys(state.jobs[strip_name] || %{}))
     shutdown_animators(strip_name, Map.keys(state.animations[strip_name] || %{}))
-    LedStrip.stop(strip_name)
+    :ok = LedStrip.stop(strip_name)
 
     %{
       state
@@ -251,7 +259,7 @@ defmodule Fledex.Animation.Manager do
   @spec shutdown_animators(atom, [atom]) :: :ok
   defp shutdown_animators(strip_name, dropped_animations) do
     Enum.each(dropped_animations, fn animation_name ->
-      Animator.shutdown(strip_name, animation_name)
+      :ok = Animator.stop(strip_name, animation_name)
     end)
   end
 
@@ -265,7 +273,7 @@ defmodule Fledex.Animation.Manager do
   @spec create_animators(atom, map) :: :ok
   defp create_animators(strip_name, created_animations) do
     Enum.each(created_animations, fn {animation_name, config} ->
-      WorkerSupervisor.start_animation(strip_name, animation_name, config)
+      AnimationSystem.start_animation(strip_name, animation_name, config)
     end)
   end
 
@@ -294,6 +302,7 @@ defmodule Fledex.Animation.Manager do
     {dropped, existing, created}
   end
 
+  @spec register_coordinators(state_t, atom, map) :: state_t
   defp register_coordinators(state, strip_name, coordinators) do
     {dropped, updated, created} =
       filter_configs(Map.get(state.coordinators, strip_name), coordinators)
@@ -308,7 +317,7 @@ defmodule Fledex.Animation.Manager do
   @spec create_coordinators(atom, map) :: :ok
   defp create_coordinators(strip_name, created_coordinators) do
     Enum.each(created_coordinators, fn {coordinator_name, config} ->
-      WorkerSupervisor.start_coordinator(strip_name, coordinator_name, config)
+      AnimationSystem.start_coordinator(strip_name, coordinator_name, config)
     end)
   end
 
@@ -319,12 +328,14 @@ defmodule Fledex.Animation.Manager do
     end)
   end
 
+  @spec shutdown_coordinators(atom, [atom]) :: :ok
   defp shutdown_coordinators(strip_name, coordinator_names) do
     Enum.each(coordinator_names, fn coordinator_name ->
-      :ok = Coordinator.shutdown(strip_name, coordinator_name)
+      :ok = Coordinator.stop(strip_name, coordinator_name)
     end)
   end
 
+  @spec register_jobs(state_t, atom, map) :: state_t
   defp register_jobs(state, strip_name, jobs) do
     {dropped, updated, created} = filter_configs(Map.get(state.jobs, strip_name), jobs)
 
@@ -335,12 +346,14 @@ defmodule Fledex.Animation.Manager do
     %{state | jobs: Map.put(state.jobs, strip_name, jobs)}
   end
 
+  @spec shutdown_jobs(atom, [atom]) :: :ok
   defp shutdown_jobs(_strip_name, job_names) do
     Enum.each(job_names, fn job_name ->
       JobScheduler.delete_job(job_name)
     end)
   end
 
+  @spec update_jobs(atom, map) :: :ok
   defp update_jobs(strip_name, jobs) do
     Enum.each(jobs, fn {job, job_config} ->
       JobScheduler.delete_job(job)
@@ -350,6 +363,7 @@ defmodule Fledex.Animation.Manager do
     end)
   end
 
+  @spec create_jobs(atom, map) :: :ok
   defp create_jobs(strip_name, jobs) do
     Enum.each(jobs, fn {job, job_config} ->
       JobScheduler.create_job(job, job_config, strip_name)
@@ -359,6 +373,7 @@ defmodule Fledex.Animation.Manager do
     end)
   end
 
+  @spec led_strip_registered?(atom, state_t) :: boolean
   defp led_strip_registered?(strip_name, state) when is_atom(strip_name) do
     Map.has_key?(state.animations, strip_name)
   end
