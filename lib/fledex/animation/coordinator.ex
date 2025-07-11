@@ -30,22 +30,20 @@ defmodule Fledex.Animation.Coordinator do
             strip_name: :default,
             coordinator_name: :default
 
-  @name &Utils.via_tuple/3
-
   # MARK: client side
   @spec start_link(strip_name :: atom, coordinator_name :: atom, configs :: config_t) ::
           GenServer.on_start()
   def start_link(strip_name, animation_name, configs) do
     {:ok, _pid} =
       GenServer.start_link(__MODULE__, {strip_name, animation_name, configs},
-        name: @name.(strip_name, :coordinator, animation_name)
+        name: Utils.via_tuple(strip_name, :coordinator, animation_name)
       )
   end
 
   @spec config(atom, atom, config_t) :: :ok
   def config(strip_name, animation_name, config) do
     GenServer.cast(
-      @name.(strip_name, :coordinator, animation_name),
+      Utils.via_tuple(strip_name, :coordinator, animation_name),
       {:config, config}
     )
   end
@@ -53,7 +51,7 @@ defmodule Fledex.Animation.Coordinator do
   @spec stop(atom, atom) :: :ok
   def stop(strip_name, coordinator_name) do
     GenServer.stop(
-      @name.(strip_name, :coordinator, coordinator_name),
+      Utils.via_tuple(strip_name, :coordinator, coordinator_name),
       :normal
     )
   end

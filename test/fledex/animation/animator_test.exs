@@ -17,7 +17,6 @@ defmodule Fledex.Animation.AnimatorTest do
   require Logger
 
   alias Fledex.Animation.Animator
-  alias Fledex.Animation.Utils
   alias Fledex.Driver.Impl.Null
   alias Fledex.Effect.Rotation
   alias Fledex.Effect.Wanish
@@ -54,6 +53,17 @@ defmodule Fledex.Animation.AnimatorTest do
     %{strip_name: @strip_name, pid: pid}
   end
 
+  describe "util functions" do
+    test "default_def_func" do
+      assert Animator.default_def_func(%{}) == Leds.leds()
+      assert Animator.default_def_func(%{trigger_name: 10}) == Leds.leds()
+    end
+
+    test "default_send_func" do
+      assert Animator.default_send_config_func(%{}) == []
+      assert Animator.default_send_config_func(%{trigger_name: 10}) == []
+    end
+  end
   describe "init" do
     test "config applied correctly (all set)" do
       init_args = %{
@@ -361,13 +371,12 @@ defmodule Fledex.Animation.AnimatorTest do
     end
 
     test "enable animation without effects" do
-      alias Fledex.Animation.Utils
 
       state = %{
         triggers: %{},
         type: :animation,
-        def_func: &Utils.default_def_func/1,
-        options: [send_config: &Utils.default_send_config_func/1],
+        def_func: &Animator.default_def_func/1,
+        options: [send_config: &Animator.default_send_config_func/1],
         effects: [],
         strip_name: :strip_name,
         animation_name: :animation_name
@@ -381,7 +390,6 @@ defmodule Fledex.Animation.AnimatorTest do
 
     test "enable animation with effects" do
       import ExUnit.CaptureLog
-      alias Fledex.Animation.Utils
 
       effect = Fledex.Animation.TestEffect
       config = []
@@ -389,8 +397,8 @@ defmodule Fledex.Animation.AnimatorTest do
       state = %{
         triggers: %{},
         type: :animation,
-        def_func: &Utils.default_def_func/1,
-        options: [send_config: &Utils.default_send_config_func/1],
+        def_func: &Animator.default_def_func/1,
+        options: [send_config: &Animator.default_send_config_func/1],
         effects: [{effect, config}],
         strip_name: :strip_name,
         animation_name: :animation_name
@@ -426,7 +434,6 @@ defmodule Fledex.Animation.AnimatorTest do
 
   describe "debug functions" do
     test "get state" do
-      alias Fledex.Animation.Utils
 
       effect = Fledex.Animation.TestEffect
       config = []
@@ -434,8 +441,8 @@ defmodule Fledex.Animation.AnimatorTest do
       state = %{
         triggers: %{},
         type: :animation,
-        def_func: &Utils.default_def_func/1,
-        options: [send_config: &Utils.default_send_config_func/1],
+        def_func: &Animator.default_def_func/1,
+        options: [send_config: &Animator.default_send_config_func/1],
         effects: [{effect, config}],
         strip_name: :strip_name,
         animation_name: :animation_name

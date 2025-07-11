@@ -46,13 +46,10 @@ defmodule Fledex.Animation.Animator do
 
   require Logger
 
-  alias Fledex.Animation.Utils
   alias Fledex.Leds
   alias Fledex.LedStrip
-  alias Fledex.Supervisor.Utils, as: SubUtils
+  alias Fledex.Supervisor.Utils
   alias Fledex.Utils.PubSub
-
-  @name &SubUtils.via_tuple/3
 
   @type config_t :: %{
           :type => :animation | :static,
@@ -71,6 +68,19 @@ defmodule Fledex.Animation.Animator do
           :animation_name => atom
         }
 
+  @doc false
+  @default_leds Leds.leds()
+  @spec default_def_func(map) :: Leds.t()
+  def default_def_func(_triggers) do
+    @default_leds
+  end
+
+  @doc false
+  @spec default_send_config_func(map) :: []
+  def default_send_config_func(_triggers) do
+    []
+  end
+
   # MARK: client side
   @doc """
   Create a new animation (with a given name and configuration) for the led strip
@@ -80,7 +90,7 @@ defmodule Fledex.Animation.Animator do
           GenServer.on_start()
   def start_link(strip_name, animation_name, config) do
     GenServer.start_link(__MODULE__, {strip_name, animation_name, config},
-      name: @name.(strip_name, :animator, animation_name)
+      name: Utils.via_tuple(strip_name, :animator, animation_name)
     )
   end
 
@@ -98,7 +108,7 @@ defmodule Fledex.Animation.Animator do
   @spec config(atom, atom, config_t) :: :ok
   def config(strip_name, animation_name, config) do
     GenServer.cast(
-      @name.(strip_name, :animator, animation_name),
+      Utils.via_tuple(strip_name, :animator, animation_name),
       {:config, config}
     )
   end
@@ -114,7 +124,7 @@ defmodule Fledex.Animation.Animator do
   @spec update_effect(atom, atom, :all | pos_integer, keyword) :: :ok
   def update_effect(strip_name, animation_name, what, config_update) do
     GenServer.cast(
-      @name.(strip_name, :animator, animation_name),
+      Utils.via_tuple(strip_name, :animator, animation_name),
       {:update_effect, what, config_update}
     )
   end
@@ -127,7 +137,7 @@ defmodule Fledex.Animation.Animator do
   @spec stop(atom, atom) :: :ok
   def stop(strip_name, animation_name) do
     GenServer.stop(
-      @name.(strip_name, :animator, animation_name),
+      Utils.via_tuple(strip_name, :animator, animation_name),
       :normal
     )
   end
@@ -148,8 +158,8 @@ defmodule Fledex.Animation.Animator do
     state = %{
       triggers: %{},
       type: :animation,
-      def_func: &Utils.default_def_func/1,
-      options: [send_config: &Utils.default_send_config_func/1],
+      def_func: &default_def_func/1,
+      options: [send_config: &default_send_config_func/1],
       effects: [],
       strip_name: strip_name,
       animation_name: animation_name
@@ -207,7 +217,7 @@ defmodule Fledex.Animation.Animator do
            triggers: triggers
          } = state
        ) do
-    send_config_func = options[:send_config] || (&Utils.default_send_config_func/1)
+    send_config_func = options[:send_config] || (&default_send_config_func/1)
     # this is for compatibility reasons. if only a send_config_func is defined
     # in the options list, then no options are defined. In that case we need to define
     # the options as being nil to call the def_func/1 instead of the def_func/2 function
@@ -275,7 +285,7 @@ defmodule Fledex.Animation.Animator do
     %{
       type: config[:type] || state.type,
       triggers: Map.merge(state.triggers, config[:triggers] || state[:triggers]),
-      def_func: Map.get(config, :def_func, &Utils.default_def_func/1),
+      def_func: Map.get(config, :def_func, &default_def_func/1),
       options: update_options(config[:options], config[:send_config_func]),
       effects: update_effects(state.effects, config[:effects], state.strip_name),
       # not to be updated
