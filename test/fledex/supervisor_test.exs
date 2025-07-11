@@ -78,7 +78,8 @@ defmodule Fledex.SupervisorTest do
 
     test "coordinator worker" do
       assert count_workers() == 0
-      AnimationSystem.start_coordinator(@test_strip, @test_coord, %{func: fn _, _, _ -> :ok end})
+      AnimationSystem.start_coordinator(@test_strip, @test_coord, %{
+        func: fn _state, _context, _options -> :ok end})
       assert count_workers() == 1
       Coordinator.stop(@test_strip, @test_coord)
       assert count_workers() == 0
