@@ -119,6 +119,4 @@ defmodule Fledex.Animation.Coordinator do
   @doc false
   @spec default_func(any, map, keyword) :: keyword
   def default_func(_broadcast_state, _context, options), do: options
-
-
 end
