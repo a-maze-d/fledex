@@ -38,7 +38,7 @@ defmodule Fledex.Supervisor.AnimationSystem do
   `start_led_strip`, `start_animation`, `start_coordinator`. The following
   worker types exist:
   * the led strip workers (controlling the led strip)
-  * the animation workers (running withni an led strip)
+  * the animation workers (running withni an led strip). Note: this requires an led_strip
   * the coordinators (that can control and coordinate the various animations)
   """
   use Supervisor
@@ -66,7 +66,7 @@ defmodule Fledex.Supervisor.AnimationSystem do
   end
 
   @doc """
-  starts the AnimationSystem and all necessary systems
+  starts the AnimationSystem and all necessary subsystems
   """
   @spec start_link(keyword) ::
           {:ok, pid()} | {:error, {:already_started, pid()} | {:shutdown, term()} | term()}
@@ -82,6 +82,10 @@ defmodule Fledex.Supervisor.AnimationSystem do
     Supervisor.stop(__MODULE__, reason, timeout)
   end
 
+  @doc """
+  This starts a new led_strip to which we can send some led sequences,
+  and, if we update it in regular intervals, can play an animation
+  """
   @spec start_led_strip(atom, module | {module, keyword} | [{module, keyword}], keyword) ::
           GenServer.on_start()
   def start_led_strip(strip_name, drivers \\ Null, strip_config \\ []) do
@@ -96,6 +100,10 @@ defmodule Fledex.Supervisor.AnimationSystem do
     )
   end
 
+  @doc """
+  This starts a new animation. It should be noted that it's expected
+  that the led_strip is already up and running
+  """
   @spec start_animation(atom, atom, Animator.config_t()) :: GenServer.on_start()
   def start_animation(strip_name, animation_name, config) do
     DynamicSupervisor.start_child(
@@ -109,6 +117,10 @@ defmodule Fledex.Supervisor.AnimationSystem do
     )
   end
 
+  @doc """
+  This starts a new coordinator. Which can receive events and react to those
+  by impacting the running annimations.
+  """
   @spec start_coordinator(atom, atom, Coordinator.config_t()) :: GenServer.on_start()
   def start_coordinator(strip_name, coordinator_name, config) do
     DynamicSupervisor.start_child(

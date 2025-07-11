@@ -260,6 +260,26 @@ defmodule Fledex.Animation.Animator do
     []
   end
 
+  @doc false
+  @spec apply_effects(Leds.t(), [{module, map}], map, map) :: {Leds.t(), map}
+  def apply_effects(leds, effects, triggers, context) do
+    count = leds.count
+
+    {led_list, led_count, triggers} =
+      Enum.zip_reduce(
+        1..length(effects)//1,
+        Enum.reverse(effects),
+        {Leds.to_list(leds), count, triggers},
+        fn index, {effect, config}, {leds, count, triggers} ->
+          context = Map.put(context, :effect, index)
+          {leds, count, triggers} = effect.apply(leds, count, config, triggers, context)
+          {leds, count, triggers}
+        end
+      )
+
+    {Leds.leds(led_count, led_list, %{}), triggers}
+  end
+
   # MARK: private helper functions
   @spec update_leds(state_t) :: state_t
   defp update_leds(
@@ -367,24 +387,5 @@ defmodule Fledex.Animation.Animator do
   defp update_effect({module, config} = _effect, config_updates)
        when is_atom(module) and is_list(config) do
     {module, Keyword.merge(config, config_updates)}
-  end
-
-  @spec apply_effects(Leds.t(), [{module, map}], map, map) :: {Leds.t(), map}
-  defp apply_effects(leds, effects, triggers, context) do
-    count = leds.count
-
-    {led_list, led_count, triggers} =
-      Enum.zip_reduce(
-        1..length(effects)//1,
-        Enum.reverse(effects),
-        {Leds.to_list(leds), count, triggers},
-        fn index, {effect, config}, {leds, count, triggers} ->
-          context = Map.put(context, :effect, index)
-          {leds, count, triggers} = effect.apply(leds, count, config, triggers, context)
-          {leds, count, triggers}
-        end
-      )
-
-    {Leds.leds(led_count, led_list, %{}), triggers}
   end
 end
