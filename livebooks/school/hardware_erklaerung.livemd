@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <!-- livebook:{"file_entries":[{"name":"hardware.drawio.svg","type":"attachment"}]} -->
 
-# Schule: Hardware Erklaerung
+# Schule: Hardware Erklärung
 
 ## Section
 

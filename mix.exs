@@ -169,7 +169,8 @@ defmodule Fledex.MixProject do
         "livebooks/school/hardware_erklaerung.livemd"
       ],
       groups_for_extras: [
-        LiveBooks: ~r/livebooks/,
+        LiveBooks: ~r/livebooks\/[^\/]*\.(?:live)?md/,
+        "LiveBooks (German)": ~r/livebooks\/school/,
         "Other Project Info": [
           "SECURITY.md",
           "CLA.md",
@@ -183,7 +184,6 @@ defmodule Fledex.MixProject do
           Fledex,
           Fledex.LedStrip,
           Fledex.Leds,
-          Fledex.Application
         ],
         Animation: ~r/Fledex.Animation/,
         Effect: ~r/Fledex.Effect/,
@@ -191,7 +191,8 @@ defmodule Fledex.MixProject do
         "Driver Implementations": ~r/Fledex.Driver.Impl/,
         Driver: ~r/Fledex.Driver/,
         Utils: ~r/Fledex.Utils/,
-        Color: ~r/Fledex.Color/
+        Color: ~r/Fledex.Color/,
+        Supervisor: [~r/Fledex.Supervisor/, Fledex.Application]
       ],
       groups_for_docs: [
         Guards: & &1[:guard],
