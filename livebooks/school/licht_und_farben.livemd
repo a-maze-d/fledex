@@ -35,9 +35,9 @@ Falls es Fragen gibt werden die aber gerne beantwortet.
 
 ## Die Grundlagen - Was ist Licht?
 
-Licht ist eine elektromagenetische Welle die sich mit Lichtgeschwindigkeit ausbreitet.
+Licht ist eine elektromagnetische Welle die sich mit Lichtgeschwindigkeit ausbreitet.
 
-Wir werden diesen beschreibenden Satz in seine verschiedenen Element aufspalten und stellen uns die folgenden Fragen:
+Wir werden diesen beschreibenden Satz in seine verschiedene Elemente aufspalten und stellen uns die folgenden Fragen:
 
 * Was ist eine `Welle`?
 * Warum `elektromagnetisch`? Was ist das eigentlich?
@@ -222,7 +222,9 @@ Die Art hängt von der Farbmischung wie Lichtfarben (Wellenlängen) herausgefilt
 ### Subtraktive Farbmischung
 
 Wenn Licht auf ein Blatt Papier fällt wird das (weisse) Licht reflektiert. Wenn wir mit einem roten Stift eine Linie malen dann erscheint die Linie rot weil nur die Farbe reflektiert wird und alle anderen Farbanteile herausgefiltert werden.
+
 ![](assets/subtractive_light2.svg)
+
 Malen wir jetzt mit einem Blauen Stift auf die Rote Linie, dann wird die Linie schwarz sein, da der Rote Stift alle Farbanteile ausser dem Roten absorbiert under der Blaue Stift alle Farbanteile ausser dem Blauen. Im Endeffekt bleibt kein Farbantail mehr übrig. Damit sieht es schwarz aus.
 
 ![](assets/subtractive_light.svg)

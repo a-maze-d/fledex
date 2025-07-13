@@ -3,11 +3,24 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defprotocol Fledex.Color do
+  alias Fledex.Color.Types
+
+  @moduledoc """
+  Protocol that can be implemented to convert from some kind of color representation
+  to a color integer (`colorint`) with 3x8bit or to a 3 element tuple representing the colors
+  `r`, `g`, and `b`.
+  """
+
   # Note: the following function will result in some warnings with ElixirLS
   #       with the command line dialyzer it's not an issue. Therefore I disabled
   #       the dializer in ElixirLS
-  @doc "convert an abstract colour to a concrete colorint"
+
+  @doc "convert an abstract color to a concrete colorint"
+  @spec to_colorint(term) :: Types.colorint()
   def to_colorint(color)
+
+  @doc "convert an abstract color to a concrete rgb tuple"
+  @spec to_rgb(term) :: Types.rgb()
   def to_rgb(color)
 end
 
@@ -23,10 +36,22 @@ defimpl Fledex.Color, for: Tuple do
 end
 
 defimpl Fledex.Color, for: Integer do
-  alias Fledex.Color.Conversion.CalcUtils
+  alias Fledex.Color.Types
+
+  @doc """
+  Splits the rgb-integer value into it's subpixels and returns an
+  `{r, g, b}` tupel
+  """
+  @spec split_into_subpixels(Types.colorint()) :: Types.rgb()
+  def split_into_subpixels(elem) do
+    r = elem |> Bitwise.&&&(0xFF0000) |> Bitwise.>>>(16)
+    g = elem |> Bitwise.&&&(0x00FF00) |> Bitwise.>>>(8)
+    b = elem |> Bitwise.&&&(0x0000FF)
+    {r, g, b}
+  end
 
   def to_colorint(colorint), do: colorint
-  def to_rgb(colorint), do: CalcUtils.split_into_subpixels(colorint)
+  def to_rgb(colorint), do: split_into_subpixels(colorint)
 end
 
 defimpl Fledex.Color, for: Atom do

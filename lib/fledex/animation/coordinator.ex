@@ -6,54 +6,68 @@ defmodule Fledex.Animation.Coordinator do
 
   require Logger
 
-  alias Fledex.Animation.Utils
+  alias Fledex.Supervisor.Utils
   alias Fledex.Utils.PubSub
 
+  @typedoc """
+  The configuration of a coordinator.
+
+  The most important part is the `:func` which is a function that
+  takes 3 parameters
+  * `broadcast_state`: event (usually an atom),
+  * `context`: descriptor to describe who has sent ou the event. It usually contains the strip_name and/or the animation_name and/or information about the effect.
+  * `state`: contains the state of the coordinator. The first time the function is called the `:options` are passed in as `state`. The Coordinator should return a `new_state`.
+  """
   @type config_t :: %{
           :type => :coordinator,
           :options => keyword,
-          :func => (any, map, keyword -> keyword)
+          :func => (broadcast_state :: any, context :: map, state :: keyword ->
+                      new_state :: keyword)
         }
   @typep state_t :: %__MODULE__{
-           options: keyword,
+           strip_name: atom,
+           coordinator_name: atom,
            func: (broadcast_state :: any, context :: map(), options :: keyword() ->
                     new_options :: keyword()),
-           strip_name: atom,
-           coordinator_name: atom
+           options: keyword
          }
 
-  @spec default_func(any, map, keyword) :: keyword
-  def default_func(_broadcast_state, _context, options), do: options
-
-  defstruct options: [],
+  defstruct strip_name: :default,
+            coordinator_name: :default,
             func: &__MODULE__.default_func/3,
-            strip_name: :default,
-            coordinator_name: :default
-
-  @name &Utils.via_tuple/3
+            options: []
 
   # MARK: client side
-  @spec start_link(strip_name :: atom, coordinator_name :: atom, configs :: keyword) ::
+  @doc """
+  Start a new coordinator for the given led strip with the specified config
+  """
+  @spec start_link(strip_name :: atom, coordinator_name :: atom, config :: config_t) ::
           GenServer.on_start()
-  def start_link(strip_name, animation_name, configs) do
+  def start_link(strip_name, animation_name, config) do
     {:ok, _pid} =
-      GenServer.start_link(__MODULE__, {strip_name, animation_name, configs},
-        name: @name.(strip_name, :coordinator, animation_name)
+      GenServer.start_link(__MODULE__, {strip_name, animation_name, config},
+        name: Utils.via_tuple(strip_name, :coordinator, animation_name)
       )
   end
 
+  @doc """
+  Change the config of the given coordinator
+  """
   @spec config(atom, atom, config_t) :: :ok
-  def config(strip_name, animation_name, config) do
+  def config(strip_name, coordinator_name, config) do
     GenServer.cast(
-      @name.(strip_name, :coordinator, animation_name),
+      Utils.via_tuple(strip_name, :coordinator, coordinator_name),
       {:config, config}
     )
   end
 
-  @spec shutdown(atom, atom) :: :ok
-  def shutdown(strip_name, coordinator_name) do
+  @doc """
+  Stop the coordinator
+  """
+  @spec stop(atom, atom) :: :ok
+  def stop(strip_name, coordinator_name) do
     GenServer.stop(
-      @name.(strip_name, :coordinator, coordinator_name),
+      Utils.via_tuple(strip_name, :coordinator, coordinator_name),
       :normal
     )
   end
@@ -77,7 +91,7 @@ defmodule Fledex.Animation.Coordinator do
       coordinator_name: coordinator_name
     }
 
-    :ok = PubSub.subscribe(PubSub.app(), PubSub.channel_state())
+    :ok = PubSub.subscribe(PubSub.channel_state())
     {:ok, state}
   end
 
@@ -111,12 +125,19 @@ defmodule Fledex.Animation.Coordinator do
   end
 
   @impl GenServer
+  @spec terminate(reason, state :: term()) :: term()
+        when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(_reason, %{strip_name: strip_name, coordinator_name: coordinator_name} = _state) do
     Logger.debug(
       "shutting down coordinator: #{inspect({strip_name, coordinator_name})}",
       %{strip_name: strip_name, coordinator_name: coordinator_name}
     )
 
-    PubSub.unsubscribe(PubSub.app(), PubSub.channel_state())
+    PubSub.unsubscribe(PubSub.channel_state())
   end
+
+  # MARK: public helper functions
+  @doc false
+  @spec default_func(any, map, keyword) :: keyword
+  def default_func(_broadcast_state, _context, options), do: options
 end

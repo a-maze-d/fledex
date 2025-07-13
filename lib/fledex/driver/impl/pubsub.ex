@@ -3,6 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Driver.Impl.PubSub do
+  @moduledoc """
+  Vert experimental. Might not work
+  """
   @behaviour Fledex.Driver.Interface
 
   alias Fledex.Color.Types

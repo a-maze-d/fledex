@@ -381,7 +381,6 @@ defmodule Fledex.LedStripTestSync do
   alias Fledex.Driver.Impl.Spi
   alias Fledex.LedStrip
   alias Fledex.Supervisor.AnimationSystem
-  alias Fledex.Supervisor.WorkerSupervisor
 
   setup do
     start_supervised(AnimationSystem.child_spec())
@@ -411,10 +410,10 @@ defmodule Fledex.LedStripTestSync do
     end
 
     test "start server a second time" do
-      {:ok, pid} = WorkerSupervisor.start_led_strip(:test_strip_name1)
+      {:ok, pid} = AnimationSystem.start_led_strip(:test_strip_name1)
 
       # {:ok, pid} = LedStrip.start_link(:test_strip_name1)
-      assert {:ok, pid} == WorkerSupervisor.start_led_strip(:test_strip_name1)
+      assert {:ok, pid} == AnimationSystem.start_led_strip(:test_strip_name1)
       # assert {:ok, pid} == LedStrip.start_link(:test_strip_name1)
     end
   end
@@ -429,7 +428,7 @@ defmodule Fledex.LedStripTestSync do
     end
 
     test "client API calls" do
-      {:ok, pid} = WorkerSupervisor.start_led_strip(@strip_name, [{Null, []}], [])
+      {:ok, pid} = AnimationSystem.start_led_strip(@strip_name, [{Null, []}], [])
 
       # we only make sure that they are correctly wired to the server side calls
       # that are tested independently

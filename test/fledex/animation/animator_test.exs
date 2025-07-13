@@ -17,14 +17,12 @@ defmodule Fledex.Animation.AnimatorTest do
   require Logger
 
   alias Fledex.Animation.Animator
-  alias Fledex.Animation.Utils
   alias Fledex.Driver.Impl.Null
   alias Fledex.Effect.Rotation
   alias Fledex.Effect.Wanish
   alias Fledex.Leds
   alias Fledex.LedStrip
   alias Fledex.Supervisor.AnimationSystem
-  alias Fledex.Supervisor.WorkerSupervisor
 
   def default_def_func(_triggers) do
     Leds.leds(30)
@@ -50,9 +48,21 @@ defmodule Fledex.Animation.AnimatorTest do
   @strip_name :test_strip
   setup do
     start_supervised(AnimationSystem.child_spec())
-    {:ok, pid} = WorkerSupervisor.start_led_strip(@strip_name, Null, [])
+    {:ok, pid} = AnimationSystem.start_led_strip(@strip_name, [{Null, []}], [])
 
     %{strip_name: @strip_name, pid: pid}
+  end
+
+  describe "util functions" do
+    test "default_def_func" do
+      assert Animator.default_def_func(%{}) == Leds.leds()
+      assert Animator.default_def_func(%{trigger_name: 10}) == Leds.leds()
+    end
+
+    test "default_send_func" do
+      assert Animator.default_send_config_func(%{}) == []
+      assert Animator.default_send_config_func(%{trigger_name: 10}) == []
+    end
   end
 
   describe "init" do
@@ -68,7 +78,7 @@ defmodule Fledex.Animation.AnimatorTest do
       }
 
       {:ok, state, {:continue, :paint_once}} =
-        Animator.init({init_args, :test_strip, :test_animation})
+        Animator.init({:test_strip, :test_animation, init_args})
 
       assert state == init_args
     end
@@ -77,7 +87,7 @@ defmodule Fledex.Animation.AnimatorTest do
       init_args = %{type: :animation}
 
       {:ok, state, {:continue, :paint_once}} =
-        Animator.init({init_args, :test_strip, :test_animation})
+        Animator.init({:test_strip, :test_animation, init_args})
 
       assert Leds.leds() == state.def_func.(%{test_strip: 10})
       # assert %{} == state.send_config_func.(%{test_strip: 10})
@@ -87,7 +97,7 @@ defmodule Fledex.Animation.AnimatorTest do
       init_args = %{type: :animation}
 
       {:ok, state, {:continue, :paint_once}} =
-        Animator.init({init_args, :test_strip, :test_animation})
+        Animator.init({:test_strip, :test_animation, init_args})
 
       assert state.def_func != nil
       assert state.strip_name == :test_strip
@@ -154,7 +164,7 @@ defmodule Fledex.Animation.AnimatorTest do
       assert map_size(init_args.triggers) == 0
 
       {:ok, state, {:continue, :paint_once}} =
-        Animator.init({init_args, :test_strip, :test_animation})
+        Animator.init({:test_strip, :test_animation, init_args})
 
       assert map_size(init_args.triggers) == 0
       assert Keyword.has_key?(state.options, :send_config)
@@ -246,7 +256,7 @@ defmodule Fledex.Animation.AnimatorTest do
         options: [send_config: &logging_send_config_func/1]
       }
 
-      {:ok, pid} = Animator.start_link(init_args, strip_name, :test_animator)
+      {:ok, pid} = Animator.start_link(strip_name, :test_animator, init_args)
       pid
     end
 
@@ -306,9 +316,9 @@ defmodule Fledex.Animation.AnimatorTest do
       strip_name = :shutdown_testA
       {:ok, driver} = LedStrip.start_link(strip_name, Null)
       animation_name = :animation_testA
-      {:ok, pid} = Animator.start_link(%{type: :animation}, strip_name, animation_name)
+      {:ok, pid} = Animator.start_link(strip_name, animation_name, %{type: :animation})
       assert Process.alive?(pid)
-      Animator.shutdown(strip_name, animation_name)
+      Animator.stop(strip_name, animation_name)
       assert not Process.alive?(pid)
       GenServer.stop(driver, :normal)
     end
@@ -317,9 +327,9 @@ defmodule Fledex.Animation.AnimatorTest do
       strip_name = :shutdown_testB
       {:ok, driver} = LedStrip.start_link(strip_name, Null)
       animation_name = :animation_testB
-      {:ok, pid} = Animator.start_link(%{type: :static}, strip_name, animation_name)
+      {:ok, pid} = Animator.start_link(strip_name, animation_name, %{type: :static})
       assert Process.alive?(pid)
-      Animator.shutdown(strip_name, animation_name)
+      Animator.stop(strip_name, animation_name)
       assert not Process.alive?(pid)
       GenServer.stop(driver, :normal)
     end
@@ -362,13 +372,11 @@ defmodule Fledex.Animation.AnimatorTest do
     end
 
     test "enable animation without effects" do
-      alias Fledex.Animation.Utils
-
       state = %{
         triggers: %{},
         type: :animation,
-        def_func: &Utils.default_def_func/1,
-        options: [send_config: &Utils.default_send_config_func/1],
+        def_func: &Animator.default_def_func/1,
+        options: [send_config: &Animator.default_send_config_func/1],
         effects: [],
         strip_name: :strip_name,
         animation_name: :animation_name
@@ -382,7 +390,6 @@ defmodule Fledex.Animation.AnimatorTest do
 
     test "enable animation with effects" do
       import ExUnit.CaptureLog
-      alias Fledex.Animation.Utils
 
       effect = Fledex.Animation.TestEffect
       config = []
@@ -390,8 +397,8 @@ defmodule Fledex.Animation.AnimatorTest do
       state = %{
         triggers: %{},
         type: :animation,
-        def_func: &Utils.default_def_func/1,
-        options: [send_config: &Utils.default_send_config_func/1],
+        def_func: &Animator.default_def_func/1,
+        options: [send_config: &Animator.default_send_config_func/1],
         effects: [{effect, config}],
         strip_name: :strip_name,
         animation_name: :animation_name
@@ -427,16 +434,14 @@ defmodule Fledex.Animation.AnimatorTest do
 
   describe "debug functions" do
     test "get state" do
-      alias Fledex.Animation.Utils
-
       effect = Fledex.Animation.TestEffect
       config = []
 
       state = %{
         triggers: %{},
         type: :animation,
-        def_func: &Utils.default_def_func/1,
-        options: [send_config: &Utils.default_send_config_func/1],
+        def_func: &Animator.default_def_func/1,
+        options: [send_config: &Animator.default_send_config_func/1],
         effects: [{effect, config}],
         strip_name: :strip_name,
         animation_name: :animation_name

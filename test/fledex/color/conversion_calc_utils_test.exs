@@ -20,11 +20,6 @@ defmodule Fledex.Color.Conversion.CalcUtilsTest do
     assert CalcUtils.cap(led, 0x66..0xFF) == {0x66, 0xFF, 0xFF}
   end
 
-  test "split into subpixels" do
-    pixel = 0xFF7722
-    assert CalcUtils.split_into_subpixels(pixel) == {0xFF, 0x77, 0x22}
-  end
-
   test "add_subpixels" do
     pixels = [{20, 40, 100}, {20, 40, 100}, {20, 40, 100}]
     assert CalcUtils.add_subpixels(pixels) == {60, 120, 300}

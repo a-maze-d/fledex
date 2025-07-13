@@ -30,20 +30,21 @@ Even though this library is published, there are things I still want to do befor
     - [x] We probably want to remove some of the `optional` attributes in the `Animator.config_t` structure
     - [x] Rename the Manager.config_t() type (remove the plural s)
     - [x] Does the `AnimatorInterface` still make sense? No, break out into a Utils module
-    - [ ] align the `terminate`, `shutdown`, `stop` functions to be consistent
-    - [ ] cleanup the via_tuple stuff once coordinator is done (move Utils to Supervisor?)
   - [x] Do we want to create a Utily class for Components, so that the name creation is simplified? (v0.6)
   - [x] enable testing with more elixir versions 
     - [x] decide on what to do with the color stuff that seems to be broken with the new- Elixir version
+  - [x] align the `terminate`, `shutdown`, `stop` functions to be consistent
+  - [x] cleanup the argument order to be more consistent between Animator, Coordinator and LedStrip
+  - [x] Remove the `WorkerSupervisor`. It doesn't seem to have any value anymroe
+  - [x] cleanup the via_tuple stuff once coordinator is done (move Utils to Supervisor? yes moved)
   - [ ] Do we really need to use the `Leds.send` function in the `Animator`?
 - [ ] Missing functionality
   - [/] Add a default `led_strip` driver that can be configured through the config (v0.6)
-        I experimented with this idea, but it really doesn't give a real benefit. Therefore
-        dropped it again.
+        I experimented with this idea, but it really doesn't give a real benefit. Therefore dropped it again.
   - [ ] Connect everything into a supervision tree (to make it more robust) (v0.6)
     - [x] handle all the TODOs (done, for those related to the supervisor changes)
     - [x] Add logs to starting/shutting down of processes
-    - [ ] add documentation
+    - [ ] add documentation (livebook, `@doc`, `@module_doc`)
     - [ ] add negative tests (killing some service)
     - [x] Create commit log
     - [x] Cleanup code from commented out stuff
@@ -51,6 +52,9 @@ Even though this library is published, there are things I still want to do befor
     - [x] extra round of testing
     - [ ] check specs, Credo, ...
     - [ ] we start things through the Supervisor, but we don't shut things down through it
+  - [ ] We have the `Fledex.Color` protocol, but we actually don't make use of it's type. This is maybe also a good opportunity to rethink on how we handle colors in general. Maybe we should define everything as `Fledex.Color` and enapsulate CSS, SVG, RAL colours in their own struct to then have the protocol implemented for them. Other advantages:
+    - [ ] This should make the `CalcUtils.split_into_subpixels` unnecessary
+    - [ ]  
   - [ ] Enable Telemetry? (v0.7)
   - [ ] should the `:config` driver not only return the config but the strip_name too?
   - [ ] setting up livebook (a really working version) on windows is anything than easy :-( Can we do something about it? Investigate (v0.7) 

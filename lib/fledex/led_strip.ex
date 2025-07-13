@@ -20,15 +20,16 @@ defmodule Fledex.LedStrip do
 
   require Logger
 
-  alias Fledex.Animation.Utils
   alias Fledex.Color
   alias Fledex.Color.Conversion.CalcUtils
   alias Fledex.Color.Types
   alias Fledex.Driver.Impl.Null
   alias Fledex.Driver.Manager
+  alias Fledex.Supervisor.Utils
   alias Fledex.Utils.PubSub
 
   @type start_link_response :: :ignore | {:error, any} | {:ok, pid}
+
   @typep timer_t :: %{
            disabled: boolean,
            counter: pos_integer,
@@ -63,7 +64,6 @@ defmodule Fledex.LedStrip do
     group_leader: [:group_leader]
   }
 
-  @name &Utils.via_tuple/3
   # client code
   @doc """
   This starts the server controlling a specfic led strip. It is possible
@@ -89,7 +89,7 @@ defmodule Fledex.LedStrip do
   * With several drivers and global config: `start_link(:name, [{Spi, []}, {Spi, dev: "spidev0.1"}], timer_only_dirty_update: true)`
   """
   @spec start_link(atom, module | {module, keyword} | [{module, keyword}], keyword) ::
-          start_link_response()
+          GenServer.on_start()
   def start_link(strip_name, driver \\ Null, global_config \\ [])
 
   def start_link(strip_name, driver, global_config)
@@ -111,7 +111,7 @@ defmodule Fledex.LedStrip do
         GenServer.start_link(
           __MODULE__,
           {strip_name, drivers, global_config},
-          name: @name.(strip_name, :led_strip, :none)
+          name: Utils.via_tuple(strip_name, :led_strip, :none)
         )
 
       pid ->
@@ -124,9 +124,15 @@ defmodule Fledex.LedStrip do
      "Unexpected arguments #{inspect(strip_name)}, #{inspect(drivers)}, #{inspect(global_config)}"}
   end
 
+  @doc """
+  Looks up the pid of the process belonging to the LedStrip with the `strip_name`.
+
+  Returns `nil` if no process can be found.
+  """
+  @spec whereis(atom) :: pid | nil
   def whereis(strip_name) do
     case Registry.lookup(
-           Fledex.Supervisor.Utils.worker_registry(),
+           Utils.worker_registry(),
            {strip_name, :led_strip, :none}
          ) do
       [] ->
@@ -143,7 +149,7 @@ defmodule Fledex.LedStrip do
   @spec define_namespace(atom, atom) :: :ok | {:error, String.t()}
   def define_namespace(strip_name, namespace) do
     # Logger.info("defining namespace: #{strip_name}-#{namespace}")
-    GenServer.call(@name.(strip_name, :led_strip, :none), {:define_namespace, namespace})
+    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :none), {:define_namespace, namespace})
   end
 
   @doc """
@@ -151,7 +157,7 @@ defmodule Fledex.LedStrip do
   """
   @spec drop_namespace(atom, atom) :: :ok
   def drop_namespace(strip_name, namespace) do
-    GenServer.call(@name.(strip_name, :led_strip, :none), {:drop_namespace, namespace})
+    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :none), {:drop_namespace, namespace})
   end
 
   @doc """
@@ -159,7 +165,7 @@ defmodule Fledex.LedStrip do
   """
   @spec exist_namespace(atom, atom) :: boolean
   def exist_namespace(strip_name, namespace) do
-    GenServer.call(@name.(strip_name, :led_strip, :none), {:exist_namespace, namespace})
+    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :none), {:exist_namespace, namespace})
   end
 
   @doc """
@@ -172,7 +178,7 @@ defmodule Fledex.LedStrip do
   """
   @spec set_leds(atom, atom, list(pos_integer)) :: :ok | {:error, String.t()}
   def set_leds(strip_name, namespace, leds) do
-    GenServer.call(@name.(strip_name, :led_strip, :none), {:set_leds, namespace, leds})
+    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :none), {:set_leds, namespace, leds})
   end
 
   @doc """
@@ -181,7 +187,10 @@ defmodule Fledex.LedStrip do
   """
   @spec change_config(atom, keyword) :: {:ok, [keyword]}
   def change_config(strip_name, global_config) do
-    GenServer.call(@name.(strip_name, :led_strip, :none), {:change_config, global_config})
+    GenServer.call(
+      Utils.via_tuple(strip_name, :led_strip, :none),
+      {:change_config, global_config}
+    )
   end
 
   @doc """
@@ -199,13 +208,17 @@ defmodule Fledex.LedStrip do
   end
 
   def reinit(strip_name, drivers, strip_config) do
-    GenServer.call(@name.(strip_name, :led_strip, :none), {:reinit, drivers, strip_config})
+    GenServer.call(
+      Utils.via_tuple(strip_name, :led_strip, :none),
+      {:reinit, drivers, strip_config}
+    )
+
     :ok
   end
 
   @spec stop(GenServer.server()) :: :ok
   def stop(strip_name) do
-    GenServer.stop(@name.(strip_name, :led_strip, :none))
+    GenServer.stop(Utils.via_tuple(strip_name, :led_strip, :none))
   end
 
   # server code
@@ -233,83 +246,12 @@ defmodule Fledex.LedStrip do
     {:stop, "Init args need to be a 3 element tuple with name, drivers, global config"}
   end
 
-  @doc false
-  @spec init_state(atom, [{module, keyword}], keyword) :: state_t
-  def init_state(strip_name, drivers, global_config)
-      when is_atom(strip_name) and
-             is_list(drivers) and
-             is_list(global_config) do
-    config = Keyword.delete(global_config, :namespaces)
-    config = init_config(config)
-
-    %{
-      strip_name: strip_name,
-      config: config,
-      drivers: Manager.init_drivers(drivers, config),
-      # led_strip: Manager.init_config(init_args[:led_strip] || %{}),
-      namespaces: Keyword.get(global_config, :namespaces, %{})
-    }
-  end
-
-  @spec init_config(keyword) :: config_t
-  def init_config(updates) do
-    base = %{
-      group_leader: nil,
-      merge_strategy: :cap,
-      timer: %{
-        disabled: false,
-        counter: 0,
-        update_timeout: @default_update_timeout,
-        update_func: &transfer_data/1,
-        only_dirty_update: false,
-        is_dirty: false,
-        ref: nil
-      }
-    }
-
-    {config, _rets} = update_config(base, updates)
-    config
-  end
-
-  @spec update_config(base :: map, updates :: keyword) :: {map, keyword}
-  defp update_config(base, updates) do
-    Enum.reduce(updates, {base, []}, fn {key, value}, {config, rets} ->
-      case key do
-        key when is_map_key(@config_mappings, key) ->
-          path = @config_mappings[key]
-          old_value = get_in(config, path)
-          {put_in(config, path, value), Keyword.put(rets, key, old_value)}
-
-        key ->
-          Logger.warning(
-            "Unknown config key (#{inspect(key)} with value #{inspect(value)}) was specified\n#{Exception.format_stacktrace()}"
-          )
-
-          {config, rets}
-      end
-    end)
-  end
-
   @impl GenServer
   @spec terminate(reason, state_t) :: :ok
         when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(reason, %{strip_name: strip_name, drivers: drivers} = _state) do
     Logger.debug("shutting down led_strip: #{strip_name}", %{strip_name: strip_name})
     Manager.terminate(reason, drivers)
-  end
-
-  @doc false
-  @spec start_timer(state_t) :: state_t
-  defp start_timer(%{config: %{timer: %{disabled: true}}} = state), do: state
-
-  defp start_timer(state) do
-    update_timeout = state.config.timer.update_timeout
-    update_func = state.config.timer.update_func
-
-    ref = Process.send_after(self(), {:update_timeout, update_func}, update_timeout)
-    state = update_in(state, [:config, :timer, :ref], fn _current_ref -> ref end)
-
-    state
   end
 
   @impl GenServer
@@ -397,6 +339,25 @@ defmodule Fledex.LedStrip do
     {:noreply, state}
   end
 
+  ### MARK: public helper functions
+  @doc false
+  @spec init_state(atom, [{module, keyword}], keyword) :: state_t
+  def init_state(strip_name, drivers, global_config)
+      when is_atom(strip_name) and
+             is_list(drivers) and
+             is_list(global_config) do
+    config = Keyword.delete(global_config, :namespaces)
+    config = init_config(config)
+
+    %{
+      strip_name: strip_name,
+      config: config,
+      drivers: Manager.init_drivers(drivers, config),
+      # led_strip: Manager.init_config(init_args[:led_strip] || %{}),
+      namespaces: Keyword.get(global_config, :namespaces, %{})
+    }
+  end
+
   @doc false
   @spec transfer_data(state_t) :: state_t
   def transfer_data(
@@ -452,43 +413,93 @@ defmodule Fledex.LedStrip do
   end
 
   @doc false
-  @spec match_length(list(list(Types.colorint()))) :: list(list(Types.colorint()))
-  def match_length(leds) when leds == [], do: leds
-
-  def match_length(leds) do
-    max_length = Enum.reduce(leds, 0, fn sequence, acc -> max(acc, length(sequence)) end)
-    Enum.map(leds, fn sequence -> extend(sequence, max_length - length(sequence)) end)
-  end
-
-  @doc false
-  @spec extend(list(Types.colorint()), pos_integer) :: list(Types.colorint())
-  def extend(sequence, 0), do: sequence
-
-  def extend(sequence, extra) do
-    extra_length = Enum.reduce(1..extra, [], fn _index, acc -> acc ++ [0x000000] end)
-    sequence ++ extra_length
-  end
-
-  @doc false
   @spec merge_pixels(list(Types.colorint()), atom) :: Types.colorint()
   def merge_pixels(elems, merge_strategy) do
     elems
-    |> Enum.map(fn elem -> CalcUtils.split_into_subpixels(elem) end)
+    |> Enum.map(fn elem -> Color.to_rgb(elem) end)
     |> apply_merge_strategy(merge_strategy)
     |> Color.to_colorint()
   end
 
-  @doc false
+  # MARK: private helper functions
+  @spec init_config(keyword) :: config_t
+  defp init_config(updates) do
+    base = %{
+      group_leader: nil,
+      merge_strategy: :cap,
+      timer: %{
+        disabled: false,
+        counter: 0,
+        update_timeout: @default_update_timeout,
+        update_func: &transfer_data/1,
+        only_dirty_update: false,
+        is_dirty: false,
+        ref: nil
+      }
+    }
+
+    {config, _rets} = update_config(base, updates)
+    config
+  end
+
+  @spec update_config(base :: map, updates :: keyword) :: {map, keyword}
+  defp update_config(base, updates) do
+    Enum.reduce(updates, {base, []}, fn {key, value}, {config, rets} ->
+      case key do
+        key when is_map_key(@config_mappings, key) ->
+          path = @config_mappings[key]
+          old_value = get_in(config, path)
+          {put_in(config, path, value), Keyword.put(rets, key, old_value)}
+
+        key ->
+          Logger.warning(
+            "Unknown config key (#{inspect(key)} with value #{inspect(value)}) was specified\n#{Exception.format_stacktrace()}"
+          )
+
+          {config, rets}
+      end
+    end)
+  end
+
+  @spec start_timer(state_t) :: state_t
+  defp start_timer(%{config: %{timer: %{disabled: true}}} = state), do: state
+
+  defp start_timer(state) do
+    update_timeout = state.config.timer.update_timeout
+    update_func = state.config.timer.update_func
+
+    ref = Process.send_after(self(), {:update_timeout, update_func}, update_timeout)
+    state = update_in(state, [:config, :timer, :ref], fn _current_ref -> ref end)
+
+    state
+  end
+
+  @spec match_length(list(list(Types.colorint()))) :: list(list(Types.colorint()))
+  defp match_length(leds) when leds == [], do: leds
+
+  defp match_length(leds) do
+    max_length = Enum.reduce(leds, 0, fn sequence, acc -> max(acc, length(sequence)) end)
+    Enum.map(leds, fn sequence -> extend(sequence, max_length - length(sequence)) end)
+  end
+
+  @spec extend(list(Types.colorint()), pos_integer) :: list(Types.colorint())
+  defp extend(sequence, 0), do: sequence
+
+  defp extend(sequence, extra) do
+    extra_length = Enum.reduce(1..extra, [], fn _index, acc -> acc ++ [0x000000] end)
+    sequence ++ extra_length
+  end
+
   @spec apply_merge_strategy(list(Types.colorint()), atom) :: Types.rgb()
-  def apply_merge_strategy(rgb, :avg) do
+  defp apply_merge_strategy(rgb, :avg) do
     CalcUtils.avg(rgb)
   end
 
-  def apply_merge_strategy(rgb, :cap) do
+  defp apply_merge_strategy(rgb, :cap) do
     CalcUtils.cap(rgb)
   end
 
-  def apply_merge_strategy(_rgb, merge_strategy) do
+  defp apply_merge_strategy(_rgb, merge_strategy) do
     raise ArgumentError, message: "Unknown merge strategy #{inspect(merge_strategy)}"
   end
 end
