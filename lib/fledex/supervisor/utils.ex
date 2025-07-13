@@ -14,22 +14,26 @@ defmodule Fledex.Supervisor.Utils do
   @doc """
   Defines the name of the pubsub system that is used by Fledex
   """
+  @spec pubsub_name() :: atom
   def pubsub_name, do: @pubsub
 
   @doc """
   The name of the application Supervisor to which we can add
   dynamically supervisors. The AnimationSystem can be added to it
   """
+  @spec app_supervisor() :: module
   def app_supervisor, do: @app_supervisor
 
   @doc """
   The name of the registry to which the workers will be registered
   """
+  @spec worker_registry() :: module
   def worker_registry, do: @registry
 
   @doc """
   The name of the supervisor that observes all the workers in the AnimationSystem
   """
+  @spec workers_supervisor() :: module
   def workers_supervisor, do: @supervisor
 
   @doc """

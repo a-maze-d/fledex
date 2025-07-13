@@ -73,21 +73,9 @@ defmodule Fledex.Color.Conversion.CalcUtils do
 
   @spec nscale8(Types.colorint(), Types.rgb(), boolean) :: Types.colorint()
   def nscale8(color, rgb, video) do
-    split_into_subpixels(color)
+    Color.to_rgb(color)
     |> nscale8(rgb, video)
     |> Color.to_colorint()
-  end
-
-  @doc """
-  Splits the rgb-integer value into it's subpixels and returns an
-  `{r, g, b}` tupel
-  """
-  @spec split_into_subpixels(Types.colorint()) :: Types.rgb()
-  def split_into_subpixels(elem) do
-    r = elem |> Bitwise.&&&(0xFF0000) |> Bitwise.>>>(16)
-    g = elem |> Bitwise.&&&(0x00FF00) |> Bitwise.>>>(8)
-    b = elem |> Bitwise.&&&(0x0000FF)
-    {r, g, b}
   end
 
   @doc """
