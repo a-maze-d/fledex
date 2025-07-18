@@ -377,6 +377,8 @@ defmodule Fledex.LedStripTestSync do
 
   import ExUnit.CaptureLog
 
+  require Logger
+  alias Fledex.Supervisor.LedStripSupervisor
   alias Fledex.Driver.Impl.Null
   alias Fledex.Driver.Impl.Spi
   alias Fledex.LedStrip
@@ -410,10 +412,10 @@ defmodule Fledex.LedStripTestSync do
     end
 
     test "start server a second time" do
-      {:ok, pid} = AnimationSystem.start_led_strip(:test_strip_name1)
+      {:ok, pid} = AnimationSystem.start_led_strip(:test_strip_name6)
 
       # {:ok, pid} = LedStrip.start_link(:test_strip_name1)
-      assert {:ok, pid} == AnimationSystem.start_led_strip(:test_strip_name1)
+      assert {:ok, pid} == AnimationSystem.start_led_strip(:test_strip_name6)
       # assert {:ok, pid} == LedStrip.start_link(:test_strip_name1)
     end
   end
@@ -428,7 +430,7 @@ defmodule Fledex.LedStripTestSync do
     end
 
     test "client API calls" do
-      {:ok, pid} = AnimationSystem.start_led_strip(@strip_name, [{Null, []}], [])
+      {:ok, _pid} = AnimationSystem.start_led_strip(@strip_name, [{Null, []}], [])
 
       # we only make sure that they are correctly wired to the server side calls
       # that are tested independently
@@ -439,14 +441,21 @@ defmodule Fledex.LedStripTestSync do
 
       # successful config change
       assert {:ok, timer_counter: 0} = LedStrip.change_config(@strip_name, timer_counter: 1)
-      assert %{config: %{timer: %{counter: 1}}} = :sys.get_state(pid)
+
+      led_strip_pid =
+        Supervisor.which_children(LedStripSupervisor.supervisor_name(@strip_name))
+        |> Enum.filter(fn {_name, _pid, type, _module} -> type == :worker end)
+        |> List.first()
+        |> elem(1)
+
+      assert %{config: %{timer: %{counter: 1}}} = :sys.get_state(led_strip_pid)
 
       # unsuccessful config change
       assert capture_log(fn ->
                assert {:ok, []} = LedStrip.change_config(@strip_name, counter: 2)
              end) =~ "Unknown config key (:counter with value 2) was specified"
 
-      assert %{config: %{timer: %{counter: 1}}} = :sys.get_state(pid)
+      assert %{config: %{timer: %{counter: 1}}} = :sys.get_state(led_strip_pid)
 
       # test all 3 reinit functions (they all lead to the same result)
       # This is the reason why we expect the configure and reinit to be called 3 times

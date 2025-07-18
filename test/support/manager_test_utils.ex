@@ -33,8 +33,8 @@ defmodule Fledex.ManagerTestUtils do
   end
 
   @spec whereis(atom, :animator | :job | :coordinator | :led_strip, atom) :: GenServer.name()
-  def whereis(strip_name, type, animation_name \\ :none),
-    do: GenServer.whereis(Utils.via_tuple(strip_name, type, animation_name))
+  def whereis(strip_name, type, other_name),
+    do: GenServer.whereis(Utils.via_tuple(strip_name, type, other_name))
 
   def stop_if_running(name, reason \\ :normal) do
     pid = Process.whereis(name)

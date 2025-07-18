@@ -15,6 +15,10 @@ defmodule Fledex.LedStrip do
   The role the LedStrip plays is similar to the one a window server  plays on a normal
   computer, except that a window server would manage several screens, whereas here each
   LED strip would get its own.
+
+  Note: In general you shouldn't require to start an LedStrip directly, but you should
+  use the `Fledex DSL`. In order to start an `LedStrip` a Registry (with name as provided by
+  `Fledex.Subscription.Utils.worker_registry/0`) is required.
   """
   use GenServer
 
@@ -65,6 +69,14 @@ defmodule Fledex.LedStrip do
   }
 
   # client code
+  def child_spec({strip_name, drivers, global_onfig}) do
+    %{
+      id: strip_name,
+      start: {__MODULE__, :start_link, [strip_name, drivers, global_onfig]},
+      name: Utils.via_tuple(strip_name, :led_strip, :strip)
+    }
+  end
+
   @doc """
   This starts the server controlling a specfic led strip. It is possible
   to install several drivers at the same time, so different hardware gets the same data
@@ -106,17 +118,17 @@ defmodule Fledex.LedStrip do
       when is_list(drivers) and is_list(global_config) do
     drivers = Manager.remove_invalid_drivers(drivers)
 
-    case whereis(strip_name) do
-      nil ->
-        GenServer.start_link(
-          __MODULE__,
-          {strip_name, drivers, global_config},
-          name: Utils.via_tuple(strip_name, :led_strip, :none)
-        )
+    # case whereis(strip_name) do
+    #   nil ->
+    GenServer.start_link(
+      __MODULE__,
+      {strip_name, drivers, global_config},
+      name: Utils.via_tuple(strip_name, :led_strip, :strip)
+    )
 
-      pid ->
-        {:ok, pid}
-    end
+    #   pid ->
+    #     {:ok, pid}
+    # end
   end
 
   def start_link(strip_name, drivers, global_config) do
@@ -125,31 +137,15 @@ defmodule Fledex.LedStrip do
   end
 
   @doc """
-  Looks up the pid of the process belonging to the LedStrip with the `strip_name`.
-
-  Returns `nil` if no process can be found.
-  """
-  @spec whereis(atom) :: pid | nil
-  def whereis(strip_name) do
-    case Registry.lookup(
-           Utils.worker_registry(),
-           {strip_name, :led_strip, :none}
-         ) do
-      [] ->
-        nil
-
-      [{pid, _value}] ->
-        pid
-    end
-  end
-
-  @doc """
   Define a new namespace
   """
   @spec define_namespace(atom, atom) :: :ok | {:error, String.t()}
   def define_namespace(strip_name, namespace) do
     # Logger.info("defining namespace: #{strip_name}-#{namespace}")
-    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :none), {:define_namespace, namespace})
+    GenServer.call(
+      Utils.via_tuple(strip_name, :led_strip, :strip),
+      {:define_namespace, namespace}
+    )
   end
 
   @doc """
@@ -157,7 +153,7 @@ defmodule Fledex.LedStrip do
   """
   @spec drop_namespace(atom, atom) :: :ok
   def drop_namespace(strip_name, namespace) do
-    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :none), {:drop_namespace, namespace})
+    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :strip), {:drop_namespace, namespace})
   end
 
   @doc """
@@ -165,7 +161,7 @@ defmodule Fledex.LedStrip do
   """
   @spec exist_namespace(atom, atom) :: boolean
   def exist_namespace(strip_name, namespace) do
-    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :none), {:exist_namespace, namespace})
+    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :strip), {:exist_namespace, namespace})
   end
 
   @doc """
@@ -178,7 +174,7 @@ defmodule Fledex.LedStrip do
   """
   @spec set_leds(atom, atom, list(pos_integer)) :: :ok | {:error, String.t()}
   def set_leds(strip_name, namespace, leds) do
-    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :none), {:set_leds, namespace, leds})
+    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :strip), {:set_leds, namespace, leds})
   end
 
   @doc """
@@ -188,7 +184,7 @@ defmodule Fledex.LedStrip do
   @spec change_config(atom, keyword) :: {:ok, [keyword]}
   def change_config(strip_name, global_config) do
     GenServer.call(
-      Utils.via_tuple(strip_name, :led_strip, :none),
+      Utils.via_tuple(strip_name, :led_strip, :strip),
       {:change_config, global_config}
     )
   end
@@ -209,19 +205,25 @@ defmodule Fledex.LedStrip do
 
   def reinit(strip_name, drivers, strip_config) do
     GenServer.call(
-      Utils.via_tuple(strip_name, :led_strip, :none),
+      Utils.via_tuple(strip_name, :led_strip, :strip),
       {:reinit, drivers, strip_config}
     )
 
     :ok
   end
 
-  @spec stop(GenServer.server()) :: :ok
-  def stop(strip_name) do
-    GenServer.stop(Utils.via_tuple(strip_name, :led_strip, :none))
-  end
+  # @doc """
+  # stops the LedStrip.
 
-  # server code
+  # Note that you shouldn't call it here, but through the
+  # `Fledex.Animation.Nabager`, because you might leave dangling animations.
+  # """
+  # @spec stop(atom) :: :ok
+  # def stop(strip_name) do
+  #   GenServer.stop(Utils.via_tuple(strip_name, :led_strip, :strip))
+  # end
+
+  # MARK:server side
   @impl GenServer
   @spec init({atom, list({module, keyword}), keyword}) :: {:ok, state_t} | {:stop, String.t()}
   def init({strip_name, drivers, global_config})

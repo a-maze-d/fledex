@@ -34,6 +34,7 @@ defmodule Fledex.Supervisor.AnimationSystem do
   The dynamic options are probably not something you want to do manually, but it's
   something you want to trigger when calling `use Fledex`.
 
+  # TODO: adjust docs
   Once the `AnimationSystem` is up and running you can add workers through
   `start_led_strip`, `start_animation`, `start_coordinator`. The following
   worker types exist:
@@ -45,12 +46,11 @@ defmodule Fledex.Supervisor.AnimationSystem do
 
   require Logger
 
-  alias Fledex.Animation.Animator
   alias Fledex.Animation.Coordinator
   alias Fledex.Animation.JobScheduler
   alias Fledex.Animation.Manager
   alias Fledex.Driver.Impl.Null
-  alias Fledex.LedStrip
+  alias Fledex.Supervisor.LedStripSupervisor
   alias Fledex.Supervisor.Utils
 
   @doc """
@@ -89,34 +89,21 @@ defmodule Fledex.Supervisor.AnimationSystem do
   @spec start_led_strip(atom, module | {module, keyword} | [{module, keyword}], keyword) ::
           GenServer.on_start()
   def start_led_strip(strip_name, drivers \\ Null, strip_config \\ []) do
-    DynamicSupervisor.start_child(
-      Utils.workers_supervisor(),
-      %{
-        # no need to be unique
-        id: strip_name,
-        start: {LedStrip, :start_link, [strip_name, drivers, strip_config]},
-        restart: :transient
-      }
-    )
+    case DynamicSupervisor.start_child(
+           Utils.workers_supervisor(),
+           %{
+             # no need to be unique
+             id: strip_name,
+             start: {LedStripSupervisor, :start_link, [strip_name, drivers, strip_config]},
+             restart: :transient
+           }
+         ) do
+      {:ok, pid} -> {:ok, pid}
+      {:error, {:already_started, pid}} -> {:ok, pid}
+    end
   end
 
-  @doc """
-  This starts a new animation. It should be noted that it's expected
-  that the led_strip is already up and running
-  """
-  @spec start_animation(atom, atom, Animator.config_t()) :: GenServer.on_start()
-  def start_animation(strip_name, animation_name, config) do
-    DynamicSupervisor.start_child(
-      Utils.workers_supervisor(),
-      %{
-        # no need to be unique
-        id: animation_name,
-        start: {Animator, :start_link, [strip_name, animation_name, config]},
-        restart: :transient
-      }
-    )
-  end
-
+  # TODO: move this to LedStripSupervisor since the coordinator belongs to an LED strip
   @doc """
   This starts a new coordinator. Which can receive events and react to those
   by impacting the running annimations.

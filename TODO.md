@@ -44,17 +44,19 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Connect everything into a supervision tree (to make it more robust) (v0.6)
     - [x] handle all the TODOs (done, for those related to the supervisor changes)
     - [x] Add logs to starting/shutting down of processes
-    - [ ] add documentation (livebook, `@doc`, `@module_doc`)
+    - [x] add documentation (livebook, `@doc`, `@module_doc`)
     - [ ] add negative tests (killing some service)
     - [x] Create commit log
     - [x] Cleanup code from commented out stuff
     - [x] Cleanup code from debug stuff
     - [x] extra round of testing
-    - [ ] check specs, Credo, ...
-    - [ ] we start things through the Supervisor, but we don't shut things down through it
-  - [ ] We have the `Fledex.Color` protocol, but we actually don't make use of it's type. This is maybe also a good opportunity to rethink on how we handle colors in general. Maybe we should define everything as `Fledex.Color` and enapsulate CSS, SVG, RAL colours in their own struct to then have the protocol implemented for them. Other advantages:
-    - [ ] This should make the `CalcUtils.split_into_subpixels` unnecessary
-    - [ ]  
+    - [x] check specs, Credo, ...
+    - [ ] The Animator shoudl be connected to the LedStrip. Otherwise we get the wrong behavior
+  - [ ] we start things through the Supervisor, but we don't shut things down through it (v0.7)
+  - [ ] We have the `Fledex.Color` protocol, but we actually don't make use of its type. This is maybe also a good opportunity to rethink on how we handle colors in general. Maybe we should define everything as `Fledex.Color` and encapsulate CSS, SVG, RAL colours in their own struct to then have the protocol implemented for them. (v0.7)
+  Other advantages:
+    - [x] This should make the `CalcUtils.split_into_subpixels` unnecessary (v0.6)
+  - [ ] Replace Quantum with SchedEx? https://hexdocs.pm/sched_ex/readme.html (v0.7)
   - [ ] Enable Telemetry? (v0.7)
   - [ ] should the `:config` driver not only return the config but the strip_name too?
   - [ ] setting up livebook (a really working version) on windows is anything than easy :-( Can we do something about it? Investigate (v0.7) 

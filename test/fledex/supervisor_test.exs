@@ -3,13 +3,15 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.SupervisorTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: false
+
+  require Logger
 
   alias Fledex.Animation.Animator
   alias Fledex.Animation.Coordinator
   alias Fledex.Animation.Manager
-  alias Fledex.LedStrip
   alias Fledex.Supervisor.AnimationSystem
+  alias Fledex.Supervisor.LedStripSupervisor
   alias Fledex.Supervisor.Utils
 
   describe "animation system" do
@@ -33,9 +35,19 @@ defmodule Fledex.SupervisorTest do
     end
   end
 
-  def count_workers do
+  defp count_workers do
     DynamicSupervisor.count_children(Utils.workers_supervisor())
-    |> Map.get(:workers)
+    |> Map.get(:active)
+  end
+
+  defp supervisor_workers(strip_name) do
+    DynamicSupervisor.count_children(LedStripSupervisor.supervisor_name(strip_name))
+    |> Map.get(:active)
+  end
+
+  defp animation_workers(strip_name) do
+    DynamicSupervisor.count_children(LedStripSupervisor.animations_name(strip_name))
+    |> Map.get(:active)
   end
 
   @test_strip :test_strip
@@ -56,7 +68,29 @@ defmodule Fledex.SupervisorTest do
       assert count_workers() == 0
       AnimationSystem.start_led_strip(@test_strip)
       assert count_workers() == 1
-      LedStrip.stop(@test_strip)
+      LedStripSupervisor.stop(@test_strip)
+      assert count_workers() == 0
+    end
+
+    defp get_led_strip_pid(strip_name) do
+      Supervisor.which_children(LedStripSupervisor.supervisor_name(strip_name))
+      |> Enum.filter(fn {_name, _pid, type, _module} -> type == :worker end)
+      |> List.first()
+      |> elem(1)
+    end
+
+    test "kill led strip" do
+      assert count_workers() == 0
+      AnimationSystem.start_led_strip(@test_strip)
+      assert count_workers() == 1
+
+      led_strip_pid1 = get_led_strip_pid(@test_strip)
+      Process.exit(led_strip_pid1, :kill)
+      led_strip_pid2 = get_led_strip_pid(@test_strip)
+      assert led_strip_pid2 != nil
+      assert led_strip_pid1 != led_strip_pid2
+
+      LedStripSupervisor.stop(@test_strip)
       assert count_workers() == 0
     end
 
@@ -66,13 +100,21 @@ defmodule Fledex.SupervisorTest do
       AnimationSystem.start_led_strip(@test_strip)
 
       assert count_workers() == 1
-      AnimationSystem.start_animation(@test_strip, @test_anim, %{type: :animation})
-      assert count_workers() == 2
+      assert supervisor_workers(@test_strip) == 2
+      assert animation_workers(@test_strip) == 0
+      LedStripSupervisor.start_animation(@test_strip, @test_anim, %{type: :animation})
+
+      assert count_workers() == 1
+      assert supervisor_workers(@test_strip) == 2
+      assert animation_workers(@test_strip) == 1
+
       Animator.stop(@test_strip, @test_anim)
       assert count_workers() == 1
+      assert supervisor_workers(@test_strip) == 2
+      assert animation_workers(@test_strip) == 0
 
       # cleanup
-      LedStrip.stop(@test_strip)
+      LedStripSupervisor.stop(@test_strip)
       assert count_workers() == 0
     end
 

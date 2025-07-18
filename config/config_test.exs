@@ -4,6 +4,9 @@
 
 import Config
 
+config :logger, level: :info
+config :fledex, Fledex.Animation.JobScheduler, debug_logging: false
+
 config :circuits_sim,
   config: [
     {Fledex.Test.CircuitsSim.Device.WS2801, bus_name: "spidev0.0", render: :leds}

@@ -27,6 +27,9 @@ defmodule Fledex.Leds do
   @enforce_keys [:count, :leds, :opts]
   defstruct count: 0, leds: %{}, opts: %{}, meta: %{index: 1}
 
+  @typedoc """
+  The structure defining an led sequence.
+  """
   @type t :: %__MODULE__{
           count: integer,
           leds: %{pos_integer => Types.colorint()},
