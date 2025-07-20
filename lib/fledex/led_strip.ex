@@ -29,6 +29,7 @@ defmodule Fledex.LedStrip do
   alias Fledex.Color.Types
   alias Fledex.Driver.Impl.Null
   alias Fledex.Driver.Manager
+  alias Fledex.Effect.Rotation
   alias Fledex.Supervisor.Utils
   alias Fledex.Utils.PubSub
 
@@ -175,6 +176,24 @@ defmodule Fledex.LedStrip do
   @spec set_leds(atom, atom, list(pos_integer)) :: :ok | {:error, String.t()}
   def set_leds(strip_name, namespace, leds) do
     GenServer.call(Utils.via_tuple(strip_name, :led_strip, :strip), {:set_leds, namespace, leds})
+  end
+
+  @doc """
+  Similar to `set_leds/3` but allows to specify some options to rotate
+  the leds. The recognized options are:
+  * `:offset`: The amount to rotate
+  * `:rotate_left`: whether we want to rotate to the left (or the right). The default is `true`
+  """
+  @spec set_leds_with_rotation(atom, atom, list(pos_integer), pos_integer, keyword) :: :ok | {:error, String.t()}
+  def set_leds_with_rotation(strip_name, namespace, leds, count, opts) do
+    # TODO: maybe use a case statement to make it more robust?
+    # someone might define a nil offset :-(
+    offset = Keyword.get(opts, :offset, 0) || 0
+    rotate_left = Keyword.get(opts, :rotate_left, true)
+    offset = if count == 0, do: 0, else: rem(offset, count)
+
+    vals = Rotation.rotate(leds, count, offset, rotate_left)
+    set_leds(strip_name, namespace, vals)
   end
 
   @doc """

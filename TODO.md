@@ -37,7 +37,7 @@ Even though this library is published, there are things I still want to do befor
   - [x] cleanup the argument order to be more consistent between Animator, Coordinator and LedStrip
   - [x] Remove the `WorkerSupervisor`. It doesn't seem to have any value anymroe
   - [x] cleanup the via_tuple stuff once coordinator is done (move Utils to Supervisor? yes moved)
-  - [ ] Do we really need to use the `Leds.send` function in the `Animator`?
+  - [x] Do we really need to use the `Leds.send` function in the `Animator`. Moving it to `LedStrip`
 - [ ] Missing functionality
   - [/] Add a default `led_strip` driver that can be configured through the config (v0.6)
         I experimented with this idea, but it really doesn't give a real benefit. Therefore dropped it again.
@@ -45,13 +45,14 @@ Even though this library is published, there are things I still want to do befor
     - [x] handle all the TODOs (done, for those related to the supervisor changes)
     - [x] Add logs to starting/shutting down of processes
     - [x] add documentation (livebook, `@doc`, `@module_doc`)
-    - [ ] add negative tests (killing some service)
+    - [x] add negative tests (killing some service)
     - [x] Create commit log
     - [x] Cleanup code from commented out stuff
     - [x] Cleanup code from debug stuff
     - [x] extra round of testing
     - [x] check specs, Credo, ...
-    - [ ] The Animator shoudl be connected to the LedStrip. Otherwise we get the wrong behavior
+    - [x] The Animator shoudl be connected to the LedStrip. Otherwise we get the wrong behavior
+    - [ ] The Coordinator should be connected to the LedStrip, otherwise it would be awkward
   - [ ] we start things through the Supervisor, but we don't shut things down through it (v0.7)
   - [ ] We have the `Fledex.Color` protocol, but we actually don't make use of its type. This is maybe also a good opportunity to rethink on how we handle colors in general. Maybe we should define everything as `Fledex.Color` and encapsulate CSS, SVG, RAL colours in their own struct to then have the protocol implemented for them. (v0.7)
   Other advantages:

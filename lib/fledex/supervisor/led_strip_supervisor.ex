@@ -43,8 +43,8 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
     Logger.debug("Starting LedStrip #{strip_name}")
 
     children = [
-      {DynamicSupervisor, name: animations_name(strip_name), strategy: :one_for_one},
-      {LedStrip, init_args}
+      {LedStrip, init_args},
+      {DynamicSupervisor, name: animations_name(strip_name), strategy: :one_for_one}
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

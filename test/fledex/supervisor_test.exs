@@ -55,7 +55,7 @@ defmodule Fledex.SupervisorTest do
   @test_coord :my_coordinator
   describe "workers" do
     setup do
-      start_supervised(AnimationSystem.child_spec([]))
+      start_supervised(AnimationSystem.child_spec())
       :ok
     end
 
@@ -116,6 +116,47 @@ defmodule Fledex.SupervisorTest do
       # cleanup
       LedStripSupervisor.stop(@test_strip)
       assert count_workers() == 0
+    end
+
+    def animation_pid(strip_name, animation_name) do
+      Registry.select(Utils.worker_registry(), [
+        {
+          {:"$1", :"$2", :"$3"},
+          [],
+          [{{:"$1", :"$2", :"$3"}}]
+        }
+      ])
+      |> Enum.filter(fn {name, _pid, _other} ->
+        {strip_name, :animator, animation_name} == name
+      end)
+      |> List.first()
+      |> elem(1)
+    end
+
+    test "kill animation" do
+      # the animation requires an led strip
+      assert count_workers() == 0
+      AnimationSystem.start_led_strip(@test_strip)
+
+      assert count_workers() == 1
+      assert supervisor_workers(@test_strip) == 2
+      assert animation_workers(@test_strip) == 0
+      LedStripSupervisor.start_animation(@test_strip, @test_anim, %{type: :animation})
+
+      animation_pid1 = animation_pid(@test_strip, @test_anim)
+      assert animation_pid1 != nil
+
+      Logger.debug("killing animation #{inspect(animation_pid1)}...")
+      Process.exit(animation_pid1, :kill)
+
+      # give it some time to recove
+      Process.sleep(1_000)
+
+      animation_pid2 = animation_pid(@test_strip, @test_anim)
+      assert animation_pid2 != nil
+      assert animation_pid1 != animation_pid2
+
+      LedStripSupervisor.stop(@test_strip)
     end
 
     test "coordinator worker" do
