@@ -55,8 +55,9 @@ Even though this library is published, there are things I still want to do befor
     - [x] extra round of testing
     - [x] check specs, Credo, ...
     - [x] The Animator shoudl be connected to the LedStrip. Otherwise we get the wrong behavior
-    - [ ] The Coordinator should be connected to the LedStrip, otherwise it would be awkward
-  - [ ] we start things through the Supervisor, but we don't shut things down through it (v0.7)
+    - [x] The Coordinator should be connected to the LedStrip, otherwise it would be awkward
+    - [ ] The Job should (at least appear) to be connected to the LedStrip (v0.7)
+    - [ ] we start things through the Supervisor, but we don't shut things down through it (v0.7)
   - [ ] We have the `Fledex.Color` protocol, but we actually don't make use of its type. This is maybe also a good opportunity to rethink on how we handle colors in general. Maybe we should define everything as `Fledex.Color` and encapsulate CSS, SVG, RAL colours in their own struct to then have the protocol implemented for them. (v0.7)
   Other advantages:
     - [x] This should make the `CalcUtils.split_into_subpixels` unnecessary (v0.6)

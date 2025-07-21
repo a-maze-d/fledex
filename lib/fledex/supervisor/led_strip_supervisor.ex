@@ -3,15 +3,24 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Supervisor.LedStripSupervisor do
+  @moduledoc """
+  This is the supervisor for an led strip and all it's workers, like animations
+  (`start_animation/3`) and coordinators (`start_coordinator/3`).
+  """
   use Supervisor
 
   require Logger
 
   alias Fledex.Animation.Animator
+  alias Fledex.Animation.Coordinator
   alias Fledex.LedStrip
   alias Fledex.Supervisor.Utils
 
   # MARK: client side
+  @doc """
+  Start a new supervisor for an led strip.
+  """
+  @spec start_link(atom, LedStrip.drivers_config_t(), keyword) :: Supervisor.on_start()
   def start_link(strip_name, drivers, global_configs) do
     Supervisor.start_link(
       __MODULE__,
@@ -20,18 +29,24 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
     )
   end
 
+  @doc """
+  Stop the supervisor (and all it's children)
+  """
+  @spec stop(atom) :: :ok
   def stop(strip_name) do
     Supervisor.stop(supervisor_name(strip_name))
   end
 
   @doc """
-  This starts a new animation. It should be noted that it's expected
-  that the led_strip is already up and running
+  This starts a new animation attached to the specified led strip.
+
+  It should be noted that it's expected that the led_strip supervisor is
+  already up and running
   """
   @spec start_animation(atom, atom, Animator.config_t()) :: GenServer.on_start()
   def start_animation(strip_name, animation_name, config) do
     DynamicSupervisor.start_child(
-      animations_name(strip_name),
+      workers_name(strip_name),
       %{
         # no need to be unique
         id: animation_name,
@@ -41,25 +56,48 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
     )
   end
 
+  @doc """
+  This starts a new coordinator. Which can receive events and react to those
+  by impacting the running annimations.
+  """
+  @spec start_coordinator(atom, atom, Coordinator.config_t()) :: GenServer.on_start()
+  def start_coordinator(strip_name, coordinator_name, config) do
+    DynamicSupervisor.start_child(
+      workers_name(strip_name),
+      %{
+        # no need to be unique
+        id: coordinator_name,
+        start: {Coordinator, :start_link, [strip_name, coordinator_name, config]},
+        restart: :transient
+      }
+    )
+  end
+
   # MARK: Server side
   @impl true
+  @spec init({atom, LedStrip.drivers_config_t(), keyword}) ::
+          {:ok,
+           {Supervisor.sup_flags(),
+            [Supervisor.child_spec() | (old_erlang_child_spec :: :supervisor.child_spec())]}}
   def init({strip_name, _drivers, _global_config} = init_args) do
     Logger.debug("Starting LedStrip #{strip_name}")
 
     children = [
       {LedStrip, init_args},
-      {DynamicSupervisor, name: animations_name(strip_name), strategy: :one_for_one}
+      {DynamicSupervisor, name: workers_name(strip_name), strategy: :one_for_one}
     ]
 
     Supervisor.init(children, strategy: :one_for_one)
   end
 
   # MARK: public helper functions
+  @spec supervisor_name(atom) :: GenServer.name()
   def supervisor_name(strip_name) do
     Utils.via_tuple(strip_name, :led_strip, :supervisor)
   end
 
-  def animations_name(strip_name) do
-    Utils.via_tuple(strip_name, :led_strip, :animations)
+  @spec workers_name(atom) :: GenServer.name()
+  def workers_name(strip_name) do
+    Utils.via_tuple(strip_name, :led_strip, :workers)
   end
 end

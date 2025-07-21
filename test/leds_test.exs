@@ -478,7 +478,7 @@ defmodule Fledex.LedsTestSync do
           |> Leds.send()
 
           # the Logger driver is rather slow, therefore waiting a bit
-          Process.sleep(100)
+          Process.sleep(200)
         end)
 
       assert log =~ "16711680,65280,255"

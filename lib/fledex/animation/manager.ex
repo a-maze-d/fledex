@@ -74,7 +74,7 @@ defmodule Fledex.Animation.Manager do
   configurations, or a touple with module and keyword list to adjust the
   configuration.(see [`LedStrip`](Fledex.LedStrip.html) for details).
   """
-  @spec register_strip(atom, [{module, keyword}], keyword) :: :ok
+  @spec register_strip(atom, LedStrip.drivers_config_t(), keyword) :: :ok
   def register_strip(strip_name, drivers, strip_config) do
     strip_config = Keyword.put_new(strip_config, :group_leader, Process.group_leader())
 
@@ -128,7 +128,7 @@ defmodule Fledex.Animation.Manager do
 
   @impl GenServer
   @spec handle_call(
-          {:regiseter_strip, atom, [{module, keyword}], keyword},
+          {:regiseter_strip, atom, LedStrip.drivers_config_t(), keyword},
           GenServer.from(),
           state_t
         ) ::
@@ -207,7 +207,7 @@ defmodule Fledex.Animation.Manager do
     {animations, coordinators, jobs}
   end
 
-  @spec register_strip(state_t, atom, [{module, keyword}], keyword) :: state_t
+  @spec register_strip(state_t, atom, LedStrip.drivers_config_t(), keyword) :: state_t
   defp register_strip(state, strip_name, drivers, strip_config) do
     _result = AnimationSystem.start_led_strip(strip_name, drivers, strip_config)
 
@@ -318,7 +318,7 @@ defmodule Fledex.Animation.Manager do
   @spec create_coordinators(atom, map) :: :ok
   defp create_coordinators(strip_name, created_coordinators) do
     Enum.each(created_coordinators, fn {coordinator_name, config} ->
-      AnimationSystem.start_coordinator(strip_name, coordinator_name, config)
+      LedStripSupervisor.start_coordinator(strip_name, coordinator_name, config)
     end)
   end
 

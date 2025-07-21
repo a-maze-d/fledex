@@ -34,22 +34,17 @@ defmodule Fledex.Supervisor.AnimationSystem do
   The dynamic options are probably not something you want to do manually, but it's
   something you want to trigger when calling `use Fledex`.
 
-  # TODO: adjust docs
-  Once the `AnimationSystem` is up and running you can add workers through
-  `start_led_strip`, `start_animation`, `start_coordinator`. The following
-  worker types exist:
-  * the led strip workers (controlling the led strip)
-  * the animation workers (running withni an led strip). Note: this requires an led_strip
-  * the coordinators (that can control and coordinate the various animations)
+  Once the `AnimationSystem` is up and running you can add led strips through
+  `start_led_strip/3`
   """
   use Supervisor
 
   require Logger
 
-  alias Fledex.Animation.Coordinator
   alias Fledex.Animation.JobScheduler
   alias Fledex.Animation.Manager
   alias Fledex.Driver.Impl.Null
+  alias Fledex.LedStrip
   alias Fledex.Supervisor.LedStripSupervisor
   alias Fledex.Supervisor.Utils
 
@@ -86,7 +81,7 @@ defmodule Fledex.Supervisor.AnimationSystem do
   This starts a new led_strip to which we can send some led sequences,
   and, if we update it in regular intervals, can play an animation
   """
-  @spec start_led_strip(atom, module | {module, keyword} | [{module, keyword}], keyword) ::
+  @spec start_led_strip(atom, LedStrip.drivers_config_t(), keyword) ::
           GenServer.on_start()
   def start_led_strip(strip_name, drivers \\ Null, strip_config \\ []) do
     case DynamicSupervisor.start_child(
@@ -103,25 +98,7 @@ defmodule Fledex.Supervisor.AnimationSystem do
     end
   end
 
-  @doc """
-  This starts a new coordinator. Which can receive events and react to those
-  by impacting the running annimations.
-  """
-  @spec start_coordinator(atom, atom, Coordinator.config_t()) :: GenServer.on_start()
-  def start_coordinator(strip_name, coordinator_name, config) do
-    DynamicSupervisor.start_child(
-      Utils.workers_supervisor(),
-      %{
-        # no need to be unique
-        id: coordinator_name,
-        start: {Coordinator, :start_link, [strip_name, coordinator_name, config]},
-        restart: :transient
-      }
-    )
-  end
-
   # MARK: server side
-
   @impl true
   @spec init(keyword) ::
           {:ok, {Supervisor.sup_flags(), [Supervisor.child_spec() | :supervisor.child_spec()]}}

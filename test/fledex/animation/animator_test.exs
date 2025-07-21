@@ -261,7 +261,7 @@ defmodule Fledex.Animation.AnimatorTest do
     end
 
     def wait(pid) do
-      Process.sleep(1_000)
+      Process.sleep(2_000)
       pid
     end
 

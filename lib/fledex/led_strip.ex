@@ -34,7 +34,7 @@ defmodule Fledex.LedStrip do
   alias Fledex.Utils.PubSub
 
   @type start_link_response :: :ignore | {:error, any} | {:ok, pid}
-
+  @type drivers_config_t :: module | Manager.driver_t() | Manager.drivers_t()
   @typep timer_t :: %{
            disabled: boolean,
            counter: pos_integer,
@@ -53,7 +53,7 @@ defmodule Fledex.LedStrip do
   @typep state_t :: %{
            strip_name: atom,
            config: config_t,
-           drivers: Manager.driver_t(),
+           drivers: Manager.drivers_t(),
            namespaces: map
          }
 
@@ -70,11 +70,11 @@ defmodule Fledex.LedStrip do
   }
 
   # client code
+  @spec child_spec({atom, drivers_config_t(), keyword}) :: Supervisor.child_spec()
   def child_spec({strip_name, drivers, global_onfig}) do
     %{
       id: strip_name,
-      start: {__MODULE__, :start_link, [strip_name, drivers, global_onfig]},
-      name: Utils.via_tuple(strip_name, :led_strip, :strip)
+      start: {__MODULE__, :start_link, [strip_name, drivers, global_onfig]}
     }
   end
 
@@ -101,7 +101,7 @@ defmodule Fledex.LedStrip do
   * With several drivers: `start_link(:name, [{Spu, []}, {Spi, dev: "spidev0.1"}])`
   * With several drivers and global config: `start_link(:name, [{Spi, []}, {Spi, dev: "spidev0.1"}], timer_only_dirty_update: true)`
   """
-  @spec start_link(atom, module | {module, keyword} | [{module, keyword}], keyword) ::
+  @spec start_link(atom, drivers_config_t, keyword) ::
           GenServer.on_start()
   def start_link(strip_name, driver \\ Null, global_config \\ [])
 
@@ -228,7 +228,7 @@ defmodule Fledex.LedStrip do
   (including the drivers). Most of the time you don't need to call this.
   If you do, you will surely know about it :)
   """
-  @spec reinit(atom, module | {module, keyword} | [{module, keyword}], keyword) :: :ok
+  @spec reinit(atom, drivers_config_t, keyword) :: :ok
   def reinit(strip_name, driver, strip_config) when is_atom(driver) do
     reinit(strip_name, {driver, []}, strip_config)
   end
@@ -245,17 +245,6 @@ defmodule Fledex.LedStrip do
 
     :ok
   end
-
-  # @doc """
-  # stops the LedStrip.
-
-  # Note that you shouldn't call it here, but through the
-  # `Fledex.Animation.Nabager`, because you might leave dangling animations.
-  # """
-  # @spec stop(atom) :: :ok
-  # def stop(strip_name) do
-  #   GenServer.stop(Utils.via_tuple(strip_name, :led_strip, :strip))
-  # end
 
   # MARK:server side
   @impl GenServer
@@ -351,7 +340,7 @@ defmodule Fledex.LedStrip do
   end
 
   @impl GenServer
-  @spec handle_call({:reinit, [{module, keyword}], keyword}, {pid, any}, state_t) ::
+  @spec handle_call({:reinit, Manager.drivers_t(), keyword}, {pid, any}, state_t) ::
           {:reply, :ok, state_t}
   def handle_call({:reinit, drivers, config}, _from, state) do
     {updated_config, _rets} = update_config(state.config, config)
@@ -381,7 +370,7 @@ defmodule Fledex.LedStrip do
 
   ### MARK: public helper functions
   @doc false
-  @spec init_state(atom, [{module, keyword}], keyword) :: state_t
+  @spec init_state(atom, Manager.drivers_t(), keyword) :: state_t
   def init_state(strip_name, drivers, global_config)
       when is_atom(strip_name) and
              is_list(drivers) and
