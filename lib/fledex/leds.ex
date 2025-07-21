@@ -162,8 +162,8 @@ defmodule Fledex.Leds do
   This is used when the led sequence is sent to the `Fledex.LedStrip` when the
   `send/2` function is called.
   """
-  @spec set_led_strip_info(t, namespace :: atom, server_name :: atom) :: t
-  def set_led_strip_info(%{opts: opts} = leds, namespace, server_name \\ Fledex.LedStrip) do
+  @spec set_led_strip_info(t, server_name :: atom, namespace :: atom) :: t
+  def set_led_strip_info(%{opts: opts} = leds, server_name \\ Fledex.LedStrip, namespace) do
     opts = %{opts | server_name: server_name, namespace: namespace}
     %__MODULE__{leds | opts: opts}
   end

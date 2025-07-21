@@ -317,7 +317,7 @@ defmodule Fledex.Animation.Animator do
   end
 
   @spec send_leds(atom, atom, list(pos_integer), keyword) :: :ok | {:error, String.t()}
-  def send_leds(strip_name, animation_name, leds, opts \\ []) do
+  defp send_leds(strip_name, animation_name, leds, opts) do
     count = leds.count
     leds = Leds.to_list(leds)
     LedStrip.set_leds_with_rotation(strip_name, animation_name, leds, count, opts)

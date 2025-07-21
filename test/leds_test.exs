@@ -269,7 +269,7 @@ defmodule Fledex.LedsTest do
     end
 
     test "setting driver info" do
-      leds = Leds.leds() |> Leds.set_led_strip_info(:test_name, :test_strip)
+      leds = Leds.leds() |> Leds.set_led_strip_info(:test_strip, :test_name)
       assert leds.opts.namespace == :test_name
       assert leds.opts.server_name == :test_strip
 
@@ -434,27 +434,48 @@ end
 defmodule Fledex.LedsTestSync do
   # all the sync tests that require some GenServer. We want to run
   # them in a sync way. We split them out for that reason
-  use ExUnit.Case
+  use ExUnit.Case, async: false
 
   # import ExUnit.CaptureLog
   require Logger
 
   alias Fledex.Leds
+  alias Fledex.LedStrip
+  alias Fledex.Supervisor.Utils
 
-  # describe "send functions" do
-  #   test "correct setup and warnings" do
-  #     leds = Leds.leds(20) |> Leds.light(:red, 1, 10)
-
-  #     {:ok, log} =
-  #       with_log(fn ->
-  #         Leds.send(leds)
-  #       end)
-
-  #     assert String.match?(log, ~r/warning/)
-  #     assert String.match?(log, ~r/You should start it/)
-  #     assert String.match?(log, ~r/namespace hasn't been defined/)
-  #   end
-  # end
+  @test_strip :test_strip
+  @test_namespace :test_namespace
+  describe "send functions" do
+    setup do
+      init_args = {
+        @test_strip,
+        [{
+          Fledex.Driver.Impl.Logger,
+          [terminal: false, log_color_code: true, update_freq: 1]
+        }],
+        []
+      }
+      start_supervised({Registry, keys: :unique, name: Utils.worker_registry()})
+      start_supervised({Phoenix.PubSub, adapter_name: :pg2, name: Utils.pubsub_name()})
+      start_supervised({LedStrip, init_args})
+      LedStrip.define_namespace(@test_strip, @test_namespace)
+      :ok
+    end
+    test "send function with rotation" do
+      import ExUnit.CaptureLog
+      {:ok, log} = with_log(fn ->
+        Leds.new(3)
+          |> Leds.light(:red)
+          |> Leds.light(:green)
+          |> Leds.light(:blue)
+          |> Leds.set_led_strip_info(@test_strip, @test_namespace)
+          |> Leds.send()
+        # the Logger driver is rather slow, therefore waiting a bit
+        Process.sleep(100)
+      end)
+      assert log =~ "16711680,65280,255"
+    end
+  end
 end
 
 defmodule Fledex.LedsTestKino do

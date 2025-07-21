@@ -149,7 +149,7 @@ defmodule Helpers do
       ]
 
       Leds.leds(50)
-      |> Leds.set_led_strip_info(namespace, LedStrip)
+      |> Leds.set_led_strip_info(LedStrip, namespace)
       |> Leds.rainbow(config)
       |> Leds.send(offset: index)
 
@@ -161,7 +161,7 @@ defmodule Helpers do
   def gradient(namespace) do
     Enum.each(0..10000, fn index ->
       Leds.leds(50)
-      |> Leds.set_led_strip_info(namespace, LedStrip)
+      |> Leds.set_led_strip_info(LedStrip, namespace)
       |> Leds.gradient(0xFF0000, 0x0000FF, %{num_leds: 50})
       |> Leds.send(
         offset: index,
