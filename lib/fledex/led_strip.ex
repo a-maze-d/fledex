@@ -462,6 +462,7 @@ defmodule Fledex.LedStrip do
   end
 
   # MARK: private helper functions
+  @spec get_offset(keyword) :: non_neg_integer()
   defp get_offset(opts) do
     case Keyword.get(opts, :offset, 0) do
       x when is_integer(x) and x < 0 -> 0
@@ -470,6 +471,7 @@ defmodule Fledex.LedStrip do
     end
   end
 
+  @spec get_rotation_left(keyword) :: boolean
   defp get_rotation_left(opts) do
     case Keyword.get(opts, :rotate_left, true) do
       x when is_boolean(x) -> x

@@ -39,6 +39,8 @@ Even though this library is published, there are things I still want to do befor
   - [x] Remove the `WorkerSupervisor`. It doesn't seem to have any value anymroe
   - [x] cleanup the via_tuple stuff once coordinator is done (move Utils to Supervisor? yes moved)
   - [x] Do we really need to use the `Leds.send` function in the `Animator`. Moving it to `LedStrip`
+  - [ ] Can we reuse the same registry for PubSub and for our workers?
+  - [ ] Add more guards to functions to make them more robust
 - [ ] Missing functionality
   - [/] Add a default `led_strip` driver that can be configured through the config (v0.6)
         I experimented with this idea, but it really doesn't give a real benefit. Therefore dropped it again.
