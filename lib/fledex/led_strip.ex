@@ -18,7 +18,7 @@ defmodule Fledex.LedStrip do
 
   Note: In general you shouldn't require to start an LedStrip directly, but you should
   use the `Fledex DSL`. In order to start an `LedStrip` a Registry (with name as provided by
-  `Fledex.Subscription.Utils.worker_registry/0`) is required.
+  `Fledex.Supervisor.Utils.worker_registry/0`) is required.
   """
   use GenServer
 
