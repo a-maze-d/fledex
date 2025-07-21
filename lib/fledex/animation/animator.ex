@@ -312,6 +312,7 @@ defmodule Fledex.Animation.Animator do
     {leds, triggers} = apply_effects(leds, effects, triggers, context)
 
     {config, triggers} = send_config_func.(triggers) |> get_with_triggers(triggers)
+
     LedStrip.set_leds_with_rotation(
       strip_name,
       animation_name,
