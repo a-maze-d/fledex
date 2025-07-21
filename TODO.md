@@ -44,7 +44,7 @@ Even though this library is published, there are things I still want to do befor
 - [ ] Missing functionality
   - [/] Add a default `led_strip` driver that can be configured through the config (v0.6)
         I experimented with this idea, but it really doesn't give a real benefit. Therefore dropped it again.
-  - [ ] Connect everything into a supervision tree (to make it more robust) (v0.6)
+  - [x] Connect everything into a supervision tree (to make it more robust) (v0.6)
     - [x] handle all the TODOs (done, for those related to the supervisor changes)
     - [x] Add logs to starting/shutting down of processes
     - [x] add documentation (livebook, `@doc`, `@module_doc`)
@@ -56,8 +56,8 @@ Even though this library is published, there are things I still want to do befor
     - [x] check specs, Credo, ...
     - [x] The Animator shoudl be connected to the LedStrip. Otherwise we get the wrong behavior
     - [x] The Coordinator should be connected to the LedStrip, otherwise it would be awkward
-    - [ ] The Job should (at least appear) to be connected to the LedStrip (v0.7)
-    - [ ] we start things through the Supervisor, but we don't shut things down through it (v0.7)
+  - [ ] The Job should (at least appear) to be connected to the LedStrip (v0.7)
+  - [ ] we start things through the Supervisor, but we don't shut things down through it (v0.7)
   - [ ] We have the `Fledex.Color` protocol, but we actually don't make use of its type. This is maybe also a good opportunity to rethink on how we handle colors in general. Maybe we should define everything as `Fledex.Color` and encapsulate CSS, SVG, RAL colours in their own struct to then have the protocol implemented for them. (v0.7)
   Other advantages:
     - [x] This should make the `CalcUtils.split_into_subpixels` unnecessary (v0.6)

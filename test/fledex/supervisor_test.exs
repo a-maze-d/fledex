@@ -151,7 +151,7 @@ defmodule Fledex.SupervisorTest do
       animation_pid1 = worker_pid(@test_strip, :animator, @test_anim)
       assert animation_pid1 != nil
 
-      Logger.debug("killing animation #{inspect(animation_pid1)}...")
+      # Logger.debug("killing animation #{inspect(animation_pid1)}...")
       Process.exit(animation_pid1, :kill)
 
       # give it some time to recove

@@ -160,17 +160,17 @@ defmodule Fledex.Animation.Animator do
 
     state = update_config(state, init_args)
 
-    ignore = LedStrip.define_namespace(state.strip_name, state.animation_name)
-    Logger.debug("namespce: #{inspect(ignore)}")
+    _ignore = LedStrip.define_namespace(state.strip_name, state.animation_name)
+    # Logger.debug("namespce: #{inspect(ignore)}")
 
-    ignore =
+    _ignore =
       case state.type do
         :animation -> :ok = PubSub.subscribe(PubSub.channel_trigger())
         # we don't subscribe because we paint only once
         :static -> :ok
       end
 
-    Logger.debug("subscription: #{inspect(ignore)}")
+    # Logger.debug("subscription: #{inspect(ignore)}")
 
     {:ok, state, {:continue, :paint_once}}
   end
@@ -312,7 +312,6 @@ defmodule Fledex.Animation.Animator do
     {leds, triggers} = apply_effects(leds, effects, triggers, context)
 
     {config, triggers} = send_config_func.(triggers) |> get_with_triggers(triggers)
-
     LedStrip.set_leds_with_rotation(
       strip_name,
       animation_name,

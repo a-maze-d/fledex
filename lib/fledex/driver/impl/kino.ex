@@ -5,6 +5,8 @@
 defmodule Fledex.Driver.Impl.Kino do
   @behaviour Fledex.Driver.Interface
 
+  require Logger
+
   alias Fledex.Color.Correction
   alias Fledex.Color.Types
 

@@ -202,6 +202,7 @@ defmodule Fledex.LedStrip do
   def set_leds_with_rotation(strip_name, namespace, leds, count \\ nil, opts)
       when (count == nil or (is_integer(count) and count >= 0)) and is_atom(strip_name) and
              is_atom(namespace) do
+
     count = count || length(leds)
     offset = get_offset(opts)
     rotate_left = get_rotation_left(opts)
