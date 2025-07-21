@@ -24,7 +24,6 @@ defmodule Fledex.Driver.Impl.Logger do
     (like the channel it has oppened), so that we don't have open/close it
     all the time. Cleanup should happen in the terminate function
   """
-
   @impl true
   @spec configure(keyword) :: keyword
   def configure(config) do

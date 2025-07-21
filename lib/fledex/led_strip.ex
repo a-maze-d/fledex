@@ -15,6 +15,10 @@ defmodule Fledex.LedStrip do
   The role the LedStrip plays is similar to the one a window server  plays on a normal
   computer, except that a window server would manage several screens, whereas here each
   LED strip would get its own.
+
+  Note: In general you shouldn't require to start an LedStrip directly, but you should
+  use the `Fledex DSL`. In order to start an `LedStrip` a Registry (with name as provided by
+  `Fledex.Supervisor.Utils.worker_registry/0`) is required.
   """
   use GenServer
 
@@ -25,11 +29,12 @@ defmodule Fledex.LedStrip do
   alias Fledex.Color.Types
   alias Fledex.Driver.Impl.Null
   alias Fledex.Driver.Manager
+  alias Fledex.Effect.Rotation
   alias Fledex.Supervisor.Utils
   alias Fledex.Utils.PubSub
 
   @type start_link_response :: :ignore | {:error, any} | {:ok, pid}
-
+  @type drivers_config_t :: module | Manager.driver_t() | Manager.drivers_t()
   @typep timer_t :: %{
            disabled: boolean,
            counter: pos_integer,
@@ -48,7 +53,7 @@ defmodule Fledex.LedStrip do
   @typep state_t :: %{
            strip_name: atom,
            config: config_t,
-           drivers: Manager.driver_t(),
+           drivers: Manager.drivers_t(),
            namespaces: map
          }
 
@@ -65,6 +70,14 @@ defmodule Fledex.LedStrip do
   }
 
   # client code
+  @spec child_spec({atom, drivers_config_t(), keyword}) :: Supervisor.child_spec()
+  def child_spec({strip_name, drivers, global_onfig}) do
+    %{
+      id: strip_name,
+      start: {__MODULE__, :start_link, [strip_name, drivers, global_onfig]}
+    }
+  end
+
   @doc """
   This starts the server controlling a specfic led strip. It is possible
   to install several drivers at the same time, so different hardware gets the same data
@@ -88,7 +101,7 @@ defmodule Fledex.LedStrip do
   * With several drivers: `start_link(:name, [{Spu, []}, {Spi, dev: "spidev0.1"}])`
   * With several drivers and global config: `start_link(:name, [{Spi, []}, {Spi, dev: "spidev0.1"}], timer_only_dirty_update: true)`
   """
-  @spec start_link(atom, module | {module, keyword} | [{module, keyword}], keyword) ::
+  @spec start_link(atom, drivers_config_t, keyword) ::
           GenServer.on_start()
   def start_link(strip_name, driver \\ Null, global_config \\ [])
 
@@ -106,17 +119,17 @@ defmodule Fledex.LedStrip do
       when is_list(drivers) and is_list(global_config) do
     drivers = Manager.remove_invalid_drivers(drivers)
 
-    case whereis(strip_name) do
-      nil ->
-        GenServer.start_link(
-          __MODULE__,
-          {strip_name, drivers, global_config},
-          name: Utils.via_tuple(strip_name, :led_strip, :none)
-        )
+    # case whereis(strip_name) do
+    #   nil ->
+    GenServer.start_link(
+      __MODULE__,
+      {strip_name, drivers, global_config},
+      name: Utils.via_tuple(strip_name, :led_strip, :strip)
+    )
 
-      pid ->
-        {:ok, pid}
-    end
+    #   pid ->
+    #     {:ok, pid}
+    # end
   end
 
   def start_link(strip_name, drivers, global_config) do
@@ -125,31 +138,15 @@ defmodule Fledex.LedStrip do
   end
 
   @doc """
-  Looks up the pid of the process belonging to the LedStrip with the `strip_name`.
-
-  Returns `nil` if no process can be found.
-  """
-  @spec whereis(atom) :: pid | nil
-  def whereis(strip_name) do
-    case Registry.lookup(
-           Utils.worker_registry(),
-           {strip_name, :led_strip, :none}
-         ) do
-      [] ->
-        nil
-
-      [{pid, _value}] ->
-        pid
-    end
-  end
-
-  @doc """
   Define a new namespace
   """
   @spec define_namespace(atom, atom) :: :ok | {:error, String.t()}
   def define_namespace(strip_name, namespace) do
     # Logger.info("defining namespace: #{strip_name}-#{namespace}")
-    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :none), {:define_namespace, namespace})
+    GenServer.call(
+      Utils.via_tuple(strip_name, :led_strip, :strip),
+      {:define_namespace, namespace}
+    )
   end
 
   @doc """
@@ -157,7 +154,7 @@ defmodule Fledex.LedStrip do
   """
   @spec drop_namespace(atom, atom) :: :ok
   def drop_namespace(strip_name, namespace) do
-    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :none), {:drop_namespace, namespace})
+    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :strip), {:drop_namespace, namespace})
   end
 
   @doc """
@@ -165,20 +162,53 @@ defmodule Fledex.LedStrip do
   """
   @spec exist_namespace(atom, atom) :: boolean
   def exist_namespace(strip_name, namespace) do
-    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :none), {:exist_namespace, namespace})
+    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :strip), {:exist_namespace, namespace})
   end
 
   @doc """
   Sets the leds in a specific strip and namespace.
+
+  The `count` should correspond to the length of the leds list and will be
+  calculated if not provided (but often this information is already available
+  and therefore can be provided)
 
   Note: repeated calls of this function will result in previously set leds
   will be overwritten. We are passing a list of leds which means every led
   will be rewritten, except if we define a 'shorter" led sequence. In that
   case some leds might retain their previously set value.
   """
-  @spec set_leds(atom, atom, list(pos_integer)) :: :ok | {:error, String.t()}
-  def set_leds(strip_name, namespace, leds) do
-    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :none), {:set_leds, namespace, leds})
+  @spec set_leds(atom, atom, list(pos_integer), non_neg_integer() | nil) ::
+          :ok | {:error, String.t()}
+  def set_leds(strip_name, namespace, leds, count \\ nil)
+      when (count == nil or (is_integer(count) and count >= 0)) and is_atom(strip_name) and
+             is_atom(namespace) do
+    GenServer.call(
+      Utils.via_tuple(strip_name, :led_strip, :strip),
+      {:set_leds, namespace, leds, count}
+    )
+  end
+
+  @doc """
+  Similar to `set_leds/4` but allows to specify some options to rotate
+  the leds.
+
+  The recognized options are:
+  * `:offset`: The amount to rotate
+  * `:rotate_left`: whether we want to rotate to the left (or the right).
+  The default is `true`
+  """
+  @spec set_leds_with_rotation(atom, atom, list(pos_integer), non_neg_integer() | nil, keyword) ::
+          :ok | {:error, String.t()}
+  def set_leds_with_rotation(strip_name, namespace, leds, count \\ nil, opts)
+      when (count == nil or (is_integer(count) and count >= 0)) and is_atom(strip_name) and
+             is_atom(namespace) do
+    count = count || length(leds)
+    offset = get_offset(opts)
+    rotate_left = get_rotation_left(opts)
+    offset = wrap_offset(offset, count)
+
+    vals = Rotation.rotate(leds, count, offset, rotate_left)
+    set_leds(strip_name, namespace, vals, count)
   end
 
   @doc """
@@ -188,7 +218,7 @@ defmodule Fledex.LedStrip do
   @spec change_config(atom, keyword) :: {:ok, [keyword]}
   def change_config(strip_name, global_config) do
     GenServer.call(
-      Utils.via_tuple(strip_name, :led_strip, :none),
+      Utils.via_tuple(strip_name, :led_strip, :strip),
       {:change_config, global_config}
     )
   end
@@ -198,7 +228,7 @@ defmodule Fledex.LedStrip do
   (including the drivers). Most of the time you don't need to call this.
   If you do, you will surely know about it :)
   """
-  @spec reinit(atom, module | {module, keyword} | [{module, keyword}], keyword) :: :ok
+  @spec reinit(atom, drivers_config_t, keyword) :: :ok
   def reinit(strip_name, driver, strip_config) when is_atom(driver) do
     reinit(strip_name, {driver, []}, strip_config)
   end
@@ -209,19 +239,14 @@ defmodule Fledex.LedStrip do
 
   def reinit(strip_name, drivers, strip_config) do
     GenServer.call(
-      Utils.via_tuple(strip_name, :led_strip, :none),
+      Utils.via_tuple(strip_name, :led_strip, :strip),
       {:reinit, drivers, strip_config}
     )
 
     :ok
   end
 
-  @spec stop(GenServer.server()) :: :ok
-  def stop(strip_name) do
-    GenServer.stop(Utils.via_tuple(strip_name, :led_strip, :none))
-  end
-
-  # server code
+  # MARK:server side
   @impl GenServer
   @spec init({atom, list({module, keyword}), keyword}) :: {:ok, state_t} | {:stop, String.t()}
   def init({strip_name, drivers, global_config})
@@ -294,9 +319,13 @@ defmodule Fledex.LedStrip do
   end
 
   @impl GenServer
-  @spec handle_call({:set_leds, atom, list(Types.colorint())}, {pid, any}, state_t) ::
+  @spec handle_call(
+          {:set_leds, atom, list(Types.colorint()), non_neg_integer() | nil},
+          {pid, any},
+          state_t
+        ) ::
           {:reply, :ok | {:error, String.t()}, state_t}
-  def handle_call({:set_leds, name, leds}, _from, %{namespaces: namespaces} = state) do
+  def handle_call({:set_leds, name, leds, _count}, _from, %{namespaces: namespaces} = state) do
     state = put_in(state, [:config, :timer, :is_dirty], true)
 
     case Map.has_key?(namespaces, name) do
@@ -311,7 +340,7 @@ defmodule Fledex.LedStrip do
   end
 
   @impl GenServer
-  @spec handle_call({:reinit, [{module, keyword}], keyword}, {pid, any}, state_t) ::
+  @spec handle_call({:reinit, Manager.drivers_t(), keyword}, {pid, any}, state_t) ::
           {:reply, :ok, state_t}
   def handle_call({:reinit, drivers, config}, _from, state) do
     {updated_config, _rets} = update_config(state.config, config)
@@ -341,7 +370,7 @@ defmodule Fledex.LedStrip do
 
   ### MARK: public helper functions
   @doc false
-  @spec init_state(atom, [{module, keyword}], keyword) :: state_t
+  @spec init_state(atom, Manager.drivers_t(), keyword) :: state_t
   def init_state(strip_name, drivers, global_config)
       when is_atom(strip_name) and
              is_list(drivers) and
@@ -422,6 +451,30 @@ defmodule Fledex.LedStrip do
   end
 
   # MARK: private helper functions
+  @spec get_offset(keyword) :: non_neg_integer()
+  defp get_offset(opts) do
+    case Keyword.get(opts, :offset, 0) do
+      x when is_integer(x) and x < 0 -> 0
+      x when is_integer(x) -> x
+      _other -> 0
+    end
+  end
+
+  @spec get_rotation_left(keyword) :: boolean
+  defp get_rotation_left(opts) do
+    case Keyword.get(opts, :rotate_left, true) do
+      x when is_boolean(x) -> x
+      _other -> true
+    end
+  end
+
+  @spec wrap_offset(offset :: non_neg_integer(), count :: non_neg_integer()) :: non_neg_integer()
+  defp wrap_offset(_offset, 0), do: 0
+
+  defp wrap_offset(offset, count) do
+    rem(offset, count)
+  end
+
   @spec init_config(keyword) :: config_t
   defp init_config(updates) do
     base = %{

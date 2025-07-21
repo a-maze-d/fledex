@@ -17,6 +17,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Add information about color correction (section 3b) (v0.6)
   - [x] change the doc structure? so that links don't get so easily broken? (v0.6)
   - [x] Useful to provide a full story about colors (additive / subtractive colors) (v0.6)
+  - [ ] Document the driver options
   - [ ] hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.6/0.7)
 - [ ] Testing
   - [ ] Add more error handling scenarios (v0.6)
@@ -37,24 +38,30 @@ Even though this library is published, there are things I still want to do befor
   - [x] cleanup the argument order to be more consistent between Animator, Coordinator and LedStrip
   - [x] Remove the `WorkerSupervisor`. It doesn't seem to have any value anymroe
   - [x] cleanup the via_tuple stuff once coordinator is done (move Utils to Supervisor? yes moved)
-  - [ ] Do we really need to use the `Leds.send` function in the `Animator`?
+  - [x] Do we really need to use the `Leds.send` function in the `Animator`. Moving it to `LedStrip`
+  - [ ] Can we reuse the same registry for PubSub and for our workers?
+  - [ ] Add more guards to functions to make them more robust
 - [ ] Missing functionality
   - [/] Add a default `led_strip` driver that can be configured through the config (v0.6)
         I experimented with this idea, but it really doesn't give a real benefit. Therefore dropped it again.
-  - [ ] Connect everything into a supervision tree (to make it more robust) (v0.6)
+  - [x] Connect everything into a supervision tree (to make it more robust) (v0.6)
     - [x] handle all the TODOs (done, for those related to the supervisor changes)
     - [x] Add logs to starting/shutting down of processes
-    - [ ] add documentation (livebook, `@doc`, `@module_doc`)
-    - [ ] add negative tests (killing some service)
+    - [x] add documentation (livebook, `@doc`, `@module_doc`)
+    - [x] add negative tests (killing some service)
     - [x] Create commit log
     - [x] Cleanup code from commented out stuff
     - [x] Cleanup code from debug stuff
     - [x] extra round of testing
-    - [ ] check specs, Credo, ...
-    - [ ] we start things through the Supervisor, but we don't shut things down through it
-  - [ ] We have the `Fledex.Color` protocol, but we actually don't make use of it's type. This is maybe also a good opportunity to rethink on how we handle colors in general. Maybe we should define everything as `Fledex.Color` and enapsulate CSS, SVG, RAL colours in their own struct to then have the protocol implemented for them. Other advantages:
-    - [ ] This should make the `CalcUtils.split_into_subpixels` unnecessary
-    - [ ]  
+    - [x] check specs, Credo, ...
+    - [x] The Animator shoudl be connected to the LedStrip. Otherwise we get the wrong behavior
+    - [x] The Coordinator should be connected to the LedStrip, otherwise it would be awkward
+  - [ ] The Job should (at least appear) to be connected to the LedStrip (v0.7)
+  - [ ] we start things through the Supervisor, but we don't shut things down through it (v0.7)
+  - [ ] We have the `Fledex.Color` protocol, but we actually don't make use of its type. This is maybe also a good opportunity to rethink on how we handle colors in general. Maybe we should define everything as `Fledex.Color` and encapsulate CSS, SVG, RAL colours in their own struct to then have the protocol implemented for them. (v0.7)
+  Other advantages:
+    - [x] This should make the `CalcUtils.split_into_subpixels` unnecessary (v0.6)
+  - [ ] Replace Quantum with SchedEx? https://hexdocs.pm/sched_ex/readme.html (v0.7)
   - [ ] Enable Telemetry? (v0.7)
   - [ ] should the `:config` driver not only return the config but the strip_name too?
   - [ ] setting up livebook (a really working version) on windows is anything than easy :-( Can we do something about it? Investigate (v0.7) 

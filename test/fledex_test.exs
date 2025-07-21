@@ -159,6 +159,7 @@ defmodule Fledex.Test do
   # really animate since they don't register for updates
   describe "static animation" do
     test "no updates" do
+      start_supervised(AnimationSystem.child_spec())
       use Fledex, supervisor: :none
 
       led_strip :sten, Null do

@@ -75,7 +75,7 @@ defmodule Fledex do
   end
 
   @doc """
-    This introduces a new `animation` (animation) that will be played over
+    This introduces a new `animation` that will be played over
     and over again until it is changed.
 
     Therefore we give it a name to know whether it changes. The `do ... end` block
@@ -276,6 +276,18 @@ defmodule Fledex do
     # |> tap(& IO.puts Code.format_string! Macro.to_string &1)
   end
 
+  @doc """
+  This introduces a new coordinator.
+
+  A coordinator is a component that receives events from the
+  different animations and effects and can react to them (e.g.
+  enabling or disabling animations and effects).
+
+  Each coordinator is identified by a name and implements a state
+  machine in its `do ... end` block. Probably the best way to do this
+  is through pattern matching. On the broadcastet state, the context
+  (information on who emitted it) and some coordinator state.
+  """
   defmacro coordinator(name, options \\ [], do: block) do
     ast_func = Dsl.ast_create_anonymous_func(block)
 

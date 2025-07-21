@@ -3,8 +3,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Animation.JobScheduler do
-  use Quantum, otp_app: __MODULE__
+  @moduledoc """
+  A job scheduler
+  """
 
+  use Quantum, otp_app: __MODULE__
   require Logger
 
   alias Quantum.Job

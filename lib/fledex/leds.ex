@@ -21,12 +21,14 @@ defmodule Fledex.Leds do
   alias Fledex.Color
   alias Fledex.Color.Functions
   alias Fledex.Color.Types
-  alias Fledex.Effect.Rotation
   alias Fledex.LedStrip
 
   @enforce_keys [:count, :leds, :opts]
   defstruct count: 0, leds: %{}, opts: %{}, meta: %{index: 1}
 
+  @typedoc """
+  The structure defining an led sequence.
+  """
   @type t :: %__MODULE__{
           count: integer,
           leds: %{pos_integer => Types.colorint()},
@@ -160,8 +162,8 @@ defmodule Fledex.Leds do
   This is used when the led sequence is sent to the `Fledex.LedStrip` when the
   `send/2` function is called.
   """
-  @spec set_led_strip_info(t, namespace :: atom, server_name :: atom) :: t
-  def set_led_strip_info(%{opts: opts} = leds, namespace, server_name \\ Fledex.LedStrip) do
+  @spec set_led_strip_info(t, server_name :: atom, namespace :: atom) :: t
+  def set_led_strip_info(%{opts: opts} = leds, server_name \\ Fledex.LedStrip, namespace) do
     opts = %{opts | server_name: server_name, namespace: namespace}
     %__MODULE__{leds | opts: opts}
   end
@@ -439,15 +441,9 @@ defmodule Fledex.Leds do
   """
   @spec send(t, keyword) :: :ok | {:error, String.t()}
   def send(leds, opts \\ []) do
-    # someone might define a nil offset :-(
-    offset = Keyword.get(opts, :offset, 0) || 0
-    rotate_left = Keyword.get(opts, :rotate_left, true)
-    server_name = leds.opts.server_name || Keyword.get(opts, :server_name, Fledex.LedStrip)
-    namespace = leds.opts.namespace || Keyword.get(opts, :namespace, :default)
-    offset = if leds.count == 0, do: 0, else: rem(offset, leds.count)
-
-    vals = Rotation.rotate(to_list(leds), leds.count, offset, rotate_left)
-    LedStrip.set_leds(server_name, namespace, vals)
+    strip_name = leds.opts.server_name || Keyword.get(opts, :server_name, Fledex.LedStrip)
+    animation_name = leds.opts.namespace || Keyword.get(opts, :namespace, :default)
+    LedStrip.set_leds_with_rotation(strip_name, animation_name, to_list(leds), leds.count, opts)
   end
 
   @doc """

@@ -7,6 +7,7 @@ defmodule Fledex.Utils.Dsl do
 
   alias Fledex.Animation.Manager
   alias Fledex.Leds
+  alias Fledex.LedStrip
   alias Fledex.Supervisor.AnimationSystem
 
   @fledex_macros [
@@ -66,7 +67,7 @@ defmodule Fledex.Utils.Dsl do
 
   @spec configure_strip(
           atom,
-          :config | module | {module, keyword} | [{module, keyword}],
+          :config | LedStrip.drivers_config_t(),
           keyword,
           [Manager.config_t()] | Manager.config_t()
         ) :: :ok | Manager.config_t()
@@ -117,7 +118,6 @@ defmodule Fledex.Utils.Dsl do
   end
 
   defp start_system(opts) do
-    # TODO: document the options
     log_level = Keyword.get(opts, :log_level, :info)
     supervisor = Keyword.get(opts, :supervisor, :app)
     opts = Keyword.drop(opts, [:supervisor, :log_level])

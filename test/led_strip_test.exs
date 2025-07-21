@@ -137,7 +137,10 @@ defmodule Fledex.LedStripTest do
       assert state.config.timer.is_dirty == true
       state = put_in(state, [:config, :timer, :is_dirty], false)
       assert state.config.timer.is_dirty == false
-      {:reply, _na, state} = LedStrip.handle_call({:set_leds, :name, [0xFF0000]}, self(), state)
+
+      {:reply, _na, state} =
+        LedStrip.handle_call({:set_leds, :name, [0xFF0000], 1}, self(), state)
+
       assert state.config.timer.is_dirty == true
       state = put_in(state, [:config, :timer, :is_dirty], false)
       assert state.config.timer.is_dirty == false
@@ -319,7 +322,8 @@ defmodule Fledex.LedStripTest do
       leds = [0xFF0000, 0x00FF00, 0x0000FF, 0x00FF00, 0xFF0000, 0x0000FF]
       {:reply, :ok, state} = LedStrip.handle_call({:define_namespace, name}, self(), state)
 
-      {:reply, :ok, state} = LedStrip.handle_call({:set_leds, name, leds}, self(), state)
+      {:reply, :ok, state} =
+        LedStrip.handle_call({:set_leds, name, leds, length(leds)}, self(), state)
 
       assert state.namespaces == %{
                john: [0xFF0000, 0x00FF00, 0x0000FF, 0x00FF00, 0xFF0000, 0x0000FF]
@@ -333,7 +337,7 @@ defmodule Fledex.LedStripTest do
       # {:reply, _na, state} = LedStrip.handle_call({:define_namespace, name}, self(), state)
 
       {:reply, {:error, message}, _state} =
-        LedStrip.handle_call({:set_leds, name, leds}, self(), state)
+        LedStrip.handle_call({:set_leds, name, leds, length(leds)}, self(), state)
 
       assert String.match?(message, ~r/no such namespace/)
     end
@@ -377,10 +381,12 @@ defmodule Fledex.LedStripTestSync do
 
   import ExUnit.CaptureLog
 
+  require Logger
   alias Fledex.Driver.Impl.Null
   alias Fledex.Driver.Impl.Spi
   alias Fledex.LedStrip
   alias Fledex.Supervisor.AnimationSystem
+  alias Fledex.Supervisor.LedStripSupervisor
 
   setup do
     start_supervised(AnimationSystem.child_spec())
@@ -410,10 +416,10 @@ defmodule Fledex.LedStripTestSync do
     end
 
     test "start server a second time" do
-      {:ok, pid} = AnimationSystem.start_led_strip(:test_strip_name1)
+      {:ok, pid} = AnimationSystem.start_led_strip(:test_strip_name6)
 
       # {:ok, pid} = LedStrip.start_link(:test_strip_name1)
-      assert {:ok, pid} == AnimationSystem.start_led_strip(:test_strip_name1)
+      assert {:ok, pid} == AnimationSystem.start_led_strip(:test_strip_name6)
       # assert {:ok, pid} == LedStrip.start_link(:test_strip_name1)
     end
   end
@@ -428,25 +434,62 @@ defmodule Fledex.LedStripTestSync do
     end
 
     test "client API calls" do
-      {:ok, pid} = AnimationSystem.start_led_strip(@strip_name, [{Null, []}], [])
+      {:ok, _pid} = AnimationSystem.start_led_strip(@strip_name, [{Null, []}], [])
 
       # we only make sure that they are correctly wired to the server side calls
       # that are tested independently
       assert :ok == LedStrip.define_namespace(@strip_name, @namespace)
       assert LedStrip.exist_namespace(@strip_name, @namespace)
       assert not LedStrip.exist_namespace(@strip_name, :non_existent)
+      assert :ok == LedStrip.set_leds(@strip_name, @namespace, [0xFF0000, 0x00FF00, 0x0000FF], 3)
       assert :ok == LedStrip.set_leds(@strip_name, @namespace, [0xFF0000, 0x00FF00, 0x0000FF])
+
+      # stipid options
+      assert :ok ==
+               LedStrip.set_leds_with_rotation(
+                 @strip_name,
+                 @namespace,
+                 [0xFF0000, 0x00FF00, 0x0000FF],
+                 3,
+                 offset: nil,
+                 rotate_left: :blue
+               )
+
+      assert :ok ==
+               LedStrip.set_leds_with_rotation(
+                 @strip_name,
+                 @namespace,
+                 [0xFF0000, 0x00FF00, 0x0000FF],
+                 3,
+                 offset: -1
+               )
+
+      # stupid options and no led count
+      assert :ok ==
+               LedStrip.set_leds_with_rotation(
+                 @strip_name,
+                 @namespace,
+                 [0xFF0000, 0x00FF00, 0x0000FF],
+                 offset: -1
+               )
 
       # successful config change
       assert {:ok, timer_counter: 0} = LedStrip.change_config(@strip_name, timer_counter: 1)
-      assert %{config: %{timer: %{counter: 1}}} = :sys.get_state(pid)
+
+      led_strip_pid =
+        Supervisor.which_children(LedStripSupervisor.supervisor_name(@strip_name))
+        |> Enum.filter(fn {_name, _pid, type, _module} -> type == :worker end)
+        |> List.first()
+        |> elem(1)
+
+      assert %{config: %{timer: %{counter: 1}}} = :sys.get_state(led_strip_pid)
 
       # unsuccessful config change
       assert capture_log(fn ->
                assert {:ok, []} = LedStrip.change_config(@strip_name, counter: 2)
              end) =~ "Unknown config key (:counter with value 2) was specified"
 
-      assert %{config: %{timer: %{counter: 1}}} = :sys.get_state(pid)
+      assert %{config: %{timer: %{counter: 1}}} = :sys.get_state(led_strip_pid)
 
       # test all 3 reinit functions (they all lead to the same result)
       # This is the reason why we expect the configure and reinit to be called 3 times

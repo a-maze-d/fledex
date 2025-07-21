@@ -39,17 +39,17 @@ defmodule Fledex.Animation.ManagerTest do
     test "register/unregister led_strip", %{strip_name: strip_name} do
       config = ManagerTestUtils.get_manager_config()
       assert Map.keys(config) == [strip_name]
-      assert ManagerTestUtils.whereis(strip_name, :led_strip) != nil
+      assert ManagerTestUtils.whereis(strip_name, :led_strip, :supervisor) != nil
 
       Manager.unregister_strip(strip_name)
       config = ManagerTestUtils.get_manager_config()
       assert Map.keys(config) == []
-      assert ManagerTestUtils.whereis(strip_name, :led_strip) == nil
+      assert ManagerTestUtils.whereis(strip_name, :led_strip, :supervisor) == nil
 
       Manager.register_strip(strip_name, [{Null, []}], [])
       config = ManagerTestUtils.get_manager_config()
       assert Map.keys(config) == [strip_name]
-      assert ManagerTestUtils.whereis(strip_name, :led_strip) != nil
+      assert ManagerTestUtils.whereis(strip_name, :led_strip, :supervisor) != nil
     end
 
     test "register/unregister 2 led_strips", %{strip_name: strip_name} do
@@ -63,10 +63,10 @@ defmodule Fledex.Animation.ManagerTest do
     end
 
     test "re-register led_strip", %{strip_name: strip_name} do
-      pid = ManagerTestUtils.whereis(strip_name, :led_strip)
+      pid = ManagerTestUtils.whereis(strip_name, :led_strip, :supervisor)
       assert pid != nil
       Manager.register_strip(strip_name, [{Null, []}], [])
-      pid2 = ManagerTestUtils.whereis(strip_name, :led_strip)
+      pid2 = ManagerTestUtils.whereis(strip_name, :led_strip, :supervisor)
       assert pid == pid2
     end
 

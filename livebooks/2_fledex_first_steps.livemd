@@ -1,5 +1,5 @@
 <!--
-Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -56,7 +56,7 @@ Now we are ready to send some data to the led_strip. Before we send some color i
 
 ```elixir
 LedStrip.define_namespace(LedStrip, :default)
-LedStrip.set_leds(LedStrip, :default, [0xFF0000, 0x00FF00, 0x0000FF])
+LedStrip.set_leds(LedStrip, :default, [0xFF0000, 0x00FF00, 0x0000FF], 3)
 ```
 
 ## Helper functions
@@ -69,15 +69,15 @@ All functions are trying to create a simple animation by configuring the leds, s
 defmodule Helpers do
   def red(namespace) do
     Enum.each(1..10, fn _index ->
-      LedStrip.set_leds(LedStrip, namespace, [0xFF0000, 0x000000, 0x000000, 0x000000, 0x000000])
+      LedStrip.set_leds(LedStrip, namespace, [0xFF0000, 0x000000, 0x000000, 0x000000, 0x000000], 5)
       Process.sleep(600)
-      LedStrip.set_leds(LedStrip, namespace, [0x000000, 0xFF0000, 0x000000, 0x000000, 0x000000])
+      LedStrip.set_leds(LedStrip, namespace, [0x000000, 0xFF0000, 0x000000, 0x000000, 0x000000], 5)
       Process.sleep(600)
-      LedStrip.set_leds(LedStrip, namespace, [0x000000, 0x000000, 0xFF0000, 0x000000, 0x000000])
+      LedStrip.set_leds(LedStrip, namespace, [0x000000, 0x000000, 0xFF0000, 0x000000, 0x000000], 5)
       Process.sleep(600)
-      LedStrip.set_leds(LedStrip, namespace, [0x000000, 0x000000, 0x000000, 0xFF0000, 0x000000])
+      LedStrip.set_leds(LedStrip, namespace, [0x000000, 0x000000, 0x000000, 0xFF0000, 0x000000], 5)
       Process.sleep(600)
-      LedStrip.set_leds(LedStrip, namespace, [0x000000, 0x000000, 0x000000, 0x000000, 0xFF0000])
+      LedStrip.set_leds(LedStrip, namespace, [0x000000, 0x000000, 0x000000, 0x000000, 0xFF0000], 5)
       Process.sleep(600)
     end)
   end
@@ -91,7 +91,7 @@ defmodule Helpers do
         0x000000,
         0x0000FF,
         0x00FF00
-      ])
+      ], 6)
 
       Process.sleep(600)
 
@@ -102,7 +102,7 @@ defmodule Helpers do
         0x0000FF,
         0x000000,
         0x000000
-      ])
+      ], 6)
 
       Process.sleep(600)
 
@@ -113,7 +113,7 @@ defmodule Helpers do
         0x000000,
         0x000000,
         0x00FF00
-      ])
+      ], 6)
 
       Process.sleep(600)
 
@@ -124,7 +124,7 @@ defmodule Helpers do
         0x000000,
         0x000000,
         0x000000
-      ])
+      ], 6)
 
       Process.sleep(600)
 
@@ -135,7 +135,7 @@ defmodule Helpers do
         0x000000,
         0x000000,
         0x00FF00
-      ])
+      ], 6)
 
       Process.sleep(600)
     end)
@@ -149,7 +149,7 @@ defmodule Helpers do
       ]
 
       Leds.leds(50)
-      |> Leds.set_led_strip_info(namespace, LedStrip)
+      |> Leds.set_led_strip_info(LedStrip, namespace)
       |> Leds.rainbow(config)
       |> Leds.send(offset: index)
 
@@ -161,7 +161,7 @@ defmodule Helpers do
   def gradient(namespace) do
     Enum.each(0..10000, fn index ->
       Leds.leds(50)
-      |> Leds.set_led_strip_info(namespace, LedStrip)
+      |> Leds.set_led_strip_info(LedStrip, namespace)
       |> Leds.gradient(0xFF0000, 0x0000FF, %{num_leds: 50})
       |> Leds.send(
         offset: index,

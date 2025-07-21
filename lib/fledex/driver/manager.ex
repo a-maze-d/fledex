@@ -12,7 +12,7 @@ defmodule Fledex.Driver.Manager do
   @typedoc """
   The structure to hold the driver related data.
 
-  It consists of a list (to allow loading of several modules) of tuples with:
+  It consists of tuples with:
 
   * `driver`: Which modules should get loaded. Each module usually should have
       a default configuration, which can then be overwritten with specific
@@ -26,10 +26,14 @@ defmodule Fledex.Driver.Manager do
 
   Example:
   ```elixir
-  [{Fledex.Driver.Impl.Kino, update_freq: 10 }]
+  {Fledex.Driver.Impl.Kino, update_freq: 10 }
   ```
   """
-  @type driver_t :: [{driver :: module, config :: keyword()}]
+  @type driver_t :: {driver :: module, config :: keyword()}
+  @typedoc """
+  This structure is for holding several `driver_t` structures.
+  """
+  @type drivers_t :: [driver_t()]
 
   @doc false
   @spec init_drivers(list({module, keyword}), map) :: list({module, any})
@@ -51,7 +55,7 @@ defmodule Fledex.Driver.Manager do
   end
 
   @doc false
-  @spec reinit(driver_t, driver_t, map) :: driver_t
+  @spec reinit(old_drivers :: drivers_t, new_drivers :: drivers_t, map) :: drivers_t
   def reinit(old_drivers, [], global_config) do
     reinit(old_drivers, [{Null, []}], global_config)
   end
@@ -119,7 +123,7 @@ defmodule Fledex.Driver.Manager do
   end
 
   @doc false
-  @spec transfer(list(Types.colorint()), pos_integer, driver_t) :: driver_t
+  @spec transfer(list(Types.colorint()), pos_integer, drivers_t) :: drivers_t
   def transfer(leds, counter, drivers) do
     for {module, config} <- drivers do
       {config, _response} = module.transfer(leds, counter, config)
@@ -128,7 +132,7 @@ defmodule Fledex.Driver.Manager do
   end
 
   @doc false
-  @spec terminate(reason, driver_t) :: :ok
+  @spec terminate(reason, drivers_t) :: :ok
         when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(reason, drivers) do
     for {module, config} <- drivers do
