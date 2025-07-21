@@ -117,7 +117,6 @@ defmodule Fledex.Utils.Dsl do
   end
 
   defp start_system(opts) do
-    # TODO: document the options
     log_level = Keyword.get(opts, :log_level, :info)
     supervisor = Keyword.get(opts, :supervisor, :app)
     opts = Keyword.drop(opts, [:supervisor, :log_level])

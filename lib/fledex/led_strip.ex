@@ -168,32 +168,47 @@ defmodule Fledex.LedStrip do
   @doc """
   Sets the leds in a specific strip and namespace.
 
+  The `count` should correspond to the length of the leds list and will be
+  calculated if not provided (but often this information is already available
+  and therefore can be provided)
+
   Note: repeated calls of this function will result in previously set leds
   will be overwritten. We are passing a list of leds which means every led
   will be rewritten, except if we define a 'shorter" led sequence. In that
   case some leds might retain their previously set value.
   """
-  @spec set_leds(atom, atom, list(pos_integer)) :: :ok | {:error, String.t()}
-  def set_leds(strip_name, namespace, leds) do
-    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :strip), {:set_leds, namespace, leds})
+  @spec set_leds(atom, atom, list(pos_integer), non_neg_integer() | nil) ::
+          :ok | {:error, String.t()}
+  def set_leds(strip_name, namespace, leds, count \\ nil)
+      when (count == nil or (is_integer(count) and count >= 0)) and is_atom(strip_name) and
+             is_atom(namespace) do
+    GenServer.call(
+      Utils.via_tuple(strip_name, :led_strip, :strip),
+      {:set_leds, namespace, leds, count}
+    )
   end
 
   @doc """
-  Similar to `set_leds/3` but allows to specify some options to rotate
-  the leds. The recognized options are:
+  Similar to `set_leds/4` but allows to specify some options to rotate
+  the leds.
+
+  The recognized options are:
   * `:offset`: The amount to rotate
-  * `:rotate_left`: whether we want to rotate to the left (or the right). The default is `true`
+  * `:rotate_left`: whether we want to rotate to the left (or the right).
+  The default is `true`
   """
-  @spec set_leds_with_rotation(atom, atom, list(pos_integer), pos_integer, keyword) :: :ok | {:error, String.t()}
-  def set_leds_with_rotation(strip_name, namespace, leds, count, opts) do
-    # TODO: maybe use a case statement to make it more robust?
-    # someone might define a nil offset :-(
-    offset = Keyword.get(opts, :offset, 0) || 0
-    rotate_left = Keyword.get(opts, :rotate_left, true)
-    offset = if count == 0, do: 0, else: rem(offset, count)
+  @spec set_leds_with_rotation(atom, atom, list(pos_integer), non_neg_integer() | nil, keyword) ::
+          :ok | {:error, String.t()}
+  def set_leds_with_rotation(strip_name, namespace, leds, count \\ nil, opts)
+      when (count == nil or (is_integer(count) and count >= 0)) and is_atom(strip_name) and
+             is_atom(namespace) do
+    count = count || length(leds)
+    offset = get_offset(opts)
+    rotate_left = get_rotation_left(opts)
+    offset = wrap_offset(offset, count)
 
     vals = Rotation.rotate(leds, count, offset, rotate_left)
-    set_leds(strip_name, namespace, vals)
+    set_leds(strip_name, namespace, vals, count)
   end
 
   @doc """
@@ -315,9 +330,13 @@ defmodule Fledex.LedStrip do
   end
 
   @impl GenServer
-  @spec handle_call({:set_leds, atom, list(Types.colorint())}, {pid, any}, state_t) ::
+  @spec handle_call(
+          {:set_leds, atom, list(Types.colorint()), non_neg_integer() | nil},
+          {pid, any},
+          state_t
+        ) ::
           {:reply, :ok | {:error, String.t()}, state_t}
-  def handle_call({:set_leds, name, leds}, _from, %{namespaces: namespaces} = state) do
+  def handle_call({:set_leds, name, leds, _count}, _from, %{namespaces: namespaces} = state) do
     state = put_in(state, [:config, :timer, :is_dirty], true)
 
     case Map.has_key?(namespaces, name) do
@@ -443,6 +462,28 @@ defmodule Fledex.LedStrip do
   end
 
   # MARK: private helper functions
+  defp get_offset(opts) do
+    case Keyword.get(opts, :offset, 0) do
+      x when is_integer(x) and x < 0 -> 0
+      x when is_integer(x) -> x
+      _other -> 0
+    end
+  end
+
+  defp get_rotation_left(opts) do
+    case Keyword.get(opts, :rotate_left, true) do
+      x when is_boolean(x) -> x
+      _other -> true
+    end
+  end
+
+  @spec wrap_offset(offset :: non_neg_integer(), count :: non_neg_integer()) :: non_neg_integer()
+  defp wrap_offset(_offset, 0), do: 0
+
+  defp wrap_offset(offset, count) do
+    rem(offset, count)
+  end
+
   @spec init_config(keyword) :: config_t
   defp init_config(updates) do
     base = %{

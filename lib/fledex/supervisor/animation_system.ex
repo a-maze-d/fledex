@@ -103,7 +103,6 @@ defmodule Fledex.Supervisor.AnimationSystem do
     end
   end
 
-  # TODO: move this to LedStripSupervisor since the coordinator belongs to an LED strip
   @doc """
   This starts a new coordinator. Which can receive events and react to those
   by impacting the running annimations.

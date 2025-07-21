@@ -312,15 +312,16 @@ defmodule Fledex.Animation.Animator do
     {leds, triggers} = apply_effects(leds, effects, triggers, context)
 
     {config, triggers} = send_config_func.(triggers) |> get_with_triggers(triggers)
-    send_leds(strip_name, animation_name, leds, config)
-    %{state | triggers: triggers}
-  end
 
-  @spec send_leds(atom, atom, list(pos_integer), keyword) :: :ok | {:error, String.t()}
-  defp send_leds(strip_name, animation_name, leds, opts) do
-    count = leds.count
-    leds = Leds.to_list(leds)
-    LedStrip.set_leds_with_rotation(strip_name, animation_name, leds, count, opts)
+    LedStrip.set_leds_with_rotation(
+      strip_name,
+      animation_name,
+      Leds.to_list(leds),
+      leds.count,
+      config
+    )
+
+    %{state | triggers: triggers}
   end
 
   # the response can be with or without trigger, we ensure that it's always with a trigger,

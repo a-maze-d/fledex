@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -449,30 +449,38 @@ defmodule Fledex.LedsTestSync do
     setup do
       init_args = {
         @test_strip,
-        [{
-          Fledex.Driver.Impl.Logger,
-          [terminal: false, log_color_code: true, update_freq: 1]
-        }],
+        [
+          {
+            Fledex.Driver.Impl.Logger,
+            [terminal: false, log_color_code: true, update_freq: 1]
+          }
+        ],
         []
       }
+
       start_supervised({Registry, keys: :unique, name: Utils.worker_registry()})
       start_supervised({Phoenix.PubSub, adapter_name: :pg2, name: Utils.pubsub_name()})
       start_supervised({LedStrip, init_args})
       LedStrip.define_namespace(@test_strip, @test_namespace)
       :ok
     end
+
     test "send function with rotation" do
       import ExUnit.CaptureLog
-      {:ok, log} = with_log(fn ->
-        Leds.new(3)
+
+      {:ok, log} =
+        with_log(fn ->
+          Leds.new(3)
           |> Leds.light(:red)
           |> Leds.light(:green)
           |> Leds.light(:blue)
           |> Leds.set_led_strip_info(@test_strip, @test_namespace)
           |> Leds.send()
-        # the Logger driver is rather slow, therefore waiting a bit
-        Process.sleep(100)
-      end)
+
+          # the Logger driver is rather slow, therefore waiting a bit
+          Process.sleep(100)
+        end)
+
       assert log =~ "16711680,65280,255"
     end
   end

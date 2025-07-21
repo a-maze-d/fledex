@@ -441,18 +441,9 @@ defmodule Fledex.Leds do
   """
   @spec send(t, keyword) :: :ok | {:error, String.t()}
   def send(leds, opts \\ []) do
-    # # someone might define a nil offset :-(
-    # offset = Keyword.get(opts, :offset, 0) || 0
-    # rotate_left = Keyword.get(opts, :rotate_left, true)
     strip_name = leds.opts.server_name || Keyword.get(opts, :server_name, Fledex.LedStrip)
     animation_name = leds.opts.namespace || Keyword.get(opts, :namespace, :default)
-    # offset = if leds.count == 0, do: 0, else: rem(offset, leds.count)
-
-    # vals = Rotation.rotate(to_list(leds), leds.count, offset, rotate_left)
-    # LedStrip.set_leds(server_name, namespace, vals)
-    count = leds.count
-    leds = to_list(leds)
-    LedStrip.set_leds_with_rotation(strip_name, animation_name, leds, count, opts)
+    LedStrip.set_leds_with_rotation(strip_name, animation_name, to_list(leds), leds.count, opts)
   end
 
   @doc """

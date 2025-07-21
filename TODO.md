@@ -17,6 +17,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Add information about color correction (section 3b) (v0.6)
   - [x] change the doc structure? so that links don't get so easily broken? (v0.6)
   - [x] Useful to provide a full story about colors (additive / subtractive colors) (v0.6)
+  - [ ] Document the driver options
   - [ ] hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.6/0.7)
 - [ ] Testing
   - [ ] Add more error handling scenarios (v0.6)

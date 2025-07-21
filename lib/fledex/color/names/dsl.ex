@@ -77,7 +77,6 @@ defmodule Fledex.Color.Names.Dsl do
       """
       @spec colors :: list(Types.color_struct_t())
       def colors do
-        # TODO: maybe changes it to a map?
         Map.values(@colors)
       end
 
