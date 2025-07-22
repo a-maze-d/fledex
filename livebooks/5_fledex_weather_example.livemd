@@ -1,5 +1,5 @@
 <!--
-Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 
 ```elixir
 Mix.install([
-  {:fledex, "~>0.5"},
+  {:fledex, "~>0.6"},
   {:jason, "~>1.2"}
 ])
 
@@ -19,8 +19,10 @@ alias Fledex.LedStrip
 alias Fledex.Driver.Impl.Kino
 alias Fledex.Color.Correction
 alias Fledex.Utils.PubSub
+alias Fledex.Supervisor.AnimationSystem
 
-{:ok, pid} = Manager.start_link()
+AnimationSystem.start_link()
+
 
 :ok
 ```
@@ -157,7 +159,7 @@ Before we can start with the weather data, we need to make sure that we can make
 :ssl.start()
 ```
 
-Now we can make the actual call. We do want to make this call in regular intervals (every 15 min), parse the response and publish the temperature through pubsub. To do this we create a small server. In a [later chapter](./9_fledex_jobs.livemd) we will see how we can use one of the `Fledex` services to do the scheduling.
+Now we can make the actual call. We do want to make this call in regular intervals (every 15 min), parse the response and publish the temperature through pubsub. To do this we create a small server. In a [later chapter](9_fledex_jobs.livemd) we will see how we can use one of the `Fledex` services to do the scheduling.
 
 We start it with our URL (note, the parsing in the server is URL specific, so you can't simply change it to another site) and with our 15min refresh interval (specified in ms).
 

@@ -45,7 +45,7 @@ defmodule Fledex.LedStrip do
            ref: reference | nil
          }
   @typep config_t :: %{
-           group_leader: pid | nil,
+           optional(:group_leader) => pid | nil,
            merge_strategy: atom,
            timer: timer_t
          }
@@ -478,7 +478,7 @@ defmodule Fledex.LedStrip do
   @spec init_config(keyword) :: config_t
   defp init_config(updates) do
     base = %{
-      group_leader: nil,
+      group_leader: self(),
       merge_strategy: :cap,
       timer: %{
         disabled: false,

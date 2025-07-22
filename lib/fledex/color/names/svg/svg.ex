@@ -36,7 +36,7 @@ defmodule Fledex.Color.Names.SVG do
         descriptive_name: String.trim(name),
         hex: Color.to_colorint(rgb),
         rgb: rgb,
-        # TODO: convert the rgb to other color spaces
+        # convert the rgb to other color spaces
         # {LoadUtils.to_byte(h), LoadUtils.to_byte(s1), LoadUtils.to_byte(l1)},
         hsl: {0, 0, 0},
         hsv: Approximate.rgb2hsv(rgb),

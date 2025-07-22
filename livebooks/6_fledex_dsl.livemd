@@ -1,5 +1,5 @@
 <!--
-Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
 # hardware but on a normal livebook, This makes it easier to stay up-to-date and experiment
 # We start to define our fledex library, directly linking to the latest version on github
 Mix.install([
-  {:fledex, "~>0.5"}
+  {:fledex, "~>0.6"}
 ])
 ```
 
@@ -30,7 +30,7 @@ use Fledex
 
 ## The clock
 
-We now go back to our [clock example](./4_fledex_clock_example.livemd) and rewrite it with our  DSL:
+We now go back to our [clock example](4_fledex_clock_example.livemd) and rewrite it with our  DSL:
 
 * We define a new strip with a name (`:clock`), and configure it (we use the `Kino`
   default driver for display). This will internally create a new `Fledex.LedStrip` 
@@ -44,7 +44,7 @@ We now go back to our [clock example](./4_fledex_clock_example.livemd) and rewri
   trigger data (data that comes into the animation function). An explanation of what 
   we are doing in our example here will be given after the code.
 
-It is also possble to define some other configurations (like the `send_config_func` that we used in the "[Fledex Clock Example](./4_fledex_clock_example.livemd)") but we don't need it right now.
+It is also possble to define some other configurations (like the `send_config_func` that we used in the "[Fledex Clock Example](4_fledex_clock_example.livemd)") but we don't need it right now.
 
 ```elixir
 led_strip :clock, Kino do
@@ -100,7 +100,7 @@ The above code should result in an animation displaying the clock.Now it's time 
 
 ## Clock (with send function)
 
-We are now implementing the above example, but demonstrating on how the `:second`, `:minute`, and `:hour` indicators can be implemented in exactly the same way as we did in [chapter 4](./4_fledex_clock_example.livemd), i.e. with a send function that shifts the red marker depending on the time.
+We are now implementing the above example, but demonstrating on how the `:second`, `:minute`, and `:hour` indicators can be implemented in exactly the same way as we did in [chapter 4](4_fledex_clock_example.livemd), i.e. with a send function that shifts the red marker depending on the time.
 
 We also take the occasion to demonstrate on how you can define a second strip, by giving it a new name (`:clock2`). To demonstrate that it's really a new stip this clock here displays the time in UTC (we don't add the extra hour of offset). Look carefully at the blue hour indicator.
 
@@ -145,7 +145,7 @@ end
 
 ## The weather app
 
-We now implement the [weather app](./5_fledex_weather_example.livemd) (indicating the temperature) we implemented in chapter 5 by using our DSL.
+We now implement the [weather app](5_fledex_weather_example.livemd) (indicating the temperature) we implemented in chapter 5 by using our DSL.
 
 ```elixir
 led_strip :weather, Kino do

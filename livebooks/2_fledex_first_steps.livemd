@@ -7,61 +7,64 @@ SPDX-License-Identifier: Apache-2.0
 # 2. Fledex: Some simple tests
 
 ```elixir
-# We start to define some libraries we need. If you are running on a laptop
+# We start to define our library that we want to use. If you are running on a laptop
 # the libraries will be loaded, but on a nerves_livebook you can only use
-# what has been compiled in.
+# what has been compiled into your image
 Mix.install([
-  {:fledex, "~>0.5"}
+  {:fledex, "~>0.6"}
 ])
+```
 
+## Defining a strip
+
+Before we can define our strip, we need to do a bit of preparation work. This won't be necessary in the future (once we get to the DSL) because there everything will be taken care for us.
+
+There is however no real magic in that setup. We define a couple of modules, so that we don't have to type that much and then we'll start our `AnimationSystem` which is required even if we don't want to display any animation. It provides us with a stable infrastructure.
+
+```elixir
 # we define a couple of aliases to not have to type that much
 alias Fledex.Leds
 alias Fledex.LedStrip
 alias Fledex.Driver.Impl.Kino
 alias Fledex.Driver.Impl.Spi
 alias Fledex.Color.Correction
+alias Fledex.Supervisor.AnimationSystem
 
-:ok
+# then we start our system
+AnimationSystem.start_link()
 ```
 
-## Defining a strip
+Fledex has several drivers which can also be used in parallel. It's probably best to only use a single driver to start with. The `Fledex.Driver.Impl.Kino` driver does not have any hardware dependency and therefore is probably a good start to ensure that the library is loaded correctly.
 
-Fledex has several drivers which can also be used in parallel. It's probably best to only use a single driver to start with. The `Kino` driver does not have any hardware dependency and therefore is probably a good start to ensure that the library is loaded correctly.
-
-At this point, we won't go into the details what all the settings really mean, so just accept them for what they are. What is important to understand is the first parameter (`LedStrip`) which is the name of our strip through which we will refer to it. For simplicity we use the same name as the name of the module, but it can be any [`atom`](https://hexdocs.pm/elixir/1.12/Atom.html).
+At this point, we won't go into the details what all the settings really mean, so just accept them for what they are. What is important to understand is the first parameter (`:john`) is the name of our strip through which we will refer to it. You can use any [`atom`](https://hexdocs.pm/elixir/Atom.html) as a name.
 
 This allows us to have several strips at the same time. Whenever we interact with the LedStrip we need to use that name to specify which strip we mean.
 
 ```elixir
-# frame = Kino.Frame.new() |> Kino.render()
-
-{:ok, pid} =
-  LedStrip.start_link(
-    LedStrip,
-    [
-      {Kino, update_freq: 1, color_correction: Correction.no_color_correction()}
-      # {Spi, color_correction: Correction.define_correction(
-      #   Correction.Color.typical_smd5050(),
-      #   Correction.Temperature.uncorrected_temperature()
-      # )}
-    ],
-    timer_only_dirty_update: false,
-    merge_strategy: :cap
-  )
+AnimationSystem.start_led_strip(
+  :john,
+  [
+    {Kino, [update_freq: 1]}
+  ]
+)
 ```
 
 ## Setting individual LEDs
 
 Now we are ready to send some data to the led_strip. Before we send some color information, we first define a namspace (`:default`) to which we will do the drawing. Each led strip can have several namespaces that can operate independently and that get merged at the end to the same led strip (similar to a window in a window server). We'll see later why this is useful.
 
+For now we use a hex code to define colors. You can learn more about colors and how to define them in [chapter 3b](3b_fledex_everything_about_colors.livemd).
+
 ```elixir
-LedStrip.define_namespace(LedStrip, :default)
-LedStrip.set_leds(LedStrip, :default, [0xFF0000, 0x00FF00, 0x0000FF], 3)
+LedStrip.define_namespace(:john, :default)
+LedStrip.set_leds(:john, :default, [0xFF0000, 0x00FF00, 0x0000FF], 3)
 ```
+
+Note: if you don't see your led strip displayed, then you might have to scroll up a bit. It should be just after the code block where you defined your led_strip.
 
 ## Helper functions
 
-We now define a couple of helper functions. The first 2 functions (`red/1` and `blue/1`) are talking directly with the LED driver, the latter two (`rainbow/1` and `gradient/1`) are making use of the Leds client module that helps to create nice effects like a rainbow.
+We now define a couple of helper functions. The first 2 functions (`red/1` and `blue/1`) are talking directly with the LED driver, the latter two (`rainbow/1` and `gradient/1`) are making use of the Leds client module that helps to create nice effects like a rainbow or a gradient.
 
 All functions are trying to create a simple animation by configuring the leds, sleeping for a while, and then reconfiguring the leds.
 
@@ -69,22 +72,22 @@ All functions are trying to create a simple animation by configuring the leds, s
 defmodule Helpers do
   def red(namespace) do
     Enum.each(1..10, fn _index ->
-      LedStrip.set_leds(LedStrip, namespace, [0xFF0000, 0x000000, 0x000000, 0x000000, 0x000000], 5)
+      LedStrip.set_leds(:john, namespace, [0xFF0000, 0x000000, 0x000000, 0x000000, 0x000000], 5)
       Process.sleep(600)
-      LedStrip.set_leds(LedStrip, namespace, [0x000000, 0xFF0000, 0x000000, 0x000000, 0x000000], 5)
+      LedStrip.set_leds(:john, namespace, [0x000000, 0xFF0000, 0x000000, 0x000000, 0x000000], 5)
       Process.sleep(600)
-      LedStrip.set_leds(LedStrip, namespace, [0x000000, 0x000000, 0xFF0000, 0x000000, 0x000000], 5)
+      LedStrip.set_leds(:john, namespace, [0x000000, 0x000000, 0xFF0000, 0x000000, 0x000000], 5)
       Process.sleep(600)
-      LedStrip.set_leds(LedStrip, namespace, [0x000000, 0x000000, 0x000000, 0xFF0000, 0x000000], 5)
+      LedStrip.set_leds(:john, namespace, [0x000000, 0x000000, 0x000000, 0xFF0000, 0x000000], 5)
       Process.sleep(600)
-      LedStrip.set_leds(LedStrip, namespace, [0x000000, 0x000000, 0x000000, 0x000000, 0xFF0000], 5)
+      LedStrip.set_leds(:john, namespace, [0x000000, 0x000000, 0x000000, 0x000000, 0xFF0000], 5)
       Process.sleep(600)
     end)
   end
 
   def blue(namespace) do
     Enum.each(1..10, fn _index ->
-      LedStrip.set_leds(LedStrip, namespace, [
+      LedStrip.set_leds(:john, namespace, [
         0x000000,
         0x000000,
         0x000000,
@@ -95,7 +98,7 @@ defmodule Helpers do
 
       Process.sleep(600)
 
-      LedStrip.set_leds(LedStrip, namespace, [
+      LedStrip.set_leds(:john, namespace, [
         0x000000,
         0x000000,
         0x000000,
@@ -106,7 +109,7 @@ defmodule Helpers do
 
       Process.sleep(600)
 
-      LedStrip.set_leds(LedStrip, namespace, [
+      LedStrip.set_leds(:john, namespace, [
         0x000000,
         0x000000,
         0x0000FF,
@@ -117,7 +120,7 @@ defmodule Helpers do
 
       Process.sleep(600)
 
-      LedStrip.set_leds(LedStrip, namespace, [
+      LedStrip.set_leds(:john, namespace, [
         0x000000,
         0x0000FF,
         0x000000,
@@ -128,7 +131,7 @@ defmodule Helpers do
 
       Process.sleep(600)
 
-      LedStrip.set_leds(LedStrip, namespace, [
+      LedStrip.set_leds(:john, namespace, [
         0x0000FF,
         0x000000,
         0x000000,
@@ -149,7 +152,7 @@ defmodule Helpers do
       ]
 
       Leds.leds(50)
-      |> Leds.set_led_strip_info(LedStrip, namespace)
+      |> Leds.set_led_strip_info(:john, namespace)
       |> Leds.rainbow(config)
       |> Leds.send(offset: index)
 
@@ -161,7 +164,7 @@ defmodule Helpers do
   def gradient(namespace) do
     Enum.each(0..10000, fn index ->
       Leds.leds(50)
-      |> Leds.set_led_strip_info(LedStrip, namespace)
+      |> Leds.set_led_strip_info(:john, namespace)
       |> Leds.gradient(0xFF0000, 0x0000FF, %{num_leds: 50})
       |> Leds.send(
         offset: index,
@@ -186,19 +189,19 @@ Now we can try it out with one of the first functions.  Let's call our `red/1` f
 **Note:** you might have to scroll up to see the animation
 
 ```elixir
-LedStrip.define_namespace(LedStrip, :red)
+LedStrip.define_namespace(:john, :red)
 
 spawn(fn ->
   Helpers.red(:red)
 end)
 ```
 
-Similarly you can do the same thing with the `blue/1` function. Where it gets interesting is, when you start first the red function and then start the blue function while the red function is still running.
+Similarly you can do the same with the `blue/1` function. Where it gets interesting is, when you start first the red function and then start the blue function while the red function is still running.
 
 **Note:** Don't forget to use a differnt namespace name compared to the above function, otherwise one function would constantly overwrite what the other function has defined. We want them to live in parallel and get merged.
 
 ```elixir
-LedStrip.define_namespace(LedStrip, :blue)
+LedStrip.define_namespace(:john, :blue)
 
 spawn(fn ->
   Helpers.blue(:blue)
@@ -211,10 +214,10 @@ While both functions are running, they will
 
 ## Rainbow
 
-Now we can use the above functions with our Strip. We can run the functions by spawning a new thread. This allows to also see what happens if another thread works in parallel. Here we create a rainbow effect that will be send with a changing offset so that the rainbow rotates through the LEDs
+Now we can use the above functions with our trip. We can run the functions by spawning a new thread. This allows to also see what happens if another thread works in parallel. Here we create a rainbow effect that will be send with a changing offset so that the rainbow rotates through the LEDs
 
 ```elixir
-LedStrip.define_namespace(LedStrip, :rainbow)
+LedStrip.define_namespace(:john, :rainbow)
 spawn(fn -> Helpers.rainbow(:rainbow) end)
 ```
 
@@ -225,14 +228,14 @@ spawn(fn -> Helpers.rainbow(:rainbow) end)
 Here we create a gradient between red and blue. Also this one we let rotate through. Note, depending on whether you started the rainbow above or not, you might see different results. Try this section with and without running the Rainbow section.
 
 ```elixir
-LedStrip.define_namespace(LedStrip, :gradient)
+LedStrip.define_namespace(:john, :gradient)
 spawn(fn -> Helpers.gradient(:gradient) end)
 ```
 
 We can drop the namespaces to see what happens
 
 ```elixir
-LedStrip.drop_namespace(LedStrip, :gradient)
+LedStrip.drop_namespace(:john, :gradient)
 ```
 
 As we can see our animation stops to be visible and our calls to `set_leds` will fail (but we swallow those errors).
@@ -244,9 +247,9 @@ As we can see our animation stops to be visible and our calls to `set_leds` will
 This test is running a couple of different ligth definitions in parallel.
 
 ```elixir
-LedStrip.define_namespace(LedStrip, :john)
-LedStrip.define_namespace(LedStrip, :jane)
-LedStrip.define_namespace(LedStrip, :default)
+LedStrip.define_namespace(:john, :john)
+LedStrip.define_namespace(:john, :jane)
+LedStrip.define_namespace(:john, :default)
 
 spawn(fn -> Helpers.blue(:jane) end)
 spawn(fn -> Helpers.red(:john) end)
@@ -254,11 +257,3 @@ spawn(fn -> Helpers.rainbow(:default) end)
 ```
 
 As you can see the animations overlap each other. We will work with this principle going forward.
-
-Once we are done we should stop our GenServer (even though I rarely run this one ;-) but it's good to know how to do it).
-
-Note: you might see some warnings, that are caused by our above functions that will automatically start the server if hasn't been started yet. You can safely ignore those for now.
-
-```elixir
-LedStrip.stop(LedStrip)
-```

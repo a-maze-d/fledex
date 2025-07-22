@@ -6,13 +6,14 @@ defmodule Fledex.Driver.Impl.PubSubTest do
   use ExUnit.Case
 
   alias Fledex.Driver.Impl.PubSub, as: Driver
+  alias Fledex.Supervisor.Utils
   alias Fledex.Utils.PubSub
 
   setup do
-    start_supervised({Registry, name: :fledex})
-    start_supervised({Phoenix.PubSub, [name: :fledex, adapter_name: :pg2]})
+    start_supervised({Registry, name: Utils.worker_registry()})
+    start_supervised({Phoenix.PubSub, [name: Utils.pubsub_name(), adapter_name: :pg2]})
 
-    PubSub.subscribe(:fledex, "trigger")
+    PubSub.subscribe(Utils.pubsub_name(), "trigger")
   end
 
   describe "test driver basic tests" do

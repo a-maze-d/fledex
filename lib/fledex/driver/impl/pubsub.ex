@@ -9,6 +9,7 @@ defmodule Fledex.Driver.Impl.PubSub do
   @behaviour Fledex.Driver.Interface
 
   alias Fledex.Color.Types
+  alias Fledex.Supervisor.Utils
   alias Fledex.Utils.PubSub
 
   @impl true
@@ -36,7 +37,7 @@ defmodule Fledex.Driver.Impl.PubSub do
   def transfer(leds, counter, config) do
     PubSub.direct_broadcast!(
       Keyword.get(config, :node, Node.self()),
-      :fledex,
+      Utils.pubsub_name(),
       Keyword.get(config, :topic, "trigger"),
       {:trigger, %{Keyword.fetch!(config, :data_name) => {leds, counter}}}
     )

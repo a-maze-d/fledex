@@ -16,7 +16,7 @@ defmodule Fledex.Supervisor.AnimationSystem do
 
   You can start the whole subsystem by calling
   ```elixir
-  AnimationSystem.start_link/1
+  AnimationSystem.start_link/0
   ```
   It's more common to add it to a Supervision tree by calling:
   ```elixir
