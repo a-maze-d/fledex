@@ -17,7 +17,6 @@ defmodule Fledex.Effect.Interface do
 
   alias Fledex.Color.Types
 
-  # TODO: decide on what to do with those.
   @typedoc """
   Typical states of an effect that should be published
 

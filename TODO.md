@@ -39,6 +39,7 @@ Even though this library is published, there are things I still want to do befor
   - [x] cleanup the via_tuple stuff once coordinator is done (move Utils to Supervisor? yes moved)
   - [x] Do we really need to use the `Leds.send` function in the `Animator`. Moving it to `LedStrip`
   - [/] Can we reuse the same registry for PubSub and for our workers? (v0.6) No, we can't because we have different requirements. So we have to live with two registries
+  - decide on what to do with the effect states
   - [ ] Add more guards to functions to make them more robust (v0.7)
 - [ ] Missing functionality
   - [/] Add a default `led_strip` driver that can be configured through the config (v0.6)
@@ -72,6 +73,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] We have the `Fledex.Color` protocol, but we actually don't make use of its type. This is maybe also a good opportunity to rethink on how we handle colors in general. Maybe we should define everything as `Fledex.Color` and encapsulate CSS, SVG, RAL colours in their own struct to then have the protocol implemented for them. (v0.7)
   Other advantages:
     - [x] This should make the `CalcUtils.split_into_subpixels` unnecessary (v0.6)
+  - [ ] convert the rgb to other color spaces (in the various color name modules) (v0.7)
   - [ ] Put some more effort into the coordinator to make it working well (v0.7)
   - [ ] Enable Telemetry? (v0.8)
   - [ ] should the `:config` driver not only return the config but the strip_name too?

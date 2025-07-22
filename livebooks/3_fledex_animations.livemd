@@ -1,5 +1,5 @@
 <!--
-Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
