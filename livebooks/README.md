@@ -49,7 +49,7 @@ In this livebook we look how animations can be defined, this is the next step(s)
 * a weather indicator (collecting data via the internet)
 
 # 3b. Fledex: More about colors (details)
-[Link](3b_fledex_more_about_colors.livemd)
+[Link](3b_fledex_everything_about_colors.livemd)
 
 Here we talk a bit more about colors and even color corrections
 
@@ -98,6 +98,7 @@ In this chapter we will take a look on how to create reusable components. This w
 
 Animations often require some time activity. In this chapter we will take a look at the `job` feature that makes the scheduling of repetitive tasks much easier by providing a cron-job like feature. This is mainly intended to trigger some events for the animation(s), but could really be used for anything.
 
+# 10. Fledex: Coordinator (usage)
 # School livebooks
 A couple of livebooks are intended for school project
 

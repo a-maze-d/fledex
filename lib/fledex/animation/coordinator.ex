@@ -2,6 +2,17 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 defmodule Fledex.Animation.Coordinator do
+  @moduledoc """
+  The coordinator is a module that is responsible for running the coordinator
+  function.
+
+  This module is rather simple:
+  * It listens to events on the `Fledex.Utils.PubSub.channel_state()` channel
+  * Passes the events to the function (`:func`) with which it was configured (or changed through the `config/3` function)
+  * And keeps track of some settings, that the function can use in it's processing
+
+  See `t:config_t/0` for more details on how to implement the function.
+  """
   use GenServer
 
   require Logger
@@ -17,6 +28,19 @@ defmodule Fledex.Animation.Coordinator do
   * `broadcast_state`: event (usually an atom),
   * `context`: descriptor to describe who has sent ou the event. It usually contains the strip_name and/or the animation_name and/or information about the effect.
   * `state`: contains the state of the coordinator. The first time the function is called the `:options` are passed in as `state`. The Coordinator should return a `new_state`.
+
+  You probably would impelment it something like this:
+  ```elixir
+  func: fn
+    {:stop_start, %{strip_name: :john, animation_name: :doe}, state} ->
+      # ... do something with the animations or effects
+      # ... update the state if necessary
+      state
+    _ ->
+      # do nothing
+      state
+  end
+  ```
   """
   @type config_t :: %{
           :type => :coordinator,

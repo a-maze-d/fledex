@@ -119,7 +119,7 @@ defmodule Fledex.Utils.Dsl do
 
   defp start_system(opts) do
     log_level = Keyword.get(opts, :log_level, :info)
-    supervisor = Keyword.get(opts, :supervisor, :app)
+    supervisor = Keyword.get(opts, :supervisor, :none)
     opts = Keyword.drop(opts, [:supervisor, :log_level])
 
     Logger.configure(level: log_level)

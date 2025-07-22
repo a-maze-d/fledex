@@ -84,7 +84,7 @@ defmodule Fledex.Color.Names.Dsl do
       Get a list of all the predefined color (atom) names.
 
       The name can be used to either retrieve the info by calling `info/2` or by calling the function with that
-      name (see also the description at the top and take a look at this [example livebook](3b_fledex_more_about_colors.livemd))
+      name (see also the description at the top and take a look at this [example livebook](3b_fledex_everythingw_about_colors.livemd))
       """
       @spec names :: list(color_names_t)
       def names, do: Map.keys(@colors)

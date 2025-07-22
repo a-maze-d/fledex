@@ -22,6 +22,8 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
   """
   @spec start_link(atom, LedStrip.drivers_config_t(), keyword) :: Supervisor.on_start()
   def start_link(strip_name, drivers, global_configs) do
+    global_configs = Keyword.put_new(global_configs, :group_leader, Process.group_leader())
+
     Supervisor.start_link(
       __MODULE__,
       {strip_name, drivers, global_configs},

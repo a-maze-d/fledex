@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
 ```elixir
 Mix.install(
   [
-    {:fledex, "~>0.5"}
+    {:fledex, path: "/home/maze/Documents/code/fledex"}
   ],
   # necessary to enable the nicer rendering
   consolidate_protocols: false
@@ -54,7 +54,7 @@ Fledex.Color.KinoRender.new([my_color3, my_color4])
 ```
 
 The next most convenient way is to defined a color through its name (see `Fledex.Color.Names`). 
-We will look at this in more detail in a [later chapter](./3b_fledex_more_about_colors.livemd)
+We will look at this in more detail in a [later chapter](3b_fledex_everything_about_colors.livemd)
 
 ```elixir
 alias Fledex.Color.Names

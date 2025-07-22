@@ -5,7 +5,7 @@
 defmodule Fledex.MixProject do
   use Mix.Project
 
-  @version "0.6.0-dev"
+  @version "0.6.0-rc1"
   @source_url "https://github.com/a-maze-d/fledex"
   def project do
     [
@@ -102,6 +102,8 @@ defmodule Fledex.MixProject do
 
       # documentation
       # ">= 0.0.0", only: :dev, runtime: false},
+      # we need a special version of the `:ex_doc` module to support the copy_doc
+      # feature.
       {:ex_doc,
        git: "https://github.com/a-maze-d/ex_doc", branch: "copy_doc", only: :dev, runtime: false},
       # documentation coverage is a great idea, but there are several major issues:
@@ -158,7 +160,7 @@ defmodule Fledex.MixProject do
         "livebooks/2_fledex_first_steps.livemd",
         "livebooks/2b_fledex_how_to_define_leds.livemd",
         "livebooks/3_fledex_animations.livemd",
-        "livebooks/3b_fledex_more_about_colors.livemd",
+        "livebooks/3b_fledex_everything_about_colors.livemd",
         "livebooks/4_fledex_clock_example.livemd",
         "livebooks/5_fledex_weather_example.livemd",
         "livebooks/6_fledex_dsl.livemd",

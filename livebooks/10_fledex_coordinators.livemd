@@ -1,0 +1,29 @@
+# 10. Fledex: Coordinators (under construction)
+
+```elixir
+Mix.install([
+  {:fledex, "~>0.6"}
+])
+```
+
+## Section
+
+The coordinator is a component that allows to coordinate different animations and effects. This clearly is an advanced concept and before attempting it you should first make yourself very much familiar with the other `Fledex` features.
+
+Every coordinator listens to the state messages on the `Fledex.Utils.PubSub.channel_state/0` channel. Each coordinator can then decide on what to do with those messages and change the config of any animation or effect (like `enable`/`disable`).
+
+To implement a coordinator is quite simple:
+
+<!-- livebook:{"force_markdown":true} -->
+
+```elixir
+led_strip :john, Kino do
+  coordinator :switcher do
+    
+  end
+end
+```
+
+```elixir
+
+```

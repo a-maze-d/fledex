@@ -11,24 +11,25 @@ SPDX-License-Identifier: Apache-2.0
 # hardware but on a normal livebook, This makes it easier to stay up-to-date and experiment
 # We start to define our fledex library, directly linking to the latest version on github
 Mix.install([
-  {:fledex, "~>0.5"}
+  {:fledex, "~>0.6"}
 ])
+```
 
+## Preparation
+
+To start with, we define again a couple of aliases to make our life easier and more importantly, we start our `Fledex.Supervisor.AnimationSystem`. This will also start the `Fledex.Animation.Manager` that will allow us to create animations. The animations are actually maintained by the `Fledex.Animation.Animator`, but we will interact with it only through the `Fledex.Animation.Manager`.
+
+```elixir
 # we define a couple of aliases to not have to type that much
 alias Fledex.Animation.Manager
 alias Fledex.Leds
 alias Fledex.LedStrip
 alias Fledex.Driver.Impl.Kino
 alias Fledex.Color.Correction
+alias Fledex.Supervisor.AnimationSystem
 
-{:ok, pid} = Manager.start_link()
-
-:ok
+AnimationSystem.start_link()
 ```
-
-## Preparation
-
-To start with, we define a couple of aliases to make our life easier and more importantly, we start our `Fledex.Animation.Manager`. We will use it to create animations. The animations are actually maintained by the `Fledex.Animation.Animator`, but we will interact with it only through the `Fledex.Animation.Manager`.
 
 ## Helper functions
 
@@ -36,7 +37,8 @@ We define a bit of helper functions that we will use when we define our animatio
 
 Note that the functions get in a map (here called triggers) that can contain serveral
 triggers. It will definitely contain one trigger (caused by the `Fledex.LedStrip`) with
-the name of the led strip. The structure does not need to be used, but can be used in
+the name of the led strip (except during initialization phase where it might still be missing). 
+The structure does not need to be used, but can be used in
 order to change the animation based on the trigger. Here we use the trigger in the send
 configuration to specify an offset to the leds and thereby create a movement.
 
@@ -61,7 +63,7 @@ end
 
 Now it's time to define our first animation by using the `Fledex.Animation.Manager`. Before we can define our animations we first have to define (and configure) our led strip. The `Fledex.Animation.Manager` can manage serveral strips at the same time.
 
-We call our led strip `:john` (it has to be an atom). In this example we will only use the simple kino driver (and configure it with defaults) and thereby display the result within our livebook.
+We call our led strip `:john`. In this example we will only use the simple kino driver (and configure it with defaults) and thereby display the result within our livebook.
 
 We then define an animation configuration that consists of a map with the key being the name of the animation and the value being the configuration of that animation. Each animation configuration needs to specify the `:type` as `:animation`, because (as we will see later) other types exist, and a `:def_func` that defines our animation (potentially with an additional `:send_config_func` as shown here. We'll look at this in more detail in a later section).
 
@@ -81,7 +83,7 @@ Manager.register_config(:john, %{
 
 We can now redefine our animation by registering different functions. Here we define a 3 led wide red dot that moves slowly from right to left.
 
-Note: we are starting to use color names instead of defining it through an integer. If you want to learn more, then take a small detour to the [Color livebook](./3b_fledex_more_about_colors.livemd)
+Note: we are starting to use color names instead of defining it through an integer. If you want to learn more, then take a small detour to the [Color livebook](3b_fledex_everything_about_colors.livemd)
 
 The strip has been defined above, and is shown above, so when you redefine it you will have to look above too :-)
 
