@@ -18,6 +18,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.7)
   - [ ] Add a livebook with coordinator examples (v0.7)
   - [ ] Update the cheatsheet with coordinator info (v0.7)
+  - [ ] Update documentation with the Supervision tree (v0.7)
 - [ ] Testing
   - [x] Add more error handling scenarios (v0.6)
   - [ ] Add tests for the Clock and Thermometer components (v0.7)
@@ -80,17 +81,17 @@ Even though this library is published, there are things I still want to do befor
   - [ ] should the `:config` driver not only return the config but the strip_name too?
   - [ ] setting up livebook (a really working version) on windows is anything than easy :-( Can we do something about it? Investigate (v0.7)
   - [ ] Add support for WS2811/12/13/14/15 LED strips controlled through phase modulation. (v0.7)
-  - [ ] Clustering (v0.7)
+  - [ ] Clustering (v0.8)
     - [ ] Rethink the clusering and check whether the new livebook API endpoints might make it easier to cluster. Currently it seems to be quite complicated.
     - [ ] Provide examples on how to cluster
     - [ ] Add an example where several nodes are connected to transfer pubsub messages accross nodes
     - [ ] Implement music beat through clustering
-  - [ ] Create smartcells (v0.8)
+  - [ ] Create smartcells? (v1.x)
   - [/] Do we need to have language packs that allows to adjust to other languages? it would be quite easy with some `defdelegate`  At least for: (v0.9). Probably "NO", but I will reflect a bit more before closing this one! Concluded that "No".
 - [x] Bugs:
   - [x] The documentation is not perfect. The defdelegate works fine, but attaching the documentation does not always work. It sometimes refers to the original file which I don't really want (v0.6)
 - [ ] Increase consumption
-  - [ ] Create a video (v0.7, once 0.6 is released)
+  - [ ] Create a video (once v0.6 is released)
   - [ ] Migrate outstanding TODOs to github (v0.7)
   - [ ] Publish/announce on Elixirforum (v0.7)
   - [ ] Get the library into nerves-livebook (v0.7)

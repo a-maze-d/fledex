@@ -91,6 +91,13 @@ defmodule Fledex.SupervisorTest do
 
       led_strip_pid1 = get_led_strip_pid(@test_strip)
       Process.exit(led_strip_pid1, :kill)
+
+      # this test quite frequently fails. Probably
+      # a timing issue. I'll add a decently long delay
+      # to see whether that prevents the issue going forward
+      # then we can see whether we can fix this in a better
+      # way (maybe an endless loop until it pases or times out?)
+      Process.sleep(2_000)
       led_strip_pid2 = get_led_strip_pid(@test_strip)
       assert led_strip_pid2 != nil
       assert led_strip_pid1 != led_strip_pid2
