@@ -15,7 +15,7 @@ Even though this library is published, there are things I still want to do befor
   - [x] Useful to provide a full story about colors (additive / subtractive colors) (v0.6)
   - [ ] Add information about color correction (section 3b) (v0.7)
   - [ ] Document the driver options (v0.7)
-  - [ ] hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.6/0.7)
+  - [ ] hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.7)
   - [ ] Add a livebook with coordinator examples (v0.7)
   - [ ] Update the cheatsheet with coordinator info (v0.7)
 - [ ] Testing
@@ -41,6 +41,7 @@ Even though this library is published, there are things I still want to do befor
   - [/] Can we reuse the same registry for PubSub and for our workers? (v0.6) No, we can't because we have different requirements. So we have to live with two registries
   - decide on what to do with the effect states
   - [ ] Add more guards to functions to make them more robust (v0.7)
+  - [x] Check the build version. We state Elixir version `~>1.14` in the `mix.exs` file, but we only build it with `1.17.x` and `1.18.x` in our `elixir.yml`. We should align those two. Limiting to the min version to be the same as nerves-livebook, because that's what I really target.
 - [ ] Missing functionality
   - [/] Add a default `led_strip` driver that can be configured through the config (v0.6)
         I experimented with this idea, but it really doesn't give a real benefit. Therefore dropped it again.
@@ -87,7 +88,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Create smartcells (v0.8)
   - [/] Do we need to have language packs that allows to adjust to other languages? it would be quite easy with some `defdelegate`  At least for: (v0.9). Probably "NO", but I will reflect a bit more before closing this one! Concluded that "No".
 - [x] Bugs:
-  - [x] The documentation is not perfect. The defdelegate works fine, but attaching the documentation does not always work. It sometimes refers to the original file which I don't really want (v0.6?)
+  - [x] The documentation is not perfect. The defdelegate works fine, but attaching the documentation does not always work. It sometimes refers to the original file which I don't really want (v0.6)
 - [ ] Increase consumption
   - [ ] Create a video (v0.7, once 0.6 is released)
   - [ ] Migrate outstanding TODOs to github (v0.7)
