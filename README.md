@@ -34,7 +34,7 @@ by adding `:fledex` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:fledex, "~> 0.5"}
+    {:fledex, "~> 0.6"}
   ]
 end
 ```
@@ -111,7 +111,7 @@ Thus, you will have to clone the repository and add in the `mix.exs` file `flede
 defp deps do
   [
     ...
-    {:fledex, "~>0.5}
+    {:fledex, "~>0.6}
   ]
 ```
 
