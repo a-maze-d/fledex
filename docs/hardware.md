@@ -52,11 +52,11 @@ The reason for the level shifter is that the RPI (even though it's powered with 
 ## Finding the pins on the RPI
 
 It can be quite tricky to find the correct pin on the RPI. Therefore several resources are linked below. The difficult part is to figure out where pin 1 is located, everything else is then quite easy.
-The below drawings try to make it clear on how you have to look at your RPI. You look from the the top down onto the processor (black) and then you can easily find pin 1.
+The below drawing tries to make it clear on how you have to look at your RPI. You look from the the top down onto the processor (black) and then you can easily find pin 1.
 
 ## Direct Connection
 
-The direct connection (especially with short conncetions) will probably work, because the allowed tolerance for a HIGH signal and will still be above the required 2V. Any signal above 2V is considered as HIGH (= binary a 1) and any signal below 0.8V is considered as LOW (= binary a 0). 
+The direct connection (especially with short connections) will probably work, because the allowed tolerance for a HIGH signal. We will still be above the required 2V. Any signal above 2V is considered as HIGH (= binary a 1) and any signal below 0.8V is considered as LOW (= binary a 0). 
 
 ![direct connection](assets/hardware.drawio.svg "Direct connection")
 
@@ -67,10 +67,10 @@ There are [different ways](https://electronics.stackexchange.com/questions/82104
 
 You have to do the following steps:
 
-1. Connect the higher voltage and lower voltages to LV and HV respectively. This tells the level shifter to which levels we want to translate. It's important to make sure that the lower voltage is on the LV side and the higher voltage on the HV side.
-2. Connect each signal line to one of the signal pins. The 3.3V to the LV side (A1-A4) and the 5V to the corresponding pins on the HV side (B1-B2).
-3. Enable the output by connecting the OE pin to the LV pin
-4. Connect all the Ground lines to the GND pin.
+1. Connect the higher voltage and lower voltages to HV and LV respectively. This tells the level shifter to which levels we want to translate. It's important to make sure that the lower voltage is on the LV side and the higher voltage on the HV side.
+2. Connect each signal line to one of the signal pins. The 3.3V to the LV side (A1-A4) and the 5V to the corresponding pins on the HV side (B1-B4).
+3. Enable the output by connecting the OE pin (output enabled) to the LV pin
+4. Connect all the ground lines to the GND pin.
 
 ![Connection with Level shifter](assets/hardware-Page-2.drawio.svg)
 

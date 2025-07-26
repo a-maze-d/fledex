@@ -19,6 +19,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Add tests for the Clock and Thermometer components (v0.7)
 - [ ] Cleanup
   - [ ] Add more guards to functions to make them more robust (v0.7)
+  - [ ] All Color name modules have the same interface (through the DSL it's even enforced). Let's make this more explicit by introducting a Color.Names.Interface with the appropriate callbacks (v0.7)
 - [ ] Missing functionality
   - [ ] The Job should (at least appear) to be connected to the LedStrip (v0.7)
   - [ ] Replace Quantum with SchedEx? https://hexdocs.pm/sched_ex/readme.html (v0.7)

@@ -1,5 +1,5 @@
 <!--
-Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -54,7 +54,7 @@ led_strip Spi do
 end
 ```
 
-Once we have defined our led strip we can start to define sequences of leds. This can be achieved in 4 different ways:
+Once we have defined our led strip we can start to define sequences of leds. This can be achieved in 3 different ways:
 
 * **static:** a static set of leds that do not change over time
 * **animation:** an animated, i.e. changing set of leds
