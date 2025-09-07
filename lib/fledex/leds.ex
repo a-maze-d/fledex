@@ -174,7 +174,7 @@ defmodule Fledex.Leds do
   * `:num_leds`: how many leds should be part of the rainbow (by default all leds)
   * `:offset`: as from which led we want to start the  rainbow (default: 0, no offset)
 
-  Other options that can be used are those in `Fledex.Color.Functions.create_rainbow_circula_rgb/2`
+  Other options that can be used are those in `Fledex.Color.Functions.create_rainbow_circular_rgb/2`
   especially:
   * `:reversed`: The rainbow can go from red (start color) to blue (end color) or the other
       way around.

@@ -81,7 +81,7 @@ defmodule Fledex.Color.Functions do
       `color_correction_none/1` (default) and `color_correction_g2`
   """
   @spec hsv2rgb(list(Types.hsv()), keyword) :: list(Types.rgb())
-  def hsv2rgb(leds, opts \\ [] ) do
+  def hsv2rgb(leds, opts \\ []) do
     conversion_function = Keyword.get(opts, :conversion_function, &Rainbow.hsv2rgb/2)
     color_correction = Keyword.get(opts, :color_correction, &color_correction_none/1)
 
@@ -112,5 +112,4 @@ defmodule Fledex.Color.Functions do
   defp step(reversed, hue)
   defp step(false, hue), do: hue
   defp step(true, hue), do: -hue
-
 end

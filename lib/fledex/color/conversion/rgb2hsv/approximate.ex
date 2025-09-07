@@ -47,12 +47,14 @@ defmodule Fledex.Color.Conversion.Approximate do
   end
 
   defp calc_saturation(desat) when desat == 0, do: 255
+
   defp calc_saturation(desat) do
     # s = 255 - desat
     255 - trunc(:math.sqrt(desat * 256))
   end
 
   defp calc_value(total, _desat) when total > 255, do: 255
+
   defp calc_value(total, desat) do
     v = qadd8(desat, total)
     if v != 255, do: trunc(:math.sqrt(v * 256)), else: v
