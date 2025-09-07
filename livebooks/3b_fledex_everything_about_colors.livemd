@@ -79,4 +79,20 @@ leds(5) |> almond |> red |> green |> blue(offset: 5)
 
 ## Color Correction
 
-More info to follow
+Before we look at the Fledex features regarding color correction we first need to understand what color correction is. [Wikipedia](https://en.wikipedia.org/wiki/Color_correction) describes the process nicely as:
+
+> Color correction is a technical process that fixes color issues and makes footage appear as
+>  naturalistic as possible. The idea is for colors to look clean and real, as human eyes would see
+> them in the real world – basically, correcting problems of the underlying image by balancing out
+> the colors, making the whites appear white, the blacks appear black, and making sure that
+> everything is even.
+
+The color correction consists of two parts. First to compensate the physical mis-coloring of the LEDs. The basic colors on the classical 5050 LED chip are not shown in the same intensity. So we need to compensate this.
+
+The second color coorection we might want to perform is to bring the color into the correct "temperature" (named due to the [black body radiator](https://en.wikipedia.org/wiki/Black-body_radiation)) with a relatively continuous spectrum, or approach the light of a gaseous light source with more discrete spectral band (see [gas discharge lamp](https://en.wikipedia.org/wiki/Gas-discharge_lamp)).
+
+Color correction is provided in Fledex through the modules under `Fledex.Color.Correction`.
+
+> [!NOTE]
+> If you look at color conversion (hsv2rgb) there is also the possibility to color correct,
+> but you probably don't want to touch that.

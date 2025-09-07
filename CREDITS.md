@@ -67,4 +67,5 @@ Without the valuable work from other projects it wouldn't have made sense to eve
 * [Phoenix Framework](https://www.phoenixframework.org/)
 * [Livebook](https://livebook.dev/)
 * [Nerves](https://nerves-project.org/) including the Nerves-Livebook
+* Various online sources, too many to mention here.
 

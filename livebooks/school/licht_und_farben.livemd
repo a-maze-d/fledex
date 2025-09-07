@@ -204,15 +204,15 @@ Das menschliche Auge besteht (vereinfacht) aus sogenannten Stäbchen und Zäpfch
 * Die **Stäbchen** sind sehr breitbandig und für das Nachtsehen verantwortlich (sie sind sehr empfindlich, können aber keine Farbe sehen).
 * Die **Zäpfchen** gibt es in 3 Typen die auf unterschiedliche Wellenlängen ansprechen (L = rot, M = grün und S = blau). Sie erlauben unserem Gehirn das Farbsehen.
 
-Hier die Empfindlichkeit der Stäbchen und Zäpfchen:
+Hier die Empfindlichkeit der Zäpfchen:
 
 <!-- livebook:{"break_markdown":true} -->
 
-![](assets/Cone-response-de.svg)
+![](assets/Normalized_response_spectra_of_human_cones.png)
 
 <!-- livebook:{"break_markdown":true} -->
 
-Der Mensch kann aber nicht nur die Regenbogenfarben (monochromatisches Licht) sehen, sondern auch Mischfarben. <span style="background:#ff00ff;">Magenta</span> ist z.B. nicht im Regenbogen zu finden da es eine Mischfarbe aus Rot und Blau ist, die im Regenbogen nicht dicht beieinander liegen. Gelb ist auch eine Mischfarbe, allerdings von Rot und Grün welche nebeneinander liegen, weshalb man Gelb im Regenbogen sieht.
+Der Mensch kann aber nicht nur die Regenbogenfarben (monochromatisches Licht) sehen, sondern auch Mischfarben. Magenta ist z.B. nicht im Regenbogen zu finden da es eine Mischfarbe aus Rot und Blau ist, die im Regenbogen nicht dicht beieinander liegen. Gelb ist auch eine Mischfarbe, allerdings von Rot und Grün welche nebeneinander liegen, weshalb man Gelb im Regenbogen sieht.
 
 ## Farbmischung
 
@@ -229,7 +229,9 @@ Malen wir jetzt mit einem Blauen Stift auf die Rote Linie, dann wird die Linie s
 
 ![](assets/subtractive_light.svg)
 
-Das ist die **subtraktive Farbmischung** (wir fangen mit Weiss an und ziehen davon Farben ab).
+Das ist die **subtraktive Farbmischung** (wir fangen mit Weiss an und ziehen davon Farben ab). Mit den Farben rot, grün und blau reichen bereits zwei Farben aus um Schwarz zu bekommen. Beim Druck, wo die subtraktive Farbmischung verwendet wird, könnten wir damit nicht viele Farben darstellen. Deshalb werden dort die Farben Cyan, Magenta, Gelb und Schwarz verwendet (CMYK: cyan (C), magenta (M), yellow (Y), black (K)). Das Schwarz ist notwendig, da die Mischung der drei Farben kein sattes Schwarz ergibt.
+
+![](assets/subtractive_light_cymk.svg)
 
 ### Additive Farbmischung
 

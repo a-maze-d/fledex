@@ -173,9 +173,13 @@ defmodule Fledex.Leds do
 
   * `:num_leds`: how many leds should be part of the rainbow (by default all leds)
   * `:offset`: as from which led we want to start the  rainbow (default: 0, no offset)
+
+  Other options that can be used are those in `Fledex.Color.Functions.create_rainbow_circula_rgb/2`
+  especially:
   * `:reversed`: The rainbow can go from red (start color) to blue (end color) or the other
       way around.
-  * `:initial_hue`: The starting color in degree (`0..360`). (default: 0)
+  * `:initial_hue`: The starting color in degree mapped to a byte (e.g. `0..255`
+      corresponds to `0..258`). (default: 0)
 
   Note: any led that has been defined before calling this function will be overwritten
   with the rainbow value.
@@ -183,12 +187,11 @@ defmodule Fledex.Leds do
   @spec rainbow(t, keyword) :: t
   def rainbow(%__MODULE__{} = leds, opts \\ []) do
     num_leds = Keyword.get(opts, :num_leds, leds.count)
-    reversed = Keyword.get(opts, :reversed, false)
     offset = Keyword.get(opts, :offset, 0)
-    initial_hue = Keyword.get(opts, :initial_hue, 0)
+    conv_opts = Keyword.drop(opts, [:num_leds, :offset])
 
     led_values =
-      Functions.create_rainbow_circular_rgb(num_leds, initial_hue, reversed)
+      Functions.create_rainbow_circular_rgb(num_leds, conv_opts)
       |> convert_to_leds_structure(offset)
 
     put_in(leds.leds, Map.merge(leds.leds, led_values))
