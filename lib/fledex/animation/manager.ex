@@ -4,6 +4,10 @@
 
 defmodule Fledex.Animation.Manager do
   @moduledoc """
+  > **Note**
+  > You probably do not want to use this module directly but use the DSL defined
+  > in `Fledex`
+
   The animation manager manages several animations (and potentially
   serveral led strips at the same time.
   Usually you don't start the service yoursel, but it gets automatically
@@ -99,8 +103,9 @@ defmodule Fledex.Animation.Manager do
   this function again, will be stopped if they are not part of the configuration anymore.
   Newly defined animations will be started.
 
-  Note: the animation functions might get called quite frequently and
-  therefore any work within them should be kept to a minimum.
+  > **Note**
+  > The animation functions might get called quite frequently and
+  > therefore any work within them should be kept to a minimum.
   """
   @spec register_config(atom, %{atom => map}) :: :ok
   def register_config(strip_name, configs) do

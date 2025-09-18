@@ -53,6 +53,13 @@ defmodule Fledex.Color.NamesTest do
   end
 
   describe "color names access tests" do
+    test "defined color modules" do
+      color_name_modules = Names.color_name_modules()
+      assert length(color_name_modules) == 4
+      assert List.first(color_name_modules) == {Fledex.Color.Names.Wiki, :core}
+      assert List.last(color_name_modules) == {Fledex.Color.Names.RAL, :optional}
+    end
+
     test "calling by name" do
       assert Names.vermilion2(:all) == %{
                hex: 14_235_678,
@@ -119,8 +126,14 @@ defmodule Fledex.Color.NamesTest do
       assert 14_235_678 == vermilion2()
     end
 
-    test "color name guard" do
-      import Fledex.Color.Names.Guards, only: [is_color_name: 1]
+    test "color name guard (names guard)" do
+      import Fledex.Color.Names
+      assert is_color_name(:vermilion2) == true
+      assert is_color_name(:non_existing) == true
+    end
+
+    test "color name guard (wiki guard)" do
+      import Fledex.Color.Names.Wiki
       assert is_color_name(:vermilion2) == true
       assert is_color_name(:non_existing) == false
     end
@@ -137,6 +150,21 @@ defmodule Fledex.Color.NamesTest do
       assert Leds.get_light(leds, 1) == 0xFF0000
       assert Leds.get_light(leds, 2) == 0x00FF00
       assert Leds.get_light(leds, 3) == 0x0000FF
+    end
+
+    test "non-existing color name atoms default to black" do
+      alias Fledex.Color
+      alias Fledex.Leds
+
+      leds =
+        Leds.leds(3)
+        |> Leds.light(:non_existing)
+        |> Leds.light(Color.to_rgb(:non_existing))
+        |> Leds.light(Color.to_colorint(:non_existing))
+
+      assert Leds.get_light(leds, 1) == 0x000000
+      assert Leds.get_light(leds, 2) == 0x000000
+      assert Leds.get_light(leds, 3) == 0x000000
     end
   end
 end

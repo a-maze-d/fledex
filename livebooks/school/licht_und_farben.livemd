@@ -241,7 +241,6 @@ Wenn wir eine rote Lampe haben dann wird nur das Licht mit der roten Wellenläng
 
 Das ist die **additive Farbmischung** (wir fangen mit Schwarz an und legen Farben drauf).
 
-> [!NOTE]
 > Mit unserer Lichterkette wenden wir nur die additive Farbmischung an
 
 ## Los geht's!

@@ -41,6 +41,9 @@ defmodule Fledex.Color.Names.Dsl do
             converter: converter,
             module: module
           ] do
+      @behaviour Fledex.Color.Names.Interface
+
+      alias Fledex.Color.Names.Interface
       alias Fledex.Color.Names.Types
       alias Fledex.Leds
 
@@ -69,12 +72,14 @@ defmodule Fledex.Color.Names.Dsl do
       @doc ~S"""
       Check whether the atom is a valid color name
       """
+      @impl Interface
       @doc guard: true
       defguard is_color_name(atom) when is_atom(atom) and is_map_key(@colors, atom)
 
       @doc ~S"""
       Get all the data about the predefined colors
       """
+      @impl Interface
       @spec colors :: list(Types.color_struct_t())
       def colors do
         Map.values(@colors)
@@ -87,8 +92,22 @@ defmodule Fledex.Color.Names.Dsl do
       name (see also the description at the top and take a look at this [example
       livebook](3b_fledex_everything_about_colors.livemd))
       """
+      @impl Interface
       @spec names :: list(color_names_t)
       def names, do: Map.keys(@colors)
+
+      @doc """
+      Retrieve information about the color with the given name
+      """
+      @impl Interface
+      def info(name, what \\ :hex)
+      # def info(name, what) when is_color_name(name), do: apply(__MODULE__, name, [what])
+      def info(name, what) do
+        case function_exported?(__MODULE__, name, 1) do
+          true -> apply(__MODULE__, name, [what])
+          false -> nil
+        end
+      end
 
       @base16 16
       for {name, color} <- colors do
@@ -100,9 +119,9 @@ defmodule Fledex.Color.Names.Dsl do
           |> String.pad_leading(6, "0")
 
         @doc """
-        <div style="width: 25px; height: 25px; display: inline-block; background-color: ##{hex}; border: 1px solid black"></div>
-
         Defines the color rgb(#{r}, #{g}, #{b}).
+
+        <div style="width: 25px; height: 25px; display: inline-block; background-color: ##{hex}; border: 1px solid black"></div>
         """
         @doc color_name: true
         @spec unquote(name)(Types.color_props_t()) :: Types.color_vals_t()

@@ -93,6 +93,7 @@ The second color coorection we might want to perform is to bring the color into 
 
 Color correction is provided in Fledex through the modules under `Fledex.Color.Correction`.
 
-> [!NOTE]
+> **Note**
+> 
 > If you look at color conversion (hsv2rgb) there is also the possibility to color correct,
 > but you probably don't want to touch that.

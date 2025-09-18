@@ -16,7 +16,7 @@ defmodule Fledex.LedStrip do
   computer, except that a window server would manage several screens, whereas here each
   LED strip would get its own.
 
-  > [!Note]
+  > **Note**
   > In general you shouldn't require to start an LedStrip directly, but you should
   > use the `Fledex DSL`. In order to start an `LedStrip` a Registry (with name as provided by
   > `Fledex.Supervisor.Utils.worker_registry/0`) is required.
@@ -195,10 +195,12 @@ defmodule Fledex.LedStrip do
   calculated if not provided (but often this information is already available
   and therefore can be provided)
 
-  Note: repeated calls of this function will result in previously set leds
-  will be overwritten. We are passing a list of leds which means every led
-  will be rewritten, except if we define a 'shorter" led sequence. In that
-  case some leds might retain their previously set value.
+  > **Note**
+  >
+  > Repeated calls of this function will result in previously set leds
+  > will be overwritten. We are passing a list of leds which means every led
+  > will be rewritten, except if we define a 'shorter" led sequence. In that
+  > case some leds might retain their previously set value.
   """
   @spec set_leds(atom, atom, list(pos_integer), non_neg_integer() | nil) ::
           :ok | {:error, String.t()}

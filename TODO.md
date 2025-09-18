@@ -19,9 +19,11 @@ Even though this library is published, there are things I still want to do befor
 - [ ] Testing
   - [ ] Add tests for the Clock and Thermometer components (v0.7)
 - [ ] Cleanup
-  - [ ] Cleanup the color conversion functions. There are a lot of unused parts, providing flexibility that is not required.
+  - [x] Cleanup the color conversion functions. There are a lot of unused parts, providing flexibility that is not required.
   - [ ] Add more guards to functions to make them more robust (v0.7)
   - [ ] All Color name modules have the same interface (through the DSL it's even enforced). Let's make this more explicit by introducting a Color.Names.Interface with the appropriate callbacks (v0.7)
+  - [x] We could change the `Fledex.Color` for `Atom` to delegate to any of the color modules until we find the module that implements it. Defaulting to black if the color does not exist. Thus, we wouldn't even need any specific `color_name` guard, since any atom would be "kind of" valid. I think that would dramatically reduce the dependencies. Downside is that it wouldn't be possible to look at all the colors that are implemented at compiletime, but for that we have runtime functions and that's probably where we would need them the most. (v0;7)
+  - [ ] Change the import of `Fledex.Color.Names` and import the different color components individually instead. `Fledex.Color.Names` still makes sense to bind those together. The import can be done in a flexible way. This should reduce the complexity of the code, the dependencies, and increase the flexibility without loss of convenience for the user (v0.8)
 - [ ] Missing functionality
   - [ ] The Job should (at least appear) to be connected to the LedStrip (v0.7)
   - [ ] Replace Quantum with SchedEx? https://hexdocs.pm/sched_ex/readme.html (v0.7)

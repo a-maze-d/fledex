@@ -21,13 +21,15 @@ defmodule Fledex.Driver.Manager do
       their own set of settings. You need to check the driver module documentation
       for allowed settings
 
-  Note: You can specify a driver module several times and give them different settings.
-        This allows for example to send the same data to two different SPI ports.
-
-  Example:
-  ```elixir
-  {Fledex.Driver.Impl.Kino, update_freq: 10 }
-  ```
+  > **Note**
+  >
+  > You can specify a driver module several times and give them different settings.
+  > This allows for example to send the same data to two different SPI ports.
+  >
+  > Example:
+  > ```elixir
+  > {Fledex.Driver.Impl.Kino, update_freq: 10 }
+  > ```
   """
   @type driver_t :: {driver :: module, config :: keyword()}
   @typedoc """

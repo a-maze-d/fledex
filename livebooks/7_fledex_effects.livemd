@@ -16,7 +16,7 @@ Mix.install([
 
 ## Introduction
 
-> [!WARNING]
+> **CAUTION**
 > 
 > This version contains a big change in how effects should behave and interact.
 > This is still work in progress and you might run into issues. The next version

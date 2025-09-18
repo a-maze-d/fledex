@@ -3,7 +3,18 @@
 # SPDX-License-Identifier: Apache-2.0
 defmodule Fledex.Color.Names.Wiki do
   @moduledoc ~S"""
-  Do not use this module directly, but use Fledex.Color.Names instead
+  This module defines all the named colors specified on wikipedia, which is a collection
+  of various sources.
+  See:
+  * https://en.wikipedia.org/wiki/List_of_colors:_A%E2%80%93F
+  * https://en.wikipedia.org/wiki/List_of_colors:_G%E2%80%93M
+  * https://en.wikipedia.org/wiki/List_of_colors:_N%E2%80%93Z
+
+
+  Prefer to not use this module directly, but use `Fledex.Color.Names` instead.
+
+  > **Note**
+  > This module implements the `Fledex.Color.Names.Interface` behaviour.
   """
 
   alias Fledex.Color.Names.WikiUtils
@@ -18,6 +29,7 @@ defmodule Fledex.Color.Names.Wiki do
     converter: &WikiUtils.converter/1,
     module: __MODULE__
 
+  @doc false
   def file do
     @external_resource
   end

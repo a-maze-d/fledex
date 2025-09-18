@@ -200,8 +200,8 @@ defmodule Fledex.Utils.Dsl do
   This function is to decide on whether `ast_create_anonymous_func/1`
   or `ast_create_anonymous_func/2` should be called
 
-  NOTE: this function makes the assumption that a single argument is
-        required.
+  > **Note**
+  > This function makes the assumption that a single argument is required.
   """
   @spec ast_add_argument_to_func_if_missing(any()) :: {:fn, [], [{:->, list(), list()}, ...]}
   def ast_add_argument_to_func_if_missing(block) do

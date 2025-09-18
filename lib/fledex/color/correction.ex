@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -162,6 +162,17 @@ defmodule Fledex.Color.Correction do
     def uncorrected_temperature, do: 0xFFFFFF
   end
 
+  @doc """
+  This function allows to combine several aspects of corrections together to a single
+  correction.
+
+  The elements are:
+  * scale: Whether we want to have the full intensity (default 255, i.e. full intensity)
+  * color_correction: Probably one of the corrections defined in
+    `Fledex.Color.Correction.Color`
+  * temperature_correction: Probably one of the corrections defined in
+    `Fledex.Color.Correction.Temperature`
+  """
   @spec define_correction(byte, Types.colorint(), Types.colorint()) :: Types.rgb()
   def define_correction(scale \\ 255, color_correction, temperature_correction)
 
@@ -180,9 +191,13 @@ defmodule Fledex.Color.Correction do
     {0, 0, 0}
   end
 
+  @doc """
+  This defines a color correction without correction. I.e. the rgb colors will be with
+  full brightness `{255, 255, 255}`
+  """
   @spec no_color_correction() :: Types.rgb()
   def no_color_correction do
-    # yes we could hard code this, but this is rarely used and therefore not performant
+    # yes we could hard code this, but this is rarely used and therefore not performance
     # relevant. And this is more clear on what it means to not have any color correction.
     define_correction(Color.uncorrected_color(), Temperature.uncorrected_temperature())
   end

@@ -4,7 +4,13 @@
 
 defmodule Fledex.Color.Names.SVG do
   @moduledoc ~S"""
-  Do not use this module directly, but use Fledex.Color.Names instead
+  This module defines all the named colors in the SVG standard, see:
+  https://www.w3.org/TR/SVG11/types.html#ColorKeywords
+
+  Prefer to not use this module directly, but use `Fledex.Color.Names` instead.
+
+  > **Note**
+  > This module implements the `Fledex.Color.Names.Interface` behaviour.
   """
   alias Fledex.Color
   alias Fledex.Color.Conversion.Approximate

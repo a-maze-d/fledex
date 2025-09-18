@@ -20,9 +20,10 @@ defmodule Fledex.Driver.Impl.Logger do
     The real implementatin probably opens a channel (if not already open)
     to the bus (like SPI) sends the data to the bus.
 
-    Note: this module is allowed to store information in the state
-    (like the channel it has oppened), so that we don't have open/close it
-    all the time. Cleanup should happen in the terminate function
+    > **Note**
+    > This module is allowed to store information in the state
+    > (like the channel it has oppened), so that we don't have open/close it
+    > all the time. Cleanup should happen in the terminate function
   """
   @impl true
   @spec configure(keyword) :: keyword

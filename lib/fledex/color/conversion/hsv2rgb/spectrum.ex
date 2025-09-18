@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -6,7 +6,8 @@ defmodule Fledex.Color.Conversion.Spectrum do
   @moduledoc """
   Spectrum color conversion from HSV to RGB
 
-  Note: Fledex uses by default the `Fledex.Color.Conversion.Rainbow` color conversion
+  > **Note**
+  > Fledex uses by default the `Fledex.Color.Conversion.Rainbow` color conversion
   """
   alias Fledex.Color.Conversion.CalcUtils
 

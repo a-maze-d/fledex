@@ -40,7 +40,11 @@ defmodule Fledex do
   This macro does also import `Fledex.Leds`, `Fledex.Utils.PubSub`, `Fledex.Color.Names`, and `Crontab.CronExpression`. Therefore the functions from those modules are directly
   available without namespace, the drivers part of the `FledexDriver.Impl` namespace are all aliased.
 
-  **Note:** this could lead to a conflict with other libraries (like the `Kino`-driver with the `Kino`-library). In that case just use the fully qualified module name and prefix it even with `Elixir.`, i.e. `Elixir.Kino` if you want to use the `Kino`-library.
+  > **Note**
+  >
+  > This could lead to a conflict with other libraries (like the `Kino`-driver with the
+  > `Kino`-library). In that case just use the fully qualified module name and prefix
+  > it even with `Elixir.`, i.e. `Elixir.Kino` if you want to use the `Kino`-library.
 
   Take a look at the various [livebook examples](readme-2.html) for more details on how to use the Fledex library and macros.
 
