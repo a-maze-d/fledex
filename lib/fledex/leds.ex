@@ -135,9 +135,10 @@ defmodule Fledex.Leds do
   @doc """
   This function sets the count of leds of the led sequence.
 
-  Note: Be careful if you redefine the count when some leds have
-  been defined outside of the previous range; they might suddenly become
-  visible.
+  > **Note**
+  > Be careful if you redefine the count when some leds have
+  > been defined outside of the previous range; they might suddenly become
+  > visible.
   """
   @spec set_count(t, pos_integer) :: t
   def set_count(%__MODULE__{} = leds, count) do
@@ -147,9 +148,10 @@ defmodule Fledex.Leds do
   @doc """
   This function checks how many leds are defined in the led sequence.
 
-  Note: The color of an led outside that range can be defined, but it won't be
-  send to the `Fledex.LedStrip` when the `send/2` function is called. See also
-  `set_count/2` for information.
+  > **Note**
+  > The color of an led outside that range can be defined, but it won't be
+  > send to the `Fledex.LedStrip` when the `send/2` function is called. See also
+  > `set_count/2` for information.
   """
   @spec count(t) :: pos_integer
   def count(%__MODULE__{count: count} = _leds) do
@@ -173,22 +175,26 @@ defmodule Fledex.Leds do
 
   * `:num_leds`: how many leds should be part of the rainbow (by default all leds)
   * `:offset`: as from which led we want to start the  rainbow (default: 0, no offset)
+
+  Other options that can be used are those in `Fledex.Color.Functions.create_rainbow_circular_rgb/2`
+  especially:
   * `:reversed`: The rainbow can go from red (start color) to blue (end color) or the other
       way around.
-  * `:initial_hue`: The starting color in degree (`0..360`). (default: 0)
+  * `:initial_hue`: The starting color in degree mapped to a byte (e.g. `0..255`
+      corresponds to `0..258`). (default: 0)
 
-  Note: any led that has been defined before calling this function will be overwritten
-  with the rainbow value.
+  > **Note**
+  > Any led that has been defined before calling this function will be overwritten
+  > with the rainbow value.
   """
   @spec rainbow(t, keyword) :: t
   def rainbow(%__MODULE__{} = leds, opts \\ []) do
     num_leds = Keyword.get(opts, :num_leds, leds.count)
-    reversed = Keyword.get(opts, :reversed, false)
     offset = Keyword.get(opts, :offset, 0)
-    initial_hue = Keyword.get(opts, :initial_hue, 0)
+    conv_opts = Keyword.drop(opts, [:num_leds, :offset])
 
     led_values =
-      Functions.create_rainbow_circular_rgb(num_leds, initial_hue, reversed)
+      Functions.create_rainbow_circular_rgb(num_leds, conv_opts)
       |> convert_to_leds_structure(offset)
 
     put_in(leds.leds, Map.merge(leds.leds, led_values))
@@ -236,7 +242,8 @@ defmodule Fledex.Leds do
 
   This way you can easily create a repetitive pattern
 
-  **Note:** this will change the led sequence count  (`amount` times the initial `count`)
+  > **Note:**
+  > This will change the led sequence count  (`amount` times the initial `count`)
   """
   @spec repeat(t, integer) :: t
   def repeat(leds, amount) when amount == 1, do: leds
@@ -269,8 +276,9 @@ defmodule Fledex.Leds do
   If there are no more leds, this function will virtually continue and define leds
   outside the scope, see also the note on `set_count/2`.
 
-  Note: it is possible to use a sub sequence of leds and they all will be added to
-  the sequence.
+  > **Note**
+  > It is possible to use a sub sequence of leds and they all will be added to
+  > the sequence.
   """
   @spec light(t, Types.color() | t) :: t
   def light(%__MODULE__{meta: meta} = leds, rgb) do
@@ -368,7 +376,8 @@ defmodule Fledex.Leds do
   @doc """
   Convert the sequence of leds to a binary sequence of `Fledex.Color.Types.colorint` colors.
 
-  Note: Only the leds that are inside the `count` will be emitted into the binary sequence.
+  > **Note**
+  > Only the leds that are inside the `count` will be emitted into the binary sequence.
   """
   @spec to_binary(t) :: binary
   def to_binary(%__MODULE__{count: count, leds: _leds, opts: _opts, meta: _meta} = leds) do
@@ -380,7 +389,8 @@ defmodule Fledex.Leds do
   @doc """
   Convert the sequence of leds into an list of `Fledex.Color.Types.colorint` colors.
 
-  Note: Only the leds that are inside the `count` will be added to the list.
+  > **Note**
+  > Only the leds that are inside the `count` will be added to the list.
   """
   @spec to_list(t) :: list(Types.colorint())
   def to_list(%__MODULE__{count: count, leds: _leds, opts: _opts, meta: _meta} = leds)
@@ -435,9 +445,10 @@ defmodule Fledex.Leds do
       (default: `Fledex.LedStrip`)
   * `:namespace`: The name of the namespace within the LedStrip (default: `:default`)
 
-  Note: the led sequence will always be applied in it's entirety, and will wrap around.
-  Through the `:offset` it is possible to create simple animations by simply counting up
-  the counter.
+  > **Note**
+  > The led sequence will always be applied in it's entirety, and will wrap around.
+  > Through the `:offset` it is possible to create simple animations by simply counting up
+  > the counter.
   """
   @spec send(t, keyword) :: :ok | {:error, String.t()}
   def send(leds, opts \\ []) do
@@ -465,8 +476,9 @@ defmodule Fledex.Leds do
     as well as a texutal representation. The user can change between the two
     through tabs
 
-    **Note:** Ensure  that the protocols are not consolidated by spacifying:
-    `consolidate_protocols: false`
+    > **Note:**
+    > Ensure that the protocols are not consolidated by specifying:
+    > `consolidate_protocols: false`
     """
     alias Fledex.Leds
 

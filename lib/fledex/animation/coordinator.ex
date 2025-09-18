@@ -3,6 +3,10 @@
 # SPDX-License-Identifier: Apache-2.0
 defmodule Fledex.Animation.Coordinator do
   @moduledoc """
+  > **Note**
+  > You probably do not want to use this module directly but use the DSL defined
+  > in `Fledex`
+
   The coordinator is a module that is responsible for running the coordinator
   function.
 

@@ -9,8 +9,9 @@ Even though this library is published, there are things I still want to do befor
 
 # Tasks
 - [ ] Documentation
-  - [ ] Add information about color correction (section 3b) (v0.7)
+  - [x] Add information about color correction (section 3b) (v0.7)
   - [ ] Document the driver options (v0.7)
+  - [x] Improve API documentation (v0.7)
   - [ ] hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.7)
   - [ ] Add a livebook with coordinator examples (v0.7)
   - [ ] Update the cheatsheet with coordinator info (v0.7)
@@ -18,7 +19,11 @@ Even though this library is published, there are things I still want to do befor
 - [ ] Testing
   - [ ] Add tests for the Clock and Thermometer components (v0.7)
 - [ ] Cleanup
+  - [x] Cleanup the color conversion functions. There are a lot of unused parts, providing flexibility that is not required.
   - [ ] Add more guards to functions to make them more robust (v0.7)
+  - [ ] All Color name modules have the same interface (through the DSL it's even enforced). Let's make this more explicit by introducting a Color.Names.Interface with the appropriate callbacks (v0.7)
+  - [x] We could change the `Fledex.Color` for `Atom` to delegate to any of the color modules until we find the module that implements it. Defaulting to black if the color does not exist. Thus, we wouldn't even need any specific `color_name` guard, since any atom would be "kind of" valid. I think that would dramatically reduce the dependencies. Downside is that it wouldn't be possible to look at all the colors that are implemented at compiletime, but for that we have runtime functions and that's probably where we would need them the most. (v0;7)
+  - [ ] Change the import of `Fledex.Color.Names` and import the different color components individually instead. `Fledex.Color.Names` still makes sense to bind those together. The import can be done in a flexible way. This should reduce the complexity of the code, the dependencies, and increase the flexibility without loss of convenience for the user (v0.8)
 - [ ] Missing functionality
   - [ ] The Job should (at least appear) to be connected to the LedStrip (v0.7)
   - [ ] Replace Quantum with SchedEx? https://hexdocs.pm/sched_ex/readme.html (v0.7)
@@ -37,6 +42,11 @@ Even though this library is published, there are things I still want to do befor
     - [ ] Add an example where several nodes are connected to transfer pubsub messages accross nodes
     - [ ] Implement music beat through clustering
   - [ ] Create smartcells? (v1.x)
+- [ ] License
+  - [ ] Ensure everything can be under an FSF approved open source license (see https://spdx.org/licenses/)
+    - [ ] wiki colors (v0.7)
+    - [ ] ral colors (v0.7)
+    - [x] cone image (v0.7)
 - [ ] Increase consumption
   - [ ] Create a video (once v0.6 is released)
   - [ ] Migrate outstanding TODOs to github (v0.7)

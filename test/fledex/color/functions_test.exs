@@ -13,6 +13,7 @@ defmodule Fledex.Color.FunctionsTest do
   alias Fledex.Color.Conversion.Rainbow
   alias Fledex.Color.Correction
   alias Fledex.Color.Functions
+  alias Fledex.Color.HSV
 
   doctest Functions
 
@@ -20,16 +21,16 @@ defmodule Fledex.Color.FunctionsTest do
     test "create 10 pixels with rainbow colors" do
       assert Functions.create_rainbow_circular_hsv(10) ==
                [
-                 {0, 240, 255},
-                 {25, 240, 255},
-                 {51, 240, 255},
-                 {76, 240, 255},
-                 {102, 240, 255},
-                 {127, 240, 255},
-                 {153, 240, 255},
-                 {179, 240, 255},
-                 {204, 240, 255},
-                 {230, 240, 255}
+                 %HSV{h: 0, s: 240, v: 255},
+                 %HSV{h: 25, s: 240, v: 255},
+                 %HSV{h: 51, s: 240, v: 255},
+                 %HSV{h: 76, s: 240, v: 255},
+                 %HSV{h: 102, s: 240, v: 255},
+                 %HSV{h: 127, s: 240, v: 255},
+                 %HSV{h: 153, s: 240, v: 255},
+                 %HSV{h: 179, s: 240, v: 255},
+                 %HSV{h: 204, s: 240, v: 255},
+                 %HSV{h: 230, s: 240, v: 255}
                ]
     end
 
@@ -41,32 +42,32 @@ defmodule Fledex.Color.FunctionsTest do
     test "create 10 pixels with rainbow colors and offset 50" do
       assert Functions.create_rainbow_circular_hsv(10, 50) ==
                [
-                 {50, 240, 255},
-                 {75, 240, 255},
-                 {101, 240, 255},
-                 {126, 240, 255},
-                 {152, 240, 255},
-                 {177, 240, 255},
-                 {203, 240, 255},
-                 {229, 240, 255},
-                 {254, 240, 255},
-                 {24, 240, 255}
+                 %HSV{h: 50, s: 240, v: 255},
+                 %HSV{h: 75, s: 240, v: 255},
+                 %HSV{h: 101, s: 240, v: 255},
+                 %HSV{h: 126, s: 240, v: 255},
+                 %HSV{h: 152, s: 240, v: 255},
+                 %HSV{h: 177, s: 240, v: 255},
+                 %HSV{h: 203, s: 240, v: 255},
+                 %HSV{h: 229, s: 240, v: 255},
+                 %HSV{h: 254, s: 240, v: 255},
+                 %HSV{h: 24, s: 240, v: 255}
                ]
     end
 
     test "create 10 pixels with rainbow colors and offset 50 in reversed order" do
       assert Functions.create_rainbow_circular_hsv(10, 50, true) ==
                [
-                 {50, 240, 255},
-                 {25, 240, 255},
-                 {255, 240, 255},
-                 {230, 240, 255},
-                 {204, 240, 255},
-                 {179, 240, 255},
-                 {153, 240, 255},
-                 {127, 240, 255},
-                 {102, 240, 255},
-                 {76, 240, 255}
+                 %HSV{h: 50, s: 240, v: 255},
+                 %HSV{h: 25, s: 240, v: 255},
+                 %HSV{h: 255, s: 240, v: 255},
+                 %HSV{h: 230, s: 240, v: 255},
+                 %HSV{h: 204, s: 240, v: 255},
+                 %HSV{h: 179, s: 240, v: 255},
+                 %HSV{h: 153, s: 240, v: 255},
+                 %HSV{h: 127, s: 240, v: 255},
+                 %HSV{h: 102, s: 240, v: 255},
+                 %HSV{h: 76, s: 240, v: 255}
                ]
     end
 
@@ -223,17 +224,17 @@ defmodule Fledex.Color.FunctionsTest do
   describe "test hsv2rgb function" do
     assert [{173, 14, 5}] ==
              Functions.hsv2rgb(
-               [{5, 219, 216}],
-               &Rainbow.hsv2rgb/2,
-               &Correction.color_correction_none/1
+               [%HSV{h: 5, s: 219, v: 216}],
+               conversion_function: &Rainbow.hsv2rgb/2,
+               color_correction: &Functions.color_correction_none/1
              )
 
     assert [{173, 14, 5}] ==
              Functions.hsv2rgb(
-               [{5, 219, 216}],
-               &Rainbow.hsv2rgb/2
+               [%HSV{h: 5, s: 219, v: 216}],
+               conversion_function: &Rainbow.hsv2rgb/2
              )
 
-    assert [{173, 14, 5}] == Functions.hsv2rgb([{5, 219, 216}])
+    assert [{173, 14, 5}] == Functions.hsv2rgb([%HSV{h: 5, s: 219, v: 216}])
   end
 end

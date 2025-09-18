@@ -16,9 +16,12 @@ defmodule Fledex.LedStrip do
   computer, except that a window server would manage several screens, whereas here each
   LED strip would get its own.
 
-  Note: In general you shouldn't require to start an LedStrip directly, but you should
-  use the `Fledex DSL`. In order to start an `LedStrip` a Registry (with name as provided by
-  `Fledex.Supervisor.Utils.worker_registry/0`) is required.
+  > **Note**
+  > In general you shouldn't require to start an LedStrip directly, but you should
+  > use the `Fledex DSL`. In order to start an `LedStrip` a Registry (with name as provided by
+  > `Fledex.Supervisor.Utils.worker_registry/0`) is required.
+
+  To see how to configure an led strip, look at `start_link/3`
   """
   use GenServer
 
@@ -79,10 +82,12 @@ defmodule Fledex.LedStrip do
   end
 
   @doc """
-  This starts the server controlling a specfic led strip. It is possible
-  to install several drivers at the same time, so different hardware gets the same data
-  at the same time (similar to mirroring a screen). If you want to send different
-  data to different strips, you should start several instances of this server
+  This starts the server controlling a specfic led strip.
+
+  It is possible to install several drivers at the same time,
+  so different hardware gets the same data at the same time (similar to
+  mirroring a screen). If you want to send different data to different
+  strips, you should start several instances of this server
 
   Because we can have several drivers (even though that is rather the exception)
   the confirgation is split up into several parts (not all of them need to be present):
@@ -100,7 +105,27 @@ defmodule Fledex.LedStrip do
   * With real driver and some driver overlay: `start_link(:name, {Spi, dev: "spidev0.1"})`
   * With several drivers: `start_link(:name, [{Spu, []}, {Spi, dev: "spidev0.1"}])`
   * With several drivers and global config: `start_link(:name, [{Spi, []}, {Spi, dev: "spidev0.1"}], timer_only_dirty_update: true)`
+
+  The settings for for the driver are driver specific. The global config
+  has the following properties:
+  * `:timer_update_timeout`: This specifies the time interval between refreshes
+  * `:timer_only_dirty_update`: This specifies if a refresh should always happen
+    or only if some leds have changed
+  * `:merge_strategy`: This specifies how a set of pixel definitions that overlap
+    should be merged together. Two strategies are known `:avg` and `:cap` (default)
+  * `:group_leader`: This allows to set a specific
+    [`group leader`](https://hexdocs.pm/elixir/Process.html#group_leader/2)
+    which might be important in some cases.
   """
+  # Additional properties that are for testing only:
+  # * `:timer_disabled`: This disables the timer that is responsible for refreshing
+  #   the led strip.
+  # * `:timer_counter`: This sets the timer counter (that gets incremented with
+  #   every refresh) to a specific value.
+  # * `:timer_update_func`: This is the function that will be called when a
+  #   refresh should happen
+  # * `:timer_is_dirty`: This specifies whether the led strip is dirty and needs
+  #   a refresh. This is used if for `:timer_only_dirty_update`.
   @spec start_link(atom, drivers_config_t, keyword) ::
           GenServer.on_start()
   def start_link(strip_name, driver \\ Null, global_config \\ [])
@@ -119,17 +144,11 @@ defmodule Fledex.LedStrip do
       when is_list(drivers) and is_list(global_config) do
     drivers = Manager.remove_invalid_drivers(drivers)
 
-    # case whereis(strip_name) do
-    #   nil ->
     GenServer.start_link(
       __MODULE__,
       {strip_name, drivers, global_config},
       name: Utils.via_tuple(strip_name, :led_strip, :strip)
     )
-
-    #   pid ->
-    #     {:ok, pid}
-    # end
   end
 
   def start_link(strip_name, drivers, global_config) do
@@ -139,6 +158,10 @@ defmodule Fledex.LedStrip do
 
   @doc """
   Define a new namespace
+
+  A namespace is a sequence of led definitions. Each namespace is independent
+  from other namspaces. All namespaces will get mapped onto the physical
+  leds when merging all namespaces together.
   """
   @spec define_namespace(atom, atom) :: :ok | {:error, String.t()}
   def define_namespace(strip_name, namespace) do
@@ -172,10 +195,12 @@ defmodule Fledex.LedStrip do
   calculated if not provided (but often this information is already available
   and therefore can be provided)
 
-  Note: repeated calls of this function will result in previously set leds
-  will be overwritten. We are passing a list of leds which means every led
-  will be rewritten, except if we define a 'shorter" led sequence. In that
-  case some leds might retain their previously set value.
+  > **Note**
+  >
+  > Repeated calls of this function will result in previously set leds
+  > will be overwritten. We are passing a list of leds which means every led
+  > will be rewritten, except if we define a 'shorter" led sequence. In that
+  > case some leds might retain their previously set value.
   """
   @spec set_leds(atom, atom, list(pos_integer), non_neg_integer() | nil) ::
           :ok | {:error, String.t()}
@@ -212,7 +237,9 @@ defmodule Fledex.LedStrip do
   end
 
   @doc """
-  Change some aspect of a configuration for a specific strip. The configuration
+  Change the config of the led strip.
+
+  Change some aspect of the configuration for an led strip. The configuration
   will be updated and the old values will be returned.
   """
   @spec change_config(atom, keyword) :: {:ok, [keyword]}
@@ -224,9 +251,11 @@ defmodule Fledex.LedStrip do
   end
 
   @doc """
+  This reinitializes the led strip. You probably don't need it.
+
   In some circumstances it might be necessary to reinitialize the led_strip
   (including the drivers). Most of the time you don't need to call this.
-  If you do, you will surely know about it :)
+  If you do, you surely will know about it :)
   """
   @spec reinit(atom, drivers_config_t, keyword) :: :ok
   def reinit(strip_name, driver, strip_config) when is_atom(driver) do

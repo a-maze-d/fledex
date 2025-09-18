@@ -4,7 +4,13 @@
 
 defmodule Fledex.Color.Names.CSS do
   @moduledoc ~S"""
-  Do not use this module directly, but use Fledex.Color.Names instead
+  This module defines all the named colors in the CSS standard, see:
+  https://drafts.csswg.org/css-color/#named-colors
+
+  Prefer to not use this module directly, but use `Fledex.Color.Names` instead.
+
+  > **Note**
+  > This module implements the `Fledex.Color.Names.Interface` behaviour.
   """
   alias Fledex.Color.Conversion.Approximate
   alias Fledex.Color.Names.LoadUtils

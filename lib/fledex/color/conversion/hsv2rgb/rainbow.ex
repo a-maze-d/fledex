@@ -1,11 +1,20 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Color.Conversion.Rainbow do
+  @moduledoc """
+  Module defininig an `hsv2rgb/2` conversion following the rainbow
+  color map.
+
+  This does give more enphasis to yellow. An alternative color map
+  would be the Spectrum color map, which has very little yellow
+  which often feels less natural.
+  """
   import Bitwise
 
   alias Fledex.Color.Conversion.CalcUtils
+  alias Fledex.Color.HSV
   alias Fledex.Color.Types
 
   @k255 255
@@ -13,14 +22,24 @@ defmodule Fledex.Color.Conversion.Rainbow do
   @k170 170
   @k85 85
 
+  @doc """
+  Fledex uses by default a Rainbow color conversion from HSV to RGB
+
+  Fledex does also provide a `Fledex.Color.Conversion.Spectrum` color
+  conversion, but more effort from your side is required to use them. See this
+  [great article](https://github.com/FastLED/FastLED/wiki/FastLED-HSV-Colors)
+  to understand the difference between the two
+  """
   @spec hsv2rgb(Types.hsv(), (Types.rgb() -> Types.rgb())) :: Types.rgb()
-  def hsv2rgb({h, s, v}, extra_color_correction) do
+  def hsv2rgb(%HSV{h: h, s: s, v: v}, extra_color_correction) do
+    # based on: https://github.com/FastLED/FastLED/blob/95d0a5582b2052729f345719e65edf7a4b9e7098/src/hsv2rgb.cpp#L267
     determine_rgb(h)
     |> extra_color_correction.()
     |> desaturate(s)
     |> scale_brightness(v)
   end
 
+  # MARK: private utility functions
   @spec determine_rgb(byte) :: Types.rgb()
   defp determine_rgb(h) do
     main = {(h &&& 0x80) > 0, (h &&& 0x40) > 0, (h &&& 0x20) > 0}

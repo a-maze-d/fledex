@@ -3,8 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Color.KinoRender do
-  import Fledex.Color.Names.Guards
-
   alias Fledex.Color
   alias Fledex.Color.Types
   alias Fledex.Leds
@@ -34,7 +32,7 @@ defmodule Fledex.Color.KinoRender do
     new([color])
   end
 
-  def new(color) when is_atom(color) and is_color_name(color) do
+  def new(color) when is_atom(color) do
     new([color])
   end
 

@@ -182,19 +182,27 @@ defmodule Fledex.MixProject do
         ]
       ],
       groups_for_modules: [
-        Core: [
+        "Core:": [
           Fledex,
           Fledex.LedStrip,
           Fledex.Leds
         ],
-        Animation: ~r/Fledex.Animation/,
-        Effect: ~r/Fledex.Effect/,
-        Component: ~r/Fledex.Component/,
-        "Driver Implementations": ~r/Fledex.Driver.Impl/,
-        Driver: ~r/Fledex.Driver/,
-        Utils: ~r/Fledex.Utils/,
-        Color: ~r/Fledex.Color/,
-        Supervisor: [~r/Fledex.Supervisor/, Fledex.Application]
+        "Core: Color Names": [
+          Fledex.Color.Names.Interface,
+          Fledex.Color.Names,
+          Fledex.Color.Names.CSS,
+          Fledex.Color.Names.RAL,
+          Fledex.Color.Names.SVG,
+          Fledex.Color.Names.Wiki
+        ],
+        "Core: Components": ~r/Fledex.Component/,
+        "Core: Drivers": ~r/Fledex.Driver.Impl/,
+        "Core: Effects": ~r/Fledex.Effect/,
+        "Details: Animation": ~r/Fledex.Animation/,
+        "Details: Color": ~r/Fledex.Color/,
+        "Details: Driver": ~r/Fledex.Driver/,
+        "Details: Supervisor": [~r/Fledex.Supervisor/, Fledex.Application],
+        "Details: Utils": ~r/Fledex.Utils/
       ],
       groups_for_docs: [
         Guards: & &1[:guard],

@@ -1,5 +1,5 @@
 <!--
-Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -24,7 +24,7 @@ The intent of the library is to simplify the programming of a programmable LED s
 
 The idea is to introduce similarly easy concepts for the programming of LEDs as [SonicPi](https://sonic-pi.net/) did for music. The library was developed in collaboration with my son and hopefully we can push it to become better over time. For my son the goal will be to connect the LEDs to some music and to animate the LEDs depending on the beat.
 
-Quite a lot of inspiration came from the [FastLED project](http://fastled.io/) and quite a few of their functions got reimplemented in Elixir. If you look at the implementation of some of those functions you might want to look at their comments.
+Quite a lot of inspiration came from the [FastLED project](http://fastled.io/) and quite a few of their functions got reimplemented in Elixir. Therefore you might want to look at that liberary. It is probably also the library that is more appropriate if you need performance.
 
 ## Installation
 
@@ -42,8 +42,10 @@ end
 ## Usage
 The smoothest way is to use the Fledex DSL which defines some functions and macros. To enable them you need to `use Fledex`. This will (by default) start the animation manager (`Fledex.Animation.Manager`) through which all led definitions are routed. But don't worry, you won't really see it.
 
-**Note:** by enabling the DSL through the `use Fledex` call, the most important modules 
-are imported (see `Fledex.__using__/1` for details).
+> **Note:**
+>  
+> By enabling the DSL through the `use Fledex` call, the most important modules 
+> are imported (see `Fledex.__using__/1` for details).
 
 As a next step you define an LED strip through the `led_strip` macro. While defining the led strip you need to decide on how you want to talk to your strip; you need an appropriate driver.  There are several ways on how you can address your LED strip. The most common ways are through an SPI bus (`Fledex.Driver.Impl.Spi`) or through Kino (`Fledex.Driver.Impl.Kino`) as a simulated LED strip in [Livebook](https://livebook.dev/). It is possible to adjust the settings of the drivers, or even define several drivers at the same time.
 
@@ -54,7 +56,7 @@ led_strip Spi do
 end
 ```
 
-Once we have defined our led strip we can start to define sequences of leds. This can be achieved in 4 different ways:
+Once we have defined our led strip we can start to define sequences of leds. This can be achieved in 3 different ways:
 
 * **static:** a static set of leds that do not change over time
 * **animation:** an animated, i.e. changing set of leds

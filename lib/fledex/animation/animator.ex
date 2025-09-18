@@ -4,6 +4,10 @@
 
 defmodule Fledex.Animation.Animator do
   @moduledoc """
+  > **Note**
+  > You probably do not want to use this module directly but use the DSL defined
+  > in `Fledex`
+
   The client often wants to run some animations. This can of course be done by
   repeatedly updating the `Leds` definitions and calling
   `Leds.send()` to send it to the driver.

@@ -3,17 +3,18 @@
 # SPDX-License-Identifier: Apache-2.0
 defmodule Fledex.Utils.Guards do
   @moduledoc """
-    This module collects all useful guards. If you want to use one of them
-    you need to `import` this module.
+  This module collects all useful guards. If you want to use one of them
+  you need to `import` this module.
   """
 
   @doc """
-    This guard checks whether the value is within the given range.
-    Notes:
+  This guard checks whether the value is within the given range.
 
-      * The lower bound is excluded (except if `inverse_bounds` is true)
-      * The upper bound is included (except if `inverse_bounds` is true)
-      * This guard is not fully tested, so be careful when using that it works for you.
+  Notes:
+
+    * The lower bound is excluded (except if `inverse_bounds` is true)
+    * The upper bound is included (except if `inverse_bounds` is true)
+    * This guard is not fully tested, so be careful when using that it works for you.
   """
   @doc guard: true
   # @spec is_in_range(integer, boolean, integer, integer) :: boolean

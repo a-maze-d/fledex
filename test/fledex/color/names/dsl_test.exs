@@ -34,7 +34,10 @@ defmodule Fledex.Color.Names.DslTest do
         end)
 
       # check how many color names (starting with a) we found and how many other functions
-      assert {96, 2} = {a_func, o_func}
+      # We onlyl load the colors with a, so all the "other functions are those that we define
+      # in addition to the color names and those are:
+      # `info/1`, `info/2`, `names/0`, `colors/0`
+      assert {96, 4} = {a_func, o_func}
 
       # check one concrete example that it exists in the correct arities
       assert {:android_green, 0} in functions

@@ -7,12 +7,14 @@ defmodule Fledex.Color.ColorTest do
 
   alias Fledex.Color.Conversion.Approximate
   alias Fledex.Color.Conversion.Rainbow
-  alias Fledex.Color.Conversion.Raw
   alias Fledex.Color.Conversion.Spectrum
 
   alias Fledex.Color.Correction
   alias Fledex.Color.Correction.Color
   alias Fledex.Color.Correction.Temperature
+
+  alias Fledex.Color.Functions
+  alias Fledex.Color.HSV
 
   describe "color protocol tests" do
     test "convert to_colorint" do
@@ -43,29 +45,39 @@ defmodule Fledex.Color.ColorTest do
 
   describe "color conversion tests" do
     test "approximate" do
-      assert {15, 168, 255} == Approximate.rgb2hsv({216, 56, 30})
-      assert {0, 0, 0} == Approximate.rgb2hsv({0, 0, 0})
+      assert %HSV{h: 15, s: 168, v: 255} == Approximate.rgb2hsv({216, 56, 30})
+      assert %HSV{h: 0, s: 0, v: 0} == Approximate.rgb2hsv({0, 0, 0})
     end
 
     test "rainbow" do
-      assert {173, 14, 5} == Rainbow.hsv2rgb({5, 219, 216}, fn rgb -> rgb end)
-      assert {173, 10, 0} == Rainbow.hsv2rgb({5, 255, 216}, fn rgb -> rgb end)
-      assert {183, 183, 183} == Rainbow.hsv2rgb({5, 0, 216}, fn rgb -> rgb end)
-      assert {0, 0, 0} == Rainbow.hsv2rgb({5, 0, 5}, fn rgb -> rgb end)
+      assert {173, 14, 5} == Rainbow.hsv2rgb(%HSV{h: 5, s: 219, v: 216}, fn rgb -> rgb end)
+      assert {173, 10, 0} == Rainbow.hsv2rgb(%HSV{h: 5, s: 255, v: 216}, fn rgb -> rgb end)
+      assert {183, 183, 183} == Rainbow.hsv2rgb(%HSV{h: 5, s: 0, v: 216}, fn rgb -> rgb end)
+      assert {0, 0, 0} == Rainbow.hsv2rgb(%HSV{h: 5, s: 0, v: 5}, fn rgb -> rgb end)
     end
 
-    test "raw" do
-      assert {198, 44, 30} == Raw.hsv2rgb({5, 219, 216}, fn rgb -> rgb end)
+    test "rainbow through protocol" do
+      assert {173, 14, 5} == Fledex.Color.to_rgb(%HSV{h: 5, s: 219, v: 216})
+      assert {173, 10, 0} == Fledex.Color.to_rgb(%HSV{h: 5, s: 255, v: 216})
+      assert {183, 183, 183} == Fledex.Color.to_rgb(%HSV{h: 5, s: 0, v: 216})
+      assert {0, 0, 0} == Fledex.Color.to_rgb(%HSV{h: 5, s: 0, v: 5})
+    end
+
+    test "rainbow through protocol to colorint" do
+      assert 0xAD0E05 == Fledex.Color.to_colorint(%HSV{h: 5, s: 219, v: 216})
+      assert 0xAD0A00 == Fledex.Color.to_colorint(%HSV{h: 5, s: 255, v: 216})
+      assert 0xB7B7B7 == Fledex.Color.to_colorint(%HSV{h: 5, s: 0, v: 216})
+      assert 0x000000 == Fledex.Color.to_colorint(%HSV{h: 5, s: 0, v: 5})
     end
 
     test "spectrum" do
-      assert {204, 38, 30} == Spectrum.hsv2rgb({5, 219, 216}, fn rgb -> rgb end)
+      assert {204, 38, 30} == Spectrum.hsv2rgb(%HSV{h: 5, s: 219, v: 216}, fn rgb -> rgb end)
     end
 
     test "set_colors" do
-      assert Raw.set_colors(0, 128, 150, 182) == {182, 150, 128}
-      assert Raw.set_colors(1, 128, 150, 182) == {128, 182, 150}
-      assert Raw.set_colors(2, 128, 150, 182) == {150, 128, 182}
+      assert Spectrum.set_colors(0, 128, 150, 182) == {182, 150, 128}
+      assert Spectrum.set_colors(1, 128, 150, 182) == {128, 182, 150}
+      assert Spectrum.set_colors(2, 128, 150, 182) == {150, 128, 182}
     end
   end
 
@@ -74,7 +86,7 @@ defmodule Fledex.Color.ColorTest do
       assert Correction.Color.typical_smd5050() == 0xFFB0F0
       assert Correction.Color.typical_led_strip() == 0xFFB0F0
       assert Correction.Color.typical_8mm_pixel() == 0xFFE08C
-      assert Correction.Color.typical_pixel() == 0xFFE08C
+      assert Correction.Color.typical_pixel_string() == 0xFFE08C
       assert Correction.Color.uncorrected_color() == 0xFFFFFF
     end
 
@@ -102,14 +114,16 @@ defmodule Fledex.Color.ColorTest do
     end
 
     test "correction functions" do
-      assert Correction.color_correction_g2({0xFF, 0xFF, 0xFF}) == {0xFF, 0x3F, 0xFF}
+      assert Functions.color_correction_g2({0xFF, 0xFF, 0xFF}) == {0xFF, 0x3F, 0xFF}
       assert Correction.define_correction(0, 0xFFFFFF, 0xFFFFFF) == {0, 0, 0}
+      assert Correction.define_correction(0xFFFFFF, 0xFFFFFF, 0xFFFFFF) == {0xFF, 0xFF, 0xFF}
+      assert Correction.define_correction(0xAAAAAA, 0xFFFFFF, 0xFFFFFF) == {170, 170, 170}
 
       assert Correction.apply_rgb_correction([{0x7F, 0x7F, 0x7F}], 0xFFFFFF) == [
                {0x7F, 0x7F, 0x7F}
              ]
 
-      assert Correction.calculate_color_correction(0x10, 0, 0) == 0
+      assert Correction.calculate_single_color_correction(0x10, 0, 0) == 0
     end
   end
 
@@ -138,25 +152,25 @@ defmodule Fledex.Color.ColorTest do
       # #19CB97 	0.099 	0.795 	0.591 	162.4° 	163.4° 	0.696 	0.620 	0.795 	0.447 	0.495 	0.564 	0.875 	0.779 	0.800
       # #362698 	0.211 	0.149 	0.597 	248.3° 	247.3° 	0.448 	0.420 	0.597 	0.373 	0.319 	0.219 	0.750 	0.601 	0.533
       # #7E7EB8 	0.495 	0.493 	0.721 	240.5° 	240.4° 	0.228 	0.227 	0.721 	0.607 	0.570 	0.520 	0.316 	0.290 	0.135
-      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xFFFFFF)) == {0, 0, 255}
-      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x808080)) == {0, 0, 181}
-      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x000000)) == {0, 0, 0}
-      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xFF0000)) == {0, 255, 255}
-      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xBFBF00)) == {63, 255, 255}
-      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x008000)) == {96, 255, 181}
-      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x80FFFF)) == {195, 74, 255}
-      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x8080FF)) == {195, 74, 255}
-      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xBF40BF)) == {0, 127, 255}
-      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xA0A424)) == {71, 159, 255}
-      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x411BEA)) == {182, 172, 255}
-      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x1EAC41)) == {116, 168, 255}
-      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xF0C80E)) == {43, 196, 255}
-      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xB430E5)) == {248, 145, 255}
-      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xED7651)) == {32, 111, 255}
-      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xFEF888)) == {55, 69, 255}
-      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x19C897)) == {147, 175, 255}
-      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x362698)) == {172, 157, 252}
-      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x7E7EB8)) == {160, 76, 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xFFFFFF)) == %HSV{h: 0, s: 0, v: 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x808080)) == %HSV{h: 0, s: 0, v: 181}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x000000)) == %HSV{h: 0, s: 0, v: 0}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xFF0000)) == %HSV{h: 0, s: 255, v: 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xBFBF00)) == %HSV{h: 63, s: 255, v: 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x008000)) == %HSV{h: 96, s: 255, v: 181}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x80FFFF)) == %HSV{h: 195, s: 74, v: 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x8080FF)) == %HSV{h: 195, s: 74, v: 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xBF40BF)) == %HSV{h: 0, s: 127, v: 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xA0A424)) == %HSV{h: 71, s: 159, v: 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x411BEA)) == %HSV{h: 182, s: 172, v: 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x1EAC41)) == %HSV{h: 116, s: 168, v: 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xF0C80E)) == %HSV{h: 43, s: 196, v: 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xB430E5)) == %HSV{h: 248, s: 145, v: 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xED7651)) == %HSV{h: 32, s: 111, v: 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0xFEF888)) == %HSV{h: 55, s: 69, v: 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x19C897)) == %HSV{h: 147, s: 175, v: 255}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x362698)) == %HSV{h: 172, s: 157, v: 252}
+      assert Approximate.rgb2hsv(Fledex.Color.to_rgb(0x7E7EB8)) == %HSV{h: 160, s: 76, v: 255}
     end
   end
 end

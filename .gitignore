@@ -37,3 +37,6 @@ fledex-*.tar
 
 # tool versions
 .tool-versions
+
+# ignore the expert files (expert is the new Elixr LS)
+/.expert/

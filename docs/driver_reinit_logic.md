@@ -11,13 +11,21 @@ Ideally we don't tear everything down, but only those parts that are really requ
 
 This document is investigating the approach we want to take.
 
-Note:
-the different drivers are NOT uniquely identified (and it would be a too big burden on the user to do so), so that we have to figure out the most appropriate update from the information that we have at our hands.
+> **Note**
+> 
+> The different drivers are NOT uniquely identified (and it would be a too big burden on
+> the user to do so), so that we have to figure out the most appropriate update from the
+> information that we have at our hands.
 
-Note2:
-I'm not sure whether it's really necessary to go through all those troubles to keep existing drivers active. Maybe it's much easier to tear everything down. Maybe we should KISS. The only issue is that, when we recompile a strip (when changing the configuration), we do have to "reconfigure" the drivers.
-Usually the drivers don't change in this scenario, so tearing everything down and rebuildnig it feels wrong.
-A bit of a middle ground could be that we reinit ONLY if the number of drivers, their types, and their orders is exactly the same.
+> **Note2**
+> I'm not sure whether it's really necessary to go through all those troubles to keep
+> existing drivers active. Maybe it's much easier to tear everything down. Maybe we should
+> KISS. The only issue is that, when we recompile a strip (when changing the
+> configuration), we do have to "reconfigure" the drivers.
+> Usually the drivers don't change in this scenario, so tearing everything down and
+> rebuildnig it feels wrong.
+> A bit of a middle ground could be that we reinit ONLY if the number of drivers, their
+> types, and their orders is exactly the same.
 
 # driver structure
 Before we look at the information available, let's look at the driver/config structure.

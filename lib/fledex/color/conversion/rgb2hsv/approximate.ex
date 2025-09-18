@@ -1,11 +1,18 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Color.Conversion.Approximate do
+  @moduledoc """
+  This module defines the conversion from RGB to HSV.
+
+  The conversion is not perfect, since it's trimmed for
+  performance and not for 100% accuracy. Hence the module
+  name.
+  """
   alias Fledex.Color.Conversion.CalcUtils
+  alias Fledex.Color.HSV
   alias Fledex.Color.Types
-  # alias Fledex.Color.Utils
 
   @hue_red 0
   @hue_orange 32
@@ -18,13 +25,15 @@ defmodule Fledex.Color.Conversion.Approximate do
 
   @spec rgb2hsv(Types.rgb()) :: Types.hsv()
   def rgb2hsv({r, g, b}) do
+    # based on: https://github.com/FastLED/FastLED/blob/95d0a5582b2052729f345719e65edf7a4b9e7098/src/hsv2rgb.cpp#L550
+    # see also: https://github.com/FastLED/FastLED/blob/95d0a5582b2052729f345719e65edf7a4b9e7098/src/hsv2rgb.h#L182
     desat = find_desaturation({r, g, b})
     s = calc_saturation(desat)
 
     {r, g, b} = {r - desat, g - desat, b - desat}
 
     if r + g + b == 0 do
-      {0, 0, 255 - s}
+      %HSV{h: 0, s: 0, v: 255 - s}
     else
       # for desaturation
       {r, g, b} = scale_to_compensate({r, g, b}, s)
@@ -33,27 +42,22 @@ defmodule Fledex.Color.Conversion.Approximate do
       {r, g, b} = scale_to_compensate({r, g, b}, total)
       v = calc_value(total, desat)
       h = calc_hue({r, g, b})
-      {h, s, v}
+      %HSV{h: h, s: s, v: v}
     end
   end
+
+  defp calc_saturation(desat) when desat == 0, do: 255
 
   defp calc_saturation(desat) do
-    s = 255 - desat
-
-    if s != 255 do
-      255 - trunc(:math.sqrt((255 - s) * 256))
-    else
-      s
-    end
+    # s = 255 - desat
+    255 - trunc(:math.sqrt(desat * 256))
   end
 
+  defp calc_value(total, _desat) when total > 255, do: 255
+
   defp calc_value(total, desat) do
-    if total > 255 do
-      255
-    else
-      v = qadd8(desat, total)
-      if v != 255, do: trunc(:math.sqrt(v * 256)), else: v
-    end
+    v = qadd8(desat, total)
+    if v != 255, do: trunc(:math.sqrt(v * 256)), else: v
   end
 
   defp calc_hue({r, 0, _b}, r) do

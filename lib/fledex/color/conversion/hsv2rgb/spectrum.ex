@@ -1,14 +1,31 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
-defmodule Fledex.Color.Conversion.Raw do
+defmodule Fledex.Color.Conversion.Spectrum do
+  @moduledoc """
+  Spectrum color conversion from HSV to RGB
+
+  > **Note**
+  > Fledex uses by default the `Fledex.Color.Conversion.Rainbow` color conversion
+  """
+  alias Fledex.Color.Conversion.CalcUtils
+
+  alias Fledex.Color.HSV
   alias Fledex.Color.Types
 
-  @hsv_section_3 0x40
+  @spec hsv2rgb(Types.hsv(), (Types.rgb() -> Types.rgb())) :: Types.rgb()
+  def hsv2rgb(%HSV{h: h, s: _s, v: _v} = hsv, extra_color_correction) do
+    # based on https://github.com/FastLED/FastLED/blob/95d0a5582b2052729f345719e65edf7a4b9e7098/src/hsv2rgb.cpp#L236
+    h = CalcUtils.scale8(h, 191)
+    hsv2rgb_raw(%{hsv | h: h}, extra_color_correction)
+  end
 
-  @spec hsv2rgb(Types.hsv(), any) :: Types.rgb()
-  def hsv2rgb({h, s, v}, _extra_color_correction) do
+  # MARK: private utility functions
+  @hsv_section_3 0x40
+  @spec hsv2rgb_raw(Types.hsv(), any) :: Types.rgb()
+  defp hsv2rgb_raw(%HSV{h: h, s: s, v: v}, _extra_color_correction) do
+    # based on: https://github.com/FastLED/FastLED/blob/95d0a5582b2052729f345719e65edf7a4b9e7098/src/hsv2rgb.cpp#L51
     invsat = 255 - s
     brightness_floor = trunc(v * invsat / 256)
 
