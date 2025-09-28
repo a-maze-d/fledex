@@ -3,9 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Color.Names.Types do
-  # alias Fledex.Color.Names.NamesA2F
-  # alias Fledex.Color.Names.NamesG2M
-  # alias Fledex.Color.Names.NamesN2Z
   alias Fledex.Color.Names
   alias Fledex.Color.Types
 
@@ -13,9 +10,6 @@ defmodule Fledex.Color.Names.Types do
   The allowed color names
   """
   @type color_names_t :: Names.color_names_t()
-  # NamesA2F.color_names_t
-  # | NamesG2M.color_names_t
-  # | NamesN2Z.color_names_t
 
   @typedoc """
   The different properties that can be interrogated from a named color
@@ -36,6 +30,7 @@ defmodule Fledex.Color.Names.Types do
           source: String.t(),
           module: module
         }
+
   @typedoc """
   The different values that can be returned when interrogating for some named color properties
   """

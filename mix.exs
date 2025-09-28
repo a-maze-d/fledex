@@ -13,7 +13,7 @@ defmodule Fledex.MixProject do
       version: @version,
       elixir: "~> 1.17",
       elixirc_paths: elixirc_paths(Mix.env()),
-      elixirc_options: [long_compilation_threshold: 60_000],
+      elixirc_options: elixirc_options(Mix.env()),
       start_permanent: Mix.env() == :prod,
       description: description(),
       package: package(),
@@ -51,9 +51,13 @@ defmodule Fledex.MixProject do
     ]
   end
 
-  # specified per env which files to compile
+  # specified per env which files to compile. For tests we add the support folder
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
+
+  # specified per env which compilation options to use
+  # the color creation can take quite a while, therefore increasing the threshold
+  defp elixirc_options(_), do: [long_compilation_threshold: 60_000]
 
   # Run "mix help compile.app" to learn about applications.
   def application do

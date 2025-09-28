@@ -4,8 +4,11 @@
 
 defmodule Fledex.Color.Names.Interface do
   @moduledoc """
-  This module defines the standard interface (behaviour) for color name modules
+  This module defines the standard interface (behaviour) for color names modules
   which they should implement.
+
+  The easiest way to generate a color names module is probably by reading in a csv file
+  with the definitions with the help of `Fledex.Color.Names.Generator`
   """
 
   alias Fledex.Color.Names.Types

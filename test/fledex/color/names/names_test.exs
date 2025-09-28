@@ -56,8 +56,8 @@ defmodule Fledex.Color.NamesTest do
     test "defined color modules" do
       color_name_modules = Names.color_name_modules()
       assert length(color_name_modules) == 4
-      assert List.first(color_name_modules) == {Fledex.Color.Names.Wiki, :core}
-      assert List.last(color_name_modules) == {Fledex.Color.Names.RAL, :optional}
+      assert List.first(color_name_modules) == {Fledex.Color.Names.Wiki, :core, :wiki}
+      assert List.last(color_name_modules) == {Fledex.Color.Names.RAL, :optional, :ral}
     end
 
     test "calling by name" do

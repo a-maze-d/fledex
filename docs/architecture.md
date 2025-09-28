@@ -33,7 +33,8 @@ Currently there are 4 drivers available:
 * `Null` is a driver that acts similar to `/dev/null`, i.e. doesn't do anyting with the
   data. This can be very convenient for running some tests.
 
-> **Note**
+> #### Note {: .info}
+>
 > In addition an additional a special `:config` driver can be used, which simply returns
 > the current definition. This can be very useful when defining components as well as in
 > tests.

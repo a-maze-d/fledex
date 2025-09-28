@@ -12,7 +12,7 @@ defmodule Fledex.Color.Names do
   * [W3C - SVG colors](https://www.w3.org/TR/SVG11/types.html#ColorKeywords)
   * [Wikipedia - List of RAL colors](https://en.wikipedia.org/wiki/List_of_RAL_colours)
 
-  You can retrieve the information through their respective modules (`Fledex.Color.Names.Wiki.Wiki`,
+  You can retrieve the information through their respective color names modules (`Fledex.Color.Names.Wiki.Wiki`,
   `Fledex.Color.Names.CSS`, `Fledex.Color.Names.SVG`, and `Fledex.Color.Names.RAL`)
   This module binds (most of) them together into a single module (in case of conflict the
   first mentioned module definition will win).
@@ -47,7 +47,7 @@ defmodule Fledex.Color.Names do
   `atom` color. Thus, you can get the same information for `almond()` by calling
   `info(:almond, :hex)`
 
-  > **Note**
+  > #### Note {: .info}
   >
   > RAL colours do have a name and a code (the official "name"), but neither of those are
   > commonly used and therefore those colors are NOT exposed through this interface. The
@@ -68,17 +68,20 @@ defmodule Fledex.Color.Names do
   > you can also import `Fledex.Color.Names.RAL` to make `sunset_red()` available and
   > thereby get more or less the same convenience
 
-  > **Note2**
+  > #### Note {: .info}
+  >
   > This module implements the `Fledex.Color.Names.Interface` behaviour.
   """
   @behaviour Fledex.Color.Names.Interface
+
+  require Logger
 
   # I think the documentation is not picking up the
   # behaviour if we use the alias before the behaviour
   alias Fledex.Color.Names.Interface
   alias Fledex.Color.Names.Types
 
-  # List of modules that define coulors that should be loaded
+  # List of modules that define colors that should be loaded
   # Note: if there is an overlap between the lists, i.e. the same color name
   #       appears twice, then only the first definition will be used.
   #       Thus, the different color modules should be sorted accordingly
@@ -90,12 +93,44 @@ defmodule Fledex.Color.Names do
   #       to_colorint(some_atom), which will also be looked up in optional
   #       color modules
   @modules [
-    {Fledex.Color.Names.Wiki, :core},
-    {Fledex.Color.Names.CSS, :core},
-    {Fledex.Color.Names.SVG, :core},
+    {Fledex.Color.Names.Wiki, :core, :wiki},
+    {Fledex.Color.Names.CSS, :core, :css},
+    {Fledex.Color.Names.SVG, :core, :svg},
     # we intentionally do not include RAL colors as `:core`
-    {Fledex.Color.Names.RAL, :optional}
+    {Fledex.Color.Names.RAL, :optional, :ral}
   ]
+
+  @doc """
+  This module allows to define a single interface for several color modules
+  Instead of importing this module use `use #{__MODULE__}` instead.
+
+  This allows  to control which color name spaces (and in which order)
+  get imported.
+
+  > #### Note {: .info}
+  >
+  > If no colors are defined (i.e. `colors: []` is specified), then nothing will
+  > be created.
+  """
+  @spec __using__(keyword) :: Macro.t()
+  defmacro __using__(opts \\ []) do
+    color_mod_name_defined = Keyword.has_key?(opts, :color_mod_name)
+    color_mod_name = Keyword.get(opts, :color_mod_name, nil)
+    colors = Keyword.get(opts, :colors, [])
+    if Enum.empty?(colors) or (color_mod_name_defined and color_mod_name == nil) do
+      nil
+    else
+      color_mod_name = color_mod_name || Fledex.Color.Names
+      quote do
+        defmodule unquote(color_mod_name) do
+          @modules_and_colors unquote(colors)
+          def modules_and_colors do
+            @modules_and_colors
+          end
+        end
+      end
+    end
+  end
 
   @doc """
   gets a list of modules that define colors. Only the core
@@ -112,8 +147,8 @@ defmodule Fledex.Color.Names do
   {module_names, _seen} =
     Enum.reduce(@modules, [], fn
       # filter out optional modules
-      {module, :core}, acc -> [module | acc]
-      {_module, _type}, acc -> acc
+      {module, :core, _name}, acc -> [module | acc]
+      {_module, _type, _name}, acc -> acc
     end)
     |> Enum.reverse()
     |> Enum.reduce({module_names, seen}, fn module, {module_names, seen} ->
@@ -145,8 +180,8 @@ defmodule Fledex.Color.Names do
   @type color_names_t ::
           unquote(
             Enum.flat_map(@modules, fn
-              {module, :core} -> module.names()
-              {_module, _type} -> []
+              {module, :core, _name} -> module.names()
+              {_module, _type, _name} -> []
             end)
             |> Enum.uniq()
             |> Enum.sort()
@@ -174,8 +209,8 @@ defmodule Fledex.Color.Names do
   @spec colors :: list(Types.color_struct_t())
   def colors do
     Enum.flat_map(@modules, fn
-      {module, :core} -> module.colors()
-      {_module, _type} -> []
+      {module, :core, _name} -> module.colors()
+      {_module, _type, _name} -> []
     end)
     |> Enum.uniq_by(fn color -> color.name end)
   end
@@ -191,8 +226,8 @@ defmodule Fledex.Color.Names do
   @spec names :: list(color_names_t)
   def names do
     Enum.flat_map(@modules, fn
-      {module, :core} -> module.names()
-      {_module, _type} -> []
+      {module, :core, _name} -> module.names()
+      {_module, _type, _name} -> []
     end)
     |> Enum.uniq()
   end

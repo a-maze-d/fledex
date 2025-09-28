@@ -200,7 +200,8 @@ defmodule Fledex.Utils.Dsl do
   This function is to decide on whether `ast_create_anonymous_func/1`
   or `ast_create_anonymous_func/2` should be called
 
-  > **Note**
+  > #### Note {: .info}
+  >
   > This function makes the assumption that a single argument is required.
   """
   @spec ast_add_argument_to_func_if_missing(any()) :: {:fn, [], [{:->, list(), list()}, ...]}
@@ -248,5 +249,117 @@ defmodule Fledex.Utils.Dsl do
       end)
 
     {:fn, [], [{:->, [], [args, block]}]}
+  end
+
+  @modules [
+    {Fledex.Color.Names.Wiki, :core, :wiki},
+    {Fledex.Color.Names.CSS, :core, :css},
+    {Fledex.Color.Names.SVG, :core, :svg},
+    # we intentionally do not include RAL colors as `:core`
+    {Fledex.Color.Names.RAL, :optional, :ral}
+  ]
+
+  def create_color_name_asts(opts) do
+    color_mod_name = opts[:color_mod_name]
+    modules_with_names = find_modules_with_names(opts[:colors])
+    opts = Keyword.drop(opts, [:colors, :color_mod_name])
+
+    modules_with_only = modules_with_only(modules_with_names)
+    import_ast = Enum.map(modules_with_only, &import_color_module/1)
+    # for some reason it doesn't work to have
+    # quote do
+    #   use Fledex.Color.Names, colors: unquote(colors)
+    # end
+    use_ast = {
+      :use,
+      [
+        context: Elixir,
+        imports: [{1, Kernel}, {2, Kernel}]
+      ],
+      [
+        {:__aliases__, [alias: false], [:Fledex, :Color, :Names]},
+        [
+          colors: modules_with_names,
+          color_mod_name: color_mod_name
+        ]
+      ]}
+
+    {use_ast, import_ast, opts}
+  end
+
+  defp import_color_module({module, only}) do
+    # for some reason it doesn't work to do
+    # quote do
+    #   import unquote(module), only: unquote(only)
+    # end
+    # Therefore creating the AST manually
+    module_alias_ast  = quote do unquote(module) end
+    {:import, [context: Elixir],[
+      module_alias_ast,
+      [only: only]
+    ]}
+  end
+
+  defp modules_with_only(modules_with_names) do
+    # each name has a function with arity 1 and 2
+    Enum.map(modules_with_names, fn {module, names} ->
+      {module, Enum.flat_map(names, fn only ->
+        [{only, 0}, {only, 1}, {only, 2}]
+      end)}
+    end)
+  end
+
+  defp find_modules_with_names([]), do: []
+  defp find_modules_with_names(nil), do: find_modules_with_names([:default])
+  defp find_modules_with_names(opt) when is_atom(opt), do: find_modules_with_names([opt])
+  defp find_modules_with_names([:none]), do: find_modules_with_names([])
+  defp find_modules_with_names([:all]) do
+    Enum.map(@modules, fn elem -> elem(elem, 0) end)
+    |> find_modules_with_names()
+  end
+  defp find_modules_with_names([:default]) do
+    Enum.filter(@modules, fn {_mod, type, _name} -> type == :core end)
+    |> Enum.map(fn elem -> elem(elem, 0) end)
+    |> find_modules_with_names()
+  end
+  defp find_modules_with_names(color_names) when is_list(color_names) do
+    color_names
+    |> translate_names2modules()
+    |> diff_names_between_modules()
+  end
+
+  defp translate_names2modules(names) do
+    Enum.reduce(names, [], fn color_name, acc ->
+      case Enum.find(@modules, fn {_module, _type, name} -> name == color_name end) do
+        {module, _type, _name} ->
+          # we translate from an atom to a module
+          [module | acc]
+        nil ->
+          # no translation, maybe we got a names module
+          if loadable?(color_name) do
+            [color_name | acc]
+          else
+            # we have no idea what we got so we will ignore it
+            Logger.warning("""
+              Not a known color name. Either an atom (with appropriate mapping)
+              or a module (implementing the Fledex.ColorNames behavior) is expected.
+              I found instead: #{inspect color_name}
+              And we will ignore it
+            """)
+            acc
+          end
+      end
+    end)
+  end
+  defp loadable?(color_name) do
+    Code.ensure_loaded?(color_name) and function_exported?(color_name, :names, 0)
+  end
+
+  defp diff_names_between_modules(modules) do
+    Enum.reduce(modules, {[], MapSet.new()}, fn module, {mods, known} ->
+      only = MapSet.difference(MapSet.new(module.names()), known)
+      {[{module, MapSet.to_list(only)} | mods], MapSet.union(known, only)}
+    end)
+    |> elem(0)
   end
 end

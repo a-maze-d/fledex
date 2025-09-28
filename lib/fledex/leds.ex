@@ -135,7 +135,8 @@ defmodule Fledex.Leds do
   @doc """
   This function sets the count of leds of the led sequence.
 
-  > **Note**
+  > #### Note {: .info}
+  >
   > Be careful if you redefine the count when some leds have
   > been defined outside of the previous range; they might suddenly become
   > visible.
@@ -148,7 +149,8 @@ defmodule Fledex.Leds do
   @doc """
   This function checks how many leds are defined in the led sequence.
 
-  > **Note**
+  > #### Note {: .info}
+  >
   > The color of an led outside that range can be defined, but it won't be
   > send to the `Fledex.LedStrip` when the `send/2` function is called. See also
   > `set_count/2` for information.
@@ -183,7 +185,8 @@ defmodule Fledex.Leds do
   * `:initial_hue`: The starting color in degree mapped to a byte (e.g. `0..255`
       corresponds to `0..258`). (default: 0)
 
-  > **Note**
+  > #### Note {: .info}
+  >
   > Any led that has been defined before calling this function will be overwritten
   > with the rainbow value.
   """
@@ -276,7 +279,8 @@ defmodule Fledex.Leds do
   If there are no more leds, this function will virtually continue and define leds
   outside the scope, see also the note on `set_count/2`.
 
-  > **Note**
+  > #### Note {: .info}
+  >
   > It is possible to use a sub sequence of leds and they all will be added to
   > the sequence.
   """
@@ -376,7 +380,8 @@ defmodule Fledex.Leds do
   @doc """
   Convert the sequence of leds to a binary sequence of `Fledex.Color.Types.colorint` colors.
 
-  > **Note**
+  > #### Note {: .info}
+  >
   > Only the leds that are inside the `count` will be emitted into the binary sequence.
   """
   @spec to_binary(t) :: binary
@@ -389,7 +394,8 @@ defmodule Fledex.Leds do
   @doc """
   Convert the sequence of leds into an list of `Fledex.Color.Types.colorint` colors.
 
-  > **Note**
+  > #### Note {: .info}
+  >
   > Only the leds that are inside the `count` will be added to the list.
   """
   @spec to_list(t) :: list(Types.colorint())
@@ -445,7 +451,8 @@ defmodule Fledex.Leds do
       (default: `Fledex.LedStrip`)
   * `:namespace`: The name of the namespace within the LedStrip (default: `:default`)
 
-  > **Note**
+  > #### Note {: .info}
+  >
   > The led sequence will always be applied in it's entirety, and will wrap around.
   > Through the `:offset` it is possible to create simple animations by simply counting up
   > the counter.

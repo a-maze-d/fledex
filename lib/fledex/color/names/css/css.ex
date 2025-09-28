@@ -9,7 +9,8 @@ defmodule Fledex.Color.Names.CSS do
 
   Prefer to not use this module directly, but use `Fledex.Color.Names` instead.
 
-  > **Note**
+  > #### Note {: .info}
+  >
   > This module implements the `Fledex.Color.Names.Interface` behaviour.
   """
   alias Fledex.Color.Conversion.Approximate
@@ -17,7 +18,7 @@ defmodule Fledex.Color.Names.CSS do
 
   @external_resource Path.dirname(__DIR__) <> "/css/css_colors.csv"
 
-  use Fledex.Color.Names.Dsl,
+  use Fledex.Color.Names.Generator,
     filename: @external_resource,
     pattern: ~r/^.*$/i,
     drop: 1,

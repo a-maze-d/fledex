@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-defmodule Fledex.Color.Names.Dsl do
+defmodule Fledex.Color.Names.Generator do
   alias Fledex.Color.Names.LoadUtils
 
   defmacro __using__(opts) do

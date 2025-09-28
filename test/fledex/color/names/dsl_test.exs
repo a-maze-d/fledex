@@ -2,14 +2,14 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-defmodule Fledex.Color.Names.DslTest do
+defmodule Fledex.Color.Names.GeneratorTest do
   use ExUnit.Case
 
   defmodule TestNames do
     alias Fledex.Color.Names.Wiki
     alias Fledex.Color.Names.WikiUtils
 
-    use Fledex.Color.Names.Dsl,
+    use Fledex.Color.Names.Generator,
       filename: Wiki.file(),
       pattern: ~r/^[a].*$/i,
       drop: 1,

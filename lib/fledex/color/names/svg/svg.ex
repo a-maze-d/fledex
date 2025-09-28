@@ -9,7 +9,8 @@ defmodule Fledex.Color.Names.SVG do
 
   Prefer to not use this module directly, but use `Fledex.Color.Names` instead.
 
-  > **Note**
+  > #### Note {: .info}
+  >
   > This module implements the `Fledex.Color.Names.Interface` behaviour.
   """
   alias Fledex.Color
@@ -18,7 +19,7 @@ defmodule Fledex.Color.Names.SVG do
 
   @external_resource Path.dirname(__DIR__) <> "/svg/svg_colors.csv"
 
-  use Fledex.Color.Names.Dsl,
+  use Fledex.Color.Names.Generator,
     filename: @external_resource,
     pattern: ~r/^.*$/i,
     drop: 1,

@@ -7,7 +7,8 @@ defmodule Fledex.Color.Names.RAL do
   This module defines all the named colors in the RAL Design System Plus, see:
   https://en.wikipedia.org/wiki/List_of_RAL_colours#RAL_Design_System+
 
-  > **Note**
+  > #### Note {: .info}
+  >
   > This module implements the `Fledex.Color.Names.Interface` behaviour.
   """
   alias Fledex.Color
@@ -16,7 +17,7 @@ defmodule Fledex.Color.Names.RAL do
 
   @external_resource Path.dirname(__DIR__) <> "/ral/ral_colors.csv"
 
-  use Fledex.Color.Names.Dsl,
+  use Fledex.Color.Names.Generator,
     filename: @external_resource,
     pattern: ~r/^.*$/i,
     drop: 0,

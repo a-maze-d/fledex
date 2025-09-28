@@ -66,7 +66,7 @@ defimpl Fledex.Color, for: Atom do
   defp color_name_modules do
     Fledex.Color.Names.color_name_modules()
     # we allow all types `:core` and `:optional`
-    |> Enum.map(fn {module, _type} -> module end)
+    |> Enum.map(fn {module, _type, _name} -> module end)
   end
 
   @spec find_module(atom) :: module() | nil

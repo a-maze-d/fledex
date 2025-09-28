@@ -76,7 +76,7 @@ Now we are ready to define our new simplified weather station using:
 * using the `Fledex.Component.Thermometer` component as `Fledex.component`
 * and defining a `Fledex.job` that runs every 15min (making sure we call it as soon as we define it even though it might not be time for it yet, by specifying `run_once: true`)
 
-> **Note** 
+> #### Note {: .info} 
 > 
 > We are using the normal crontab job pattern, whereas above we used the extended version
 > (with second precision) above.

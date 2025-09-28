@@ -191,7 +191,8 @@ When you want to create a color sequence that is more complex, then this can als
 
 If, for example, you want to create a rainbow pattern over 10 LEDs, you can do so by using the `rainbow/2` function.
 
-> **Note**
+> #### Note {: .info}
+> 
 > If you don't specify the nubmer of leds, all leds in the sequence will be used (here it
 > would be all 30 leds)
 

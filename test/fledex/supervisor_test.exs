@@ -27,8 +27,9 @@ defmodule Fledex.SupervisorTest do
     end
 
     test "double start system" do
-      {:ok, pid} = use Fledex, supervisor: :none
-      {:ok, pid2} = use Fledex, supervisor: :none
+      {:ok, pid} = use Fledex, supervisor: :none, colors: :none
+      {:ok, pid2} = use Fledex, supervisor: :none, colors: :none
+
       assert pid == pid2
 
       AnimationSystem.stop()
@@ -196,7 +197,7 @@ defmodule Fledex.SupervisorTest do
 
       assert Enum.empty?(DynamicSupervisor.which_children(Utils.app_supervisor()))
 
-      use Fledex, supervisor: :app
+      use Fledex, supervisor: :app, colors: :none
       assert not Enum.empty?(DynamicSupervisor.which_children(Utils.app_supervisor()))
 
       Supervisor.stop(Utils.app_supervisor(), :normal)
@@ -210,7 +211,7 @@ defmodule Fledex.SupervisorTest do
 
       workers = length(DynamicSupervisor.which_children(Elixir.Kino.DynamicSupervisor))
 
-      use Fledex, supervisor: :kino
+      use Fledex, supervisor: :kino, colors: :none
 
       assert length(DynamicSupervisor.which_children(Elixir.Kino.DynamicSupervisor)) ==
                workers + 1
@@ -226,7 +227,7 @@ defmodule Fledex.SupervisorTest do
 
       assert Enum.empty?(DynamicSupervisor.which_children(__MODULE__.DynSupervisor))
 
-      use Fledex, supervisor: {:dynamic, __MODULE__.DynSupervisor}
+      use Fledex, supervisor: {:dynamic, __MODULE__.DynSupervisor}, colors: :none
       assert not Enum.empty?(DynamicSupervisor.which_children(__MODULE__.DynSupervisor))
 
       Supervisor.stop(__MODULE__.DynSupervisor, :normal)
