@@ -22,7 +22,7 @@ defmodule Fledex.Color.Names.Wiki do
 
   @external_resource Path.dirname(__DIR__) <> "/wiki/wiki_colors.csv"
 
-  use Fledex.Color.Names.Generator,
+  use Fledex.Color.Names.ModuleGenerator,
     filename: @external_resource,
     pattern: ~r/^.*$/i,
     drop: 1,

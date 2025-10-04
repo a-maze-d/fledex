@@ -3,13 +3,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defprotocol Fledex.Color do
-  alias Fledex.Color.Types
-
   @moduledoc """
   Protocol that can be implemented to convert from some kind of color representation
   to a color integer (`colorint`) with 3x8bit or to a 3 element tuple representing the colors
   `r`, `g`, and `b`.
   """
+
+  alias Fledex.Color.Types
 
   # Note: the following function will result in some warnings with ElixirLS
   #       with the command line dialyzer it's not an issue. Therefore I disabled
@@ -41,7 +41,8 @@ defimpl Fledex.Color, for: Tuple do
   @doc """
   This function does nothing, since the data is already in the correct format
   """
-  def to_rgb({r, g, b}), do: {r, g, b}
+  @spec to_rgb(Types.rgb()) :: Types.rgb()
+  def to_rgb(rgb), do: rgb
 end
 
 defimpl Fledex.Color, for: Integer do
@@ -55,48 +56,15 @@ defimpl Fledex.Color, for: Integer do
     {r, g, b}
   end
 
+  @spec to_colorint(Types.colorint()) :: Types.colorint()
   def to_colorint(colorint), do: colorint
+
+  @spec to_rgb(Types.colorint()) :: Types.rgb()
   def to_rgb(colorint), do: split_into_subpixels(colorint)
 end
 
 defimpl Fledex.Color, for: Atom do
   alias Fledex.Color.Types
-
-  @spec color_name_modules :: list(module())
-  defp color_name_modules do
-    Fledex.Color.Names.color_name_modules()
-    # we allow all types `:core` and `:optional`
-    |> Enum.map(fn {module, _type, _name} -> module end)
-  end
-
-  @spec find_module(atom) :: module() | nil
-  defp find_module(color_name) do
-    Enum.reduce_while(color_name_modules(), nil, fn module, acc ->
-      case function_exported?(module, color_name, 1) do
-        true -> {:halt, module}
-        false -> {:cont, acc}
-      end
-    end)
-  end
-
-  @black 0x000000
-  @black_rgb {0, 0, 0}
-  @spec get_color_from_module(module | nil, atom, :hex) :: Types.colorint()
-  @spec get_color_from_module(module | nil, atom, :rgb) :: Types.rgb()
-  defp get_color_from_module(nil, _color_name, :hex), do: @black
-  defp get_color_from_module(nil, _color_name, :rgb), do: @black_rgb
-
-  defp get_color_from_module(module, color_name, type) do
-    apply(module, color_name, [type])
-  end
-
-  @spec get_color(atom, :hex) :: Types.colorint()
-  @spec get_color(atom, :rgb) :: Types.rgb()
-  defp get_color(color_name, type) do
-    color_name
-    |> find_module()
-    |> get_color_from_module(color_name, type)
-  end
 
   @doc """
   this fucntion tries to lookup the atom in the various
@@ -104,6 +72,7 @@ defimpl Fledex.Color, for: Atom do
 
   If no module can be found with the atom name then black will be returned (`0x000000`)
   """
+  @spec to_colorint(atom) :: Types.colorint()
   def to_colorint(color_name) do
     get_color(color_name, :hex)
   end
@@ -114,12 +83,44 @@ defimpl Fledex.Color, for: Atom do
 
   If no module can be found with the atom name then black will be returned (`{0, 0, 0}`)
   """
+  @spec to_rgb(atom) :: Types.rgb()
   def to_rgb(color_name) do
     get_color(color_name, :rgb)
+  end
+
+  # utility functions (exposed for testing only, do not rely on them)
+
+  @doc false
+  # Get the `Fledex.Color.Names` module if true and the `Fledex.Color.Names.Wiki` module otherwise
+  @spec get_names_module(boolean) :: module()
+  def get_names_module(true), do: Fledex.Color.Names
+  def get_names_module(false), do: Fledex.Color.Names.Wiki
+
+  @black 0x000000
+  @black_rgb {0, 0, 0}
+  @doc false
+  # get the color from the named color
+  @spec get_color(atom, :hex) :: Types.colorint()
+  @spec get_color(atom, :rgb) :: Types.rgb()
+  defp get_color(color_name, type) do
+    module = get_names_module(function_exported?(Fledex.Color.Names, :__info__, 1))
+    # credo:disable-for-next-line
+    color = apply(module, :info, [color_name, type])
+
+    case {type, color} do
+      {:hex, nil} -> @black
+      {:rgb, nil} -> @black_rgb
+      {_type, color} -> color
+    end
   end
 end
 
 defimpl Fledex.Color, for: Map do
+  alias Fledex.Color.Types
+
+  @spec to_colorint(map) :: Types.colorint()
   def to_colorint(%{rgb: rgb}), do: Fledex.Color.to_colorint(rgb)
+
+  @spec to_rgb(map) :: Types.rgb()
   def to_rgb(%{rgb: rgb}), do: Fledex.Color.to_rgb(rgb)
 end

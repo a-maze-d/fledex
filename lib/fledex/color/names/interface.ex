@@ -8,7 +8,45 @@ defmodule Fledex.Color.Names.Interface do
   which they should implement.
 
   The easiest way to generate a color names module is probably by reading in a csv file
-  with the definitions with the help of `Fledex.Color.Names.Generator`
+  with the definitions with the help of `Fledex.Color.Names.ModuleGenerator`
+
+  Fledex has an extensive set of predefined colors from:
+
+  * `Fledex.Color.Names.Wiki` from [Wikipedia - List of colors A-F](https://en.wikipedia.org/wiki/List_of_colors:_A%E2%80%93F),
+    [Wikipedia - List of colors G-M](https://en.wikipedia.org/wiki/List_of_colors:_N%E2%80%93Z),
+    [Wikipedia - List of colors N-Z](https://en.wikipedia.org/wiki/List_of_colors:_G%E2%80%93M)
+  * `Fledex.Color.Names.CSS` from [W3C - CSS colors](https://drafts.csswg.org/css-color/#named-colors)
+  * `Fledex.Color.Names.SVG` from [W3C - SVG colors](https://www.w3.org/TR/SVG11/types.html#ColorKeywords)
+  * `Fledex.Color.Names.RAL` from [Wikipedia - List of RAL colors](https://en.wikipedia.org/wiki/List_of_RAL_colours)
+
+  The behaviour only defines a very small set of functions, but it is expected that each color is reachable through a function with the name of the color. For example, you can
+  retrieve the information for the color `:almond` by calling the function with the same
+  name, i.e. `almond/1`.
+
+  The additional parameter determines which additional information should be provided. The options are:
+
+    * `:all`: This retrieves the full data set
+    * `:descriptive_name`: a string with name (from this the Atom is derived)
+    * `:hex` (default): This is the same as `almond/0`
+    * `:hsl`: This retrieves an HSL struct, i.e. `{h, s, l}`
+    * `:hsv`: This retrieves an HSV struct, i.e. `Fledex.Color.HSV`
+    * `:index`: The index of this color in the list of all colors
+    * `:rgb`: This retrieves an RGB struct, i.e. `{r, g, b}`
+    * `:source`: Information where the color comes from, see Wikipedia for more details
+    * `:module`: to get more information where the color is actually implemented. The function might return `:unknown`
+
+  And finally every color exists also in a version that allows you to add it to a
+  `Fledex.Leds` sequence. Either as next led (`almond/1`) or with a specified offset
+  (`almond/2`). The latter has no extra documentation, because it wouldn't add any real
+  value, but would clutter the doc. Here an example spec:
+
+  ```elixir
+  @spec almond(leds :: Fledex.Leds.t, offset :: non_neg_integer) :: Fledex.Leds.t
+  ```
+
+  Some additional functions exist for retrieving all `colors`, all color `names`,
+  and `info` about an `atom` color. Thus, you can get the same information for
+  `almond()` by calling `info(:almond, :hex)`
   """
 
   alias Fledex.Color.Names.Types

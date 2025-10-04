@@ -3,26 +3,37 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Driver.Interface do
-  alias Fledex.Color.Types
-
   @moduledoc """
-    A driver dispatches the "real" hardware. Differen types of
-    drivers exist. Currently the following drivers exist:
+  This interface defines the `@behaviour` for drivers. They can be
+  dummy implementations like a driver that dumps the output to IO,
+  wich can be useful for testing without real hardware.
+  A proper implementation probably opens a channel (if not already open)
+  to the bus (like SPI) and sends the data to the bus.
 
-    * [`Null`](Fledex.Driver.Impl.Null.html): a driver that doesn't do
-        anything. This is the default driver. It's also very practical for tests.
-    * [`Logger`](Fledex.Driver.Impl.Logger.html): a driver that logs the
-        led data to the terminal or to the logs
-    * [`Kino`](Fledex.Driver.Impl.Kino.html): a driver that can display
-        the LEDs in a [livebook](https://livebook.dev)
-    * [`Spi`](Fledex.Driver.Impl.Spi.html): a driver that can connect
-        to a real LED strip with a WS2801 chip.
-    * [`PubSub`](Fledex.Driver.Impl.PubSub.html): a driver that can transfer
-        the LED data via pubsub. This should also allow the data to be transferred to
-        a LED strip connected on another computer.
+  Differen types of drivers exist. Currently the following exist:
 
-    More Drivers can be created by implementing this simple behaviour
+  * [`Null`](Fledex.Driver.Impl.Null.html): a driver that doesn't do
+      anything. This is the default driver. It's also very practical for tests.
+  * [`Logger`](Fledex.Driver.Impl.Logger.html): a driver that logs the
+      led data to the terminal or to the logs
+  * [`Kino`](Fledex.Driver.Impl.Kino.html): a driver that can display
+      the LEDs in a [livebook](https://livebook.dev)
+  * [`Spi`](Fledex.Driver.Impl.Spi.html): a driver that can connect
+      to a real LED strip with a WS2801 chip.
+  * [`PubSub`](Fledex.Driver.Impl.PubSub.html): a driver that can transfer
+      the LED data via pubsub. This should also allow the data to be transferred to
+      a LED strip connected on another computer.
+
+  More Drivers can be created by implementing this simple behaviour
+
+  > #### Note {: .info}
+  >
+  > The implementing module is allowed to store information in the state
+  > (like the channel it has oppened), so that we don't have open/close it
+  > all the time. Cleanup should happen in the terminate function
   """
+
+  alias Fledex.Color.Types
 
   @doc """
   This callback will be called to retrieve the default set of parameters for

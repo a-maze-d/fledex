@@ -2,7 +2,31 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-defmodule Fledex.Color.Names.Generator do
+defmodule Fledex.Color.Names.ModuleGenerator do
+  @moduledoc """
+  This module allows to easily create color name modules (implementing the
+  `Fledex.Color.Names.Interface` behaviour) by simply using this module. Use
+  it in the following way:
+
+  ```elixir
+  defmodule MyColorModule do
+    # we point to our csv file that defines the colors
+    @external_resource Path.dirname(__DIR__) <> "/my_colors.csv"
+
+    use Fledex.Color.Names.ModuleGenerator,
+      filename: @external_resource,
+      pattern: ~r/^.*$/i,
+      drop: 1,
+      splitter_opts: [separator: ",", split_opts: [parts: 11]],
+      converter: &MyColorModule.Utils.converter/1,
+      module: __MODULE__
+  end
+  ```
+
+  The converter function needs to return a `t:Fledex.Color.Names.Types.color_struct_t`
+  struct. You can find some useful utility functions that help you in the conversion in
+  `Fledex.Color.Names.LoadUtils`.
+  """
   alias Fledex.Color.Names.LoadUtils
 
   defmacro __using__(opts) do
@@ -23,6 +47,7 @@ defmodule Fledex.Color.Names.Generator do
     )
   end
 
+  @doc false
   # credo:disable-for-next-line
   def create_color_functions(
         filename,
@@ -62,7 +87,7 @@ defmodule Fledex.Color.Names.Generator do
       @typedoc """
       The allowed color names
       """
-      @type color_names_t ::
+      @type color_name_t ::
               unquote(
                 Map.keys(@colors)
                 |> Enum.map_join(" | ", &inspect/1)
@@ -93,7 +118,7 @@ defmodule Fledex.Color.Names.Generator do
       livebook](3b_fledex_everything_about_colors.livemd))
       """
       @impl Interface
-      @spec names :: list(color_names_t)
+      @spec names :: list(color_name_t)
       def names, do: Map.keys(@colors)
 
       @doc """

@@ -1,5 +1,5 @@
 <!--
-Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -14,33 +14,38 @@ Even though this library is published, there are things I still want to do befor
   - [x] Improve API documentation (v0.7)
   - [ ] hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.7)
   - [ ] Add a livebook with coordinator examples (v0.7)
+  - [ ] Update the documentation with new color name information (v0.7)
+  - [ ] Create a new color page, since the colors will not be avilable through `Fledex.Color.Names` directly (v0.7)
   - [ ] Update the cheatsheet with coordinator info (v0.7)
   - [ ] Update documentation with the Supervision tree (v0.7)
 - [ ] Testing
-  - [ ] Add tests for the Clock and Thermometer components (v0.7)
+  - [ ] Test all the livebooks (v0.7)
+  - [ ] Add tests for the Clock component (v0.7)
+  - [ ] Add tests for the Thermometer components (v0.7)
 - [ ] Cleanup
   - [x] Cleanup the color conversion functions. There are a lot of unused parts, providing flexibility that is not required.
-  - [ ] Add more guards to functions to make them more robust (v0.7)
-  - [ ] All Color name modules have the same interface (through the DSL it's even enforced). Let's make this more explicit by introducting a Color.Names.Interface with the appropriate callbacks (v0.7)
+  - [x] Add more guards to functions to make them more robust (v0.7)
+  - [x] All Color name modules have the same interface (through the DSL it's even enforced). Let's make this more explicit by introducting a Color.Names.Interface with the appropriate callbacks (v0.7)
   - [x] We could change the `Fledex.Color` for `Atom` to delegate to any of the color modules until we find the module that implements it. Defaulting to black if the color does not exist. Thus, we wouldn't even need any specific `color_name` guard, since any atom would be "kind of" valid. I think that would dramatically reduce the dependencies. Downside is that it wouldn't be possible to look at all the colors that are implemented at compiletime, but for that we have runtime functions and that's probably where we would need them the most. (v0;7)
-  - [ ] Change the import of `Fledex.Color.Names` and import the different color components individually instead. `Fledex.Color.Names` still makes sense to bind those together. The import can be done in a flexible way. This should reduce the complexity of the code, the dependencies, and increase the flexibility without loss of convenience for the user (v0.8)
+  - [x] Change the import of `Fledex.Color.Names` and import the different color components individually instead. `Fledex.Color.Names` still makes sense to bind those together. The import can be done in a flexible way. This should reduce the complexity of the code, the dependencies, and increase the flexibility without loss of convenience for the user (v0.8)
+  - [ ] Check whether we could unload the module first before we we redefine it. The unloading could be done with [`:code.delete(module)](https://www.erlang.org/doc/apps/kernel/code.html#delete/1). This could allow us to ALLWAYS define the module and redefine an inner module. (v0.7)
 - [ ] Missing functionality
+  - [ ] Allow selecting the color modules that can be loaded instead of loading always the same list by default. (v0.7)
   - [ ] The Job should (at least appear) to be connected to the LedStrip (v0.7)
-  - [ ] Replace Quantum with SchedEx? https://hexdocs.pm/sched_ex/readme.html (v0.7)
+  - [ ] Lower than sec precision is not possible with Quantum. Replace it with a different library (maybe SchedEx? https://hexdocs.pm/sched_ex/readme.html) (v0.7)
   - [ ] we start things through the Supervisor, but we don't shut things down through it (v0.7)
-  - [ ] We have the `Fledex.Color` protocol, but we actually don't make use of its type. This is maybe also a good opportunity to rethink on how we handle colors in general. Maybe we should define everything as `Fledex.Color` and encapsulate CSS, SVG, RAL colours in their own struct to then have the protocol implemented for them. (v0.7)
-  Other advantages:
+  - [x] We have the `Fledex.Color` protocol, but we actually don't make use of its type. This is maybe also a good opportunity to rethink on how we handle colors in general. Maybe we should define everything as `Fledex.Color` and encapsulate CSS, SVG, RAL colours in their own struct to then have the protocol implemented for them. (v0.7)
   - [ ] convert the rgb to other color spaces (in the various color name modules) (v0.7)
   - [ ] Put some more effort into the coordinator to make it working well (v0.7)
   - [ ] Enable Telemetry? (v0.8)
   - [ ] should the `:config` driver not only return the config but the strip_name too?
-  - [ ] setting up livebook (a really working version) on windows is anything than easy :-( Can we do something about it? Investigate (v0.7)
-  - [ ] Add support for WS2811/12/13/14/15 LED strips controlled through phase modulation. (v0.7)
+  - [ ] Add support for WS2811/12/13/14/15 LED strips controlled through phase modulation. (v0.8)
   - [ ] Clustering (v0.8)
     - [ ] Rethink the clusering and check whether the new livebook API endpoints might make it easier to cluster. Currently it seems to be quite complicated.
     - [ ] Provide examples on how to cluster
     - [ ] Add an example where several nodes are connected to transfer pubsub messages accross nodes
     - [ ] Implement music beat through clustering
+  - [ ] setting up livebook (a really working version) on windows is anything than easy :-( Can we do something about it? Investigate (v0.9)
   - [ ] Create smartcells? (v1.x)
 - [ ] License
   - [ ] Ensure everything can be under an FSF approved open source license (see https://spdx.org/licenses/)

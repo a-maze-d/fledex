@@ -1,15 +1,14 @@
-# Copyright 2024, Matthias Reik <fledex@reik.org>
+# Copyright 2024-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Color.Names.Types do
-  alias Fledex.Color.Names
   alias Fledex.Color.Types
 
   @typedoc """
-  The allowed color names
+  any atom could be a valid color name
   """
-  @type color_names_t :: Names.color_names_t()
+  @type color_name_t :: atom
 
   @typedoc """
   The different properties that can be interrogated from a named color
@@ -21,7 +20,7 @@ defmodule Fledex.Color.Names.Types do
   """
   @type color_struct_t :: %{
           index: integer,
-          name: color_names_t,
+          name: color_name_t,
           descriptive_name: String.t(),
           hex: Types.colorint(),
           rgb: Types.rgb(),

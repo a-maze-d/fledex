@@ -259,7 +259,16 @@ defmodule Fledex.Utils.Dsl do
     {Fledex.Color.Names.RAL, :optional, :ral}
   ]
 
+  @doc """
+  This function creates the ASTs for using and for importing
+  the necessary color name modules
+  The returned options are the original as the one passed in
+  but with all the consumed options removed.
+  """
+  @spec create_color_name_asts(keyword) ::
+          {use_ast :: Macro.t(), import_ast :: Macro.t(), keyword}
   def create_color_name_asts(opts) do
+    color_mod_name_defined = Keyword.has_key?(opts, :color_mod_name)
     color_mod_name = opts[:color_mod_name]
     modules_with_names = find_modules_with_names(opts[:colors])
     opts = Keyword.drop(opts, [:colors, :color_mod_name])
@@ -277,89 +286,129 @@ defmodule Fledex.Utils.Dsl do
         imports: [{1, Kernel}, {2, Kernel}]
       ],
       [
-        {:__aliases__, [alias: false], [:Fledex, :Color, :Names]},
+        {:__aliases__, [alias: false], [:Fledex, :Color, :NamesGenerator]},
         [
           colors: modules_with_names,
-          color_mod_name: color_mod_name
+          color_mod_name: color_mod_name,
+          color_mod_name_defined: color_mod_name_defined
         ]
-      ]}
+      ]
+    }
 
     {use_ast, import_ast, opts}
   end
 
+  @spec import_color_module({module, list(atom)}) :: Macro.t()
   defp import_color_module({module, only}) do
     # for some reason it doesn't work to do
     # quote do
     #   import unquote(module), only: unquote(only)
     # end
     # Therefore creating the AST manually
-    module_alias_ast  = quote do unquote(module) end
-    {:import, [context: Elixir],[
-      module_alias_ast,
-      [only: only]
-    ]}
+    module_alias_ast =
+      quote do
+        unquote(module)
+      end
+
+    {:import, [context: Elixir],
+     [
+       module_alias_ast,
+       [only: only]
+     ]}
   end
 
-  defp modules_with_only(modules_with_names) do
+  @doc """
+  Convert a list of module-only list to a list that
+  can be used to import modules
+  """
+  @spec modules_with_only(list({module, list(atom)})) :: list({module, list({atom, 0 | 1 | 2})})
+  def modules_with_only(modules_with_names) do
     # each name has a function with arity 1 and 2
     Enum.map(modules_with_names, fn {module, names} ->
-      {module, Enum.flat_map(names, fn only ->
-        [{only, 0}, {only, 1}, {only, 2}]
-      end)}
+      {module,
+       Enum.flat_map(names, fn only ->
+         [{only, 0}, {only, 1}, {only, 2}]
+       end)}
     end)
   end
 
-  defp find_modules_with_names([]), do: []
-  defp find_modules_with_names(nil), do: find_modules_with_names([:default])
-  defp find_modules_with_names(opt) when is_atom(opt), do: find_modules_with_names([opt])
-  defp find_modules_with_names([:none]), do: find_modules_with_names([])
-  defp find_modules_with_names([:all]) do
+  @doc """
+  This function takes either a module, an atom or a list of those,
+  resolves atoms to their corresponding modules, retrieves all
+  the color names by calling `module.names()` ensuring later modules
+  do not override previous names in case of conflict, and returns
+  a list of modules and their non-conflicting names.
+  """
+  @spec find_modules_with_names(module | atom | list(module | atom) | nil) ::
+          list({module, list(atom)})
+  def find_modules_with_names([]), do: []
+  def find_modules_with_names(nil), do: find_modules_with_names([:default])
+  def find_modules_with_names(opt) when is_atom(opt), do: find_modules_with_names([opt])
+  def find_modules_with_names([:none]), do: find_modules_with_names([])
+
+  def find_modules_with_names([:all]) do
     Enum.map(@modules, fn elem -> elem(elem, 0) end)
     |> find_modules_with_names()
   end
-  defp find_modules_with_names([:default]) do
+
+  def find_modules_with_names([:default]) do
     Enum.filter(@modules, fn {_mod, type, _name} -> type == :core end)
     |> Enum.map(fn elem -> elem(elem, 0) end)
     |> find_modules_with_names()
   end
-  defp find_modules_with_names(color_names) when is_list(color_names) do
+
+  def find_modules_with_names(color_names) when is_list(color_names) do
     color_names
+    # |> Enum.reverse()
     |> translate_names2modules()
     |> diff_names_between_modules()
   end
 
+  @spec translate_names2modules(list(module | atom)) :: list(module)
   defp translate_names2modules(names) do
     Enum.reduce(names, [], fn color_name, acc ->
-      case Enum.find(@modules, fn {_module, _type, name} -> name == color_name end) do
-        {module, _type, _name} ->
-          # we translate from an atom to a module
-          [module | acc]
-        nil ->
-          # no translation, maybe we got a names module
-          if loadable?(color_name) do
-            [color_name | acc]
-          else
-            # we have no idea what we got so we will ignore it
-            Logger.warning("""
-              Not a known color name. Either an atom (with appropriate mapping)
-              or a module (implementing the Fledex.ColorNames behavior) is expected.
-              I found instead: #{inspect color_name}
-              And we will ignore it
-            """)
-            acc
-          end
-      end
+      find_module_name(color_name, acc)
     end)
+    |> Enum.reverse()
   end
+
+  @spec find_module_name(atom | module, list(module)) :: list(module)
+  defp find_module_name(color_name, acc) do
+    case Enum.find(@modules, fn {_module, _type, name} -> name == color_name end) do
+      {module, _type, _name} ->
+        # we translate from an atom to a module
+        [module | acc]
+
+      nil ->
+        # no translation, maybe we got a names module
+        if loadable?(color_name) do
+          [color_name | acc]
+        else
+          # we have no idea what we got so we will ignore it
+          Logger.warning("""
+          Not a known color name. Either an atom (with appropriate mapping)
+          or a module (implementing the Fledex.ColorNames behavior) is expected.
+          I found instead: #{inspect(color_name)}
+          And we will ignore it
+          """)
+
+          acc
+        end
+    end
+  end
+
+  @spec loadable?(module) :: boolean
   defp loadable?(color_name) do
     Code.ensure_loaded?(color_name) and function_exported?(color_name, :names, 0)
   end
 
+  @spec diff_names_between_modules(list(module)) :: list({module, list(atom)})
   defp diff_names_between_modules(modules) do
     Enum.reduce(modules, {[], MapSet.new()}, fn module, {mods, known} ->
       only = MapSet.difference(MapSet.new(module.names()), known)
       {[{module, MapSet.to_list(only)} | mods], MapSet.union(known, only)}
     end)
     |> elem(0)
+    |> Enum.reverse()
   end
 end

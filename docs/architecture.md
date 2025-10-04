@@ -1,5 +1,5 @@
 <!--
-Copyright 2023, Matthias Reik <fledex@reik.org>
+Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -25,19 +25,21 @@ leaves this to the hardware spectific `Fledex.Driver.Driver`s. It's possible to
 register several drivers at the same time.
 
 Currently there are 4 drivers available:
-* `Spi` is the main driver for talking to a real 
+* [`Spi`](`Fledex.Driver.Impl.Spi`) is the main driver for talking to a real 
   [led strip with a ws2801 chip](https://www.amazon.com/s?k=ws2801) over the spi bus
-* `Kino` is a driver that is very convenient when working with a 
+* [`Kino`](`Fledex.Driver.Impl.Kino`) is a driver that is very convenient when working with a 
   [Livebook](https://livebook.dev/) to emulate an led strip.
-* `Logger` is a driver that dumps the data to a logger.
-* `Null` is a driver that acts similar to `/dev/null`, i.e. doesn't do anyting with the
+* [`Logger`](`Fledex.Driver.Impl.Logger`) is a driver that dumps the data to a logger.
+* [`Null`](`Fledex.Driver.Impl.Null`) is a driver that acts similar to `/dev/null`, i.e. doesn't do anyting with the
   data. This can be very convenient for running some tests.
 
 > #### Note {: .info}
 >
-> In addition an additional a special `:config` driver can be used, which simply returns
+> In addition a special `:config` driver can be used, which simply returns
 > the current definition. This can be very useful when defining components as well as in
-> tests.
+> tests. When using this driver, you probably should specify also the following options:
+> * `dont_start: true` to avoid starting the `Fledex.Animation.Manager`
+> * `colors: nil` to avoid the creation of a `Fledex.Color.Names` module that could conflict with other instances. Also, you should prefer to use colors as integers. If you want to use colors by name, you should explicitly specify the module name.
 
 # The Leds
 The `Leds` is an easy way to define a set of Leds. This module provides the 

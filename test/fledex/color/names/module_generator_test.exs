@@ -1,15 +1,15 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
-defmodule Fledex.Color.Names.GeneratorTest do
+defmodule Fledex.Color.Names.ModuleGeneratorTest do
   use ExUnit.Case
 
   defmodule TestNames do
     alias Fledex.Color.Names.Wiki
     alias Fledex.Color.Names.WikiUtils
 
-    use Fledex.Color.Names.Generator,
+    use Fledex.Color.Names.ModuleGenerator,
       filename: Wiki.file(),
       pattern: ~r/^[a].*$/i,
       drop: 1,

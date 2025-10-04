@@ -173,7 +173,9 @@ defmodule Fledex.Leds do
   end
 
   @doc """
-  Defines a rainbow over the leds. The options that can be specified are:
+  Defines a rainbow over the leds.
+
+  The options that can be specified are:
 
   * `:num_leds`: how many leds should be part of the rainbow (by default all leds)
   * `:offset`: as from which led we want to start the  rainbow (default: 0, no offset)

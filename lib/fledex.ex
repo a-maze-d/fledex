@@ -1,4 +1,4 @@
-# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -40,10 +40,9 @@ defmodule Fledex do
   @doc """
   By `use`-ing this module, the `Fledex` macros are made available.
 
-  This macro does also import `Fledex.Leds`, `Fledex.Utils.PubSub`, `Crontab.CronExpression`, `Fledex.Utils.PubSub`, and all the colors specified (see also the `:colors` option, including the generated `Fledex.Color.Names` module). Therefore the functions from those modules are directly
-  available without namespace, the drivers part of the `FledexDriver.Impl` namespace are all aliased.
+  This macro does also import `Fledex.Leds`, `Crontab.CronExpression`, `Fledex.Utils.PubSub`, and all the colors specified (see also the `:colors` option, including the generated `Fledex.Color.Names` module). Therefore the functions from those modules are directly available without namespace. In addition the drivers (part of the [`FledexDriver.Impl` namespace](Fledex.Driver.Impl.Kino.html)) are aliased.
 
-  > #### Caution {: .caution}
+  > #### Caution {: .warning}
   >
   > This could lead to a conflict with other libraries (like the `Kino`-driver with the
   > `Kino`-library). In that case just use the fully qualified module name and prefix
@@ -81,7 +80,28 @@ defmodule Fledex do
     * `:wiki`: This will load `Fledex.Color.Names.Wiki`
     * `:all`: This will load all the above colors
     * `:none`: no colors will be imported
-    * `:default`: this will load the default set of colors. This is the default, i.e. when you do not specify the `:colors` option.
+    * `:default`: this will load the default set of colors (`:wiki`, `:css`, `:svg`). This is the default, i.e. when you do not specify the `:colors` option.
+
+  > #### Note {: .info}
+  >
+  > Color modules that are not specified can still be used. If you use the `:default`
+  > color names and want to use a colors from `Fledex.Color.Names.RAL`. Let's assume you
+  > want to use the `:sunset_red` RAL color, then you can use it like the following:
+  > ```elixir
+  > Leds.new(10)
+  >   # by calling it implicitly (which only works for inbuilt color modules)
+  >   |> Leds.light(:sunset_red)
+  >   |> Leds.light(Fledex.Color.to_colorint(:sunset_red))
+  >   |> Leds.light(Fledex.Color.to_rgb(:sunset_red))
+  >   # by calling it explicitly (which works for all color modules)
+  >   |> Leds.light(Fledex.Color.Names.RAL.sunset_red(:hex))
+  >   |> Leds.light(Fledex.Color.Names.RAL.sunset_red(:rgb))
+  >   |> Fledex.Color.Names.RAL.sunset_red()
+  > ```
+  >
+  > You can also import `Fledex.Color.Names.RAL` to make `sunset_red()` available and
+  > thereby get more or less the same convenience (but why wouldn't you specify it already
+  > during `use Fledex`?)
 
   By default the module `Fledex.Color.Names` will be created which is an easy interface into all defined colors. Sometimes, you want the module to have a different name (especially during tests) so that several `use` do not conflict. In that case you can specify the `:color_mod_name` option. You can also use this option if you want to avoid  the generation of the module by specifying `nil` as argument.
 
@@ -114,7 +134,8 @@ defmodule Fledex do
   """
   @spec __using__(keyword) :: Macro.t()
   defmacro __using__(opts) do
-    {use_ast, import_ast, opts} = Fledex.Utils.Dsl.create_color_name_asts(opts)
+    alias Fledex.Utils.Dsl
+    {use_ast, import_ast, opts} = Dsl.create_color_name_asts(opts)
 
     quote bind_quoted: [opts: opts, import_ast: import_ast, use_ast: use_ast] do
       import Crontab.CronExpression
