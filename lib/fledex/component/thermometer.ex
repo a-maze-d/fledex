@@ -1,4 +1,4 @@
-# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -13,7 +13,7 @@ defmodule Fledex.Component.Thermometer do
   """
   @behaviour Fledex.Component.Interface
 
-  alias Fledex.Color.Names
+  alias Fledex.Color.Names.Wiki
   alias Fledex.Component.Utils
   alias Fledex.Leds
 
@@ -91,7 +91,7 @@ defmodule Fledex.Component.Thermometer do
 
   defp def_func_helper(_triggers, options) do
     range = Keyword.fetch!(options, :range)
-    marker = Keyword.get(options, :marker, Names.black())
+    marker = Keyword.get(options, :marker, Wiki.black())
     marker_distance = Keyword.get(options, :marker_distance, 5)
 
     negative_scale =

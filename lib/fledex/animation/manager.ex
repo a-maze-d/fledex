@@ -4,7 +4,8 @@
 
 defmodule Fledex.Animation.Manager do
   @moduledoc """
-  > **Note**
+  > #### Note {: .info}
+  >
   > You probably do not want to use this module directly but use the DSL defined
   > in `Fledex`
 
@@ -103,7 +104,8 @@ defmodule Fledex.Animation.Manager do
   this function again, will be stopped if they are not part of the configuration anymore.
   Newly defined animations will be started.
 
-  > **Note**
+  > #### Note {: .info}
+  >
   > The animation functions might get called quite frequently and
   > therefore any work within them should be kept to a minimum.
   """

@@ -16,7 +16,8 @@ defmodule Fledex.LedStrip do
   computer, except that a window server would manage several screens, whereas here each
   LED strip would get its own.
 
-  > **Note**
+  > #### Note {: .info}
+  >
   > In general you shouldn't require to start an LedStrip directly, but you should
   > use the `Fledex DSL`. In order to start an `LedStrip` a Registry (with name as provided by
   > `Fledex.Supervisor.Utils.worker_registry/0`) is required.
@@ -195,7 +196,7 @@ defmodule Fledex.LedStrip do
   calculated if not provided (but often this information is already available
   and therefore can be provided)
 
-  > **Note**
+  > #### Note {: .info}
   >
   > Repeated calls of this function will result in previously set leds
   > will be overwritten. We are passing a list of leds which means every led

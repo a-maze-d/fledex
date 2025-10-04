@@ -88,7 +88,7 @@ end
 ```
 
 You mainly use the functionality from `Fledex.Leds` which has plenty of functions. It allows to set individual leds, provides the possibility to nest led sequences, to repeat and to define leds through some functions, like gradients and rainbow distributions.
-`Fledex.Color.Names` provides a very rich set of predefined [color names](https://www.ditig.com/256-colors-cheat-sheet), but you can define it also by specifying a hex value. 
+`Fledex` comes with a very rich set of color names that can be used (see `Fledex.Color.Names.Interface` for details), but you can define it also by specifying a hex value. 
 Here an example of an led squence of 10 leds with the first 3 being `red`, `green`, and  `0x0000ff` (blue). The rest will be black (off).
 ```elixir
   leds(10) |> red() |> light(:green) |> light(0x0000ff)

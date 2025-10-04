@@ -6,7 +6,8 @@ defmodule Fledex.Color.Conversion.Spectrum do
   @moduledoc """
   Spectrum color conversion from HSV to RGB
 
-  > **Note**
+  > #### Note {: .info}
+  >
   > Fledex uses by default the `Fledex.Color.Conversion.Rainbow` color conversion
   """
   alias Fledex.Color.Conversion.CalcUtils

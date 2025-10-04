@@ -3,7 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0
 defmodule Fledex.Animation.Coordinator do
   @moduledoc """
-  > **Note**
+  > #### Note {: .info}
+  >
   > You probably do not want to use this module directly but use the DSL defined
   > in `Fledex`
 

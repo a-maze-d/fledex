@@ -4,6 +4,7 @@
 
 defmodule Fledex.Color.ColorTest do
   use ExUnit.Case, async: true
+  use Fledex, dont_start: true
 
   alias Fledex.Color.Conversion.Approximate
   alias Fledex.Color.Conversion.Rainbow
@@ -30,6 +31,11 @@ defmodule Fledex.Color.ColorTest do
       assert Fledex.Color.to_rgb(:red) == {0xFF, 0x00, 0x00}
       assert Fledex.Color.to_rgb(0x123456) == {0x12, 0x34, 0x56}
       assert Fledex.Color.to_rgb({0x12, 0x34, 0x56}) == {0x12, 0x34, 0x56}
+    end
+
+    test "test names module" do
+      assert Fledex.Color.Names == Fledex.Color.Atom.get_names_module(true)
+      assert Fledex.Color.Names.Wiki == Fledex.Color.Atom.get_names_module(false)
     end
   end
 

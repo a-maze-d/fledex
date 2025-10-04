@@ -36,19 +36,22 @@ defmodule Fledex.Test do
     test "use macro" do
       # we start the server
       assert GenServer.whereis(Manager) == nil
-      use Fledex, supervisor: :none
+      use Fledex, supervisor: :none, color_mod_name: MacroTest1
       assert GenServer.whereis(Manager) != nil
 
-      # and check that Crontab.CronExpression, Fledex, Fledex.Leds and Fledex.Color.Names
+      # and check that Crontab.CronExpression, Fledex, Fledex.Leds, Fledex.Color.Names, ...
       # are imported:
-      # from Crontab.CronExpression
-      assert :erlang.fun_info(&sigil_e/2)
       # from Fledex
+      assert :erlang.fun_info(&version/0)
       assert :erlang.fun_info(&component/3)
       # from Fledex.Leds
       assert :erlang.fun_info(&leds/1)
       # from Fledex.Color.Names
+      assert :erlang.fun_info(&red/0)
       assert :erlang.fun_info(&red/1)
+      assert :erlang.fun_info(&red/2)
+      # from Crontab.CronExpression
+      assert :erlang.fun_info(&sigil_e/2)
       # from Fledex.Utils.PubSub
       assert :erlang.fun_info(&broadcast_trigger/1)
 
@@ -58,18 +61,28 @@ defmodule Fledex.Test do
     test "use macro without server" do
       # we don't start the server
       assert GenServer.whereis(Manager) == nil
-      use Fledex, dont_start: true
+      use Fledex, dont_start: true, color_mod_name: WithoutServerTest
       assert GenServer.whereis(Manager) == nil
 
-      # and check that both Fledex and Fledex.Leds are imported
+      # and check that Crontab.CronExpression, Fledex, Fledex.Leds, Fledex.Color.Names, ...
+      # are imported:
+      # from Fledex
+      assert :erlang.fun_info(&version/0)
+      assert :erlang.fun_info(&component/3)
       # from Fledex.Leds
       assert :erlang.fun_info(&leds/1)
       # from Fledex.Color.Names
       assert :erlang.fun_info(&red/0)
+      assert :erlang.fun_info(&red/1)
+      assert :erlang.fun_info(&red/2)
+      # from Crontab.CronExpression
+      assert :erlang.fun_info(&sigil_e/2)
+      # from Fledex.Utils.PubSub
+      assert :erlang.fun_info(&broadcast_trigger/1)
     end
 
     test "simple animation macro" do
-      use Fledex, dont_start: true
+      use Fledex, dont_start: true, colors: :none
 
       config =
         animation :merry do
@@ -81,7 +94,7 @@ defmodule Fledex.Test do
     end
 
     test "simple animation macro (with led_strip)" do
-      use Fledex, supervisor: :none
+      use Fledex, supervisor: :none, colors: :none
 
       led_strip :john, Null do
         animation :merry do
@@ -100,7 +113,7 @@ defmodule Fledex.Test do
     end
 
     test "simple animation macro (with led_strip) withoutout trigger" do
-      use Fledex, supervisor: :none
+      use Fledex, supervisor: :none, colors: :none
 
       led_strip :john, Null do
         animation :merry do
@@ -119,7 +132,7 @@ defmodule Fledex.Test do
     end
 
     test "complex scenario" do
-      use Fledex, supervisor: :none
+      use Fledex, supervisor: :none, colors: :none
 
       led_strip :doe, Null do
         animation :caine do
@@ -160,7 +173,7 @@ defmodule Fledex.Test do
   describe "static animation" do
     test "no updates" do
       start_supervised(AnimationSystem.child_spec())
-      use Fledex, supervisor: :none
+      use Fledex, supervisor: :none, colors: :none
 
       led_strip :sten, Null do
         static :svenson do
@@ -187,7 +200,7 @@ defmodule Fledex.Test do
 
   describe "effects" do
     test "simple" do
-      use Fledex, dont_start: true
+      use Fledex, dont_start: true, colors: :none
 
       with_effect =
         effect Fledex.Test do
@@ -200,7 +213,7 @@ defmodule Fledex.Test do
     end
 
     test "with options" do
-      use Fledex, dont_start: true
+      use Fledex, dont_start: true, colors: :none
 
       with_effect =
         effect Fledex.Test, option: :something do
@@ -213,7 +226,7 @@ defmodule Fledex.Test do
     end
 
     test "with several options" do
-      use Fledex, dont_start: true
+      use Fledex, dont_start: true, colors: :none
 
       with_effect =
         effect Fledex.Test, option1: :something, option2: :something_else do
@@ -227,7 +240,7 @@ defmodule Fledex.Test do
     end
 
     test "several nested" do
-      use Fledex, dont_start: true
+      use Fledex, dont_start: true, colors: :none
 
       with_effects =
         effect Fledex.Test do
@@ -267,7 +280,7 @@ defmodule Fledex.Test do
         end
       end
 
-      use Fledex, dont_start: true
+      use Fledex, dont_start: true, colors: :none
 
       config =
         component(:name, Test,
@@ -290,7 +303,7 @@ defmodule Fledex.Test do
 
   describe "dsl" do
     test "effect + double animation" do
-      use Fledex, dont_start: true
+      use Fledex, dont_start: true, colors: :none
       alias Fledex.Effect.Dimming
 
       config =
@@ -316,7 +329,7 @@ defmodule Fledex.Test do
     end
 
     test "nested effect, on effect and animation" do
-      use Fledex, dont_start: true
+      use Fledex, dont_start: true, colors: :none
       alias Fledex.Effect.Dimming
       alias Fledex.Effect.Rotation
 
@@ -345,7 +358,7 @@ defmodule Fledex.Test do
     end
 
     test "double animation in strip" do
-      use Fledex, dont_start: true
+      use Fledex, dont_start: true, colors: :none
 
       config =
         led_strip :strip, :config do
@@ -368,7 +381,7 @@ defmodule Fledex.Test do
     end
 
     test "animation with job" do
-      use Fledex, dont_start: true
+      use Fledex, dont_start: true, colors: :none
 
       config =
         led_strip :strip, :config do
@@ -386,7 +399,7 @@ defmodule Fledex.Test do
     end
 
     test "animation with coordinator" do
-      use Fledex, dont_start: true
+      use Fledex, dont_start: true, colors: :none
 
       config =
         led_strip :strip, :config do
