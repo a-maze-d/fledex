@@ -31,11 +31,11 @@ AnimationSystem.start_link()
 
 In the last project we created a clock. We could make a call to get the current time in every redraw loop. This approach is not possible for data that we are fetching from an external source. In this example we will create a weather display. We will get the information from an API.
 
-If we took the same approach as in the clock example, we would make an API call every 500ms which probably would result in us getting blocked. It is completely unnecessary to make that many call; the wheather doesn't change that frequently.
+If we took the same approach as in the clock example, we would make an API call every 500ms which probably would result in us getting blocked. It is completely unnecessary to make that many call; the weather doesn't change that frequently.
 
 What we will do is to check every 15 min what the latest weather status is.
 
-There are plenty of Weather APIs on the internet, but most of them require to register which is not ideal for a public example. Therefore I decided to use [Open-Meteo](https://open-meteo.com/) which provides all we need.
+There are plenty of weather APIs on the internet, but most of them require to register which is not ideal for a public example. Therefore I decided to use [Open-Meteo](https://open-meteo.com/) which provides all we need.
 
 We need to decide for which location we want to get the weather. Since I'm living in Budapest I use it's coordinates (lat: `47.4729344`, lon: `19.0468802`). To figure out your own coordinates, you can use [Open Street Map](https://www.openstreetmap.org). Search for your location, right click on the exact position, right-click and select Query feature. Now the [URL](https://www.openstreetmap.org/query?lat=47.4729344&lon=19.0468802) will privide you with the `lat`-itude and `lon`-gitude coordinates.
 
@@ -71,16 +71,14 @@ Now it's time to prepare our led strip. First we define our strip and we set a v
 
 ```elixir
 # we start with the default configuration, but change the timer update frequency to 10 sec
-:ok = Manager.register_strip(:weather, [{Kino, []}], timer_update_timeout: 10_000)
-
-:ok
+Manager.register_strip(:weather, [{Kino, []}], timer_update_timeout: 10_000)
 ```
 
 Now we define two animations, the first one creates blue (below zero), green (zero), or red (above zero) indicators. The indicators have the length of the temperature and start from zero to either go to the left (negative) or the right (positive). The second animation is a helper that creates some lines every 5°C to make it easier to read the temperature.
 
 The temperature will be delivered to us as part of the trigger. We'll look at how we will get  this information in the section below.
 
-As and additional bonus, the thermometer is showing the full scale, if no proper measurement is received (arbitrarily high value of 100), which can happen during the initialization phase.
+As an additional bonus, the thermometer is showing the full scale, if no proper measurement is received (arbitrarily high value of 100), which can happen during the initialization phase.
 
 ```elixir
 Manager.register_config(:weather, %{
@@ -133,6 +131,7 @@ Manager.register_config(:weather, %{
         |> Leds.light(:ash_gray, offset: 5)
         |> Leds.repeat(8)
 
+      # 61 = 20 below 0, 0, and 40 above zero
       Leds.leds(61)
       |> Leds.light(negative_scale)
       |> Leds.light(:ash_gray)
@@ -142,7 +141,7 @@ Manager.register_config(:weather, %{
 })
 ```
 
-For testing we can send an arbitrary temperature value to our strip. This allows us to also see whether the strip has the correct behavior when the temperature is at zero (or even below) degree. For testing it would be really unpractical if we need to wait until the outside temperature reaches those levels.
+For testing we can send an arbitrary temperature value to our strip. This allows us to also see whether the strip has the correct behavior when the temperature is at zero degree (or even below). For testing it would be really unpractical if we need to wait until the outside temperature reaches those levels.
 
 Here we send a temperature value of -15.2 degree (which the strip should round to -15 degree). Remember, we set the strip to update slowly and therefore it might (depending on when the next refresh will happen) take a little while before you see the change.
 
@@ -152,7 +151,7 @@ PubSub.broadcast_trigger(%{temperature: -15.2})
 
 ## Getting the weather data
 
-Before we can start with the weather data, we need to make sure that we can make http client calls (also over https) and therefore we start the two services.
+Before we can start with the weather data, we need to make sure that we can make http client calls (also over https) and therefore we start two services.
 
 ```elixir
 :inets.start()

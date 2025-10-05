@@ -25,9 +25,9 @@ use Fledex
 
 ## Clock with job
 
-In the last couple of examples it was always a bit cumbersome to get those updates in regular intervals. at every screen refresh we needed to do calculate something or we needed a decently complicated `GenServer` to do tasks in regular intervals.
+In the last couple of examples it was always a bit cumbersome to get those updates in regular intervals. Either we had to calculate at every screen refresh, or created a decently complicated `GenServer` to do tasks in regular intervals. As we have seen in the [last example](8_fledex_component.livemd) there is an easier way to do this by using the `job` macro.
 
-Let me introduce you to `job`. It allows us to take care of repetitive work by easily specifying a cron-job. All you need are:
+Let me now introduce you properly to the `job` macro. It allows us to take care of repetitive work by easily specifying a cron-job. All you need are:
 
 * a name for the job that identifies it uniquely
 * a schedule when the job should run (see [this cheatsheet](https://hexdocs.pm/crontab/cron_notation.html#expressions) for the possibilities)
@@ -79,7 +79,7 @@ Now we are ready to define our new simplified weather station using:
 > #### Note
 > 
 > We are using the normal crontab job pattern, whereas above we used the extended version
-> (with second precision) above.
+> (with second precision), indicated by the extra trailing `e`.
 
 ```elixir
 alias Fledex.Component.Thermometer

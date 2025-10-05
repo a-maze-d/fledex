@@ -83,7 +83,7 @@ Manager.register_config(:john, %{
 
 We can now redefine our animation by registering different functions. Here we define a 3 led wide red dot that moves slowly from right to left.
 
-> #### Note {: .info}
+> #### Note
 > 
 > We are starting to use color names instead of defining it through an integer. 
 > If you want to learn more, then take a small detour to the [Color livebook](3b_fledex_everything_about_colors.livemd)

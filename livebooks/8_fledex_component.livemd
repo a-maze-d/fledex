@@ -89,13 +89,23 @@ end
 broadcast_trigger(%{hour: 17, minute: 34})
 ```
 
-The interesting thing in the `Fledex.Component.Dot` component is that it actually defines the component by using the `Fledex.animation/3` macro. The code looks like the following
+The interesting thing in the `Fledex.Component.Dot` component is that it actually defines the component by using the `Fledex.animation/3` macro. Therefore it first `use Fledex` to make the macro available. We specify some options:
+
+* `dont_start: true`: to avoid starting the animation manager
+* `colors: none`: we don't want to include any color names.
+  > #### Note
+  > 
+  > We want to leave the definition of color names to the user of our component. In a component you
+  > should ideally define colors as hex values and not by name. If you still want to use color
+  > names,then specify the color name module explicityly (example: `Fledex.Color.Names.Wiki.red()`)
+
+The code looks like the following
 
 <!-- livebook:{"force_markdown":true} -->
 
 ```elixir
   def configure(name, options) when is_atom(name) and is_list(options) do
-    use Fledex
+    use Fledex, dont_start: true, colors: :none
     # ... here comes some option extraction stuff
     animation name do
       triggers when is_map(triggers) and is_map_key(triggers, trigger_name) ->
@@ -119,7 +129,7 @@ Each animation requires its own unique name and this is accomplished with a smal
 ```elixir
   def configure(name, options) do
     # ... here comes some option extraction stuff 
-    use Fledex
+    use Fledex, dont_start: true, colors: :none
     led_strip name, :config do
       component :minute, Dot, color: minute_color, count: 60, trigger_name: create_name(trigger_name, :minute)
       component :hour, Dot, color: hour_color, count: 24, trigger_name: create_name(trigger_name, :hour)
@@ -153,7 +163,7 @@ broadcast_trigger(%{clock_hour: 17, clock_minute: 34, clock_second: 12})
 
 ## A job to drive the clock
 
-Regular updates is something so common that we'll look at the `job` macro that will allow us to schedule udpates in regular intervals. We will take a closer look at this in [another livebook](9_fledex_jobs.livemd) but here is already a sneak preview.
+To trigger regular updates is something so common that Fledex comes with a `job` macro that will allow us to do this in an easy way. We will take a closer look at this in [another livebook](9_fledex_jobs.livemd) but here is already a sneak preview.
 
 ```elixir
 alias Fledex.Component.Clock

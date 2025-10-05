@@ -12,7 +12,15 @@ Mix.install([
 ])
 ```
 
-## Section
+## Setup
+
+We start with our classical setup
+
+```elixir
+use Fledex
+```
+
+## The coordinator macro
 
 The coordinator is a component that allows to coordinate different animations and effects. This clearly is an advanced concept and before attempting it you should first make yourself very much familiar with the other `Fledex` features.
 

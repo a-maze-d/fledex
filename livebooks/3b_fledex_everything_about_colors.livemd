@@ -12,11 +12,27 @@ Mix.install([
 ])
 ```
 
+## Setup
+
 ## Colors and different drivers
 
 Different drivers have different color characteristics. Therefore you might have to adjust the colors when migrating from one output to another. Some drivers allow some color correction to try to adjust for those issues (see also the 'Color Correction' section.
 
 ## Color Information
+
+To load the colors you need to `use Fledex`. You can configure which colors you want to use by pasing in a list of colors, example:
+
+<!-- livebook:{"force_markdown":true} -->
+
+```elixir
+use Fledex, colors: [:wiki, :css]
+```
+
+We don't specify anything and thereby go with the default color set of `:wiki`, `:css`, and `:svg`
+
+```elixir
+use Fledex
+```
 
 Fledex has an extensive set of predefined colors from [Wikipedia](https://en.wikipedia.org/wiki/List_of_colors:_A%E2%80%93F), [CSS](https://drafts.csswg.org/css-color/#named-colors), [SVG](https://www.w3.org/TR/SVG11/types.html#ColorKeywords), and [RAL](https://en.wikipedia.org/wiki/List_of_RAL_colours).Apart from the last list (which is not so commonly used), they are all combined together to a single Names module. You can retrieve those names by calling:
 
@@ -26,35 +42,40 @@ Fledex has an extensive set of predefined colors from [Wikipedia](https://en.wik
 Fledex.Color.Names.names()
 ```
 
-You can also retrieve the complete data set by calling:
+For each color you can retrieve the complete data set by calling:
 
 <!-- livebook:{"force_markdown":true} -->
 
 ```elixir
-Fledex.Color.Names.colors()
+name = :blue
+Fledex.Color.Names.info(name, :all)
 ```
 
-Here a list of all the colors (except the RAL colors, those can be found in `Fledex.Color.Names.RAL`):
+Here a list of all the defined colors (extra colors can still be used, but need to be called explicitly, like the RAL colors through `Fledex.Color.Names.RAL`):
 
 ```elixir
-Kino.DataTable.new(Fledex.Color.Names.colors(),
-  keys: [:descriptive_name, :name, :rgb, :hex, :hsv, :hsl, :source],
+colors = Enum.map(Fledex.Color.Names.names() |> Enum.sort(), fn name ->
+  Fledex.Color.Names.info(name, :all)
+  end)
+Elixir.Kino.DataTable.new(colors,
+  keys: [:descriptive_name, :name, :rgb, :hex, :hsv, :hsl, :source, :module],
   sorting_enabled: true
 )
 ```
 
-You can also retrieve the information from a specific color, like `:almond` in the following way
+You can also retrieve the information for a specific color, like `:almond` in the following way
 
-* `almond/0`: Every color has it's own function and the :hex value (represented as integer) will be returned
+* `almond/0`: Every color has it's own function and the `:hex` value (represented as integer) will be returned
 * `almond/1`: This allows the retrieve a specific representation. It should be noted, that the color functions (that are often just approximations), do not provide the same results. The values returned here are the ones as defined in their sources:
   * `:all`: This retrieves the full data set
   * `:hex`: This is the same as `almond/0`
   * `:rgb`: This retrieves an RGB struct, i.e. `{r, g, b}`
-  * `:hsv`: This retrieves an HSV struct, i.e. `{h, s, v}`
+  * `:hsv`: This retrieves an HSV struct, i.e. `%Fledex.Color.HSV{h: h, s: s, v: v}`
   * `:hsl`: This retrieves an HSL struct, i.e. `{h, s, l}`
   * `:index`: The index of this color in the list of all colors
   * `:desriptive_name`: a string with name (we derive the `Atom` from it)
   * `:source`: Information where the color comes from. Even the colors on Wikipedia are often coming from other sources.
+  * `:module`: The module where the color has been defined
 * `info/1` and `info/2`: They are convenience functions when you only have an atom as the color name. They map to the functions, thus `info(:almond)` is equal to `almond()` and `info(:almond, what)` is equal to `almond(what)`.
 
 In addition each color can also be used directly in an `Leds` sequence since it provides two convenience functions:
@@ -93,7 +114,7 @@ The second color coorection we might want to perform is to bring the color into 
 
 Color correction is provided in Fledex through the modules under `Fledex.Color.Correction`.
 
-> #### Note {: .info}
+> #### Note
 > 
 > If you look at color conversion (hsv2rgb) there is also the possibility to color correct,
 > but you probably don't want to touch that.
