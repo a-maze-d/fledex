@@ -3,6 +3,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Color.Names.LoadUtils do
+  @moduledoc """
+  Some utility functions that can help when loading color names from a CSV file
+  """
+
+  # This function is used by the Generator, but is not intended to be used otherwise
+  # it is for loading the CSV files in a decently generic way
+  @doc false
   def load_color_file(
         names_file,
         names_pattern,
@@ -27,13 +34,22 @@ defmodule Fledex.Color.Names.LoadUtils do
     |> Map.new()
   end
 
-  def line_splitter(index, line, opts) do
+  defp line_splitter(index, line, opts) do
     separator = Keyword.get(opts, :separator, ",")
     split_opts = Keyword.get(opts, :split_opts, parts: 11)
     [index] ++ String.split(line, separator, split_opts)
   end
 
-  def convert_to_atom(name) do
+  @doc """
+  Converts a string (can be even unicode) into an asci atom
+
+  It performs the following steps:
+  * normalizes the string (NFD form)
+  * replaces any non-alpha-numeric characters with underscores (except at the start and end)
+  * downcases it
+  * converts it to an atom
+  """
+  def str2atom(name) do
     name
     |> String.normalize(:nfd)
     |> String.replace(~r/[^a-zA-Z0-9]/, " ")
@@ -43,31 +59,47 @@ defmodule Fledex.Color.Names.LoadUtils do
     |> String.to_atom()
   end
 
-  def clean_and_convert(hex_string) do
-    hex_string = String.replace(hex_string, "#", "")
-    {hex_int, _rest} = Integer.parse(hex_string, 16)
-    hex_int
+  @doc """
+  Converts a hex string (potentially with a `#` sign) into an integer
+  """
+  def hexstr2i(hex_string) do
+    hex_string
+    |> String.replace("#", "")
+    |> Integer.parse(16)
+    |> elem(0)
   end
 
-  def to_byte(value) do
+  @doc """
+  Converts an asci string representing a byte into that byte
+
+  The value is interpreted as a value between 0 and 255 except in the following
+  special cases:
+  * `%`: If the string contains a trailing percent sign, then
+        the value is interpreted as a percent and stretched onto a byte
+  * `°`: If the string contains a trailing degree sign, then
+        the value is interpreted degree between 0 and 359 and mapped to a byte
+  """
+  def a2b(value) do
     value =
       String.trim(value)
       |> String.replace("—", "0")
 
     case Float.parse(value) do
       {value, "%"} -> trunc(value / 100 * 255)
-      {value, "°"} -> trunc(value / 360 * 255)
+      {value, "°"} -> trunc(value / 359 * 255)
       {value, _other} -> value
     end
   end
 
-  def a2i(value) do
-    value = clean(value)
-    {int, _rest} = Integer.parse(value)
-    int
-  end
+  @doc """
+  Converts an asci string with an integer into an integer.
 
-  def clean(integer_string) do
-    String.replace(integer_string, ~r/[^0-9]/, "")
+  Any non-digit charaters will be removed before the conversion
+  """
+  def a2i(value) do
+    value
+    |> String.replace(~r/[^0-9]/, "")
+    |> Integer.parse()
+    |> elem(0)
   end
 end

@@ -20,7 +20,8 @@ defmodule Fledex.Effect.Interface do
   @typedoc """
   Typical states of an effect that should be published
 
-  > **Note**
+  > #### Note {: .info}
+  >
   > This is not used yet and still very much in flux
 
   An effect can be in different states

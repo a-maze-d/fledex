@@ -38,9 +38,8 @@ Then we modify the led strip to update with a very low frequency. Our clock only
 
 ```elixir
 # we start with the default configuration but change the timer update frequency to 500ms
-:ok = Manager.register_strip(:clock, [{Kino, []}], timer_update_timeout: 500)
+Manager.register_strip(:clock, [{Kino, []}], timer_update_timeout: 500)
 
-:ok
 ```
 
 ## Defining our clock

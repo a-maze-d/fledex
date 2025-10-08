@@ -116,7 +116,7 @@ defmodule Fledex.Animation.ManagerTest do
     end
 
     test "add job" do
-      use Fledex, dont_start: true
+      use Fledex, dont_start: true, colors: :none
 
       config =
         led_strip :john, :config, [] do
@@ -133,7 +133,7 @@ defmodule Fledex.Animation.ManagerTest do
     end
 
     test "change job" do
-      use Fledex, dont_start: true
+      use Fledex, dont_start: true, colors: :none
 
       before_config =
         led_strip :john, :config do
@@ -172,7 +172,7 @@ defmodule Fledex.Animation.ManagerTest do
     end
 
     test "update job" do
-      use Fledex, dont_start: true
+      use Fledex, dont_start: true, colors: :none
 
       before_config =
         led_strip :john, :config do
@@ -211,7 +211,7 @@ defmodule Fledex.Animation.ManagerTest do
     end
 
     test "delete job" do
-      use Fledex, dont_start: true
+      use Fledex, dont_start: true, colors: :none
 
       before_config =
         led_strip :john, :config do
@@ -242,7 +242,7 @@ defmodule Fledex.Animation.ManagerTest do
     end
 
     test "create coordinator", %{strip_name: strip_name} do
-      use Fledex, dont_start: true
+      use Fledex, dont_start: true, colors: :none
 
       config1 =
         led_strip strip_name, :config do
@@ -256,7 +256,7 @@ defmodule Fledex.Animation.ManagerTest do
     end
 
     test "update coordinator", %{strip_name: strip_name} do
-      use Fledex, dont_start: true
+      use Fledex, dont_start: true, colors: :none
 
       config1 =
         led_strip strip_name, :config do
@@ -286,7 +286,7 @@ defmodule Fledex.Animation.ManagerTest do
     end
 
     test "delete coordinator", %{strip_name: strip_name} do
-      use Fledex, dont_start: true
+      use Fledex, dont_start: true, colors: :none
 
       config1 =
         led_strip strip_name, :config do

@@ -12,7 +12,8 @@ The description consists of 2 parts, the first one without a level-shifter
 the second one with a level shifter
 
 
-> **CAUTION**
+> #### Caution {: .warning}
+> 
 > YOU MUST BE A QUALIFIED ELECTRICIAN TO CONNECT TO HIGH/DANGEROUS VOLTAGES (> 30V)
 > 
 > NO RESPONSIBILITY CAN BE TAKEN FOR ANY DAMAGE CAUSED BY FOLLOWING THIS GUIDE
@@ -24,7 +25,8 @@ the second one with a level shifter
 * (optional) [Level shifter](https://www.ti.com/product/TXB0104?qgpn=txb0104) in a easy to use format (e.g. [the one from Adafruit](https://www.adafruit.com/product/1875))
 * cables, soldering iron, plugs, ...
 
-> **Note**
+> #### Note {: .info}
+> 
 > Fledex currently only supports the LED strips with WS2801 chips via the SPI bus, but it
 > would be easy to extend the library with other drivers for other chip types or buses.
 

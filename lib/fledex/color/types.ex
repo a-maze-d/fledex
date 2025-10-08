@@ -1,9 +1,10 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Color.Types do
   alias Fledex.Color.HSV
+  alias Fledex.Color.Names.Types
 
   @type rgb :: {red :: 0..255, green :: 0..255, blue :: 0..255}
   @type hsv :: HSV.t()
@@ -11,5 +12,5 @@ defmodule Fledex.Color.Types do
   @type colorint :: 0..0xFFFFFF
 
   @type color_any :: color() | hsv() | hsl()
-  @type color :: rgb | colorint | Fledex.Color.Names.color_names_t()
+  @type color :: rgb | colorint | Types.color_name_t()
 end

@@ -60,7 +60,8 @@ LedStrip.define_namespace(:john, :default)
 LedStrip.set_leds(:john, :default, [0xFF0000, 0x00FF00, 0x0000FF], 3)
 ```
 
-> **Note**
+> #### Note {: .info}
+> 
 > If you don't see your led strip displayed, then you might have to scroll up a bit. It
 > should be just after the code block where you defined your led_strip.
 
@@ -188,7 +189,8 @@ Take note, that our functions create sequences of different length.
 
 Now we can try it out with one of the first functions.  Let's call our `red/1` function. We spawn it in  a separate process. The reason for that you'll see in a second.
 
-> **Note** 
+> #### Note {: .info} 
+> 
 > You might have to scroll up to see the animation
 
 ```elixir
@@ -201,7 +203,7 @@ end)
 
 Similarly you can do the same with the `blue/1` function. Where it gets interesting is, when you start first the red function and then start the blue function while the red function is still running.
 
-> **Note** 
+> #### Note {: .info} 
 > 
 > Don't forget to use a differnt namespace name compared to the above function, otherwise
 > one function would constantly overwrite what the other function has defined. We want them
