@@ -17,10 +17,7 @@ defmodule Fledex.Color.NamesGenerator do
 
   require Logger
 
-  # I think the documentation is not picking up the
-  # behaviour if we use the alias before the behaviour
-  # alias Fledex.Color.Names.Interface
-  # alias Fledex.Color.Names.Types
+  alias Fledex.Color.Names.Types
 
   # List of modules that define colors that should be loaded
   # Note: if there is an overlap between the lists, i.e. the same color name
@@ -65,6 +62,13 @@ defmodule Fledex.Color.NamesGenerator do
       color_mod_name = color_mod_name || Fledex.Color.Names
 
       quote bind_quoted: [colors: colors, color_mod_name: color_mod_name] do
+        # ensure we remove any already existing versions (including an old one by purging)
+        if Code.loaded?(color_mod_name) do
+          # `Code` does not expose those functions, so we need to use Erlang version.
+          :code.purge(color_mod_name)
+          :code.delete(color_mod_name)
+        end
+
         defmodule color_mod_name do
           alias Fledex.Color.Names.Types
           @modules_and_colors colors
@@ -77,6 +81,7 @@ defmodule Fledex.Color.NamesGenerator do
             Enum.flat_map(@modules_and_colors, fn {_module, colors} -> colors end)
           end
 
+          @spec find_module_with_names(atom) :: {module, list(atom)}
           def find_module_with_names(name) do
             module_and_names =
               Enum.find(@modules_and_colors, {nil, []}, fn {module, colors} ->
@@ -84,11 +89,7 @@ defmodule Fledex.Color.NamesGenerator do
               end)
           end
 
-          # defp find_name_in_colors?(colors, name) do
-          #   name in colors
-          #   # Enum.find(colors, fn color -> color == name end) != nil
-          # end
-
+          @spec info(name :: atom, what :: Types.color_props_t()) :: Types.color_vals_t()
           def info(name, what \\ :hex)
 
           def info(name, what) do
