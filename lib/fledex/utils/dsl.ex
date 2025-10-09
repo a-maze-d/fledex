@@ -3,6 +3,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Utils.Dsl do
+  @moduledoc """
+  The module is only inteded to be used by the Fledex module.
+
+  It's a set of helper functions to create the DSL. A lot of functions are workign on
+  the AST (abstract syntax tree) level.
+  """
   require Logger
 
   alias Fledex.Animation.Manager
