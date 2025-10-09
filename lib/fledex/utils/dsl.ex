@@ -106,6 +106,9 @@ defmodule Fledex.Utils.Dsl do
     Manager.register_config(strip_name, config)
   end
 
+  @doc """
+  This initializes our animation system, except if we don't want this
+  """
   @spec init(keyword) :: :ok | {:ok, pid()}
   def init(opts) do
     # let's start our animation manager. The manager makes sure only one will be started
