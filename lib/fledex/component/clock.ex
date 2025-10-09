@@ -15,7 +15,8 @@ defmodule Fledex.Component.Clock do
     {helper_color, hour_color, minute_color, second_color} =
       Keyword.get(options, :colors, {:davy_s_grey, :red, :blue, :green})
 
-    use Fledex, dont_start: true, colors: :none
+    import Fledex
+    import Fledex.Leds
 
     led_strip name, :config do
       component(trigger_second, Dot,

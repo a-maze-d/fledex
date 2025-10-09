@@ -19,7 +19,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Update the cheatsheet with coordinator info (v0.7)
   - [ ] Update documentation with the Supervision tree (v0.7)
 - [ ] Testing
-  - [ ] Test all the livebooks (v0.7)
+  - [x] Test all the livebooks (v0.7)
   - [ ] Add tests for the Clock component (v0.7)
   - [ ] Add tests for the Thermometer components (v0.7)
 - [ ] Cleanup
@@ -28,9 +28,10 @@ Even though this library is published, there are things I still want to do befor
   - [x] All Color name modules have the same interface (through the DSL it's even enforced). Let's make this more explicit by introducting a Color.Names.Interface with the appropriate callbacks (v0.7)
   - [x] We could change the `Fledex.Color` for `Atom` to delegate to any of the color modules until we find the module that implements it. Defaulting to black if the color does not exist. Thus, we wouldn't even need any specific `color_name` guard, since any atom would be "kind of" valid. I think that would dramatically reduce the dependencies. Downside is that it wouldn't be possible to look at all the colors that are implemented at compiletime, but for that we have runtime functions and that's probably where we would need them the most. (v0;7)
   - [x] Change the import of `Fledex.Color.Names` and import the different color components individually instead. `Fledex.Color.Names` still makes sense to bind those together. The import can be done in a flexible way. This should reduce the complexity of the code, the dependencies, and increase the flexibility without loss of convenience for the user (v0.8)
-  - [ ] Check whether we could unload the module first before we we redefine it. The unloading could be done with [`:code.delete(module)](https://www.erlang.org/doc/apps/kernel/code.html#delete/1). This could allow us to ALLWAYS define the module and redefine an inner module. (v0.7)
+  - [x] Check whether we could unload the module first before we we redefine it. The unloading could be done with [`:code.delete(module)](https://www.erlang.org/doc/apps/kernel/code.html#delete/1). This could allow us to ALLWAYS define the module and redefine an inner module. (v0.7)
+  - [x] components shouldn't `use` but `import` Fledex. This way we would solve a lot of issues.
 - [ ] Missing functionality
-  - [ ] Allow selecting the color modules that can be loaded instead of loading always the same list by default. (v0.7)
+  - [x] Allow selecting the color modules that can be loaded instead of loading always the same list by default. (v0.7)
   - [ ] The Job should (at least appear) to be connected to the LedStrip (v0.7)
   - [ ] Lower than sec precision is not possible with Quantum. Replace it with a different library (maybe SchedEx? https://hexdocs.pm/sched_ex/readme.html) (v0.7)
   - [ ] we start things through the Supervisor, but we don't shut things down through it (v0.7)

@@ -89,10 +89,13 @@ end
 broadcast_trigger(%{hour: 17, minute: 34})
 ```
 
-The interesting thing in the `Fledex.Component.Dot` component is that it actually defines the component by using the `Fledex.animation/3` macro. Therefore it first `use Fledex` to make the macro available. We specify some options:
+The interesting thing in the `Fledex.Component.Dot` component is that it actually defines the component by using the `Fledex.animation/3` macro. Therefore it first `import Fledex` to make the macro available. We shouldn't use `use Fledex` since a lot of things are happening in the background that we don't want to happen for just the macros (like starting an animation, defining color names, ...). We could avoid all this by specifying some options:
 
 * `dont_start: true`: to avoid starting the animation manager
 * `colors: none`: we don't want to include any color names.
+
+but that almost equal to importing.
+
   > #### Note
   > 
   > We want to leave the definition of color names to the user of our component. In a component you
@@ -105,7 +108,9 @@ The code looks like the following
 
 ```elixir
   def configure(name, options) when is_atom(name) and is_list(options) do
-    use Fledex, dont_start: true, colors: :none
+    import Fledex
+    import Fledex.Leds
+
     # ... here comes some option extraction stuff
     animation name do
       triggers when is_map(triggers) and is_map_key(triggers, trigger_name) ->
@@ -128,8 +133,10 @@ Each animation requires its own unique name and this is accomplished with a smal
 
 ```elixir
   def configure(name, options) do
+    import Fledex
+    import Fledex.Leds
+
     # ... here comes some option extraction stuff 
-    use Fledex, dont_start: true, colors: :none
     led_strip name, :config do
       component :minute, Dot, color: minute_color, count: 60, trigger_name: create_name(trigger_name, :minute)
       component :hour, Dot, color: hour_color, count: 24, trigger_name: create_name(trigger_name, :hour)

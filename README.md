@@ -89,7 +89,7 @@ end
 
 You mainly use the functionality from `Fledex.Leds` which has plenty of functions. It allows to set individual leds, provides the possibility to nest led sequences, to repeat and to define leds through some functions, like gradients and rainbow distributions.
 `Fledex` comes with a very rich set of color names that can be used (see `Fledex.Color.Names.Interface` for details), but you can define it also by specifying a hex value. 
-Here an example of an led squence of 10 leds with the first 3 being `red`, `green`, and  `0x0000ff` (blue). The rest will be black (off).
+Here an example of an led sequence of 10 leds with the first 3 being (purposefully specified in different ways) `red()` (as function), `:green` (as atom), and  `0x0000ff` (blue, as hex-code) The rest will be black (off).
 ```elixir
   leds(10) |> red() |> light(:green) |> light(0x0000ff)
 ```
