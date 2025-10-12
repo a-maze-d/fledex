@@ -55,7 +55,19 @@ defmodule Fledex.Color.Names.ModuleGenerator do
         drop,
         splitter_opts,
         converter,
-        module
+        module,
+        fields \\ [
+          :index,
+          :name,
+          :descriptive_name,
+          :hex,
+          :rgb,
+          :hsl,
+          :hsv,
+          :source,
+          :module,
+          :all
+        ]
       ) do
     quote unquote: false,
           bind_quoted: [
@@ -64,7 +76,8 @@ defmodule Fledex.Color.Names.ModuleGenerator do
             drop: drop,
             splitter_opts: splitter_opts,
             converter: converter,
-            module: module
+            module: module,
+            fields: fields
           ] do
       @behaviour Fledex.Color.Names.Interface
 
@@ -121,6 +134,18 @@ defmodule Fledex.Color.Names.ModuleGenerator do
       @spec names :: list(color_name_t)
       def names, do: Map.keys(@colors)
 
+      @standard_fields [
+        :index,
+        :name,
+        :descriptive_name,
+        :hex,
+        :rgb,
+        :hsl,
+        :hsv,
+        :source,
+        :module,
+        :all
+      ]
       @doc """
       Retrieve information about the color with the given name
       """
@@ -128,9 +153,10 @@ defmodule Fledex.Color.Names.ModuleGenerator do
       def info(name, what \\ :hex)
       # def info(name, what) when is_color_name(name), do: apply(__MODULE__, name, [what])
       def info(name, what) do
-        case function_exported?(__MODULE__, name, 1) do
-          true -> apply(__MODULE__, name, [what])
-          false -> nil
+        case {function_exported?(__MODULE__, name, 1), what in @standard_fields} do
+          {true, true} -> apply(__MODULE__, name, [what])
+          {true, false} -> apply(__MODULE__, name, [:all]) |> Map.get(what, nil)
+          _ -> nil
         end
       end
 

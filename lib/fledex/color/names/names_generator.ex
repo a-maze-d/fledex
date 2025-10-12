@@ -83,10 +83,10 @@ defmodule Fledex.Color.NamesGenerator do
 
           @spec find_module_with_names(atom) :: {module, list(atom)}
           def find_module_with_names(name) do
-            module_and_names =
-              Enum.find(@modules_and_colors, {nil, []}, fn {module, colors} ->
-                name in colors
-              end)
+            # module_and_names =
+            Enum.find(@modules_and_colors, {nil, []}, fn {module, colors} ->
+              name in colors
+            end)
           end
 
           @spec info(name :: atom, what :: Types.color_props_t()) :: Types.color_vals_t()

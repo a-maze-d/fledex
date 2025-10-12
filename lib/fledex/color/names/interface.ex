@@ -50,6 +50,7 @@ defmodule Fledex.Color.Names.Interface do
   """
 
   alias Fledex.Color.Names.Types
+  alias Fledex.Color.Types, as: ColorTypes
 
   @doc ~S"""
   Check whether the atom is a valid color name
@@ -74,5 +75,15 @@ defmodule Fledex.Color.Names.Interface do
   @doc """
   Retrieve information about the color with the given name
   """
-  @callback info(name :: atom, what :: Types.color_props_t()) :: Types.color_vals_t()
+  @callback info(name :: atom, :index) :: nil | integer
+  @callback info(name :: atom, :name) :: nil | Types.color_name_t()
+  @callback info(name :: atom, :descriptive_name) :: nil | String.t()
+  @callback info(name :: atom, :hex) :: nil | ColorTypes.colorint()
+  @callback info(name :: atom, :rgb) :: nil | ColorTypes.rgb()
+  @callback info(name :: atom, :hsl) :: nil | ColorTypes.hsl()
+  @callback info(name :: atom, :hsv) :: nil | ColorTypes.hsv()
+  @callback info(name :: atom, :source) :: nil | String.t()
+  @callback info(name :: atom, :module) :: nil | module()
+  @callback info(name :: atom, :all) :: nil | Types.color_vals_t()
+  @callback info(name :: atom, what :: atom) :: any()
 end

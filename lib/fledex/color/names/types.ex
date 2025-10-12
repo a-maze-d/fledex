@@ -19,6 +19,7 @@ defmodule Fledex.Color.Names.Types do
   The structure of a named color with all it's attributes.
   """
   @type color_struct_t :: %{
+          optional(atom) => any(),
           index: integer,
           name: color_name_t,
           descriptive_name: String.t(),
