@@ -159,6 +159,7 @@ defmodule Fledex.MixProject do
         "docs/hardware.md",
         "docs/project_plan.md",
         "docs/cheatsheet.cheatmd",
+        "docs/colors.md",
         "livebooks/README.md",
         "livebooks/1_first_steps_with_an_led_strip.livemd",
         "livebooks/2_fledex_first_steps.livemd",
@@ -218,7 +219,7 @@ defmodule Fledex.MixProject do
 
   defp aliases do
     [
-      # docs: ["docs", &copy_doc_images/1],
+      docs: ["docs.fledex.colors", "docs"],
       # test: ["coveralls.html"],
       reuse: [&run_reuse/1]
     ]

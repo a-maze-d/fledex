@@ -14,6 +14,10 @@ defmodule Fledex.Color.Names.Utils do
     {Fledex.Color.Names.RAL, :optional, :ral}
   ]
 
+  def modules do
+    @modules
+  end
+
   @doc """
   This function takes either a module, an atom or a list of those,
   resolves atoms to their corresponding modules, retrieves all

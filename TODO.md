@@ -15,7 +15,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.7)
   - [ ] Add a livebook with coordinator examples (v0.7)
   - [ ] Update the documentation with new color name information (v0.7)
-  - [ ] Create a new color page, since the colors will not be avilable through `Fledex.Color.Names` directly (v0.7)
+  - [x] Create a new color page, since the colors will not be available through `Fledex.Color.Names` directly (v0.7)
   - [ ] Update the cheatsheet with coordinator info (v0.7)
   - [ ] Update documentation with the Supervision tree (v0.7)
 - [ ] Testing

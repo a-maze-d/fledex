@@ -36,17 +36,19 @@ defmodule Fledex.Color.Names.ModuleGenerator do
     splitter_opts = Keyword.fetch!(opts, :splitter_opts)
     converter = Keyword.fetch!(opts, :converter)
     module = Keyword.get(opts, :module, :unknown)
-    fields = Keyword.get(opts, :fields, [
-      :index,
-      :name,
-      :descriptive_name,
-      :hex,
-      :rgb,
-      :hsl,
-      :hsv,
-      :source,
-      :module
-    ])
+
+    fields =
+      Keyword.get(opts, :fields, [
+        :index,
+        :name,
+        :descriptive_name,
+        :hex,
+        :rgb,
+        :hsl,
+        :hsv,
+        :source,
+        :module
+      ])
 
     create_color_functions(
       filename,
@@ -168,9 +170,11 @@ defmodule Fledex.Color.Names.ModuleGenerator do
         @spec unquote(name)(Types.color_props_t()) :: Types.color_vals_t()
         def unquote(name)(what \\ :hex)
         def unquote(name)(:all), do: unquote(Macro.escape(color))
+
         for field <- fields do
           def unquote(name)(unquote(field)), do: unquote(Macro.escape(color))[unquote(field)]
         end
+
         @spec unquote(name)(Leds.t()) :: Leds.t()
         def unquote(name)(leds), do: leds |> Leds.light(unquote(Macro.escape(color)).hex)
         @doc false
