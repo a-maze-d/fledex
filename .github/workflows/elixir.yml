@@ -34,6 +34,7 @@ jobs:
             otp: 27
           - elixir: 1.18.x
             otp: 28
+            coverage: true
     steps:
     - name: Harden the runner (Audit all outbound calls)
       uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
@@ -53,15 +54,18 @@ jobs:
 
     - name: Restore dependencies cache
       uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-      id: mix_cache
       with:
-        path: |
-          deps
-          _build
+        path: deps/
         key: test-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('**/mix.lock') }}
 
+    - name: Restore build cache
+      uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+      with:
+        path: _build/test/
+        key: test-${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('**/mix.lock') }}
+        
+
     - name: Install dependencies
-      if: steps.mix_cache.outputs.cache-hit != 'true'
       run: |
         mix local.rebar --force
         mix local.hex --force
@@ -78,6 +82,13 @@ jobs:
       run: mix format --check-formatted
 
     - name: Run tests
+      run: mix test
+      env:
+        MIX_ENV: test
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Check coverage
+      if: "${{ matrix.coverage }}"
       run: mix coveralls.github
       env:
         MIX_ENV: test
