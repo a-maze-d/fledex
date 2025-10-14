@@ -5,45 +5,6 @@
 defmodule Fledex.Color.TNamesTest do
   use ExUnit.Case, async: false
 
-  defmodule TestNames do
-    @behaviour Fledex.Color.Names.Interface
-
-    defguard is_color_name(name) when name == :maze
-
-    def names do
-      [:maze]
-    end
-
-    def colors do
-      [
-        %{
-          index: 1,
-          name: :maze,
-          descriptive_name: "maze special color",
-          hex: 0x747474,
-          rgb: {0x74, 0x74, 0x74},
-          hsl: {0, 0, 0},
-          hsv: %Fledex.Color.HSV{h: 0, s: 0, v: 0},
-          source: "",
-          module: TestNames
-        }
-      ]
-    end
-
-    def info(:maze, :hex) do
-      0x747474
-    end
-
-    def info(:maze, :all) do
-      [color] = colors()
-      color
-    end
-
-    def maze(what) do
-      info(:maze, what)
-    end
-  end
-
   alias Fledex.Color.TNames
 
   def get_modules(modules_and_color) do
@@ -106,10 +67,10 @@ defmodule Fledex.Color.TNamesTest do
       assert length(mac) == 2
       assert get_modules(mac) == [Fledex.Color.Names.Wiki, Fledex.Color.Names.CSS]
 
-      use TNames, colors: [TestNames]
+      use TNames, colors: [TestColorModule]
       mac = TNames.modules_and_colors()
       assert length(mac) == 1
-      assert get_modules(mac) == [TestNames]
+      assert get_modules(mac) == [TestColorModule]
 
       use TNames, colors: [:default]
       mac = TNames.modules_and_colors()
@@ -143,31 +104,42 @@ defmodule Fledex.Color.TNamesTest do
       assert Enum.empty?(TNames.modules_and_colors())
     end
 
+    # it's a bit unclear to me where the logging is going :-(
     test "specify non-existing module" do
       import ExUnit.CaptureLog
+      require Logger
 
       assert capture_log(fn ->
-               # <-- non-existant
-               use TNames, colors: Test1
+               # non-existant color module
+               Code.compile_string("""
+                 alias Fledex.Color.TNames
+                 Code.ensure_loaded(TNames)
+                 use TNames, colors: Test1
+               """)
              end) =~ "Not a known color name"
     end
 
     test "specify color name module with wrong behaviour" do
       import ExUnit.CaptureLog
 
-      defmodule Test2 do
-      end
-
       assert capture_log(fn ->
-               # <-- existant, but not implementing the behaviour
-               use TNames, colors: Test2
+               # existant, but not implementing the behaviour
+               Code.compile_string("""
+                   alias Fledex.Color.TNames
+                   Code.ensure_loaded(TNames)
+
+                   defmodule Test2 do
+                   end
+
+                   use TNames, colors: Test2
+               """)
              end) =~ "Not a known color name"
     end
   end
 
   describe "test apis" do
     test "names" do
-      use TNames, colors: TestNames
+      use TNames, colors: TestColorModule
       assert TNames.names() == [:maze]
     end
 
@@ -199,9 +171,9 @@ defmodule Fledex.Color.TNamesTest do
     end
 
     test "info" do
-      use TNames, colors: TestNames
+      use TNames, colors: TestColorModule
       assert TNames.info(:maze) == 0x747474
-      assert TNames.info(:maze, :all) == TestNames.info(:maze, :all)
+      assert TNames.info(:maze, :all) == TestColorModule.info(:maze, :all)
 
       use TNames, colors: nil
       assert TNames.info(:maze) == nil

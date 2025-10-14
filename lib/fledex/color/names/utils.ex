@@ -14,6 +14,24 @@ defmodule Fledex.Color.Names.Utils do
     {Fledex.Color.Names.RAL, :optional, :ral}
   ]
 
+  @doc """
+  Returns a list with the known color name modules (known to Fledex)
+
+  Fledex is configured with a set of color name modules that can be retrieved through this function. A list is returned with a tuple consisting of of:
+
+  * `module`: The color name module
+  * `type`: Whether it's a `:core` color or an `:optional` color. The former will get loaded as one of the default colors
+  * `shortcut_name`: an `atom` name through which you can reference this module
+
+  It should be noted that the order is important in the case of name conflicts. Color name definitions from earlier modules take precedence.
+
+  Example:
+  * Given `ModuleA` defines `:green` as `0x00FF00`
+  * Given `ModuleB` defines `:green` as `0x00AA00`
+  * If `ModuleA` is specied BEFORE `ModuleB` then `:green` will be defined as `0x00FF00`
+  * If `ModuleA` is specified AFTER `ModuleB` then `:green` will be defined as `0x00AA00`
+  """
+  @spec modules :: list({module, type :: :core | :optional, shutcut_name :: atom})
   def modules do
     @modules
   end
@@ -73,8 +91,7 @@ defmodule Fledex.Color.Names.Utils do
           Logger.warning("""
           Not a known color name. Either an atom (with appropriate mapping)
           or a module (implementing the Fledex.ColorNames behavior) is expected.
-          I found instead: #{inspect(color_name)}
-          And we will ignore it
+          I found instead: "#{inspect(color_name)}", and we will ignore it
           """)
 
           acc
@@ -95,5 +112,32 @@ defmodule Fledex.Color.Names.Utils do
     end)
     |> elem(0)
     |> Enum.reverse()
+  end
+
+  @spec import_color_module({module, list(atom)}) :: Macro.t()
+  defp import_color_module({module, only}) do
+    quote do
+      import unquote(module), only: unquote(only)
+    end
+  end
+
+  def create_imports_ast(modules_and_colors) do
+    modules_with_only(modules_and_colors)
+    |> Enum.map(&import_color_module/1)
+  end
+
+  # @doc """
+  # Convert a list of module-only list to a list that
+  # can be used to import modules
+  # """
+  @spec modules_with_only(list({module, list(atom)})) :: list({module, list({atom, 0 | 1 | 2})})
+  defp modules_with_only(modules_with_colors) do
+    # each name has a function with arity 1 and 2
+    Enum.map(modules_with_colors, fn {module, names} ->
+      {module,
+       Enum.flat_map(names, fn only ->
+         [{only, 0}, {only, 1}, {only, 2}]
+       end)}
+    end)
   end
 end

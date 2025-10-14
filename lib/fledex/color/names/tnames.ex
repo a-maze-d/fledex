@@ -20,6 +20,7 @@ defmodule Elixir.Fledex.Color.TNames do
   > should not `use Fledex` but `import Fledex` and be explicit in your color selection.
   """
   alias Fledex.Color.Names.Types
+  alias Fledex.Color.Names.Utils
 
   @doc """
   By using this module you configure the #{__MODULE__} for a set of colors as
@@ -30,6 +31,16 @@ defmodule Elixir.Fledex.Color.TNames do
   > This will create the `Fledex.Color.Names.Config` module. If you `use` this
   > module several times, previous definition will be replaced. This could lead
   > to unexpected behaviors.
+
+  ### Options:
+  * `:colors`: You can specify a single color module, a list of color modules, or one of the special specifiers (`:default`, `:all`, `:none`, `nil`). When you specify a color module you can do so either through it's fully qualified module name (and thereby even
+  load color modules that Fledex doesn't know about) or through its shortcut name (see `Fledex.Color.Names.Utils.modules/0`)
+
+  ### Special specifiers:
+  * `:all`: All known color modules will be loaded. Be careful, because there are A LOT of color names, probably more than what you really need
+  * `:default`: This will load the core modules (see `Fledex.Color.Names.Utils.modules/0`). If no `:colors` option is specified then that's also the set that will be loaded.
+  * `:none`: No color will be loaded (still the `Fledex.Color.Names.Config` will be created. Compare this with `nil`)
+  * `nil`: This is similar to `:none` except that the `Fledex.Color.Names.Config` will not be created, and if it exists will be deleted.
   """
   @spec __using__(keyword) :: Macro.t()
   defmacro __using__(opts) do
@@ -45,9 +56,16 @@ defmodule Elixir.Fledex.Color.TNames do
         end
       end
     else
-      quote bind_quoted: [mod_name: mod_name, colors: colors] do
-        alias Fledex.Color.Names.Utils
-        modules_and_colors = Utils.find_modules_with_names(colors)
+      # we get an AST, so we need to convert it back to a list of atoms and module names
+      modules_and_colors =
+        colors
+        |> Macro.prewalk(&Macro.expand(&1, __ENV__))
+        |> Utils.find_modules_with_names()
+
+      ast = Utils.create_imports_ast(modules_and_colors)
+
+      quote bind_quoted: [mod_name: mod_name, modules_and_colors: modules_and_colors, ast: ast] do
+        Macro.escape(ast)
 
         if Code.loaded?(mod_name) do
           # `Code` does not expose those functions, so we need to use Erlang version.
