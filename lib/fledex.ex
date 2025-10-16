@@ -134,16 +134,17 @@ defmodule Fledex do
   """
   @spec __using__(keyword) :: Macro.t()
   defmacro __using__(opts) do
-    alias Fledex.Utils.Dsl
-    {use_ast, import_ast, opts} = Dsl.create_color_name_asts(opts)
+    # alias Fledex.Utils.Dsl
+    # {use_ast, import_ast, opts} = Dsl.create_color_name_asts(opts)
 
-    quote bind_quoted: [opts: opts, import_ast: import_ast, use_ast: use_ast] do
+    quote bind_quoted: [opts: opts] do # , import_ast: import_ast, use_ast: use_ast] do
+      use Fledex.Color.Names, colors: unqote(opts[:colors])
+      # Macro.escape(use_ast)
+      # Macro.escape(import_ast)
       import Crontab.CronExpression
       import Fledex
       # import also the Leds and the color name definitions so no namespace are required
       import Fledex.Leds
-      Macro.escape(use_ast)
-      Macro.escape(import_ast)
       import Fledex.Utils.PubSub
 
       alias Fledex.Driver.Impl.Kino
