@@ -36,7 +36,7 @@ if Mix.env() == :dev do
       file = Path.join(out_dir, out_name)
 
       Mix.shell().info([:green, "Generating Fledex Colors to #{file}"])
-      content = create_content(Utils.modules())
+      content = create_content(Utils.known_color_modules())
       File.write(file, content, [:utf8, :write])
     end
 

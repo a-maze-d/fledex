@@ -10,6 +10,7 @@ defmodule Fledex.Color.NamesOldTest do
   alias Fledex.Color.Names.LoadUtils
   alias Fledex.Color.Names.Wiki
   alias Fledex.Color.Names.WikiUtils
+  alias Fledex.Config
   alias Fledex.Leds
 
   describe "color names loading tests" do
@@ -55,11 +56,12 @@ defmodule Fledex.Color.NamesOldTest do
 
   describe "color names access tests" do
     test "defined color modules" do
-      modules_and_colors = Names.modules_and_colors()
-      assert length(modules_and_colors) == 3
+      use Fledex, dont_start: true, colors: :default
+      colors = Config.colors()
+      assert length(colors) == 3
 
       modules =
-        Enum.map(modules_and_colors, fn {module, colors} ->
+        Enum.map(colors, fn {module, colors} ->
           assert is_list(colors)
           module
         end)
@@ -73,6 +75,7 @@ defmodule Fledex.Color.NamesOldTest do
 
     test "calling by name" do
       alias Fledex.Color.Names.Wiki
+      use Config, colors: :default
 
       assert Wiki.vermilion2(:all) == %{
                hex: 14_235_678,
@@ -131,6 +134,7 @@ defmodule Fledex.Color.NamesOldTest do
     end
 
     test "test quick access functions (with atom)" do
+      use Config, colors: :default
       assert 14_235_678 == Names.info(:vermilion2)
       assert 14_235_678 == Names.info(:vermilion2, :hex)
       assert {216, 56, 30} == Names.info(:vermilion2, :rgb)

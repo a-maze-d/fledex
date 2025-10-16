@@ -11,30 +11,30 @@ defmodule Elixir.Fledex.Color.Names do
   alias Fledex.Color.Names.Types
   alias Fledex.Config
 
-  @doc """
-  By using this module you configure the #{__MODULE__} for a set of colors as
-  specified in the `:colors` option.
+  # @doc """
+  # By using this module you configure the #{__MODULE__} for a set of colors as
+  # specified in the `:colors` option.
 
-  > #### Caution {:.warning}
-  >
-  > This will create the `Fledex.Config.Data` module. If you `use` this
-  > module several times, previous definition will be replaced. This could lead
-  > to unexpected behaviors.
+  # > #### Caution {:.warning}
+  # >
+  # > This will create the `Fledex.Config.Data` module. If you `use` this
+  # > module several times, previous definition will be replaced. This could lead
+  # > to unexpected behaviors.
 
-  ### Options:
-  * `:colors`: You can specify a single color module, a list of color modules, or one of the special specifiers (`:default`, `:all`, `:none`, `nil`). When you specify a color module you can do so either through it's fully qualified module name (and thereby even
-  load color modules that Fledex doesn't know about) or through its shortcut name (see `Fledex.Config.modules/0`)
+  # ### Options:
+  # * `:colors`: You can specify a single color module, a list of color modules, or one of the special specifiers (`:default`, `:all`, `:none`, `nil`). When you specify a color module you can do so either through it's fully qualified module name (and thereby even
+  # load color modules that Fledex doesn't know about) or through its shortcut name (see `Fledex.Config.modules/0`)
 
-  ### Special specifiers:
-  * `:all`: All known color modules will be loaded. Be careful, because there are A LOT of color names, probably more than what you really need
-  * `:default`: This will load the core modules (see `Fledex.Config.modules/0`). If no `:colors` option is specified then that's also the set that will be loaded.
-  * `:none`: No color will be loaded (still the `Fledex.Color.Names.Config` will be created. Compare this with `nil`)
-  * `nil`: This is similar to `:none` except that the `Fledex.Color.Names.Config` will not be created, and if it exists will be deleted.
-  """
-  @spec __using__(keyword) :: Macro.t()
-  defmacro __using__(opts) do
-    Fledex.Config.create_config(opts)
-  end
+  # ### Special specifiers:
+  # * `:all`: All known color modules will be loaded. Be careful, because there are A LOT of color names, probably more than what you really need
+  # * `:default`: This will load the core modules (see `Fledex.Config.modules/0`). If no `:colors` option is specified then that's also the set that will be loaded.
+  # * `:none`: No color will be loaded (still the `Fledex.Color.Names.Config` will be created. Compare this with `nil`)
+  # * `nil`: This is similar to `:none` except that the `Fledex.Color.Names.Config` will not be created, and if it exists will be deleted.
+  # """
+  # @spec __using__(keyword) :: Macro.t()
+  # defmacro __using__(opts) do
+  #   Fledex.Config.create_config_ast(opts)
+  # end
 
   @doc """
   Checks whether the argument is a valid color name.
@@ -51,7 +51,7 @@ defmodule Elixir.Fledex.Color.Names do
   """
   @spec colors :: list(Types.color_struct_t())
   def colors do
-    Enum.flat_map(Config.modules_and_colors(), fn {module, color_names} ->
+    Enum.flat_map(Config.colors(), fn {module, color_names} ->
       Enum.filter(module.colors(), fn color ->
         color[:name] in color_names
       end)
@@ -70,12 +70,12 @@ defmodule Elixir.Fledex.Color.Names do
   > #### Caution {:.warning}
   >
   > When importing color modules, you have to be careful to only import those
-  > functions that do not overlap. You can call `Fledex.Config.modules_and_colors/0` to get
+  > functions that do not overlap. You can call `Fledex.Config.colors/0` to get
   > the list of modules and the colors that should be imported.
   """
   @spec names :: list(Types.color_name_t())
   def names do
-    Enum.flat_map(Config.modules_and_colors(), fn {_module, colors} -> colors end)
+    Enum.flat_map(Config.colors(), fn {_module, colors} -> colors end)
   end
 
   @doc """
@@ -88,7 +88,6 @@ defmodule Elixir.Fledex.Color.Names do
 
   def info(name, what) do
     find_module_with_names(name)
-    |> elem(0)
     |> get_color_from_module(name, what)
   end
 
@@ -96,9 +95,10 @@ defmodule Elixir.Fledex.Color.Names do
   # MARK: private utility functions
   @spec find_module_with_names(atom) :: {module, list(atom)}
   defp find_module_with_names(name) do
-    Enum.find(Config.modules_and_colors(), {nil, []}, fn {_module, colors} ->
+    Enum.find(Config.colors(), {nil, []}, fn {_module, colors} ->
       name in colors
     end)
+    |> elem(0)
   end
 
   @spec get_color_from_module(module | nil, atom, atom) :: nil | Types.color_vals_t()

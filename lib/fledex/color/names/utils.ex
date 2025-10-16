@@ -6,7 +6,7 @@ defmodule Fledex.Color.Names.Utils do
   require Logger
 
   # known color modules with their aliases
-  @modules [
+  @known_color_modules [
     {Fledex.Color.Names.Wiki, :core, :wiki},
     {Fledex.Color.Names.CSS, :core, :css},
     {Fledex.Color.Names.SVG, :core, :svg},
@@ -31,9 +31,9 @@ defmodule Fledex.Color.Names.Utils do
   * If `ModuleA` is specied BEFORE `ModuleB` then `:green` will be defined as `0x00FF00`
   * If `ModuleA` is specified AFTER `ModuleB` then `:green` will be defined as `0x00AA00`
   """
-  @spec modules :: list({module, type :: :core | :optional, shutcut_name :: atom})
-  def modules do
-    @modules
+  @spec known_color_modules :: list({module, type :: :core | :optional, shutcut_name :: atom})
+  def known_color_modules do
+    @known_color_modules
   end
 
   @doc """
@@ -50,12 +50,12 @@ defmodule Fledex.Color.Names.Utils do
   def find_modules_with_names([:none]), do: find_modules_with_names([])
 
   def find_modules_with_names([:all]) do
-    Enum.map(@modules, fn elem -> elem(elem, 0) end)
+    Enum.map(@known_color_modules, fn elem -> elem(elem, 0) end)
     |> find_modules_with_names()
   end
 
   def find_modules_with_names([:default]) do
-    Enum.filter(@modules, fn {_mod, type, _name} -> type == :core end)
+    Enum.filter(@known_color_modules, fn {_mod, type, _name} -> type == :core end)
     |> Enum.map(fn elem -> elem(elem, 0) end)
     |> find_modules_with_names()
   end
@@ -77,7 +77,7 @@ defmodule Fledex.Color.Names.Utils do
 
   @spec find_module_name(atom | module, list(module)) :: list(module)
   defp find_module_name(color_name, acc) do
-    case Enum.find(@modules, fn {_module, _type, name} -> name == color_name end) do
+    case Enum.find(@known_color_modules, fn {_module, _type, name} -> name == color_name end) do
       {module, _type, _name} ->
         # we translate from an atom to a module
         [module | acc]
@@ -122,7 +122,8 @@ defmodule Fledex.Color.Names.Utils do
   end
 
   def create_imports_ast(modules_and_colors) do
-    modules_with_only(modules_and_colors)
+    modules_and_colors
+    |> modules_with_only()
     |> Enum.map(&import_color_module/1)
   end
 

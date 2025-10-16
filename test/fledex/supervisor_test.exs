@@ -227,7 +227,10 @@ defmodule Fledex.SupervisorTest do
 
       assert Enum.empty?(DynamicSupervisor.which_children(__MODULE__.DynSupervisor))
 
-      use Fledex, supervisor: {:dynamic, __MODULE__.DynSupervisor}, colors: :none
+      use Fledex, [
+        supervisor: {:dynamic, __MODULE__.DynSupervisor},
+        colors: :none
+      ]
       assert not Enum.empty?(DynamicSupervisor.which_children(__MODULE__.DynSupervisor))
 
       Supervisor.stop(__MODULE__.DynSupervisor, :normal)

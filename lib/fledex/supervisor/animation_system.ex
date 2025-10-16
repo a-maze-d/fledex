@@ -56,7 +56,7 @@ defmodule Fledex.Supervisor.AnimationSystem do
   def child_spec(init_args \\ []) do
     %{
       id: Fledex.Supervisor.AnimationSystem,
-      start: {Fledex.Supervisor.AnimationSystem, :start_link, init_args}
+      start: {Fledex.Supervisor.AnimationSystem, :start_link, [init_args]}
     }
   end
 

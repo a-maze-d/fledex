@@ -140,7 +140,7 @@ defmodule Fledex do
     # |> Macro.prewalk(&Macro.expand(&1, __ENV__))
     # |> dbg()
 
-    config = Fledex.Config.create_config(opts)
+    config = Fledex.Config.create_config_ast(opts)
     quote bind_quoted: [opts: opts, config: config] do # , import_ast: import_ast, use_ast: use_ast] do
       Macro.escape(config)
 

@@ -115,6 +115,7 @@ defmodule Fledex.Utils.Dsl do
     if Keyword.get(opts, :dont_start, false) == true do
       :ok
     else
+      # Logger.info("Starting AnimationSystem with: #{inspect opts}")
       case start_system(opts) do
         {:ok, pid} ->
           {:ok, pid}
