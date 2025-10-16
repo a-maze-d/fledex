@@ -134,12 +134,6 @@ defmodule Fledex do
   """
   @spec __using__(keyword) :: Macro.t()
   defmacro __using__(opts) do
-    # alias Fledex.Utils.Dsl
-    # {use_ast, import_ast, opts} = Dsl.create_color_name_asts(opts)
-    # colors = opts[:colors]
-    # |> Macro.prewalk(&Macro.expand(&1, __ENV__))
-    # |> dbg()
-
     config = Fledex.Config.create_config_ast(opts)
     quote bind_quoted: [opts: opts, config: config] do # , import_ast: import_ast, use_ast: use_ast] do
       Macro.escape(config)
