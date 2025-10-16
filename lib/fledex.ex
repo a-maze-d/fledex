@@ -136,11 +136,14 @@ defmodule Fledex do
   defmacro __using__(opts) do
     # alias Fledex.Utils.Dsl
     # {use_ast, import_ast, opts} = Dsl.create_color_name_asts(opts)
+    # colors = opts[:colors]
+    # |> Macro.prewalk(&Macro.expand(&1, __ENV__))
+    # |> dbg()
 
-    quote bind_quoted: [opts: opts] do # , import_ast: import_ast, use_ast: use_ast] do
-      use Fledex.Color.Names, colors: unqote(opts[:colors])
-      # Macro.escape(use_ast)
-      # Macro.escape(import_ast)
+    config = Fledex.Config.create_config(opts)
+    quote bind_quoted: [opts: opts, config: config] do # , import_ast: import_ast, use_ast: use_ast] do
+      Macro.escape(config)
+
       import Crontab.CronExpression
       import Fledex
       # import also the Leds and the color name definitions so no namespace are required
