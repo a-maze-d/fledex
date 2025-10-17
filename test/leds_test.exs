@@ -4,10 +4,11 @@
 
 defmodule Fledex.LedsTest do
   use ExUnit.Case, async: true
+
   alias Fledex.Leds
   alias Fledex.LedStrip
 
-  doctest Leds
+  doctest Fledex.Leds
 
   describe "basic tests" do
     test "define raw struct" do
@@ -78,6 +79,8 @@ defmodule Fledex.LedsTest do
     end
 
     test "converting from list to map" do
+      use Fledex.Config, colors: :default
+
       list = [
         {0, 0, 0},
         {25, 25, 25},
@@ -221,6 +224,8 @@ defmodule Fledex.LedsTest do
     end
 
     test "setting leds by name" do
+      use Fledex.Config, color: :default
+
       leds =
         Leds.leds(10)
         |> Leds.light(:light_salmon)
@@ -351,6 +356,8 @@ defmodule Fledex.LedsTest do
     end
 
     test "repeat" do
+      use Fledex.Config
+
       leds =
         Leds.leds(3) |> Leds.light(:red) |> Leds.light(:red) |> Leds.light(:red) |> Leds.repeat(3)
 
@@ -380,6 +387,8 @@ defmodule Fledex.LedsTest do
     end
 
     test "repeat with different input types" do
+      use Fledex.Config, colors: :default
+
       leds =
         Leds.leds(
           10,
@@ -467,6 +476,9 @@ defmodule Fledex.LedsTestSync do
 
     test "send function with rotation" do
       import ExUnit.CaptureLog
+      alias Fledex.Config
+
+      use Config, colors: :default
 
       {:ok, log} =
         with_log(fn ->

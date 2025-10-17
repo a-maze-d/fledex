@@ -13,7 +13,8 @@ defmodule Fledex.Color.Names.Wiki do
 
   Prefer to not use this module directly, but use `Fledex.Color.Names` instead.
 
-  > **Note**
+  > #### Note {: .info}
+  >
   > This module implements the `Fledex.Color.Names.Interface` behaviour.
   """
 
@@ -21,7 +22,7 @@ defmodule Fledex.Color.Names.Wiki do
 
   @external_resource Path.dirname(__DIR__) <> "/wiki/wiki_colors.csv"
 
-  use Fledex.Color.Names.Dsl,
+  use Fledex.Color.Names.ModuleGenerator,
     filename: @external_resource,
     pattern: ~r/^.*$/i,
     drop: 1,

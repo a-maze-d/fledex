@@ -4,7 +4,8 @@
 
 defmodule Fledex.Animation.JobScheduler do
   @moduledoc """
-  > **Note**
+  > #### Note {: .info}
+  >
   > You probably do not want to use this module directly but use the DSL defined
   > in `Fledex`
 

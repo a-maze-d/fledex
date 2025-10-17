@@ -4,7 +4,8 @@ Copyright 2023-2024, Matthias Reik <fledex@reik.org>
 SPDX-License-Identifier: Apache-2.0
 -->
 
-> **CAUTION**
+> #### Caution {: .warning}
+>
 > Some of the information here is slightly outdated, because the implementation has
 > evolved over time, but the basic concepts are still valid.
 

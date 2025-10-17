@@ -11,13 +11,14 @@ Ideally we don't tear everything down, but only those parts that are really requ
 
 This document is investigating the approach we want to take.
 
-> **Note**
+> #### Note {: .info}
 > 
 > The different drivers are NOT uniquely identified (and it would be a too big burden on
 > the user to do so), so that we have to figure out the most appropriate update from the
 > information that we have at our hands.
 
-> **Note2**
+> #### Note {: .info}
+> 
 > I'm not sure whether it's really necessary to go through all those troubles to keep
 > existing drivers active. Maybe it's much easier to tear everything down. Maybe we should
 > KISS. The only issue is that, when we recompile a strip (when changing the

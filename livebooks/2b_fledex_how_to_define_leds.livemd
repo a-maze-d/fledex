@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
 ```elixir
 Mix.install(
   [
-    {:fledex, path: "/home/maze/Documents/code/fledex"}
+    {:fledex, "~>0.6"}
   ],
   # necessary to enable the nicer rendering
   consolidate_protocols: false
@@ -53,18 +53,25 @@ my_color4 = {44, 175, 228}
 Fledex.Color.KinoRender.new([my_color3, my_color4])
 ```
 
-The next most convenient way is to defined a color through its name (see `Fledex.Color.Names`). 
+The next most convenient way is to defined a color through its name (see `Fledex.Color.Names.Interface`). Fledex uses the `Fledex.Color` protocol for conversion of any arbitrary
+colors. 
 We will look at this in more detail in a [later chapter](3b_fledex_everything_about_colors.livemd)
 
 ```elixir
+# This will load some color
+use Fledex
+
+alias Fledex.Color
 alias Fledex.Color.Names
 # note, this is a slightly different color compared to the above one, since the exact color 
 # does not exist. "Cerulean (Crayola): {28, 170, 214} is roughly the same color
 my_color5 = :cerulean_crayola
 my_color6 = Names.info(my_color5)
-my_color7 = Names.cerulean_crayola()
+my_color7 = Color.to_colorint(my_color5)
+my_color8 = Color.to_rgb(my_color5)
+my_color9 = cerulean_crayola()
 
-Fledex.Color.KinoRender.new([my_color5, my_color6, my_color7])
+Fledex.Color.KinoRender.new([my_color5, my_color6, my_color7, my_color8, my_color9])
 ```
 
 From the color names you can also get more information, but as mentioned above we'll look at this in a later chapter.
@@ -104,7 +111,7 @@ alias Fledex.Color.Names
 leds =
   leds
   |> Leds.light(:red, offset: 10)
-  |> Leds.light(Names.green())
+  |> Leds.light(green())
   |> Leds.light({0, 0, 0xFF})
 ```
 
@@ -191,7 +198,8 @@ When you want to create a color sequence that is more complex, then this can als
 
 If, for example, you want to create a rainbow pattern over 10 LEDs, you can do so by using the `rainbow/2` function.
 
-> **Note**
+> #### Note
+> 
 > If you don't specify the nubmer of leds, all leds in the sequence will be used (here it
 > would be all 30 leds)
 

@@ -1,9 +1,17 @@
-# Copyright 2024, Matthias Reik <fledex@reik.org>
+# Copyright 2024-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Utils.DslTest do
   defmodule Test do
+  end
+
+  defmodule TestWithColorNames do
+    @behaviour Fledex.Color.Names.Interface
+    defguard is_color_name(name) when name == :red or name == :green or name == :blue
+    def names, do: [:red, :green, :blue]
+    def colors, do: []
+    def info(_name, _val), do: nil
   end
 
   use ExUnit.Case

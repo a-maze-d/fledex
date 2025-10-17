@@ -3,6 +3,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Utils.Dsl do
+  @moduledoc """
+  The module is only inteded to be used by the Fledex module.
+
+  It's a set of helper functions to create the DSL. A lot of functions are workign on
+  the AST (abstract syntax tree) level.
+  """
   require Logger
 
   alias Fledex.Animation.Manager
@@ -100,12 +106,16 @@ defmodule Fledex.Utils.Dsl do
     Manager.register_config(strip_name, config)
   end
 
+  @doc """
+  This initializes our animation system, except if we don't want this
+  """
   @spec init(keyword) :: :ok | {:ok, pid()}
   def init(opts) do
     # let's start our animation manager. The manager makes sure only one will be started
     if Keyword.get(opts, :dont_start, false) == true do
       :ok
     else
+      # Logger.info("Starting AnimationSystem with: #{inspect opts}")
       case start_system(opts) do
         {:ok, pid} ->
           {:ok, pid}
@@ -200,7 +210,8 @@ defmodule Fledex.Utils.Dsl do
   This function is to decide on whether `ast_create_anonymous_func/1`
   or `ast_create_anonymous_func/2` should be called
 
-  > **Note**
+  > #### Note {: .info}
+  >
   > This function makes the assumption that a single argument is required.
   """
   @spec ast_add_argument_to_func_if_missing(any()) :: {:fn, [], [{:->, list(), list()}, ...]}

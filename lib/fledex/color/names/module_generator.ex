@@ -2,7 +2,31 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-defmodule Fledex.Color.Names.Dsl do
+defmodule Fledex.Color.Names.ModuleGenerator do
+  @moduledoc """
+  This module allows to easily create color name modules (implementing the
+  `Fledex.Color.Names.Interface` behaviour) by simply using this module. Use
+  it in the following way:
+
+  ```elixir
+  defmodule MyColorModule do
+    # we point to our csv file that defines the colors
+    @external_resource Path.dirname(__DIR__) <> "/my_colors.csv"
+
+    use Fledex.Color.Names.ModuleGenerator,
+      filename: @external_resource,
+      pattern: ~r/^.*$/i,
+      drop: 1,
+      splitter_opts: [separator: ",", split_opts: [parts: 11]],
+      converter: &MyColorModule.Utils.converter/1,
+      module: __MODULE__
+  end
+  ```
+
+  The converter function needs to return a `t:Fledex.Color.Names.Types.color_struct_t`
+  struct. You can find some useful utility functions that help you in the conversion in
+  `Fledex.Color.Names.LoadUtils`.
+  """
   alias Fledex.Color.Names.LoadUtils
 
   defmacro __using__(opts) do
@@ -13,16 +37,31 @@ defmodule Fledex.Color.Names.Dsl do
     converter = Keyword.fetch!(opts, :converter)
     module = Keyword.get(opts, :module, :unknown)
 
+    fields =
+      Keyword.get(opts, :fields, [
+        :index,
+        :name,
+        :descriptive_name,
+        :hex,
+        :rgb,
+        :hsl,
+        :hsv,
+        :source,
+        :module
+      ])
+
     create_color_functions(
       filename,
       pattern,
       drop,
       splitter_opts,
       converter,
-      module
+      module,
+      fields
     )
   end
 
+  @doc false
   # credo:disable-for-next-line
   def create_color_functions(
         filename,
@@ -30,7 +69,8 @@ defmodule Fledex.Color.Names.Dsl do
         drop,
         splitter_opts,
         converter,
-        module
+        module,
+        fields
       ) do
     quote unquote: false,
           bind_quoted: [
@@ -39,7 +79,8 @@ defmodule Fledex.Color.Names.Dsl do
             drop: drop,
             splitter_opts: splitter_opts,
             converter: converter,
-            module: module
+            module: module,
+            fields: fields
           ] do
       @behaviour Fledex.Color.Names.Interface
 
@@ -62,7 +103,7 @@ defmodule Fledex.Color.Names.Dsl do
       @typedoc """
       The allowed color names
       """
-      @type color_names_t ::
+      @type color_name_t ::
               unquote(
                 Map.keys(@colors)
                 |> Enum.map_join(" | ", &inspect/1)
@@ -93,19 +134,21 @@ defmodule Fledex.Color.Names.Dsl do
       livebook](3b_fledex_everything_about_colors.livemd))
       """
       @impl Interface
-      @spec names :: list(color_names_t)
+      @spec names :: list(color_name_t)
       def names, do: Map.keys(@colors)
 
+      @standard_fields fields
       @doc """
       Retrieve information about the color with the given name
       """
       @impl Interface
       def info(name, what \\ :hex)
-      # def info(name, what) when is_color_name(name), do: apply(__MODULE__, name, [what])
+
       def info(name, what) do
-        case function_exported?(__MODULE__, name, 1) do
-          true -> apply(__MODULE__, name, [what])
-          false -> nil
+        case {function_exported?(__MODULE__, name, 1), what in [:all | @standard_fields]} do
+          {true, true} -> apply(__MODULE__, name, [what])
+          {true, false} -> apply(__MODULE__, name, [:all]) |> Map.get(what, nil)
+          _other -> nil
         end
       end
 
@@ -127,15 +170,11 @@ defmodule Fledex.Color.Names.Dsl do
         @spec unquote(name)(Types.color_props_t()) :: Types.color_vals_t()
         def unquote(name)(what \\ :hex)
         def unquote(name)(:all), do: unquote(Macro.escape(color))
-        def unquote(name)(:index), do: unquote(Macro.escape(color)).index
-        def unquote(name)(:name), do: unquote(Macro.escape(color)).name
-        def unquote(name)(:rgb), do: unquote(Macro.escape(color)).rgb
-        def unquote(name)(:hex), do: unquote(Macro.escape(color)).hex
-        def unquote(name)(:hsv), do: unquote(Macro.escape(color)).hsv
-        def unquote(name)(:hsl), do: unquote(Macro.escape(color)).hsl
-        def unquote(name)(:descriptive_name), do: unquote(Macro.escape(color)).descriptive_name
-        def unquote(name)(:source), do: unquote(Macro.escape(color)).source
-        def unquote(name)(:module), do: unquote(Macro.escape(color)).module
+
+        for field <- fields do
+          def unquote(name)(unquote(field)), do: unquote(Macro.escape(color))[unquote(field)]
+        end
+
         @spec unquote(name)(Leds.t()) :: Leds.t()
         def unquote(name)(leds), do: leds |> Leds.light(unquote(Macro.escape(color)).hex)
         @doc false

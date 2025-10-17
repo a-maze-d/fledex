@@ -20,9 +20,13 @@ Mix.install([
 We now define our animations with our DSL with the following steps:
 
 * First we have to `use Fledex` in order to 
-  * load our `Fledex` DSL (like `led_strip`,`animation` and the like) and
-  * to import commonly used functions, like `Fledex.Leds`, `Fledex.Color.Names`. This means we won't write `Leds` in fron of functions anymore.
+  * load our `Fledex` DSL (like `led_strip`,`animation`, and the like) and
+  * to import commonly used functions (`Fledex.Leds`, `Fledex.Utils.PubSub`, and `Crontab.CronExpression`) This means we can use those funcitons without specifying the module name anymore. For example `Leds.leds(10)` becomes simply `leds(10)`.
+  * to import the selected color names (`Fledex.Color.Names.Wiki`, `Fledex.Color.Names.CSS`, `Fledex.Color.Names.SVG` by default) and to create Fledex.Color.Names to know which colors are available.
+  * to alias the various drivers, so they can be used without namespace (`Kino` within livebook and `Spi` for real hardware are the most common ones)
   * to start (by default) the `Fledex.Animation.Manager` if it's not already running, who will take care of all the animation coordinations.
+
+For now we are happy with the defaults and therefore do not pass any extra options.
 
 ```elixir
 use Fledex
@@ -89,7 +93,7 @@ The above code should result in an animation displaying the clock.Now it's time 
 
 1. in classical Erlang/Elixir style the underscore (`_`) in `_triggers` indicates that the variable is not used.
 2. The DSL allows you to remove the `_trigger ->` part in an animation if you don't need it.
-3. The code could have been more compact by also just matching the part that we are interested in. Also considering the previous point the `:second` indicator could have been defined like this:
+3. The code could have been more compact by also just matching the part that we are interested in. The `:second` indicator could have been defined in the followin way (considering all the points already mentinoed and that the indicator is independ on our timezone (at least not here), so that we don't need the adjustment. Also considering the previous point the `:second` indicator could have been defined like this:
    ```elixir
    animation :second do
       %{second: second} = Time.utc_now() |> Time.add(1, :hour)

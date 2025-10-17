@@ -3,6 +3,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Driver.Impl.Logger do
+  @moduledoc """
+    This driver can log the data either to `IO` or to a `Logger`.
+
+    When logging to IO an attempt is made to preserve the colors, which
+    is difficult due to the more restrictive nature of the IO colors
+    (5bit instead of 8bit). It's probably best to stick to the
+    [ANSI defined colors](https://www.ditig.com/256-colors-cheat-sheet)
+  """
   @behaviour Fledex.Driver.Interface
   require Logger
 
@@ -13,18 +21,6 @@ defmodule Fledex.Driver.Impl.Logger do
   @divisor 255 / 5
   @block <<"\u2588">>
 
-  @moduledoc """
-    This is a dummy implementation of the Driver that dumps
-    the binaries to IO. This can be useful if you want to run
-    some tests without real hardware.
-    The real implementatin probably opens a channel (if not already open)
-    to the bus (like SPI) sends the data to the bus.
-
-    > **Note**
-    > This module is allowed to store information in the state
-    > (like the channel it has oppened), so that we don't have open/close it
-    > all the time. Cleanup should happen in the terminate function
-  """
   @impl true
   @spec configure(keyword) :: keyword
   def configure(config) do
