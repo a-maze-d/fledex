@@ -4,14 +4,45 @@
 
 defmodule Fledex.Config do
   @moduledoc """
+  This module gives access to configure Fledex at runtime.
+
+  When you `use Fledex` this module will be configured accordingly. You can configure
+  this module also by `use Fledex.Config`
+
+  See `__using__/1` for the available options
+
   > #### Caution {:.warning}
   >
   > Even though you can `use` this module several times, you might get unwanted
-  > effects and change your `Fledex.Config.Data` unintentionally.
-  > You really should just call `create_config/1` in this module only once.
+  > effects and change your configuration (`Fledex.Config.Data`) unintentionally.
+  > You really should just call `use Fledex.Config` once. Especially the importing
+  > of the color names can lead to errors. Example:
   >
-  > When you `use Fledex` you will also call `create_config/1`. In a `component` you
-  > should not `use Fledex` but `import Fledex` and be explicit in your color selection.
+  > ``` elixir
+  > iex(1)> use Fledex.Config, colors: :wiki
+  > {:module, Fledex.Config.Data,
+  >  <<70, 79, 82, 49, 0, 0, 134, 168, 66, 69, 65, 77, 65, 116, 85, 56, 0, 0, 0,
+  >    185, 255, 255, 255, 239, 8, 25, 69, 108, 105, 120, 105, 114, 46, 70, 108,
+  >    101, 100, 101, 120, 46, 67, 111, 110, 102, 105, 103, 46, ...>>, {:colors, 0}}
+  > iex(2)> red()
+  > 16711680
+  > iex(3)> use Fledex.Config, colors: :css
+  > {:module, Fledex.Config.Data,
+  >  <<70, 79, 82, 49, 0, 0, 25, 52, 66, 69, 65, 77, 65, 116, 85, 56, 0, 0, 0, 185,
+  >    255, 255, 255, 239, 8, 25, 69, 108, 105, 120, 105, 114, 46, 70, 108, 101,
+  >    100, 101, 120, 46, 67, 111, 110, 102, 105, 103, 46, ...>>, {:colors, 0}}
+  > iex(4)> red()
+  > error: function red/0 imported from both Fledex.Color.Names.CSS and Fledex.Color.Names.Wiki, call is ambiguous
+  > └─ iex:4
+  >
+  > ** (CompileError) cannot compile code (errors have been logged)
+  > ```
+  >
+  > If you want to call `use Fledex.Config` several times in `iex` and want to
+  > avoid the import issue, then you can call `respawn/0` in-between.
+  >
+  > The above is also the reason why you should **NOT** `use Fledex` but `import Fledex`
+  > in a `component` and be explicit in your color selection.
   """
 
   require Logger
@@ -26,7 +57,7 @@ defmodule Fledex.Config do
   ]
 
   @doc """
-  By using this module you configure the Fledex. Currently the only setting is to define
+  By using this module you configure Fledex. Currently the only setting is to define
   the color modules to be used through the `:colors` option.
 
   > #### Caution {:.warning}
@@ -54,8 +85,10 @@ defmodule Fledex.Config do
   end
 
   @doc """
-  This function will create an AST that:
-    1. defines the `Fledex.Config.Data` which is used by this module
+  This function will create an AST
+
+  The AST will provide the following functionality:
+    1. defines the `Fledex.Config.Data` which is used by this module (if available)
     2. creates the necessary color module imports that are being defined
 
   You can use this function directly, but you probably want to use the
@@ -102,7 +135,7 @@ defmodule Fledex.Config do
   end
 
   @doc """
-  Check whether we have defined a configuration.
+  Checks whether we have defined a configuration.
 
   If not, all function calls in this module will succeed,
   but will only contain defaults (probably quite empty results)
@@ -115,7 +148,7 @@ defmodule Fledex.Config do
   @doc """
   Returns a list with the known color name modules (known to Fledex)
 
-  Fledex is configured with a set of color name modules that can be retrieved through this function. A list is returned with a tuple consisting of of:
+  Fledex is configured with a set of color name modules that can be retrieved through this function. A list is returned with a tuple consisting of:
 
   * `module`: The color name module
   * `type`: Whether it's a `:core` color or an `:optional` color. The former will get loaded as one of the default colors
@@ -135,7 +168,7 @@ defmodule Fledex.Config do
   end
 
   @doc """
-  Get the list of modules and their (non-overlapping) colors that are currently configured
+  Get the list of modules and their (non-overlapping) color names that are currently configured.
   """
   @spec configured_color_modules :: list({module, list(atom)})
   def configured_color_modules do

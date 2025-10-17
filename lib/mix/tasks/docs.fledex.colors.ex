@@ -58,16 +58,49 @@ if Mix.env() == :dev do
       # Color Names
       This is a list of all the colors that can be found in Fledex.
       The modules that are marked as `core` are thsoe that will be loaded by default
-      if nothing else is mentioned. Those modules that are marked as `optional` are
-      the ones that get shipped with `Fledex` but are not loaded by default.
+      if you `use Fledex` or `use Fledex.Config` and nothing else is mentioned.
+      Those modules that are marked as `optional` are the ones that get shipped with
+      `Fledex` but are not loaded by default.
 
-      If you specify your own color list, you can make use of the alias name (`atom`).
-      Therefore the sections are named with the alias instead of the module name.
+      You can still load them through `use Fledex` or `use Fledex.Config` by passing
+      a `:colors` argument (see `Fledex` and `Fledex.Config`) If you specify your
+      own color module, you can make use of the alias name (`atom`). Therefore the
+      sections are named with the alias instead of the module name.
+
+      You can also bring your own color name list and load it, but in that acse you
+      will need to specify the full color module name.
 
       > #### Info {:.info}
       >
       > The colors get loaded by default in the ordered specified here, so if there
       > is a name conflict the former will win over latter.
+
+      Once you have specified your color lists, you can access those colors through
+      their alias names (use them through the `Fledex.Color` protocol or the
+      `Fledex.Color.Names` module) and (because those functions get imported) through
+      their function names.
+
+      This allows to use them in an easy way when defining led sequences like:
+
+      ```elixir
+        # load our configuration (only Wiki colors)
+        # CAUTION: don't call this several time
+        use Fledex.Config, colors: :wiki
+
+        # import the Fledex.Leds module to reduce the typing
+        import Fledex.Leds
+
+        # alias some more modules
+        alias Fledex.Color
+        alias Fledex.Color.Names
+
+        # create our led sequence with the colors: red, green, blue, purple
+        leds(10)
+          |> light(:red)
+          |> green()
+          |> light(Color.to_colorint(:blue))
+          |> light(Names.info(:purple))
+      ```
       """
     end
 

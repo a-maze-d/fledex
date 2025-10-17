@@ -5,8 +5,9 @@
 defprotocol Fledex.Color do
   @moduledoc """
   Protocol that can be implemented to convert from some kind of color representation
-  to a color integer (`colorint`) with 3x8bit or to a 3 element tuple representing the colors
-  `r`, `g`, and `b`.
+
+  The conversionto can either happen to a color integer (`colorint`) with 3x 8bit or to a 3 element `{r, g, n}` tuple
+  representing the colors `r`, `g`, and `b`.
   """
 
   alias Fledex.Color.Types

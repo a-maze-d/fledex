@@ -187,6 +187,8 @@ defmodule Fledex.MixProject do
       groups_for_modules: [
         "Core:": [
           Fledex,
+          Fledex.Color,
+          Fledex.Config,
           Fledex.LedStrip,
           Fledex.Leds
         ],

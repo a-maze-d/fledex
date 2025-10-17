@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.LedsTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias Fledex.Leds
   alias Fledex.LedStrip

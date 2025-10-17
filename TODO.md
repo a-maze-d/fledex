@@ -14,7 +14,7 @@ Even though this library is published, there are things I still want to do befor
   - [x] Improve API documentation (v0.7)
   - [ ] hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.7)
   - [ ] Add a livebook with coordinator examples (v0.7)
-  - [ ] Update the documentation with new color name information (v0.7)
+  - [x] Update the documentation with new color name information (v0.7)
   - [x] Create a new color page, since the colors will not be available through `Fledex.Color.Names` directly (v0.7)
   - [ ] Update the cheatsheet with coordinator info (v0.7)
   - [ ] Update documentation with the Supervision tree (v0.7)
@@ -36,7 +36,8 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Lower than sec precision is not possible with Quantum. Replace it with a different library (maybe SchedEx? https://hexdocs.pm/sched_ex/readme.html) (v0.7)
   - [ ] we start things through the Supervisor, but we don't shut things down through it (v0.7)
   - [x] We have the `Fledex.Color` protocol, but we actually don't make use of its type. This is maybe also a good opportunity to rethink on how we handle colors in general. Maybe we should define everything as `Fledex.Color` and encapsulate CSS, SVG, RAL colours in their own struct to then have the protocol implemented for them. (v0.7)
-  - [ ] convert the rgb to other color spaces (in the various color name modules) (v0.7)
+  - [x] Allow color modules to not carry more information than just a pre-defined set
+  - [ ] convert the rgb to other color spaces (in the various color name modules). Considering the previous point we might not need to do this, because it should now be optional (v0.7)
   - [ ] Put some more effort into the coordinator to make it working well (v0.7)
   - [ ] Enable Telemetry? (v0.8)
   - [ ] should the `:config` driver not only return the config but the strip_name too?

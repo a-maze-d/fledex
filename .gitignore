@@ -40,3 +40,6 @@ fledex-*.tar
 
 # ignore the expert files (expert is the new Elixr LS)
 /.expert/
+
+# ignore the auto generated color.md file
+/docs/colors.md
