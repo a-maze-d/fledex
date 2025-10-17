@@ -16,14 +16,14 @@ defmodule Fledex.Config do
 
   require Logger
 
-    # known color modules with their aliases
-    @known_color_modules [
-      {Fledex.Color.Names.Wiki, :core, :wiki},
-      {Fledex.Color.Names.CSS, :core, :css},
-      {Fledex.Color.Names.SVG, :core, :svg},
-      # we intentionally do not include RAL colors as `:core`
-      {Fledex.Color.Names.RAL, :optional, :ral}
-    ]
+  # known color modules with their aliases
+  @known_color_modules [
+    {Fledex.Color.Names.Wiki, :core, :wiki},
+    {Fledex.Color.Names.CSS, :core, :css},
+    {Fledex.Color.Names.SVG, :core, :svg},
+    # we intentionally do not include RAL colors as `:core`
+    {Fledex.Color.Names.RAL, :optional, :ral}
+  ]
 
   @doc """
   By using this module you configure the Fledex. Currently the only setting is to define
@@ -67,6 +67,7 @@ defmodule Fledex.Config do
 
     if colors == nil do
       quote do
+        #credo:disable-for-next-line
         Elixir.Fledex.Config.cleanup_old_config()
       end
     else
@@ -80,6 +81,7 @@ defmodule Fledex.Config do
 
       quote bind_quoted: [colors: modules_and_colors, ast: ast] do
         Macro.escape(ast)
+        #credo:disable-for-next-line
         Elixir.Fledex.Config.cleanup_old_config()
 
         defmodule Elixir.Fledex.Config.Data do
@@ -106,7 +108,7 @@ defmodule Fledex.Config do
   but will only contain defaults (probably quite empty results)
   """
   @spec exists? :: boolean
-  def exists?() do
+  def exists? do
     Code.loaded?(Fledex.Config.Data)
   end
 
@@ -263,7 +265,7 @@ defmodule Fledex.Config do
   > your configuration to your likings
   """
   @spec cleanup_old_config() :: :ok
-  def cleanup_old_config() do
+  def cleanup_old_config do
     if exists?() do
       # `Code` does not expose those functions, so we need to use Erlang version.
       :code.purge(Fledex.Config.Data)

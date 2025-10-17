@@ -9,6 +9,7 @@ defmodule Fledex.Color.Names do
   """
   @behaviour Fledex.Color.Names.Interface
 
+  alias Fledex.Color.Names.Interface
   alias Fledex.Color.Names.Types
   alias Fledex.Config
 
@@ -19,15 +20,15 @@ defmodule Fledex.Color.Names do
   name. For this facade module all atoms could be a valid color name. Thus, we
   loosen the definition here.
   """
+  @impl Interface
   @doc guard: true
-  @impl true
   defguard is_color_name(atom) when is_atom(atom)
 
   @doc """
   Get a detailed list of all the colors that have been configured
   """
+  @impl Interface
   @spec colors :: list(Types.color_struct_t())
-  @impl true
   def colors do
     Enum.flat_map(Config.configured_color_modules(), fn {module, color_names} ->
       Enum.filter(module.colors(), fn color ->
@@ -51,8 +52,8 @@ defmodule Fledex.Color.Names do
   > functions that do not overlap. You can call `Fledex.Config.configured_color_modules/0` to get
   > the list of modules and the colors that should be imported.
   """
+  @impl Interface
   @spec names :: list(Types.color_name_t())
-  @impl true
   def names do
     Enum.flat_map(Config.configured_color_modules(), fn {_module, colors} -> colors end)
   end
@@ -62,7 +63,7 @@ defmodule Fledex.Color.Names do
 
   See `m:Fledex.Color.Names.Interface` for more details
   """
-  @impl true
+  @impl Interface
   @spec info(name :: atom, what :: atom) :: nil | Types.color_vals_t() | any()
   def info(name, what \\ :hex)
 
@@ -70,6 +71,7 @@ defmodule Fledex.Color.Names do
     find_module_with_name(name)
     |> get_color_from_module(name, what)
   end
+
   def info(_name, _what), do: nil
 
   # MARK: private utility functions

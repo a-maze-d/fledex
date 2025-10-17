@@ -143,12 +143,11 @@ defmodule Fledex.Color.Names.ModuleGenerator do
       """
       @impl Interface
       def info(name, what \\ :hex)
-      # def info(name, what) when is_color_name(name), do: apply(__MODULE__, name, [what])
       def info(name, what) do
         case {function_exported?(__MODULE__, name, 1), what in [:all | @standard_fields]} do
           {true, true} -> apply(__MODULE__, name, [what])
           {true, false} -> apply(__MODULE__, name, [:all]) |> Map.get(what, nil)
-          _ -> nil
+          _other -> nil
         end
       end
 

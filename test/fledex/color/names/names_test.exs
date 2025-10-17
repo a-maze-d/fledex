@@ -34,7 +34,7 @@ defmodule Fledex.Color.NamesTest do
                case color[:module] do
                  Fledex.Color.Names.RAL -> {left, Fledex.Color.Names.RAL}
                  Fledex.Color.Names.Wiki -> {Fledex.Color.Names.Wiki, right}
-                 _ -> {left, right}
+                 _other  -> {left, right}
                end
              end) == {Fledex.Color.Names.Wiki, Fledex.Color.Names.RAL}
 

@@ -184,6 +184,7 @@ defmodule Fledex.ConfigTest do
 
     test "calling by name with atom" do
       use Fledex.Config, colors: :default
+
       assert Names.info(:vermilion2, :all) == %{
                hex: 14_235_678,
                hsl: {5, 193, 122},
