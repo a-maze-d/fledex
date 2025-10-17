@@ -57,7 +57,7 @@ defmodule Fledex.Color.NamesOldTest do
   describe "color names access tests" do
     test "defined color modules" do
       use Fledex, dont_start: true, colors: :default
-      colors = Config.colors()
+      colors = Config.configured_color_modules()
       assert length(colors) == 3
 
       modules =
@@ -103,6 +103,7 @@ defmodule Fledex.Color.NamesOldTest do
     end
 
     test "calling by name with atom" do
+      use Fledex.Config, colors: :default
       assert Names.info(:vermilion2, :all) == %{
                hex: 14_235_678,
                hsl: {5, 193, 122},

@@ -6,7 +6,7 @@ if Mix.env() == :dev do
   defmodule Mix.Tasks.Docs.Fledex.Colors do
     use Mix.Task
 
-    alias Fledex.Color.Names.Utils
+    alias Fledex.Config
 
     @shortdoc "Generate documentation for all the available Fledex colors from various color modules"
     @requirements ["compile"]
@@ -36,7 +36,7 @@ if Mix.env() == :dev do
       file = Path.join(out_dir, out_name)
 
       Mix.shell().info([:green, "Generating Fledex Colors to #{file}"])
-      content = create_content(Utils.known_color_modules())
+      content = create_content(Config.known_color_modules())
       File.write(file, content, [:utf8, :write])
     end
 

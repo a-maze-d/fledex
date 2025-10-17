@@ -135,7 +135,8 @@ defmodule Fledex do
   @spec __using__(keyword) :: Macro.t()
   defmacro __using__(opts) do
     config = Fledex.Config.create_config_ast(opts)
-    quote bind_quoted: [opts: opts, config: config] do # , import_ast: import_ast, use_ast: use_ast] do
+    # , import_ast: import_ast, use_ast: use_ast] do
+    quote bind_quoted: [opts: opts, config: config] do
       Macro.escape(config)
 
       import Crontab.CronExpression

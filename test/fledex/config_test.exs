@@ -14,21 +14,21 @@ defmodule Fledex.ConfigTest do
   describe "use config" do
     test "use once" do
       use Config, colors: [:wiki, :css]
-      assert length(Config.colors()) == 2
+      assert length(Config.configured_color_modules()) == 2
     end
 
     test "use multiple times" do
       use Config, colors: [:wiki, :css]
-      assert length(Config.colors()) == 2
+      assert length(Config.configured_color_modules()) == 2
       use Config, colors: [:svg]
-      assert length(Config.colors()) == 1
+      assert length(Config.configured_color_modules()) == 1
       use Config, colors: []
-      assert Enum.empty?(Config.colors())
+      assert Enum.empty?(Config.configured_color_modules())
     end
 
     test "colors parameter" do
       use Config
-      mac = Config.colors()
+      mac = Config.configured_color_modules()
       assert length(mac) == 3
 
       assert get_modules(mac) == [
@@ -38,42 +38,42 @@ defmodule Fledex.ConfigTest do
              ]
 
       use Config, colors: []
-      mac = Config.colors()
+      mac = Config.configured_color_modules()
       assert Enum.empty?(mac)
       assert get_modules(mac) == []
 
       use Config, colors: :wiki
-      mac = Config.colors()
+      mac = Config.configured_color_modules()
       assert length(mac) == 1
       assert get_modules(mac) == [Fledex.Color.Names.Wiki]
 
       use Config, colors: :none
-      mac = Config.colors()
+      mac = Config.configured_color_modules()
       assert Enum.empty?(mac)
       assert get_modules(mac) == []
 
       use Config, colors: [:wiki]
-      mac = Config.colors()
+      mac = Config.configured_color_modules()
       assert length(mac) == 1
       assert get_modules(mac) == [Fledex.Color.Names.Wiki]
 
       use Config, colors: [:none]
-      mac = Config.colors()
+      mac = Config.configured_color_modules()
       assert Enum.empty?(mac)
       assert get_modules(mac) == []
 
       use Config, colors: [:wiki, Fledex.Color.Names.CSS]
-      mac = Config.colors()
+      mac = Config.configured_color_modules()
       assert length(mac) == 2
       assert get_modules(mac) == [Fledex.Color.Names.Wiki, Fledex.Color.Names.CSS]
 
       use Config, colors: [TestColorModule]
-      mac = Config.colors()
+      mac = Config.configured_color_modules()
       assert length(mac) == 1
       assert get_modules(mac) == [TestColorModule]
 
       use Config, colors: [:default]
-      mac = Config.colors()
+      mac = Config.configured_color_modules()
       assert length(mac) == 3
 
       assert get_modules(mac) == [
@@ -83,7 +83,7 @@ defmodule Fledex.ConfigTest do
              ]
 
       use Config, colors: [:all]
-      mac = Config.colors()
+      mac = Config.configured_color_modules()
       assert length(mac) == 4
 
       assert get_modules(mac) == [
@@ -97,11 +97,11 @@ defmodule Fledex.ConfigTest do
     test "no colors definition" do
       use Config, colors: :wiki
       assert Fledex.Config.exists?()
-      assert length(Config.colors()) == 1
+      assert length(Config.configured_color_modules()) == 1
 
       use Config, colors: nil
       assert not Fledex.Config.exists?()
-      assert Enum.empty?(Config.colors())
+      assert Enum.empty?(Config.configured_color_modules())
     end
 
     # it's a bit unclear to me where the logging is going :-(

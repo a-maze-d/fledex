@@ -64,8 +64,8 @@ defmodule Fledex.Color.NamesTest do
 
   describe "color name utils" do
     test "modules" do
-      alias Fledex.Color.Names.Utils
-      assert length(Utils.known_color_modules()) == 4
+      alias Fledex.Config
+      assert length(Config.known_color_modules()) == 4
     end
   end
 end
