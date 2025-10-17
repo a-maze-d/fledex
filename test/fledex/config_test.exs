@@ -105,6 +105,11 @@ defmodule Fledex.ConfigTest do
       assert Enum.empty?(Config.configured_color_modules())
     end
 
+    test "color import" do
+      use Config, colors: :wiki
+      assert red() == 0xFF0000
+    end
+
     # it's a bit unclear to me where the logging is going :-(
     test "specify non-existing module" do
       import ExUnit.CaptureLog

@@ -143,6 +143,7 @@ defmodule Fledex.Color.Names.ModuleGenerator do
       """
       @impl Interface
       def info(name, what \\ :hex)
+
       def info(name, what) do
         case {function_exported?(__MODULE__, name, 1), what in [:all | @standard_fields]} do
           {true, true} -> apply(__MODULE__, name, [what])

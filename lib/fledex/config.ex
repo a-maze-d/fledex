@@ -67,7 +67,7 @@ defmodule Fledex.Config do
 
     if colors == nil do
       quote do
-        #credo:disable-for-next-line
+        # credo:disable-for-next-line
         Elixir.Fledex.Config.cleanup_old_config()
       end
     else
@@ -81,7 +81,7 @@ defmodule Fledex.Config do
 
       quote bind_quoted: [colors: modules_and_colors, ast: ast] do
         Macro.escape(ast)
-        #credo:disable-for-next-line
+        # credo:disable-for-next-line
         Elixir.Fledex.Config.cleanup_old_config()
 
         defmodule Elixir.Fledex.Config.Data do

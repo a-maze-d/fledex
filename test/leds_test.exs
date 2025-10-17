@@ -357,6 +357,7 @@ defmodule Fledex.LedsTest do
 
     test "repeat" do
       use Fledex.Config
+
       leds =
         Leds.leds(3) |> Leds.light(:red) |> Leds.light(:red) |> Leds.light(:red) |> Leds.repeat(3)
 

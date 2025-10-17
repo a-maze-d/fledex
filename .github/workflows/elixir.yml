@@ -35,6 +35,7 @@ jobs:
           - elixir: 1.18.x
             otp: 28
             coverage: true
+            format: true
     steps:
     - name: Harden the runner (Audit all outbound calls)
       uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
@@ -79,6 +80,7 @@ jobs:
       uses: fsfe/reuse-action@676e2d560c9a403aa252096d99fcab3e1132b0f5 # v6.0.0
 
     - name: Check format
+      if: "${{ matrix.format }}"
       run: mix format --check-formatted
 
     - name: Run tests
