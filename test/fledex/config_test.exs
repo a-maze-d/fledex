@@ -5,6 +5,7 @@
 defmodule Fledex.ConfigTest do
   use ExUnit.Case
 
+  alias Fledex.Color.Names
   alias Fledex.Config
 
   def get_modules(modules_and_color) do
@@ -134,6 +135,84 @@ defmodule Fledex.ConfigTest do
                    use Config, colors: Test2
                """)
              end) =~ "Not a known color name"
+    end
+  end
+
+  describe "color names access tests" do
+    test "defined color modules" do
+      use Config, colors: :default
+      colors = Config.configured_color_modules()
+      assert length(colors) == 3
+
+      modules =
+        Enum.map(colors, fn {module, colors} ->
+          assert is_list(colors)
+          module
+        end)
+
+      assert modules == [Fledex.Color.Names.Wiki, Fledex.Color.Names.CSS, Fledex.Color.Names.SVG]
+    end
+
+    test "calling by name" do
+      alias Fledex.Color.Names.Wiki
+      use Config, colors: :default
+
+      assert Wiki.vermilion2(:all) == %{
+               hex: 14_235_678,
+               hsl: {5, 193, 122},
+               hsv: {5, 219, 216},
+               index: 828,
+               name: :vermilion2,
+               descriptive_name: "Vermilion2",
+               source: "",
+               rgb: {216, 56, 30},
+               module: Fledex.Color.Names.Wiki
+             }
+
+      assert Names.info(:vermilion2, :all) == %{
+               hex: 14_235_678,
+               hsl: {5, 193, 122},
+               hsv: {5, 219, 216},
+               index: 828,
+               name: :vermilion2,
+               descriptive_name: "Vermilion2",
+               source: "",
+               rgb: {216, 56, 30},
+               module: Fledex.Color.Names.Wiki
+             }
+    end
+
+    test "calling by name with atom" do
+      use Fledex.Config, colors: :default
+      assert Names.info(:vermilion2, :all) == %{
+               hex: 14_235_678,
+               hsl: {5, 193, 122},
+               hsv: {5, 219, 216},
+               index: 828,
+               name: :vermilion2,
+               descriptive_name: "Vermilion2",
+               source: "",
+               rgb: {216, 56, 30},
+               module: Fledex.Color.Names.Wiki
+             }
+    end
+
+    test "test quick access functions (with atom)" do
+      use Config, colors: :default
+      assert 14_235_678 == Names.info(:vermilion2)
+      assert 14_235_678 == Names.info(:vermilion2, :hex)
+      assert {216, 56, 30} == Names.info(:vermilion2, :rgb)
+      assert :vermilion2 == Names.info(:vermilion2, :name)
+      assert {5, 193, 122} == Names.info(:vermilion2, :hsl)
+      assert {5, 219, 216} == Names.info(:vermilion2, :hsv)
+      assert 828 == Names.info(:vermilion2, :index)
+      assert "Vermilion2" == Names.info(:vermilion2, :descriptive_name)
+      assert "" == Names.info(:vermilion2, :source)
+      assert "Crayola" == Names.info(:absolute_zero, :source)
+      assert nil == Names.info(:non_existing_color_name, :hex)
+      assert Fledex.Color.Names.Wiki == Names.info(:vermilion2, :module)
+
+      assert :vermilion2 in Names.names()
     end
   end
 end

@@ -8,7 +8,7 @@ defmodule Fledex.LedsTest do
   alias Fledex.Leds
   alias Fledex.LedStrip
 
-  doctest Leds
+  doctest Fledex.Leds
 
   describe "basic tests" do
     test "define raw struct" do
@@ -373,10 +373,6 @@ defmodule Fledex.LedsTest do
     end
 
     test "light with repeat" do
-      alias Fledex.Config
-
-      use Config, colors: :default
-
       leds = Leds.leds(3) |> Leds.light(:red, offset: 2, repeat: 3)
       assert Leds.count(leds) == 3
       assert Leds.get_light(leds, 1) == 0x000000

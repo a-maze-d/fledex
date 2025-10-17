@@ -5,9 +5,16 @@
 defmodule Fledex.Color.Names.ModuleGeneratorTest do
   use ExUnit.Case
 
+  alias Fledex.Color
+  alias Fledex.Color.Names.LoadUtils
+  alias Fledex.Color.Names.Wiki
+  alias Fledex.Color.Names.WikiUtils
+
+  alias Fledex.Leds
+
   defmodule TestNames do
-    alias Fledex.Color.Names.Wiki
-    alias Fledex.Color.Names.WikiUtils
+    # alias Fledex.Color.Names.Wiki
+    # alias Fledex.Color.Names.WikiUtils
 
     use Fledex.Color.Names.ModuleGenerator,
       filename: Wiki.file(),
@@ -43,6 +50,89 @@ defmodule Fledex.Color.Names.ModuleGeneratorTest do
       assert {:android_green, 0} in functions
       assert {:android_green, 1} in functions
       assert {:android_green, 2} in functions
+    end
+  end
+
+  describe "color names loading tests" do
+    test "loading color file" do
+      colors =
+        LoadUtils.load_color_file(
+          Wiki.file(),
+          ~r/^.*$/i,
+          1,
+          [separator: ",", split_opts: [parts: 11]],
+          &WikiUtils.converter/1,
+          __MODULE__
+        )
+
+      assert colors != %{}
+
+      assert Map.get(colors, :vermilion2) ==
+               %{
+                 hex: 14_235_678,
+                 hsl: {5, 193, 122},
+                 hsv: {5, 219, 216},
+                 index: 828,
+                 name: :vermilion2,
+                 rgb: {216, 56, 30},
+                 descriptive_name: "Vermilion2",
+                 source: "",
+                 module: __MODULE__
+               }
+    end
+
+    test "helper functions" do
+      assert LoadUtils.str2atom(" Test String#") == :test_string
+      assert LoadUtils.hexstr2i("#808080") == 0x808080
+      assert LoadUtils.a2b("—") == 0
+      assert LoadUtils.a2b("90°") == 63
+      assert LoadUtils.a2b("25%") == 63
+      assert LoadUtils.a2i("12_b") == 12
+      assert LoadUtils.a2i("ab12_b") == 12
+      assert LoadUtils.a2i("1ab2") == 12
+      assert Color.to_colorint({0x80, 0x80, 0x80}) == 0x808080
+    end
+  end
+
+  describe "wiki color names generation" do
+    test "test quick access functions" do
+      alias Fledex.Color.Names.Wiki
+      assert 14_235_678 == Wiki.vermilion2()
+      assert 14_235_678 == Wiki.vermilion2(:hex)
+      assert {216, 56, 30} == Wiki.vermilion2(:rgb)
+      assert {5, 193, 122} == Wiki.vermilion2(:hsl)
+      assert {5, 219, 216} == Wiki.vermilion2(:hsv)
+      assert 828 == Wiki.vermilion2(:index)
+      assert "Vermilion2" == Wiki.vermilion2(:descriptive_name)
+      assert "" == Wiki.vermilion2(:source)
+      assert "Crayola" == Wiki.absolute_zero(:source)
+      assert Fledex.Color.Names.Wiki == Wiki.vermilion2(:module)
+
+      assert Enum.find_index(Wiki.names(), fn x -> x == :vermilion2 end) != nil
+      assert Enum.find_index(Wiki.colors(), fn x -> x.name == :vermilion2 end) != nil
+    end
+  end
+
+  describe "color names usage tests" do
+    test "color name guard (wiki guard)" do
+      import Fledex.Color.Names.Wiki
+      assert is_color_name(:vermilion2) == true
+      assert is_color_name(:non_existing) == false
+    end
+
+    test "Leds addition" do
+      alias Fledex.Color.Names.Wiki
+      leds = Leds.leds(3) |> Wiki.red() |> Wiki.green() |> Wiki.blue()
+      assert Leds.get_light(leds, 1) == 0xFF0000
+      assert Leds.get_light(leds, 2) == 0x00FF00
+      assert Leds.get_light(leds, 3) == 0x0000FF
+
+      leds =
+        Leds.leds(3) |> Wiki.blue(offset: 3) |> Wiki.green(offset: 2) |> Wiki.red(offset: 1)
+
+      assert Leds.get_light(leds, 1) == 0xFF0000
+      assert Leds.get_light(leds, 2) == 0x00FF00
+      assert Leds.get_light(leds, 3) == 0x0000FF
     end
   end
 end

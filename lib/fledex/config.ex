@@ -16,6 +16,15 @@ defmodule Fledex.Config do
 
   require Logger
 
+    # known color modules with their aliases
+    @known_color_modules [
+      {Fledex.Color.Names.Wiki, :core, :wiki},
+      {Fledex.Color.Names.CSS, :core, :css},
+      {Fledex.Color.Names.SVG, :core, :svg},
+      # we intentionally do not include RAL colors as `:core`
+      {Fledex.Color.Names.RAL, :optional, :ral}
+    ]
+
   @doc """
   By using this module you configure the Fledex. Currently the only setting is to define
   the color modules to be used through the `:colors` option.
@@ -25,37 +34,81 @@ defmodule Fledex.Config do
   > This will create the `Fledex.Config.Data` module. If you `use` this
   > module several times, previous definition will be replaced. This could lead
   > to unexpected behaviors.
+  >
+  > See also `create_config_ast/1` that is used internally for more details on what
+  > is happening
 
   ### Options:
   * `:colors`: You can specify a single color module, a list of color modules, or one of the special specifiers (`:default`, `:all`, `:none`, `nil`). When you specify a color module you can do so either through it's fully qualified module name (and thereby even
-  load color modules that Fledex doesn't know about) or through its shortcut name (see `Fledex.Config.modules/0`)
+  load color modules that Fledex doesn't know about) or through its shortcut name (see `Fledex.Config.known_color_modules/0`)
 
   ### Special specifiers:
   * `:all`: All known color modules will be loaded. Be careful, because there are A LOT of color names, probably more than what you really need
-  * `:default`: This will load the core modules (see `Fledex.Config.modules/0`). If no `:colors` option is specified then that's also the set that will be loaded.
+  * `:default`: This will load the core modules (see `Fledex.Config.known_color_modules/0`). If no `:colors` option is specified then that's also the set that will be loaded.
   * `:none`: No color will be loaded (still the `Fledex.Color.Names.Config` will be created. Compare this with `nil`)
   * `nil`: This is similar to `:none` except that the `Fledex.Color.Names.Config` will not be created, and if it exists will be deleted.
   """
+  @spec __using__(keyword) :: Macro.t()
   defmacro __using__(opts) do
     create_config_ast(opts)
   end
 
   @doc """
-  check whether we have defined a configuration. If not, all function calls
-  will succeed, but return quite empty results
+  This function will create an AST that:
+    1. defines the `Fledex.Config.Data` which is used by this module
+    2. creates the necessary color module imports that are being defined
+
+  You can use this function directly, but you probably want to use the
+  macro `__using__/1` (through `use Fledex.Config, opts`)
   """
+  @spec create_config_ast(keyword) :: Macro.t()
+  def create_config_ast(opts) do
+    colors = Keyword.get(opts, :colors, :default)
+
+    if colors == nil do
+      quote do
+        Elixir.Fledex.Config.cleanup_old_config()
+      end
+    else
+      # we get an AST, so we need to convert it back to a list of atoms and module names
+      modules_and_colors =
+        colors
+        |> Macro.prewalk(&Macro.expand(&1, __ENV__))
+        |> find_modules_with_names()
+
+      ast = create_imports_ast(modules_and_colors)
+
+      quote bind_quoted: [colors: modules_and_colors, ast: ast] do
+        Macro.escape(ast)
+        Elixir.Fledex.Config.cleanup_old_config()
+
+        defmodule Elixir.Fledex.Config.Data do
+          @moduledoc """
+          This module is an implementation detail from `Fledex.Color.Names` and therefore
+          should not be used directly. use `Fledex.Config.configured_color_modules/0` instead
+          """
+          @colors colors
+
+          @doc false
+          @spec colors :: list({module, list(atom)})
+          def colors do
+            @colors
+          end
+        end
+      end
+    end
+  end
+
+  @doc """
+  Check whether we have defined a configuration.
+
+  If not, all function calls in this module will succeed,
+  but will only contain defaults (probably quite empty results)
+  """
+  @spec exists? :: boolean
   def exists?() do
     Code.loaded?(Fledex.Config.Data)
   end
-
-  # known color modules with their aliases
-  @known_color_modules [
-    {Fledex.Color.Names.Wiki, :core, :wiki},
-    {Fledex.Color.Names.CSS, :core, :css},
-    {Fledex.Color.Names.SVG, :core, :svg},
-    # we intentionally do not include RAL colors as `:core`
-    {Fledex.Color.Names.RAL, :optional, :ral}
-  ]
 
   @doc """
   Returns a list with the known color name modules (known to Fledex)
@@ -91,53 +144,6 @@ defmodule Fledex.Config do
 
       false ->
         []
-    end
-  end
-
-  def create_config_ast(opts) do
-    colors = Keyword.get(opts, :colors, :default)
-    mod_name = Fledex.Config.Data
-
-    if colors == nil do
-      quote bind_quoted: [mod_name: mod_name] do
-        if Code.loaded?(mod_name) do
-          # `Code` does not expose those functions, so we need to use Erlang version.
-          :code.purge(mod_name)
-          :code.delete(mod_name)
-        end
-      end
-    else
-      # we get an AST, so we need to convert it back to a list of atoms and module names
-      modules_and_colors =
-        colors
-        |> Macro.prewalk(&Macro.expand(&1, __ENV__))
-        |> find_modules_with_names()
-
-      ast = create_imports_ast(modules_and_colors)
-
-      quote bind_quoted: [mod_name: mod_name, colors: modules_and_colors, ast: ast] do
-        Macro.escape(ast)
-
-        if Code.loaded?(mod_name) do
-          # `Code` does not expose those functions, so we need to use Erlang version.
-          :code.purge(mod_name)
-          :code.delete(mod_name)
-        end
-
-        defmodule mod_name do
-          @moduledoc """
-          This module is an implementation detail from `Fledex.Color.Names` and therefore
-          should not be used directly. use `Fledex.Config.configured_color_modules/0` instead
-          """
-          @colors colors
-
-          @doc false
-          @spec colors :: list({module, list(atom)})
-          def colors do
-            @colors
-          end
-        end
-      end
     end
   end
 
@@ -219,13 +225,7 @@ defmodule Fledex.Config do
     |> Enum.reverse()
   end
 
-  @spec import_color_module({module, list(atom)}) :: Macro.t()
-  defp import_color_module({module, only}) do
-    quote do
-      import unquote(module), only: unquote(only)
-    end
-  end
-
+  @spec create_imports_ast(list({module, list(atom)})) :: Macro.t()
   def create_imports_ast(modules_and_colors) do
     modules_and_colors
     |> modules_with_only()
@@ -243,5 +243,33 @@ defmodule Fledex.Config do
          [{only, 0}, {only, 1}, {only, 2}]
        end)}
     end)
+  end
+
+  @spec import_color_module({module, list(atom)}) :: Macro.t()
+  defp import_color_module({module, only}) do
+    quote do
+      import unquote(module), only: unquote(only)
+    end
+  end
+
+  @doc """
+  This function will cleanup a previously defined
+  config. It's safe to call this funciton even if none has
+  been defined.
+
+  > ##### Note {:.info}
+  >
+  > Proably you don't want to call this function and just redefine
+  > your configuration to your likings
+  """
+  @spec cleanup_old_config() :: :ok
+  def cleanup_old_config() do
+    if exists?() do
+      # `Code` does not expose those functions, so we need to use Erlang version.
+      :code.purge(Fledex.Config.Data)
+      :code.delete(Fledex.Config.Data)
+    end
+
+    :ok
   end
 end

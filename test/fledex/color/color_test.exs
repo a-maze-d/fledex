@@ -4,7 +4,7 @@
 
 defmodule Fledex.Color.ColorTest do
   use ExUnit.Case, async: true
-  use Fledex, dont_start: true
+  use Fledex.Config
 
   alias Fledex.Color.Conversion.Approximate
   alias Fledex.Color.Conversion.Rainbow
@@ -36,6 +36,21 @@ defmodule Fledex.Color.ColorTest do
     test "test names module" do
       assert Fledex.Color.Names == Fledex.Color.Atom.get_names_module(true)
       assert Fledex.Color.Names.Wiki == Fledex.Color.Atom.get_names_module(false)
+    end
+
+    test "non-existing color name atoms default to black" do
+      alias Fledex.Color
+      alias Fledex.Leds
+
+      leds =
+        Leds.leds(3)
+        |> Leds.light(:non_existing)
+        |> Leds.light(Color.to_rgb(:non_existing))
+        |> Leds.light(Color.to_colorint(:non_existing))
+
+      assert Leds.get_light(leds, 1) == 0x000000
+      assert Leds.get_light(leds, 2) == 0x000000
+      assert Leds.get_light(leds, 3) == 0x000000
     end
   end
 

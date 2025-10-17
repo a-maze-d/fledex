@@ -46,11 +46,16 @@ defmodule Fledex.Color.NamesTest do
     test "info" do
       use Config, colors: TestColorModule
       assert Names.info(:maze) == 0x747474
+      assert Names.info(:maze, :hex) == 0x747474
       assert Names.info(:maze, :all) == TestColorModule.info(:maze, :all)
 
       use Config, colors: nil
       assert Names.info(:maze) == nil
       assert Names.info(:maze, :all) == nil
+
+      # invalid parameters
+      assert Names.info(:maze, "hex") == nil
+      assert Names.info("maze", :hex) == nil
     end
 
     test "guard" do

@@ -2,39 +2,15 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-defmodule Elixir.Fledex.Color.Names do
+defmodule Fledex.Color.Names do
   @moduledoc """
-  This module is a bridge between color name modules aond the `Fledex.Color`
+  This module is a bridge between color name modules and the `Fledex.Color`
   protocol. It uses the `Fledex.Config` to know about the configured colors
   """
+  @behaviour Fledex.Color.Names.Interface
 
   alias Fledex.Color.Names.Types
   alias Fledex.Config
-
-  # @doc """
-  # By using this module you configure the #{__MODULE__} for a set of colors as
-  # specified in the `:colors` option.
-
-  # > #### Caution {:.warning}
-  # >
-  # > This will create the `Fledex.Config.Data` module. If you `use` this
-  # > module several times, previous definition will be replaced. This could lead
-  # > to unexpected behaviors.
-
-  # ### Options:
-  # * `:colors`: You can specify a single color module, a list of color modules, or one of the special specifiers (`:default`, `:all`, `:none`, `nil`). When you specify a color module you can do so either through it's fully qualified module name (and thereby even
-  # load color modules that Fledex doesn't know about) or through its shortcut name (see `Fledex.Config.modules/0`)
-
-  # ### Special specifiers:
-  # * `:all`: All known color modules will be loaded. Be careful, because there are A LOT of color names, probably more than what you really need
-  # * `:default`: This will load the core modules (see `Fledex.Config.modules/0`). If no `:colors` option is specified then that's also the set that will be loaded.
-  # * `:none`: No color will be loaded (still the `Fledex.Color.Names.Config` will be created. Compare this with `nil`)
-  # * `nil`: This is similar to `:none` except that the `Fledex.Color.Names.Config` will not be created, and if it exists will be deleted.
-  # """
-  # @spec __using__(keyword) :: Macro.t()
-  # defmacro __using__(opts) do
-  #   Fledex.Config.create_config_ast(opts)
-  # end
 
   @doc """
   Checks whether the argument is a valid color name.
@@ -44,12 +20,14 @@ defmodule Elixir.Fledex.Color.Names do
   loosen the definition here.
   """
   @doc guard: true
+  @impl true
   defguard is_color_name(atom) when is_atom(atom)
 
   @doc """
   Get a detailed list of all the colors that have been configured
   """
   @spec colors :: list(Types.color_struct_t())
+  @impl true
   def colors do
     Enum.flat_map(Config.configured_color_modules(), fn {module, color_names} ->
       Enum.filter(module.colors(), fn color ->
@@ -74,6 +52,7 @@ defmodule Elixir.Fledex.Color.Names do
   > the list of modules and the colors that should be imported.
   """
   @spec names :: list(Types.color_name_t())
+  @impl true
   def names do
     Enum.flat_map(Config.configured_color_modules(), fn {_module, colors} -> colors end)
   end
@@ -83,24 +62,26 @@ defmodule Elixir.Fledex.Color.Names do
 
   See `m:Fledex.Color.Names.Interface` for more details
   """
-  @spec info(name :: atom, what :: Types.color_props_t()) :: nil | Types.color_vals_t()
+  @impl true
+  @spec info(name :: atom, what :: atom) :: nil | Types.color_vals_t() | any()
   def info(name, what \\ :hex)
 
-  def info(name, what) do
-    find_module_with_names(name)
+  def info(name, what) when is_atom(name) and is_atom(what) do
+    find_module_with_name(name)
     |> get_color_from_module(name, what)
   end
+  def info(_name, _what), do: nil
 
   # MARK: private utility functions
-  @spec find_module_with_names(atom) :: {module, list(atom)}
-  defp find_module_with_names(name) do
+  @spec find_module_with_name(atom) :: module | nil
+  defp find_module_with_name(name) do
     Enum.find(Config.configured_color_modules(), {nil, []}, fn {_module, colors} ->
       name in colors
     end)
     |> elem(0)
   end
 
-  @spec get_color_from_module(module | nil, atom, atom) :: nil | Types.color_vals_t()
+  @spec get_color_from_module(module | nil, atom, atom) :: nil | Types.color_vals_t() | any()
   defp get_color_from_module(nil, _name, _what), do: nil
 
   defp get_color_from_module(module, name, what) do

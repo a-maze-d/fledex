@@ -34,5 +34,5 @@ defmodule Fledex.Color.Names.Types do
   @typedoc """
   The different values that can be returned when interrogating for some named color properties
   """
-  @type color_vals_t :: Types.color_any() | color_struct_t | String.t()
+  @type color_vals_t :: Types.color_any() | color_struct_t | String.t() | module
 end
