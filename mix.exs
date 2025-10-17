@@ -106,10 +106,8 @@ defmodule Fledex.MixProject do
 
       # documentation
       # ">= 0.0.0", only: :dev, runtime: false},
-      # we need a special version of the `:ex_doc` module to support the copy_doc
-      # feature.
-      {:ex_doc,
-       git: "https://github.com/a-maze-d/ex_doc", branch: "copy_doc", only: :dev, runtime: false},
+      {:ex_doc, "~>0.38", only: :dev, runtime: false},
+
       # documentation coverage is a great idea, but there are several major issues:
       # * The file inch_ex/lib/inch_ex/docs.ex#L74 needs to look like the following to not
       #   throw an error: `"location" => "#{inspect source}:#{inspect anno}"`
