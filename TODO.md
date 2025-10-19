@@ -12,12 +12,12 @@ Even though this library is published, there are things I still want to do befor
   - [x] Add information about color correction (section 3b) (v0.7)
   - [ ] Document the driver options (v0.7)
   - [x] Improve API documentation (v0.7)
-  - [ ] hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.7)
   - [ ] Add a livebook with coordinator examples (v0.7)
   - [x] Update the documentation with new color name information (v0.7)
   - [x] Create a new color page, since the colors will not be available through `Fledex.Color.Names` directly (v0.7)
   - [ ] Update the cheatsheet with coordinator info (v0.7)
   - [ ] Update documentation with the Supervision tree (v0.7)
+  - [ ] hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.8)
 - [ ] Testing
   - [x] Test all the livebooks (v0.7)
   - [ ] Restructure the tests, so they are not so fragile (due to `Fledex.Config`)
@@ -34,12 +34,12 @@ Even though this library is published, there are things I still want to do befor
   - [x] components shouldn't `use` but `import` Fledex. This way we would solve a lot of issues.
 - [ ] Missing functionality
   - [x] Allow selecting the color modules that can be loaded instead of loading always the same list by default. (v0.7)
-  - [ ] The Job should (at least appear) to be connected to the LedStrip (v0.7)
-  - [ ] Lower than sec precision is not possible with Quantum. Replace it with a different library (maybe SchedEx? https://hexdocs.pm/sched_ex/readme.html) (v0.7)
-  - [ ] we start things through the Supervisor, but we don't shut things down through it (v0.7)
   - [x] We have the `Fledex.Color` protocol, but we actually don't make use of its type. This is maybe also a good opportunity to rethink on how we handle colors in general. Maybe we should define everything as `Fledex.Color` and encapsulate CSS, SVG, RAL colours in their own struct to then have the protocol implemented for them. (v0.7)
-  - [x] Allow color modules to not carry more information than just a pre-defined set
+  - [x] Allow color modules to not carry more information than just a pre-defined set (v0.7)
   - [ ] convert the rgb to other color spaces (in the various color name modules). Considering the previous point we might not need to do this, because it should now be optional (v0.8)
+  - [ ] we start things through the Supervisor, but we don't shut things down through it (v0.8)
+  - [ ] The Job should (at least appear) to be connected to the LedStrip (v0.8)
+  - [ ] Lower than sec precision is not possible with Quantum. Replace it with a different library (maybe SchedEx? https://hexdocs.pm/sched_ex/readme.html) (v0.8)
   - [ ] Put some more effort into the coordinator to make it work well (v0.7)
   - [ ] Enable Telemetry? (v0.8)
   - [ ] Add support for WS2811/12/13/14/15 LED strips controlled through phase modulation. (v0.8)
@@ -52,8 +52,8 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Create smartcells? (v1.x)
 - [ ] License
   - [ ] Ensure everything can be under an FSF approved open source license (see https://spdx.org/licenses/)
-    - [ ] wiki colors (v0.7)
-    - [ ] ral colors (v0.7)
+    - [x] wiki colors (v0.7)
+    - [x] ral colors (v0.7)
     - [x] cone image (v0.7)
 - [ ] Increase consumption
   - [ ] Create a video (once v0.6 is released)
