@@ -13,9 +13,6 @@ defmodule Fledex.Color.Names.ModuleGeneratorTest do
   alias Fledex.Leds
 
   defmodule TestNames do
-    # alias Fledex.Color.Names.Wiki
-    # alias Fledex.Color.Names.WikiUtils
-
     use Fledex.Color.Names.ModuleGenerator,
       filename: Wiki.file(),
       pattern: ~r/^[a].*$/i,

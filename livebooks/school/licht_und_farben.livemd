@@ -20,7 +20,7 @@ Wir definieren ein paar Kleinigkeiten. Wir brauchen nicht zu verstehen was das e
 
 ```elixir
 import Fledex.Leds
-import Fledex.Color.Names
+import Fledex.Color.Names.Wiki
 
 :ok
 ```

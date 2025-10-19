@@ -107,7 +107,13 @@ As mentioned above, the library works well in conjunction with [Livebook](https:
 # Nerves-Livebook
 To run Fledex in a [Nerves-Livebook](https://github.com/nerves-livebook/nerves_livebook) is not quite as easy, because you can't dynamically add libraries. You can only use those libraries that have been added while building the nerves ROM.
 
-Thus, you will have to clone the repository and add in the `mix.exs` file `fledex` as a new dependency.
+Thus, you will have to clone the repository 
+```shell
+git clone "https://github.com/nerves-livebook/nerves_livebook"
+cd nerves_livebook
+```
+
+and add in the `mix.exs` file `fledex` as a new dependency.
 
 ```elixir
 defp deps do

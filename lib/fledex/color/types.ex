@@ -11,6 +11,6 @@ defmodule Fledex.Color.Types do
   @type hsl :: {hue :: 0..255, saturation :: 0..255, light :: 0..255}
   @type colorint :: 0..0xFFFFFF
 
-  @type color_any :: color() | hsv() | hsl()
   @type color :: rgb | colorint | Types.color_name_t()
+  @type color_any :: color() | hsv() | hsl()
 end

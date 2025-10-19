@@ -46,7 +46,7 @@ defmodule Fledex.Color.Names do
   and `info/2`. Alternatively you need to ensure that the configured color
   modules are imported.
 
-  > #### Caution {:.warning}
+  > #### Caution {: .warning}
   >
   > When importing color modules, you have to be careful to only import those
   > functions that do not overlap. You can call `Fledex.Config.configured_color_modules/0` to get

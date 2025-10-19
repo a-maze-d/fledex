@@ -7,8 +7,6 @@ defmodule Fledex.Color.Names.SVG do
   This module defines all the named colors in the SVG standard, see:
   https://www.w3.org/TR/SVG11/types.html#ColorKeywords
 
-  Prefer to not use this module directly, but use `Fledex.Color.Names` instead.
-
   > #### Note {: .info}
   >
   > This module implements the `Fledex.Color.Names.Interface` behaviour.

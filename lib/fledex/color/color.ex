@@ -65,6 +65,7 @@ defimpl Fledex.Color, for: Integer do
 end
 
 defimpl Fledex.Color, for: Atom do
+  alias Fledex.Color.Names
   alias Fledex.Color.Types
 
   @doc """
@@ -89,14 +90,6 @@ defimpl Fledex.Color, for: Atom do
     get_color(color_name, :rgb)
   end
 
-  # utility functions (exposed for testing only, do not rely on them)
-
-  @doc false
-  # Get the `Fledex.Color.Names` module if true and the `Fledex.Color.Names.Wiki` module otherwise
-  @spec get_names_module(boolean) :: module()
-  def get_names_module(true), do: Fledex.Color.Names
-  def get_names_module(false), do: Fledex.Color.Names.Wiki
-
   @black 0x000000
   @black_rgb {0, 0, 0}
   @doc false
@@ -104,14 +97,12 @@ defimpl Fledex.Color, for: Atom do
   @spec get_color(atom, :hex) :: Types.colorint()
   @spec get_color(atom, :rgb) :: Types.rgb()
   defp get_color(color_name, type) do
-    module = get_names_module(function_exported?(Fledex.Color.Names, :__info__, 1))
-    # credo:disable-for-next-line
-    color = apply(module, :info, [color_name, type])
+    color = Names.info(color_name, type)
 
-    case {type, color} do
-      {:hex, nil} -> @black
-      {:rgb, nil} -> @black_rgb
-      {_type, color} -> color
+    case {color, type} do
+      {nil, :hex} -> @black
+      {nil, :rgb} -> @black_rgb
+      {color, _type} -> color
     end
   end
 end

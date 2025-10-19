@@ -96,11 +96,11 @@ The interesting thing in the `Fledex.Component.Dot` component is that it actuall
 
 but that almost equal to importing.
 
-  > #### Note
+  > #### Note {: .info}
   > 
   > We want to leave the definition of color names to the user of our component. In a component you
   > should ideally define colors as hex values and not by name. If you still want to use color
-  > names,then specify the color name module explicityly (example: `Fledex.Color.Names.Wiki.red()`)
+  > names, then specify the color name module explicitly (example: `Fledex.Color.Names.Wiki.red()`)
 
 The code looks like the following
 

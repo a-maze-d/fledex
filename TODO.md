@@ -20,8 +20,10 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Update documentation with the Supervision tree (v0.7)
 - [ ] Testing
   - [x] Test all the livebooks (v0.7)
-  - [ ] Add tests for the Clock component (v0.7)
-  - [ ] Add tests for the Thermometer components (v0.7)
+  - [ ] Restructure the tests, so they are not so fragile (due to `Fledex.Config`)
+  - [ ] Add tests for the Clock component (v0.8)
+  - [ ] Add tests for the Thermometer components (v0.8)
+  - [ ] 
 - [ ] Cleanup
   - [x] Cleanup the color conversion functions. There are a lot of unused parts, providing flexibility that is not required.
   - [x] Add more guards to functions to make them more robust (v0.7)
@@ -37,10 +39,9 @@ Even though this library is published, there are things I still want to do befor
   - [ ] we start things through the Supervisor, but we don't shut things down through it (v0.7)
   - [x] We have the `Fledex.Color` protocol, but we actually don't make use of its type. This is maybe also a good opportunity to rethink on how we handle colors in general. Maybe we should define everything as `Fledex.Color` and encapsulate CSS, SVG, RAL colours in their own struct to then have the protocol implemented for them. (v0.7)
   - [x] Allow color modules to not carry more information than just a pre-defined set
-  - [ ] convert the rgb to other color spaces (in the various color name modules). Considering the previous point we might not need to do this, because it should now be optional (v0.7)
-  - [ ] Put some more effort into the coordinator to make it working well (v0.7)
+  - [ ] convert the rgb to other color spaces (in the various color name modules). Considering the previous point we might not need to do this, because it should now be optional (v0.8)
+  - [ ] Put some more effort into the coordinator to make it work well (v0.7)
   - [ ] Enable Telemetry? (v0.8)
-  - [ ] should the `:config` driver not only return the config but the strip_name too?
   - [ ] Add support for WS2811/12/13/14/15 LED strips controlled through phase modulation. (v0.8)
   - [ ] Clustering (v0.8)
     - [ ] Rethink the clusering and check whether the new livebook API endpoints might make it easier to cluster. Currently it seems to be quite complicated.

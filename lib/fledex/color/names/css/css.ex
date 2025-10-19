@@ -7,8 +7,6 @@ defmodule Fledex.Color.Names.CSS do
   This module defines all the named colors in the CSS standard, see:
   https://drafts.csswg.org/css-color/#named-colors
 
-  Prefer to not use this module directly, but use `Fledex.Color.Names` instead.
-
   > #### Note {: .info}
   >
   > This module implements the `Fledex.Color.Names.Interface` behaviour.

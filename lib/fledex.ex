@@ -40,9 +40,17 @@ defmodule Fledex do
   @doc """
   By `use`-ing this module, the `Fledex` macros are made available.
 
-  This macro does also import `Fledex.Leds`, `Crontab.CronExpression`, `Fledex.Utils.PubSub`, and all the colors specified (see also the `:colors` option, including the generated `Fledex.Color.Names` module). Therefore the functions from those modules are directly available without namespace. In addition the drivers (part of the [`FledexDriver.Impl` namespace](Fledex.Driver.Impl.Kino.html)) are aliased.
+  This macro does also import `Fledex.Leds`, `Crontab.CronExpression`, `Fledex.Utils.PubSub`, and all the colors specified (see also the `:colors` option). Therefore the functions from those modules are directly available without namespace.
 
   > #### Caution {: .warning}
+  >
+  > For that reason you should NOT `use Fledex` several times in a row, because you
+  > might run into name conflicts. In components you shoudl not `use Fledex` but just
+  > `require Fledex` (or `import Fledex` at best). See also `Fledex.Config.__using__/1`.
+
+  In addition the drivers (part of the [`FledexDriver.Impl` namespace](Fledex.Driver.Impl.Kino.html)) are aliased.
+
+  > #### Info {: .info}
   >
   > This could lead to a conflict with other libraries (like the `Kino`-driver with the
   > `Kino`-library). In that case just use the fully qualified module name and prefix
@@ -60,7 +68,6 @@ defmodule Fledex do
   * `:supervisor`: specifies how we want to supervise it. See the [Supervisor](#supervisor) section for more details.
   * `:log_level`: specifies the log level. This is important if none is already specified in a config file. This is important if Fledex is not started as an application.
   * `:colors`: defines the colors that should be imported (i.e can be called without namespace). See the [Colors](#colors) section for more details.
-  * `:color_mod_name`: See hte [Colors](#colors) section for more details.
 
   <a name="supervisor"></a>
   ### Supervisor
@@ -72,43 +79,44 @@ defmodule Fledex do
 
   <a name="colors"></a>
   ### Colors
-  The options for the `:color` option can be both a single term (`atom` or `module`) or a list thereof. When an atom is specified it will be translated to the appropriate `module`. If a `module` is specified it needs to adhere to the `Fledex.Color.Names.Interface` behaviour and will be loaded. When several color modules are specified they will all be imported.
-  The following color shortcuts exist:
+  The options for the `:colors` option can be both a single term (`atom` or `module`) or a list thereof. When an atom is specified it will be translated to the appropriate `module`(s), see below. If a `module` is specified it needs to adhere to the `Fledex.Color.Names.Interface` behaviour and will be loaded.
+
+  When several color modules are specified they will all be imported (except `no_imports: true` is specified)
+
+  The following color shortcuts exist (see also `Fledex.Config.known_color_modules/0`):
     * `:css`: This will load `Fledex.Color.Names.CSS`
     * `:ral`: This will load `Fledex.Color.Names.RAL`
     * `:svg`: This will load `Fledex.Color.Names.SVG`
     * `:wiki`: This will load `Fledex.Color.Names.Wiki`
     * `:all`: This will load all the above colors
     * `:none`: no colors will be imported
-    * `:default`: this will load the default set of colors (`:wiki`, `:css`, `:svg`). This is the default, i.e. when you do not specify the `:colors` option.
+    * `:default`: this will load the default set of colors marked as `:core` (`:wiki`, `:css`, `:svg`). This is also the default, i.e. when you do not specify the `:colors` option.
 
   > #### Note {: .info}
   >
   > Color modules that are not specified can still be used. If you use the `:default`
-  > color names and want to use a colors from `Fledex.Color.Names.RAL`. Let's assume you
+  > color names and want to use a colors from `Fledex.Color.Names.RAL`, let's assume you
   > want to use the `:sunset_red` RAL color, then you can use it like the following:
+  >
   > ```elixir
+  > alias Fledex.Leds
+  > alias Fledex.Color.Names.RAL
+  >
   > Leds.new(10)
-  >   # by calling it implicitly (which only works for inbuilt color modules)
-  >   |> Leds.light(:sunset_red)
-  >   |> Leds.light(Fledex.Color.to_colorint(:sunset_red))
-  >   |> Leds.light(Fledex.Color.to_rgb(:sunset_red))
-  >   # by calling it explicitly (which works for all color modules)
-  >   |> Leds.light(Fledex.Color.Names.RAL.sunset_red(:hex))
-  >   |> Leds.light(Fledex.Color.Names.RAL.sunset_red(:rgb))
-  >   |> Fledex.Color.Names.RAL.sunset_red()
+  >   |> Leds.light(RAL.sunset_red())
+  >   |> Leds.light(RAL.sunset_red(:hex))
+  >   |> Leds.light(RAL.sunset_red(:rgb))
+  >   |> RAL.sunset_red()
   > ```
   >
   > You can also import `Fledex.Color.Names.RAL` to make `sunset_red()` available and
   > thereby get more or less the same convenience (but why wouldn't you specify it already
   > during `use Fledex`?)
 
-  By default the module `Fledex.Color.Names` will be created which is an easy interface into all defined colors. Sometimes, you want the module to have a different name (especially during tests) so that several `use` do not conflict. In that case you can specify the `:color_mod_name` option. You can also use this option if you want to avoid  the generation of the module by specifying `nil` as argument.
-
   > #### Note {: .info}
   >
   > In case of name conflicts between color modules, only the first definition will be
-  > loaded.
+  > imported.
 
   > #### Warning {: .warning}
   >
@@ -121,8 +129,8 @@ defmodule Fledex do
   > leds(1) |> blue()
   >```
   >
-  > This will result (apart from some warnings about redefining a module) in the following
-  > error:
+  > This will result in the following error:
+  >
   > ```
   > error: function blue/1 imported from both Fledex.Color.Names.CSS and Fledex.Color.Names.Wiki, call is ambiguous
   > └─ iex:4
@@ -130,7 +138,9 @@ defmodule Fledex do
   > ** (CompileError) cannot compile code (errors have been logged)
   > ```
   >
-  > You can easily solve this by respanning the shell by calling [`respawn/0`](https://hexdocs.pm/iex/IEx.Helpers.html#respawn/0). This is not an issue in [Livebook](https://livebook.dev/).
+  > You can easily solve this by respanning the shell by calling [`respawn/0`](https://hexdocs.pm/iex/IEx.Helpers.html#respawn/0) or by makign sure we don't import the color function names by specifying `no_imports: true`.
+  >
+  > This is not an issue in [Livebook](https://livebook.dev/).
   """
   @spec __using__(keyword) :: Macro.t()
   defmacro __using__(opts) do
@@ -143,6 +153,7 @@ defmodule Fledex do
       import Fledex
       # import also the Leds and the color name definitions so no namespace are required
       import Fledex.Leds
+      import Fledex.Color.Names
       import Fledex.Utils.PubSub
 
       alias Fledex.Driver.Impl.Kino

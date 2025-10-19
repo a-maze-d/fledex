@@ -36,7 +36,7 @@ defmodule Fledex.Test do
     test "use macro" do
       # we start the server
       assert GenServer.whereis(Manager) == nil
-      use Fledex, supervisor: :none, color_mod_name: MacroTest1
+      use Fledex, supervisor: :none
       assert GenServer.whereis(Manager) != nil
 
       # and check that Crontab.CronExpression, Fledex, Fledex.Leds, Fledex.Color.Names, ...
@@ -47,6 +47,8 @@ defmodule Fledex.Test do
       # from Fledex.Leds
       assert :erlang.fun_info(&leds/1)
       # from Fledex.Color.Names
+      assert :erlang.fun_info(&names/0)
+      # from Fledex.Color.Names.Wiki (imported by the Fledex.Config)
       assert :erlang.fun_info(&red/0)
       assert :erlang.fun_info(&red/1)
       assert :erlang.fun_info(&red/2)
@@ -61,7 +63,7 @@ defmodule Fledex.Test do
     test "use macro without server" do
       # we don't start the server
       assert GenServer.whereis(Manager) == nil
-      use Fledex, dont_start: true, color_mod_name: WithoutServerTest
+      use Fledex, dont_start: true
       assert GenServer.whereis(Manager) == nil
 
       # and check that Crontab.CronExpression, Fledex, Fledex.Leds, Fledex.Color.Names, ...
@@ -72,6 +74,8 @@ defmodule Fledex.Test do
       # from Fledex.Leds
       assert :erlang.fun_info(&leds/1)
       # from Fledex.Color.Names
+      assert :erlang.fun_info(&names/0)
+      # from Fledex.Color.Names.Wiki (imported by the Fledex.Config)
       assert :erlang.fun_info(&red/0)
       assert :erlang.fun_info(&red/1)
       assert :erlang.fun_info(&red/2)

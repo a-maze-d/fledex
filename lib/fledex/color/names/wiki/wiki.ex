@@ -10,9 +10,6 @@ defmodule Fledex.Color.Names.Wiki do
   * https://en.wikipedia.org/wiki/List_of_colors:_G%E2%80%93M
   * https://en.wikipedia.org/wiki/List_of_colors:_N%E2%80%93Z
 
-
-  Prefer to not use this module directly, but use `Fledex.Color.Names` instead.
-
   > #### Note {: .info}
   >
   > This module implements the `Fledex.Color.Names.Interface` behaviour.

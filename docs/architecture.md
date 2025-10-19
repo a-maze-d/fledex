@@ -39,7 +39,7 @@ Currently there are 4 drivers available:
 > the current definition. This can be very useful when defining components as well as in
 > tests. When using this driver, you probably should specify also the following options:
 > * `dont_start: true` to avoid starting the `Fledex.Animation.Manager`
-> * `colors: nil` to avoid the creation of a `Fledex.Color.Names` module that could conflict with other instances. Also, you should prefer to use colors as integers. If you want to use colors by name, you should explicitly specify the module name.
+> * `colors: nil` to avoid the creation of a `Fledex.Config.Data` module that could conflict with other instances. Also, you should prefer to use colors as integers. If you want to use colors by name, you should explicitly specify the module name.
 
 # The Leds
 The `Leds` is an easy way to define a set of Leds. This module provides the 

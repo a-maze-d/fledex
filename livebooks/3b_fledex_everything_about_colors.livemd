@@ -89,11 +89,11 @@ In addition each color can also be used directly in an `Leds` sequence since it 
   leds |> Leds.light(almond(:hex), offset: offset)
   ```
 
-This allows for a very natural way to define an led sequence. especially if we import the `Fledex.Leds` and `Fledex.Color.Names` modules.
+This allows for a very natural way to define an led sequence. especially if we import the `Fledex.Leds` and a color names module, like `Fledex.Color.Names.Wiki` modules.
 
 ```elixir
 import Fledex.Leds
-import Fledex.Color.Names
+import Fledex.Color.Names.Wiki
 
 leds(5) |> almond |> red |> green |> blue(offset: 5)
 ```

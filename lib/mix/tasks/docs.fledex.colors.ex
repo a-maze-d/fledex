@@ -70,7 +70,7 @@ if Mix.env() == :dev do
       You can also bring your own color name list and load it, but in that acse you
       will need to specify the full color module name.
 
-      > #### Info {:.info}
+      > #### Info {: .info}
       >
       > The colors get loaded by default in the ordered specified here, so if there
       > is a name conflict the former will win over latter.

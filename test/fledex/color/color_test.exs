@@ -33,11 +33,6 @@ defmodule Fledex.Color.ColorTest do
       assert Fledex.Color.to_rgb({0x12, 0x34, 0x56}) == {0x12, 0x34, 0x56}
     end
 
-    test "test names module" do
-      assert Fledex.Color.Names == Fledex.Color.Atom.get_names_module(true)
-      assert Fledex.Color.Names.Wiki == Fledex.Color.Atom.get_names_module(false)
-    end
-
     test "non-existing color name atoms default to black" do
       alias Fledex.Color
       alias Fledex.Leds

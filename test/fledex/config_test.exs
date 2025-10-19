@@ -12,7 +12,7 @@ defmodule Fledex.ConfigTest do
     Enum.map(modules_and_color, fn {module, _colors} -> module end)
   end
 
-  describe "use config" do
+  describe "use config: " do
     test "use once" do
       use Config, colors: [:wiki, :css]
       assert length(Config.configured_color_modules()) == 2
@@ -27,7 +27,7 @@ defmodule Fledex.ConfigTest do
       assert Enum.empty?(Config.configured_color_modules())
     end
 
-    test "colors parameter" do
+    test "with colors parameter" do
       use Config
       mac = Config.configured_color_modules()
       assert length(mac) == 3
@@ -95,7 +95,7 @@ defmodule Fledex.ConfigTest do
              ]
     end
 
-    test "no colors definition" do
+    test "with no colors definition" do
       use Config, colors: :wiki
       assert Fledex.Config.exists?()
       assert length(Config.configured_color_modules()) == 1
@@ -105,13 +105,13 @@ defmodule Fledex.ConfigTest do
       assert Enum.empty?(Config.configured_color_modules())
     end
 
-    test "color import" do
+    test "with color import" do
       use Config, colors: :wiki
       assert red() == 0xFF0000
     end
 
     # it's a bit unclear to me where the logging is going :-(
-    test "specify non-existing module" do
+    test "with specifying non-existing module" do
       import ExUnit.CaptureLog
       require Logger
 
@@ -125,7 +125,7 @@ defmodule Fledex.ConfigTest do
              end) =~ "Not a known color name"
     end
 
-    test "specify color name module with wrong behaviour" do
+    test "with specifying color name module with wrong behaviour" do
       import ExUnit.CaptureLog
 
       assert capture_log(fn ->
@@ -140,6 +140,81 @@ defmodule Fledex.ConfigTest do
                    use Config, colors: Test2
                """)
              end) =~ "Not a known color name"
+    end
+
+    test "when redefining config with overlapping colors" do
+      import ExUnit.CaptureIO
+
+      code = """
+          alias Fledex.Config
+          alias Fledex.Color.Names.Wiki
+          alias Fledex.Color.Names.CSS
+
+          Code.ensure_loaded(Config)
+          Code.ensure_loaded(Wiki)
+          Code.ensure_loaded(CSS)
+
+          use Config, colors: :wiki
+          red()
+          use Config, colors: :css
+          red()
+      """
+
+      io =
+        capture_io(:stderr, fn ->
+          response =
+            try do
+              :elixir_compiler.string(to_charlist(code), "no_file", fn _a, _b -> :ok end)
+              {:ok, ""}
+            rescue
+              x in CompileError ->
+                %CompileError{description: description} = x
+                {:rescue, description}
+            end
+
+          assert response == {:rescue, "cannot compile file (errors have been logged)"}
+        end)
+
+      assert io =~ "error"
+
+      assert io =~
+               "function red/0 imported from both Fledex.Color.Names.CSS and Fledex.Color.Names.Wiki, call is ambiguous"
+    end
+
+    test "when redefining config with overlapping colors, but no imports" do
+      import ExUnit.CaptureIO
+
+      code = """
+          alias Fledex.Config
+          alias Fledex.Color.Names.Wiki
+          alias Fledex.Color.Names.CSS
+
+          Code.ensure_loaded(Config)
+          Code.ensure_loaded(Wiki)
+          Code.ensure_loaded(CSS)
+
+          use Config, colors: :wiki
+          red()
+          use Config, colors: :css, no_imports: true
+          red()
+      """
+
+      io =
+        capture_io(:stderr, fn ->
+          response =
+            try do
+              :elixir_compiler.string(to_charlist(code), "no_file", fn _a, _b -> :ok end)
+              {:ok, ""}
+            rescue
+              x in CompileError ->
+                %CompileError{description: description} = x
+                {:rescue, description}
+            end
+
+          assert response == {:ok, ""}
+        end)
+
+      assert io == ""
     end
   end
 
