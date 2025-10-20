@@ -181,7 +181,8 @@ defmodule Fledex.MixProject do
           "CLA.md",
           "CONTRIBUTING.md",
           "CODE_OF_CONDUCT.md",
-          "CONTRIBUTORS.md"
+          "CONTRIBUTORS.md",
+          "LICENSE.md"
         ]
       ],
       groups_for_modules: [
