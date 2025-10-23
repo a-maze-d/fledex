@@ -76,7 +76,7 @@ Fledex.Color.KinoRender.new([my_color5, my_color6, my_color7, my_color8, my_colo
 
 From the color names you can also get more information, but as mentioned above we'll look at this in a later chapter.
 
-In addition, you might encounter, in some cases, other color encodings like `Type.hsv` or `Typee.hsl`. But they are in general not so important.
+In addition, you might encounter, in some cases, other color encodings like `Type.hsv` or `Type.hsl`. But they are in general not so important.
 
 ## Defining individual Leds
 

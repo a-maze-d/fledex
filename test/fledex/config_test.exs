@@ -239,8 +239,8 @@ defmodule Fledex.ConfigTest do
 
       assert Wiki.vermilion2(:all) == %{
                hex: 14_235_678,
-               hsl: {5, 193, 122},
-               hsv: {5, 219, 216},
+               hsl: %Fledex.Color.HSL{h: 5, s: 193, l: 122},
+               hsv: %Fledex.Color.HSV{h: 5, s: 219, v: 216},
                index: 828,
                name: :vermilion2,
                descriptive_name: "Vermilion2",
@@ -251,8 +251,8 @@ defmodule Fledex.ConfigTest do
 
       assert Names.info(:vermilion2, :all) == %{
                hex: 14_235_678,
-               hsl: {5, 193, 122},
-               hsv: {5, 219, 216},
+               hsl: %Fledex.Color.HSL{h: 5, s: 193, l: 122},
+               hsv: %Fledex.Color.HSV{h: 5, s: 219, v: 216},
                index: 828,
                name: :vermilion2,
                descriptive_name: "Vermilion2",
@@ -267,8 +267,8 @@ defmodule Fledex.ConfigTest do
 
       assert Names.info(:vermilion2, :all) == %{
                hex: 14_235_678,
-               hsl: {5, 193, 122},
-               hsv: {5, 219, 216},
+               hsl: %Fledex.Color.HSL{h: 5, s: 193, l: 122},
+               hsv: %Fledex.Color.HSV{h: 5, s: 219, v: 216},
                index: 828,
                name: :vermilion2,
                descriptive_name: "Vermilion2",
@@ -284,8 +284,8 @@ defmodule Fledex.ConfigTest do
       assert 14_235_678 == Names.info(:vermilion2, :hex)
       assert {216, 56, 30} == Names.info(:vermilion2, :rgb)
       assert :vermilion2 == Names.info(:vermilion2, :name)
-      assert {5, 193, 122} == Names.info(:vermilion2, :hsl)
-      assert {5, 219, 216} == Names.info(:vermilion2, :hsv)
+      assert %Fledex.Color.HSL{h: 5, s: 193, l: 122} == Names.info(:vermilion2, :hsl)
+      assert %Fledex.Color.HSV{h: 5, s: 219, v: 216} == Names.info(:vermilion2, :hsv)
       assert 828 == Names.info(:vermilion2, :index)
       assert "Vermilion2" == Names.info(:vermilion2, :descriptive_name)
       assert "" == Names.info(:vermilion2, :source)

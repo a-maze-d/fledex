@@ -67,8 +67,8 @@ defmodule Fledex.Color.Names.ModuleGeneratorTest do
       assert Map.get(colors, :vermilion2) ==
                %{
                  hex: 14_235_678,
-                 hsl: {5, 193, 122},
-                 hsv: {5, 219, 216},
+                 hsl: %Fledex.Color.HSL{h: 5, s: 193, l: 122},
+                 hsv: %Fledex.Color.HSV{h: 5, s: 219, v: 216},
                  index: 828,
                  name: :vermilion2,
                  rgb: {216, 56, 30},
@@ -97,8 +97,8 @@ defmodule Fledex.Color.Names.ModuleGeneratorTest do
       assert 14_235_678 == Wiki.vermilion2()
       assert 14_235_678 == Wiki.vermilion2(:hex)
       assert {216, 56, 30} == Wiki.vermilion2(:rgb)
-      assert {5, 193, 122} == Wiki.vermilion2(:hsl)
-      assert {5, 219, 216} == Wiki.vermilion2(:hsv)
+      assert %Fledex.Color.HSL{h: 5, s: 193, l: 122} == Wiki.vermilion2(:hsl)
+      assert %Fledex.Color.HSV{h: 5, s: 219, v: 216} == Wiki.vermilion2(:hsv)
       assert 828 == Wiki.vermilion2(:index)
       assert "Vermilion2" == Wiki.vermilion2(:descriptive_name)
       assert "" == Wiki.vermilion2(:source)

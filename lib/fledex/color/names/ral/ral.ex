@@ -40,7 +40,7 @@ defmodule Fledex.Color.Names.RAL do
         rgb: rgb,
         # convert the rgb to other color spaces
         # {LoadUtils.a2b(h), LoadUtils.a2b(s1), LoadUtils.a2b(l1)},
-        hsl: {0, 0, 0},
+        hsl: %Fledex.Color.HSL{h: 0, s: 0, l: 0},
         hsv: Approximate.rgb2hsv(rgb),
         source: "RAL design system+: #{code}"
       }

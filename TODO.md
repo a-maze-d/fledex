@@ -57,7 +57,9 @@ Even though this library is published, there are things I still want to do befor
     - [x] cone image (v0.7)
 - [ ] Increase consumption
   - [ ] Create a video (once v0.6 is released)
-  - [ ] Migrate outstanding TODOs to github (v0.7)
-  - [ ] Publish/announce on Elixirforum (v0.7)
-  - [ ] Get the library into nerves-livebook (v0.7)
+  - [ ] Migrate outstanding TODOs to github (v0.8)
+  - [ ] Publish/announce on Elixirforum (v0.8)
+  - [ ] Get the library into nerves-livebook (v0.8)
+  - [ ] Move repository to its own org (fledex as an org is already taken, but fled-ex is free and I took it) (v0.8) <-- Announce this in the next release notes that this will happen?
+  - [ ] Create a github pages site for the project (v0.8)
 - [ ] Bugs (currently none known)
