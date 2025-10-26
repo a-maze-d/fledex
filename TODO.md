@@ -10,11 +10,11 @@ Even though this library is published, there are things I still want to do befor
 # Tasks
 - [ ] Documentation
   - [x] Add information about color correction (section 3b) (v0.7)
-  - [ ] Document the driver options (v0.7)
   - [x] Improve API documentation (v0.7)
-  - [ ] Add a livebook with coordinator examples (v0.7)
   - [x] Update the documentation with new color name information (v0.7)
   - [x] Create a new color page, since the colors will not be available through `Fledex.Color.Names` directly (v0.7)
+  - [ ] Document the driver options (v0.7)
+  - [ ] Add a livebook with coordinator examples (v0.7)
   - [ ] Update the cheatsheet with coordinator info (v0.7)
   - [ ] Update documentation with the Supervision tree (v0.7)
   - [ ] hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.8)
@@ -23,7 +23,6 @@ Even though this library is published, there are things I still want to do befor
   - [x] Restructure the tests, so they are not so fragile (due to `Fledex.Config`) (v0.7) <-- this does not seem to be an issue anymore.
   - [ ] Add tests for the Clock component (v0.8)
   - [ ] Add tests for the Thermometer components (v0.8)
-  - [ ] 
 - [ ] Cleanup
   - [x] Cleanup the color conversion functions. There are a lot of unused parts, providing flexibility that is not required.
   - [x] Add more guards to functions to make them more robust (v0.7)
@@ -34,7 +33,7 @@ Even though this library is published, there are things I still want to do befor
   - [x] components shouldn't `use` but `import` Fledex. This way we would solve a lot of issues.
   - [x] Introduce a `Fledex.Color.RGB` and reduce the reliance on `{r, g, b}` tuples
   - [x] Remove `Fledex.Color.to_rgb/1`
-  - [ ] Avoid the `RGB.new(color) |> RGB.to_tuple()` constructs, by changing the various functions to take RGB structures. The RGB-tuple should only be used by clients but not internally.
+  - [x] Avoid the `RGB.new(color) |> RGB.to_tuple()` constructs, by changing the various functions to take RGB structures. The RGB-tuple should only be used by clients but not internally.
   - [ ] Rethink whether we really want to create a `Fledex.Config.Data` module or we shoudl store the information in a GenServer. The issue with the GenServer is that we need to start a server. But maybe that's not soo bad.
 - [ ] Missing functionality
   - [x] Allow selecting the color modules that can be loaded instead of loading always the same list by default. (v0.7)

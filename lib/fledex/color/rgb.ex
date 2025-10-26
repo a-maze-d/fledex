@@ -18,9 +18,7 @@ defmodule Fledex.Color.RGB do
   def new({r, g, b} = _color), do: %__MODULE__{r: r, g: g, b: b}
 
   def new(color) when is_integer(color) do
-    r = color |> Bitwise.&&&(0xFF0000) |> Bitwise.>>>(16)
-    g = color |> Bitwise.&&&(0x00FF00) |> Bitwise.>>>(8)
-    b = color |> Bitwise.&&&(0x0000FF)
+    {r, g, b} = to_tuple(color)
     %__MODULE__{r: r, g: g, b: b}
   end
 
@@ -29,9 +27,21 @@ defmodule Fledex.Color.RGB do
     |> new()
   end
 
-  @spec to_tuple(t()) :: Types.rgb()
+  @spec to_tuple(t() | Types.color()) :: Types.rgb()
   def to_tuple(%__MODULE__{r: r, g: g, b: b} = _rgb) do
     {r, g, b}
+  end
+
+  def to_tuple(color) when is_integer(color) do
+    r = color |> Bitwise.&&&(0xFF0000) |> Bitwise.>>>(16)
+    g = color |> Bitwise.&&&(0x00FF00) |> Bitwise.>>>(8)
+    b = color |> Bitwise.&&&(0x0000FF)
+    {r, g, b}
+  end
+
+  def to_tuple(color) do
+    Color.to_colorint(color)
+    |> to_tuple()
   end
 
   defimpl Fledex.Color do

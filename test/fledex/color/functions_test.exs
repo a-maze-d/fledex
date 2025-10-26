@@ -14,6 +14,7 @@ defmodule Fledex.Color.FunctionsTest do
   alias Fledex.Color.Correction
   alias Fledex.Color.Functions
   alias Fledex.Color.HSV
+  alias Fledex.Color.RGB
 
   doctest Functions
 
@@ -177,46 +178,62 @@ defmodule Fledex.Color.FunctionsTest do
 
   describe "test gradient function" do
     test "gradient with 1 distance (simple)" do
-      assert Functions.create_gradient_rgb(1, {0xFF, 0x00, 0x00}, {0x00, 0x00, 0xFF}) == [
-               {0x7F, 0x00, 0x7F}
+      assert Functions.create_gradient_rgb(1, %RGB{r: 0xFF, g: 0x00, b: 0x00}, %RGB{
+               r: 0x00,
+               g: 0x00,
+               b: 0xFF
+             }) == [
+               %RGB{r: 0x7F, g: 0x00, b: 0x7F}
              ]
     end
 
     test "gradient with 1 distance (complex)" do
-      assert Functions.create_gradient_rgb(1, {0x7F, 0xD3, 0x5E}, {0x2A, 0xFF, 0x8F}) == [
-               {0x54, 0xE9, 0x76}
+      assert Functions.create_gradient_rgb(1, %RGB{r: 0x7F, g: 0xD3, b: 0x5E}, %RGB{
+               r: 0x2A,
+               g: 0xFF,
+               b: 0x8F
+             }) == [
+               %RGB{r: 0x54, g: 0xE9, b: 0x76}
              ]
     end
 
     test "gradient with 10 distance (simple)" do
-      assert Functions.create_gradient_rgb(10, {0xFF, 0x00, 0x00}, {0x00, 0x00, 0xFF}) ==
+      assert Functions.create_gradient_rgb(10, %RGB{r: 0xFF, g: 0x00, b: 0x00}, %RGB{
+               r: 0x00,
+               g: 0x00,
+               b: 0xFF
+             }) ==
                [
-                 {0xE7, 0x00, 0x17},
-                 {0xD0, 0x00, 0x2E},
-                 {0xB9, 0x00, 0x45},
-                 {0xA2, 0x00, 0x5C},
-                 {0x8B, 0x00, 0x73},
-                 {0x73, 0x00, 0x8B},
-                 {0x5C, 0x00, 0xA2},
-                 {0x45, 0x00, 0xB9},
-                 {0x2E, 0x00, 0xD0},
-                 {0x17, 0x00, 0xE7}
+                 %RGB{r: 0xE7, g: 0x00, b: 0x17},
+                 %RGB{r: 0xD0, g: 0x00, b: 0x2E},
+                 %RGB{r: 0xB9, g: 0x00, b: 0x45},
+                 %RGB{r: 0xA2, g: 0x00, b: 0x5C},
+                 %RGB{r: 0x8B, g: 0x00, b: 0x73},
+                 %RGB{r: 0x73, g: 0x00, b: 0x8B},
+                 %RGB{r: 0x5C, g: 0x00, b: 0xA2},
+                 %RGB{r: 0x45, g: 0x00, b: 0xB9},
+                 %RGB{r: 0x2E, g: 0x00, b: 0xD0},
+                 %RGB{r: 0x17, g: 0x00, b: 0xE7}
                ]
     end
 
     test "gradient with 10 distance (complex)" do
-      assert Functions.create_gradient_rgb(10, {0x7F, 0xD3, 0x5E}, {0x2A, 0xFF, 0x8F}) ==
+      assert Functions.create_gradient_rgb(10, %RGB{r: 0x7F, g: 0xD3, b: 0x5E}, %RGB{
+               r: 0x2A,
+               g: 0xFF,
+               b: 0x8F
+             }) ==
                [
-                 {0x77, 0xD7, 0x62},
-                 {0x6F, 0xDB, 0x66},
-                 {0x67, 0xDF, 0x6B},
-                 {0x60, 0xE3, 0x6F},
-                 {0x58, 0xE7, 0x74},
-                 {0x50, 0xEB, 0x78},
-                 {0x48, 0xEF, 0x7D},
-                 {0x41, 0xF3, 0x81},
-                 {0x39, 0xF7, 0x86},
-                 {0x31, 0xFB, 0x8A}
+                 %RGB{r: 0x77, g: 0xD7, b: 0x62},
+                 %RGB{r: 0x6F, g: 0xDB, b: 0x66},
+                 %RGB{r: 0x67, g: 0xDF, b: 0x6B},
+                 %RGB{r: 0x60, g: 0xE3, b: 0x6F},
+                 %RGB{r: 0x58, g: 0xE7, b: 0x74},
+                 %RGB{r: 0x50, g: 0xEB, b: 0x78},
+                 %RGB{r: 0x48, g: 0xEF, b: 0x7D},
+                 %RGB{r: 0x41, g: 0xF3, b: 0x81},
+                 %RGB{r: 0x39, g: 0xF7, b: 0x86},
+                 %RGB{r: 0x31, g: 0xFB, b: 0x8A}
                ]
     end
   end

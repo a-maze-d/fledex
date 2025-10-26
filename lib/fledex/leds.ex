@@ -237,7 +237,7 @@ defmodule Fledex.Leds do
     end_color = RGB.new(end_color)
 
     led_values =
-      Functions.create_gradient_rgb(num_leds, RGB.to_tuple(start_color), RGB.to_tuple(end_color))
+      Functions.create_gradient_rgb(num_leds, start_color, end_color)
       |> convert_to_leds_structure(offset)
 
     put_in(leds.leds, Map.merge(leds.leds, led_values))

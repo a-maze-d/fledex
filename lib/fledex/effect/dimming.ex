@@ -19,7 +19,6 @@ defmodule Fledex.Effect.Dimming do
     leds =
       Enum.map(leds, fn led ->
         led
-        |> RGB.new()
         |> RGB.to_tuple()
         |> CalcUtils.nscale8(255 - step, false)
         |> Color.to_colorint()

@@ -7,6 +7,7 @@ defmodule Fledex.Color.Functions do
 
   alias Fledex.Color.Conversion.Rainbow
   alias Fledex.Color.HSV
+  alias Fledex.Color.RGB
   alias Fledex.Color.Types
 
   @doc """
@@ -49,8 +50,12 @@ defmodule Fledex.Color.Functions do
   @doc """
   This function creates a gradient from a `start_color` to an `end_color` spread over `num_leds`
   """
-  @spec create_gradient_rgb(pos_integer, Types.rgb(), Types.rgb()) :: list(Types.rgb())
-  def create_gradient_rgb(num_leds, {sr, sg, sb} = _start_color, {er, eg, eb} = _end_color)
+  @spec create_gradient_rgb(pos_integer, RGB.t(), RGB.t()) :: list(Types.rgb())
+  def create_gradient_rgb(
+        num_leds,
+        %RGB{r: sr, g: sg, b: sb} = _start_color,
+        %RGB{r: er, g: eg, b: eb} = _end_color
+      )
       when num_leds > 0 do
     rdist87 = (er - sr) <<< 7
     gdist87 = (eg - sg) <<< 7
@@ -66,7 +71,7 @@ defmodule Fledex.Color.Functions do
     b88 = sb <<< 8
 
     for n <- 1..(steps - 1) do
-      {(r88 + rdelta * n) >>> 8, (g88 + gdelta * n) >>> 8, (b88 + bdelta * n) >>> 8}
+      %RGB{r: (r88 + rdelta * n) >>> 8, g: (g88 + gdelta * n) >>> 8, b: (b88 + bdelta * n) >>> 8}
     end
   end
 

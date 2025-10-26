@@ -48,6 +48,12 @@ defmodule Fledex.Color.ColorTest do
       assert %RGB{r: 0xFF, g: 0xEE, b: 0xDD} = RGB.new(0xFFEEDD)
       assert %RGB{r: 0xFF, g: 0xEE, b: 0xDD} = RGB.new(%{rgb: 0xFFEEDD})
       assert %RGB{r: 0xFF, g: 0xEE, b: 0xDD} = RGB.new(%{rgb: {0xFF, 0xEE, 0xDD}})
+
+      assert {0xFF, 0xEE, 0xDD} = RGB.to_tuple(RGB.new(0xFFEEDD))
+      assert {0xFF, 0xEE, 0xDD} = RGB.to_tuple({0xFF, 0xEE, 0xDD})
+      assert {0xFF, 0xEE, 0xDD} = RGB.to_tuple(0xFFEEDD)
+      assert {0xFF, 0xEE, 0xDD} = RGB.to_tuple(%{rgb: 0xFFEEDD})
+      assert {0xFF, 0xEE, 0xDD} = RGB.to_tuple(%{rgb: {0xFF, 0xEE, 0xDD}})
     end
   end
 
@@ -163,105 +169,25 @@ defmodule Fledex.Color.ColorTest do
       # #19CB97 	0.099 	0.795 	0.591 	162.4° 	163.4° 	0.696 	0.620 	0.795 	0.447 	0.495 	0.564 	0.875 	0.779 	0.800
       # #362698 	0.211 	0.149 	0.597 	248.3° 	247.3° 	0.448 	0.420 	0.597 	0.373 	0.319 	0.219 	0.750 	0.601 	0.533
       # #7E7EB8 	0.495 	0.493 	0.721 	240.5° 	240.4° 	0.228 	0.227 	0.721 	0.607 	0.570 	0.520 	0.316 	0.290 	0.135
-      assert Approximate.rgb2hsv(RGB.new(0xFFFFFF) |> RGB.to_tuple()) == %HSV{h: 0, s: 0, v: 255}
-      assert Approximate.rgb2hsv(RGB.new(0x808080) |> RGB.to_tuple()) == %HSV{h: 0, s: 0, v: 181}
-      assert Approximate.rgb2hsv(RGB.new(0x000000) |> RGB.to_tuple()) == %HSV{h: 0, s: 0, v: 0}
-
-      assert Approximate.rgb2hsv(RGB.new(0xFF0000) |> RGB.to_tuple()) == %HSV{
-               h: 0,
-               s: 255,
-               v: 255
-             }
-
-      assert Approximate.rgb2hsv(RGB.new(0xBFBF00) |> RGB.to_tuple()) == %HSV{
-               h: 63,
-               s: 255,
-               v: 255
-             }
-
-      assert Approximate.rgb2hsv(RGB.new(0x008000) |> RGB.to_tuple()) == %HSV{
-               h: 96,
-               s: 255,
-               v: 181
-             }
-
-      assert Approximate.rgb2hsv(RGB.new(0x80FFFF) |> RGB.to_tuple()) == %HSV{
-               h: 195,
-               s: 74,
-               v: 255
-             }
-
-      assert Approximate.rgb2hsv(RGB.new(0x8080FF) |> RGB.to_tuple()) == %HSV{
-               h: 195,
-               s: 74,
-               v: 255
-             }
-
-      assert Approximate.rgb2hsv(RGB.new(0xBF40BF) |> RGB.to_tuple()) == %HSV{
-               h: 0,
-               s: 127,
-               v: 255
-             }
-
-      assert Approximate.rgb2hsv(RGB.new(0xA0A424) |> RGB.to_tuple()) == %HSV{
-               h: 71,
-               s: 159,
-               v: 255
-             }
-
-      assert Approximate.rgb2hsv(RGB.new(0x411BEA) |> RGB.to_tuple()) == %HSV{
-               h: 182,
-               s: 172,
-               v: 255
-             }
-
-      assert Approximate.rgb2hsv(RGB.new(0x1EAC41) |> RGB.to_tuple()) == %HSV{
-               h: 116,
-               s: 168,
-               v: 255
-             }
-
-      assert Approximate.rgb2hsv(RGB.new(0xF0C80E) |> RGB.to_tuple()) == %HSV{
-               h: 43,
-               s: 196,
-               v: 255
-             }
-
-      assert Approximate.rgb2hsv(RGB.new(0xB430E5) |> RGB.to_tuple()) == %HSV{
-               h: 248,
-               s: 145,
-               v: 255
-             }
-
-      assert Approximate.rgb2hsv(RGB.new(0xED7651) |> RGB.to_tuple()) == %HSV{
-               h: 32,
-               s: 111,
-               v: 255
-             }
-
-      assert Approximate.rgb2hsv(RGB.new(0xFEF888) |> RGB.to_tuple()) == %HSV{
-               h: 55,
-               s: 69,
-               v: 255
-             }
-
-      assert Approximate.rgb2hsv(RGB.new(0x19C897) |> RGB.to_tuple()) == %HSV{
-               h: 147,
-               s: 175,
-               v: 255
-             }
-
-      assert Approximate.rgb2hsv(RGB.new(0x362698) |> RGB.to_tuple()) == %HSV{
-               h: 172,
-               s: 157,
-               v: 252
-             }
-
-      assert Approximate.rgb2hsv(RGB.new(0x7E7EB8) |> RGB.to_tuple()) == %HSV{
-               h: 160,
-               s: 76,
-               v: 255
-             }
+      assert Approximate.rgb2hsv({0xFF, 0xFF, 0xFF}) == %HSV{h: 0, s: 0, v: 255}
+      assert Approximate.rgb2hsv({0x80, 0x80, 0x80}) == %HSV{h: 0, s: 0, v: 181}
+      assert Approximate.rgb2hsv({0x00, 0x00, 0x00}) == %HSV{h: 0, s: 0, v: 0}
+      assert Approximate.rgb2hsv({0xFF, 0x00, 0x00}) == %HSV{h: 0, s: 255, v: 255}
+      assert Approximate.rgb2hsv({0xBF, 0xBF, 0x00}) == %HSV{h: 63, s: 255, v: 255}
+      assert Approximate.rgb2hsv({0x00, 0x80, 0x00}) == %HSV{h: 96, s: 255, v: 181}
+      assert Approximate.rgb2hsv({0x80, 0xFF, 0xFF}) == %HSV{h: 195, s: 74, v: 255}
+      assert Approximate.rgb2hsv({0x80, 0x80, 0xFF}) == %HSV{h: 195, s: 74, v: 255}
+      assert Approximate.rgb2hsv({0xBF, 0x40, 0xBF}) == %HSV{h: 0, s: 127, v: 255}
+      assert Approximate.rgb2hsv({0xA0, 0xA4, 0x24}) == %HSV{h: 71, s: 159, v: 255}
+      assert Approximate.rgb2hsv({0x41, 0x1B, 0xEA}) == %HSV{h: 182, s: 172, v: 255}
+      assert Approximate.rgb2hsv({0x1E, 0xAC, 0x41}) == %HSV{h: 116, s: 168, v: 255}
+      assert Approximate.rgb2hsv({0xF0, 0xC8, 0x0E}) == %HSV{h: 43, s: 196, v: 255}
+      assert Approximate.rgb2hsv({0xB4, 0x30, 0xE5}) == %HSV{h: 248, s: 145, v: 255}
+      assert Approximate.rgb2hsv({0xED, 0x76, 0x51}) == %HSV{h: 32, s: 111, v: 255}
+      assert Approximate.rgb2hsv({0xFE, 0xF8, 0x88}) == %HSV{h: 55, s: 69, v: 255}
+      assert Approximate.rgb2hsv({0x19, 0xC8, 0x97}) == %HSV{h: 147, s: 175, v: 255}
+      assert Approximate.rgb2hsv({0x36, 0x26, 0x98}) == %HSV{h: 172, s: 157, v: 252}
+      assert Approximate.rgb2hsv({0x7E, 0x7E, 0xB8}) == %HSV{h: 160, s: 76, v: 255}
     end
   end
 end

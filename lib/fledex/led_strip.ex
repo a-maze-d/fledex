@@ -476,11 +476,7 @@ defmodule Fledex.LedStrip do
   @spec merge_pixels(list(Types.colorint()), atom) :: Types.colorint()
   def merge_pixels(elems, merge_strategy) do
     elems
-    |> Enum.map(fn elem ->
-      elem
-      |> RGB.new()
-      |> RGB.to_tuple()
-    end)
+    |> Enum.map(fn elem -> RGB.new(elem) end)
     |> apply_merge_strategy(merge_strategy)
     |> Color.to_colorint()
   end
