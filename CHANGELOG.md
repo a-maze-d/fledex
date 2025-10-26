@@ -62,6 +62,7 @@ BIG documentation improvement and cleanups including (also through other commits
 ### Bugs
 * Fixed a documentation bug. The hue value in HSV is a byte representing 360 degrees.
 * Fixed a bug in the `Fledex.Supervisor.AnimationSystem` that prevented options to be passed correctly to the Manager. This only became apparent with 2 or more options.
+* Fixed a bug in `LoadUtils.a2b/1` The value wasn't truncated to an integer
 
 ### Cleanup
 * Renamed some modules to make their purpose more clear
