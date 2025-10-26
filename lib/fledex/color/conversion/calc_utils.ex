@@ -11,6 +11,7 @@ defmodule Fledex.Color.Conversion.CalcUtils do
   @compile {:inline}
   import Bitwise
   alias Fledex.Color
+  alias Fledex.Color.RGB
   alias Fledex.Color.Types
 
   @doc """
@@ -73,7 +74,8 @@ defmodule Fledex.Color.Conversion.CalcUtils do
 
   @spec nscale8(Types.colorint(), Types.rgb(), boolean) :: Types.colorint()
   def nscale8(color, rgb, video) do
-    Color.to_rgb(color)
+    color
+    |> RGB.to_tuple()
     |> nscale8(rgb, video)
     |> Color.to_colorint()
   end
@@ -85,7 +87,7 @@ defmodule Fledex.Color.Conversion.CalcUtils do
   """
   @spec add_subpixels(list(Types.rgb())) :: {pos_integer, pos_integer, pos_integer}
   def add_subpixels(elems) do
-    Enum.reduce(elems, {0, 0, 0}, fn {r, g, b}, {accr, accg, accb} ->
+    Enum.reduce(elems, {0, 0, 0}, fn %RGB{r: r, g: g, b: b}, {accr, accg, accb} ->
       {r + accr, g + accg, b + accb}
     end)
   end
@@ -93,7 +95,7 @@ defmodule Fledex.Color.Conversion.CalcUtils do
   @doc """
   This function calculates the average of the given "rgb" values
   """
-  @spec avg(list(Types.rgb())) :: Types.rgb()
+  @spec avg(list(RGB.t())) :: Types.rgb()
   def avg(elems) do
     count = length(elems)
     {r, g, b} = add_subpixels(elems)

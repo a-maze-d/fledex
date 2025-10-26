@@ -5,8 +5,8 @@
 defmodule Fledex.Driver.Impl.Spi do
   @behaviour Fledex.Driver.Interface
 
-  alias Fledex.Color
   alias Fledex.Color.Correction
+  alias Fledex.Color.RGB
   alias Fledex.Color.Types
 
   @impl true
@@ -65,7 +65,7 @@ defmodule Fledex.Driver.Impl.Spi do
       leds
       |> Correction.apply_rgb_correction(Keyword.fetch!(config, :color_correction))
       |> Enum.reduce(<<>>, fn led, acc ->
-        {r, g, b} = Color.to_rgb(led)
+        %RGB{r: r, g: g, b: b} = RGB.new(led)
         acc <> <<r, g, b>>
       end)
 

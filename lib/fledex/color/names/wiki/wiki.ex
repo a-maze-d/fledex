@@ -21,11 +21,8 @@ defmodule Fledex.Color.Names.Wiki do
 
   use Fledex.Color.Names.ModuleGenerator,
     filename: @external_resource,
-    pattern: ~r/^.*$/i,
-    drop: 1,
-    splitter_opts: [separator: ",", split_opts: [parts: 11]],
     converter: &WikiUtils.converter/1,
-    module: __MODULE__
+    splitter_opts: [separator: ",", split_opts: [parts: 11]]
 
   @doc false
   def file do

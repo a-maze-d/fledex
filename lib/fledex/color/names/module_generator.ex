@@ -15,88 +15,77 @@ defmodule Fledex.Color.Names.ModuleGenerator do
 
     use Fledex.Color.Names.ModuleGenerator,
       filename: @external_resource,
-      pattern: ~r/^.*$/i,
-      drop: 1,
-      splitter_opts: [separator: ",", split_opts: [parts: 11]],
       converter: &MyColorModule.Utils.converter/1,
-      module: __MODULE__
+      splitter_opts: [separator: ",", split_opts: [parts: 11]],
   end
   ```
+  The filename and the converter function are mandatory. The converter function needs to return a `t:Fledex.Color.Names.Types.color_struct_t` struct. You can find some useful utility functions that help you in the conversion in `Fledex.Color.Names.LoadUtils`.
 
-  The converter function needs to return a `t:Fledex.Color.Names.Types.color_struct_t`
-  struct. You can find some useful utility functions that help you in the conversion in
-  `Fledex.Color.Names.LoadUtils`.
+  In addition a set of options can be specified. Most of them are passed on to `Fledex.Color.Names.LoadUtils.load_color_file/3`.
+
+  Apart from those options, you can also specify the option `:fields` that specifies for which fields a function should be created (default: `[:hex]`). Thus, by default we wuld create for the color `:almond` a function `almond(:hex)` that directly returns the hex-color instead of going through some indirections.
+
+  It should be noted that, if no `:module` option is specified, the `__CALLER__` module
+  name will be configured.
   """
-  alias Fledex.Color.Names.LoadUtils
 
+  alias Fledex.Color.Names.LoadUtils
+  alias Fledex.Color.Names.Types
+
+  @doc """
+    Create a color names module by `use Fledex.Color.Names.ModuleGenerator`.
+
+    See the module description to see how to use it
+  """
   defmacro __using__(opts) do
     filename = Keyword.fetch!(opts, :filename)
-    pattern = Keyword.fetch!(opts, :pattern)
-    drop = Keyword.fetch!(opts, :drop)
-    splitter_opts = Keyword.fetch!(opts, :splitter_opts)
     converter = Keyword.fetch!(opts, :converter)
-    module = Keyword.get(opts, :module, :unknown)
+    opts = Keyword.drop(opts, [:filename, :converter, :fields])
+    %{module: caller_module} = __CALLER__
+    opts = Keyword.put_new(opts, :module, caller_module)
 
-    fields =
-      Keyword.get(opts, :fields, [
-        :index,
-        :name,
-        :descriptive_name,
-        :hex,
-        :rgb,
-        :hsl,
-        :hsv,
-        :source,
-        :module
-      ])
-
-    create_color_functions(
+    create_color_functions_ast(
       filename,
-      pattern,
-      drop,
-      splitter_opts,
       converter,
-      module,
-      fields
+      opts
     )
   end
 
   @doc false
-  # credo:disable-for-next-line
-  def create_color_functions(
+  @spec extract_property(Types.color_struct_t(), atom) :: any
+  def extract_property(color, :all), do: color
+  def extract_property(color, what), do: Map.get(color, what)
+
+  @doc false
+  # credo:disable-for-lines:110
+  @spec create_color_functions_ast(
+          String.t(),
+          ([String.t() | integer] -> Types.color_struct_t()),
+          keyword
+        ) :: Macro.t()
+  def create_color_functions_ast(
         filename,
-        pattern,
-        drop,
-        splitter_opts,
         converter,
-        module,
-        fields
+        opts
       ) do
+    fields = Keyword.get(opts, :fields, [:hex])
+    opts = Keyword.drop(opts, [:fields])
+
     quote unquote: false,
           bind_quoted: [
-            pattern: pattern,
             filename: filename,
-            drop: drop,
-            splitter_opts: splitter_opts,
             converter: converter,
-            module: module,
+            opts: opts,
             fields: fields
           ] do
       @behaviour Fledex.Color.Names.Interface
 
       alias Fledex.Color.Names.Interface
+      alias Fledex.Color.Names.ModuleGenerator
       alias Fledex.Color.Names.Types
       alias Fledex.Leds
 
-      colors =
-        LoadUtils.load_color_file(
-          filename,
-          pattern,
-          drop,
-          splitter_opts,
-          converter,
-          module
-        )
+      colors = LoadUtils.load_color_file(filename, converter, opts)
 
       @colors colors
       @color_names Map.keys(@colors)
@@ -144,13 +133,13 @@ defmodule Fledex.Color.Names.ModuleGenerator do
       @impl Interface
       def info(name, what \\ :hex)
 
-      def info(name, what) do
-        case {function_exported?(__MODULE__, name, 1), what in [:all | @standard_fields]} do
-          {true, true} -> apply(__MODULE__, name, [what])
-          {true, false} -> apply(__MODULE__, name, [:all]) |> Map.get(what, nil)
-          _other -> nil
-        end
+      def info(name, what) when is_color_name(name) do
+        @colors
+        |> Map.get(name)
+        |> ModuleGenerator.extract_property(what)
       end
+
+      def info(_name, _what), do: nil
 
       @base16 16
       for {name, color} <- colors do
@@ -169,7 +158,10 @@ defmodule Fledex.Color.Names.ModuleGenerator do
         @doc color_name: true
         @spec unquote(name)(Types.color_props_t()) :: Types.color_vals_t()
         def unquote(name)(what \\ :hex)
-        def unquote(name)(:all), do: unquote(Macro.escape(color))
+
+        def unquote(name)(what) when is_atom(what) and what not in unquote(fields) do
+          info(unquote(name), what)
+        end
 
         for field <- fields do
           def unquote(name)(unquote(field)), do: unquote(Macro.escape(color))[unquote(field)]
@@ -179,8 +171,9 @@ defmodule Fledex.Color.Names.ModuleGenerator do
         def unquote(name)(leds), do: leds |> Leds.light(unquote(Macro.escape(color)).hex)
         @doc false
         @spec unquote(name)(Leds.t(), opts :: keyword) :: Leds.t()
-        def unquote(name)(leds, opts),
-          do: leds |> Leds.light(unquote(Macro.escape(color)).hex, opts)
+        def unquote(name)(leds, opts) do
+          leds |> Leds.light(unquote(Macro.escape(color)).hex, opts)
+        end
       end
     end
   end

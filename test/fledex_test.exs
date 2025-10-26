@@ -98,7 +98,7 @@ defmodule Fledex.Test do
     end
 
     test "simple animation macro (with led_strip)" do
-      use Fledex, supervisor: :none, colors: :none
+      use Fledex, supervisor: :none, colors: :none, imports: false
 
       led_strip :john, Null do
         animation :merry do
@@ -117,7 +117,7 @@ defmodule Fledex.Test do
     end
 
     test "simple animation macro (with led_strip) withoutout trigger" do
-      use Fledex, supervisor: :none, colors: :none
+      use Fledex, supervisor: :none, colors: :none, imports: false
 
       led_strip :john, Null do
         animation :merry do
@@ -136,7 +136,7 @@ defmodule Fledex.Test do
     end
 
     test "complex scenario" do
-      use Fledex, supervisor: :none, colors: :none
+      use Fledex, supervisor: :none, colors: :none, imports: false
 
       led_strip :doe, Null do
         animation :caine do

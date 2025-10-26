@@ -19,7 +19,7 @@ defmodule TestColorModule do
         descriptive_name: "maze special color",
         hex: 0x747474,
         rgb: {0x74, 0x74, 0x74},
-        hsl: {0, 0, 0},
+        hsl: %Fledex.Color.HSL{h: 0, s: 0, l: 0},
         hsv: %Fledex.Color.HSV{h: 0, s: 0, v: 0},
         source: "",
         module: __MODULE__

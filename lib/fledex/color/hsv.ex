@@ -10,12 +10,8 @@ defmodule Fledex.Color.HSV do
     alias Fledex.Color.Conversion.Rainbow
     alias Fledex.Color.HSV
 
-    def to_rgb(%HSV{h: _h, s: _s, v: _v} = hsv) do
-      Rainbow.hsv2rgb(hsv, fn rgb -> rgb end)
-    end
-
     def to_colorint(%HSV{h: _h, s: _s, v: _v} = hsv) do
-      to_rgb(hsv)
+      Rainbow.hsv2rgb(hsv, fn rgb -> rgb end)
       |> Fledex.Color.to_colorint()
     end
   end

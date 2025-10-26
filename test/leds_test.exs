@@ -111,6 +111,8 @@ defmodule Fledex.LedsTest do
     end
 
     test "setting leds in sequence" do
+      use Fledex.Config
+
       leds =
         Leds.leds(10)
         |> Leds.light(:red)

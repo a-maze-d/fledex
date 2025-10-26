@@ -144,8 +144,7 @@ you can find some further documentation in the `docs` folder about:
 If you want to run this library in nerves-livebook, you currently have to compile your own livebook with the library included in your `mix.exs` file, since you can't add any libraries that are not already bundled.
 
 ## License
-All of the code is [licensed under an Apache-2.0](LICENSE.md) license. A couple of files have been sourced
-from various other places and they do keep their own license
+All of the code is [licensed under an Apache-2.0](LICENSE.md). A couple of files have been sourced and transformed from various other places and they do keep their own licenses.
 
 ## Contributing
 Contributions of any kind are very much welcome

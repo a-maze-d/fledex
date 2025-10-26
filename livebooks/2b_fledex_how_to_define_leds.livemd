@@ -63,12 +63,13 @@ use Fledex
 
 alias Fledex.Color
 alias Fledex.Color.Names
+alias Fledex.Color.RGB
 # note, this is a slightly different color compared to the above one, since the exact color 
 # does not exist. "Cerulean (Crayola): {28, 170, 214} is roughly the same color
 my_color5 = :cerulean_crayola
 my_color6 = Names.info(my_color5)
 my_color7 = Color.to_colorint(my_color5)
-my_color8 = Color.to_rgb(my_color5)
+my_color8 = RGB.new(my_color5)
 my_color9 = cerulean_crayola()
 
 Fledex.Color.KinoRender.new([my_color5, my_color6, my_color7, my_color8, my_color9])
@@ -76,7 +77,7 @@ Fledex.Color.KinoRender.new([my_color5, my_color6, my_color7, my_color8, my_colo
 
 From the color names you can also get more information, but as mentioned above we'll look at this in a later chapter.
 
-In addition, you might encounter, in some cases, other color encodings like `Type.hsv` or `Typee.hsl`. But they are in general not so important.
+In addition, you might encounter, in some cases, other color encodings like `Type.hsv` or `Type.hsl`. But they are in general not so important.
 
 ## Defining individual Leds
 

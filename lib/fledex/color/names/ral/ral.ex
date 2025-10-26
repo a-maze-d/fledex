@@ -12,14 +12,13 @@ defmodule Fledex.Color.Names.RAL do
   > This module implements the `Fledex.Color.Names.Interface` behaviour.
   """
   alias Fledex.Color
-  alias Fledex.Color.Conversion.Approximate
+  # alias Fledex.Color.Conversion.Approximate
   alias Fledex.Color.Names.LoadUtils
 
   @external_resource Path.dirname(__DIR__) <> "/ral/ral_colors.csv"
 
   use Fledex.Color.Names.ModuleGenerator,
     filename: @external_resource,
-    pattern: ~r/^.*$/i,
     drop: 0,
     splitter_opts: [separator: ~r/\t+/, split_opts: [trim: true]],
     converter: fn [index, name, _h, _l, _c, r, g, b, code] ->
@@ -40,10 +39,9 @@ defmodule Fledex.Color.Names.RAL do
         rgb: rgb,
         # convert the rgb to other color spaces
         # {LoadUtils.a2b(h), LoadUtils.a2b(s1), LoadUtils.a2b(l1)},
-        hsl: {0, 0, 0},
-        hsv: Approximate.rgb2hsv(rgb),
+        # hsl: %Fledex.Color.HSL{h: 0, s: 0, l: 0},
+        # hsv: Approximate.rgb2hsv(rgb),
         source: "RAL design system+: #{code}"
       }
-    end,
-    module: __MODULE__
+    end
 end
