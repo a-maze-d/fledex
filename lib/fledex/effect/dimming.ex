@@ -7,6 +7,7 @@ defmodule Fledex.Effect.Dimming do
 
   alias Fledex.Color
   alias Fledex.Color.Conversion.CalcUtils
+  alias Fledex.Color.RGB
 
   def do_apply(leds, count, config, triggers, _context) do
     trigger_name = config[:trigger_name] || :default
@@ -18,7 +19,8 @@ defmodule Fledex.Effect.Dimming do
     leds =
       Enum.map(leds, fn led ->
         led
-        |> Color.to_rgb()
+        |> RGB.new()
+        |> RGB.to_tuple()
         |> CalcUtils.nscale8(255 - step, false)
         |> Color.to_colorint()
       end)

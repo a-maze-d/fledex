@@ -106,7 +106,7 @@ defmodule Fledex.ConfigTest do
     end
 
     test "with color import" do
-      use Config, colors: :wiki
+      use Config, colors: :wiki, imports: true
       assert red() == 0xFF0000
     end
 
@@ -154,9 +154,9 @@ defmodule Fledex.ConfigTest do
           Code.ensure_loaded(Wiki)
           Code.ensure_loaded(CSS)
 
-          use Config, colors: :wiki
+          use Config, colors: :wiki, imports: true
           red()
-          use Config, colors: :css
+          use Config, colors: :css, imports: true
           red()
       """
 
@@ -193,9 +193,11 @@ defmodule Fledex.ConfigTest do
           Code.ensure_loaded(Wiki)
           Code.ensure_loaded(CSS)
 
-          use Config, colors: :wiki
+          use Config, colors: :wiki, imports: true
           red()
-          use Config, colors: :css, no_imports: true
+          use Config, colors: :css, imports: false
+          red()
+          use Config, colors: :css
           red()
       """
 

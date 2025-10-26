@@ -11,15 +11,13 @@ defmodule Fledex.Color.Names.CSS do
   >
   > This module implements the `Fledex.Color.Names.Interface` behaviour.
   """
-  alias Fledex.Color.Conversion.Approximate
+  # alias Fledex.Color.Conversion.Approximate
   alias Fledex.Color.Names.LoadUtils
 
   @external_resource Path.dirname(__DIR__) <> "/css/css_colors.csv"
 
   use Fledex.Color.Names.ModuleGenerator,
     filename: @external_resource,
-    pattern: ~r/^.*$/i,
-    drop: 1,
     splitter_opts: [separator: ~r/\s+/, split_opts: [trim: true]],
     converter: fn [index, name, hex, r, g, b] ->
       rgb = {LoadUtils.a2i(r), LoadUtils.a2i(g), LoadUtils.a2i(b)}
@@ -32,10 +30,9 @@ defmodule Fledex.Color.Names.CSS do
         rgb: rgb,
         # convert the rgb to other color spaces
         # {LoadUtils.a2b(h), LoadUtils.a2b(s1), LoadUtils.a2b(l1)},
-        hsl: %Fledex.Color.HSL{h: 0, s: 0, l: 0},
-        hsv: Approximate.rgb2hsv(rgb),
+        # hsl: %Fledex.Color.HSL{h: 0, s: 0, l: 0},
+        # hsv: Approximate.rgb2hsv(rgb),
         source: "CSS standard"
       }
-    end,
-    module: __MODULE__
+    end
 end

@@ -148,6 +148,7 @@ defmodule Fledex.MixProject do
       authors: ["a-maze-d"],
       extras: [
         "README.md",
+        "LICENSE.md",
         "SECURITY.md",
         "CLA.md",
         "CONTRIBUTING.md",

@@ -15,7 +15,7 @@ defmodule Fledex.Color.Names.ModuleGeneratorTest do
   defmodule TestNames do
     use Fledex.Color.Names.ModuleGenerator,
       filename: Wiki.file(),
-      pattern: ~r/^[a].*$/i,
+      name_pattern: ~r/^[a].*$/i,
       drop: 1,
       splitter_opts: [separator: ",", split_opts: [parts: 11]],
       converter: &WikiUtils.converter/1,
@@ -55,11 +55,11 @@ defmodule Fledex.Color.Names.ModuleGeneratorTest do
       colors =
         LoadUtils.load_color_file(
           Wiki.file(),
-          ~r/^.*$/i,
-          1,
-          [separator: ",", split_opts: [parts: 11]],
           &WikiUtils.converter/1,
-          __MODULE__
+          module: __MODULE__,
+          name_pattern: ~r/^.*$/i,
+          drop: 1,
+          splitter_opts: [separator: ",", split_opts: [parts: 11]]
         )
 
       assert colors != %{}
@@ -94,19 +94,21 @@ defmodule Fledex.Color.Names.ModuleGeneratorTest do
   describe "wiki color names generation" do
     test "test quick access functions" do
       alias Fledex.Color.Names.Wiki
+
       assert 14_235_678 == Wiki.vermilion2()
       assert 14_235_678 == Wiki.vermilion2(:hex)
-      assert {216, 56, 30} == Wiki.vermilion2(:rgb)
-      assert %Fledex.Color.HSL{h: 5, s: 193, l: 122} == Wiki.vermilion2(:hsl)
-      assert %Fledex.Color.HSV{h: 5, s: 219, v: 216} == Wiki.vermilion2(:hsv)
-      assert 828 == Wiki.vermilion2(:index)
-      assert "Vermilion2" == Wiki.vermilion2(:descriptive_name)
-      assert "" == Wiki.vermilion2(:source)
-      assert "Crayola" == Wiki.absolute_zero(:source)
       assert Fledex.Color.Names.Wiki == Wiki.vermilion2(:module)
 
       assert Enum.find_index(Wiki.names(), fn x -> x == :vermilion2 end) != nil
       assert Enum.find_index(Wiki.colors(), fn x -> x.name == :vermilion2 end) != nil
+
+      assert {216, 56, 30} == Wiki.info(:vermilion2, :rgb)
+      assert %Fledex.Color.HSL{h: 5, s: 193, l: 122} == Wiki.info(:vermilion2, :hsl)
+      assert %Fledex.Color.HSV{h: 5, s: 219, v: 216} == Wiki.info(:vermilion2, :hsv)
+      assert 828 == Wiki.info(:vermilion2, :index)
+      assert "Vermilion2" == Wiki.info(:vermilion2, :descriptive_name)
+      assert "" == Wiki.info(:vermilion2, :source)
+      assert "Crayola" == Wiki.info(:absolute_zero, :source)
     end
   end
 

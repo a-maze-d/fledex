@@ -11,6 +11,7 @@ defmodule Fledex.Color.Conversion.CalcUtils do
   @compile {:inline}
   import Bitwise
   alias Fledex.Color
+  alias Fledex.Color.RGB
   alias Fledex.Color.Types
 
   @doc """
@@ -73,7 +74,9 @@ defmodule Fledex.Color.Conversion.CalcUtils do
 
   @spec nscale8(Types.colorint(), Types.rgb(), boolean) :: Types.colorint()
   def nscale8(color, rgb, video) do
-    Color.to_rgb(color)
+    color
+    |> RGB.new()
+    |> RGB.to_tuple()
     |> nscale8(rgb, video)
     |> Color.to_colorint()
   end

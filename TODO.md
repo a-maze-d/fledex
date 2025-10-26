@@ -20,7 +20,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.8)
 - [ ] Testing
   - [x] Test all the livebooks (v0.7)
-  - [ ] Restructure the tests, so they are not so fragile (due to `Fledex.Config`)
+  - [x] Restructure the tests, so they are not so fragile (due to `Fledex.Config`) (v0.7) <-- this does not seem to be an issue anymore.
   - [ ] Add tests for the Clock component (v0.8)
   - [ ] Add tests for the Thermometer components (v0.8)
   - [ ] 
@@ -32,11 +32,15 @@ Even though this library is published, there are things I still want to do befor
   - [x] Change the import of `Fledex.Color.Names` and import the different color components individually instead. `Fledex.Color.Names` still makes sense to bind those together. The import can be done in a flexible way. This should reduce the complexity of the code, the dependencies, and increase the flexibility without loss of convenience for the user (v0.8)
   - [x] Check whether we could unload the module first before we we redefine it. The unloading could be done with [`:code.delete(module)](https://www.erlang.org/doc/apps/kernel/code.html#delete/1). This could allow us to ALLWAYS define the module and redefine an inner module. (v0.7)
   - [x] components shouldn't `use` but `import` Fledex. This way we would solve a lot of issues.
+  - [x] Introduce a `Fledex.Color.RGB` and reduce the reliance on `{r, g, b}` tuples
+  - [x] Remove `Fledex.Color.to_rgb/1`
+  - [ ] Avoid the `RGB.new(color) |> RGB.to_tuple()` constructs, by changing the various functions to take RGB structures. The RGB-tuple should only be used by clients but not internally.
+  - [ ] Rethink whether we really want to create a `Fledex.Config.Data` module or we shoudl store the information in a GenServer. The issue with the GenServer is that we need to start a server. But maybe that's not soo bad.
 - [ ] Missing functionality
   - [x] Allow selecting the color modules that can be loaded instead of loading always the same list by default. (v0.7)
   - [x] We have the `Fledex.Color` protocol, but we actually don't make use of its type. This is maybe also a good opportunity to rethink on how we handle colors in general. Maybe we should define everything as `Fledex.Color` and encapsulate CSS, SVG, RAL colours in their own struct to then have the protocol implemented for them. (v0.7)
   - [x] Allow color modules to not carry more information than just a pre-defined set (v0.7)
-  - [ ] convert the rgb to other color spaces (in the various color name modules). Considering the previous point we might not need to do this, because it should now be optional (v0.8)
+  - [x] convert the rgb to other color spaces (in the various color name modules). Considering the previous point we might not need to do this, because it should now be optional (v0.7) <-- reduced the generated color functions, and what gets exposed
   - [ ] we start things through the Supervisor, but we don't shut things down through it (v0.8)
   - [ ] The Job should (at least appear) to be connected to the LedStrip (v0.8)
   - [ ] Lower than sec precision is not possible with Quantum. Replace it with a different library (maybe SchedEx? https://hexdocs.pm/sched_ex/readme.html) (v0.8)

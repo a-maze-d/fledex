@@ -20,6 +20,7 @@ defmodule Fledex.Leds do
 
   alias Fledex.Color
   alias Fledex.Color.Functions
+  alias Fledex.Color.RGB
   alias Fledex.Color.Types
   alias Fledex.LedStrip
 
@@ -232,11 +233,11 @@ defmodule Fledex.Leds do
     num_leds = opts[:num_leds] || leds.count
     offset = opts[:offset] || 0
 
-    start_color = Color.to_rgb(start_color)
-    end_color = Color.to_rgb(end_color)
+    start_color = RGB.new(start_color)
+    end_color = RGB.new(end_color)
 
     led_values =
-      Functions.create_gradient_rgb(num_leds, start_color, end_color)
+      Functions.create_gradient_rgb(num_leds, RGB.to_tuple(start_color), RGB.to_tuple(end_color))
       |> convert_to_leds_structure(offset)
 
     put_in(leds.leds, Map.merge(leds.leds, led_values))

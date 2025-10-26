@@ -20,14 +20,14 @@ defmodule Fledex.Color.Names.Types do
   """
   @type color_struct_t :: %{
           optional(atom) => any(),
-          index: integer,
+          optional(:descriptive_name) => String.t(),
+          optional(:rgb) => Types.rgb(),
+          optional(:hsl) => Types.hsl(),
+          optional(:hsv) => Types.hsv(),
+          optional(:source) => String.t(),
+          optional(:index) => integer,
           name: color_name_t,
-          descriptive_name: String.t(),
           hex: Types.colorint(),
-          rgb: Types.rgb(),
-          hsl: Types.hsl(),
-          hsv: Types.hsv(),
-          source: String.t(),
           module: module
         }
 

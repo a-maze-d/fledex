@@ -111,7 +111,7 @@ defmodule Fledex.Supervisor.AnimationSystem do
       {Phoenix.PubSub, adapter_name: :pg2, name: Utils.pubsub_name()},
       {DynamicSupervisor, strategy: :one_for_one, name: Utils.workers_supervisor()},
       JobScheduler,
-      {Manager, init_args}
+      {Manager, [init_args]}
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

@@ -81,7 +81,7 @@ defmodule Fledex do
   ### Colors
   The options for the `:colors` option can be both a single term (`atom` or `module`) or a list thereof. When an atom is specified it will be translated to the appropriate `module`(s), see below. If a `module` is specified it needs to adhere to the `Fledex.Color.Names.Interface` behaviour and will be loaded.
 
-  When several color modules are specified they will all be imported (except `no_imports: true` is specified)
+  When several color modules are specified they will all be imported (except `imports: false` is specified)
 
   The following color shortcuts exist (see also `Fledex.Config.known_color_modules/0`):
     * `:css`: This will load `Fledex.Color.Names.CSS`
@@ -138,12 +138,13 @@ defmodule Fledex do
   > ** (CompileError) cannot compile code (errors have been logged)
   > ```
   >
-  > You can easily solve this by respanning the shell by calling [`respawn/0`](https://hexdocs.pm/iex/IEx.Helpers.html#respawn/0) or by makign sure we don't import the color function names by specifying `no_imports: true`.
+  > You can easily solve this by respanning the shell by calling [`respawn/0`](https://hexdocs.pm/iex/IEx.Helpers.html#respawn/0) or by makign sure we don't import the color function names by specifying `imports: false`.
   >
   > This is not an issue in [Livebook](https://livebook.dev/).
   """
   @spec __using__(keyword) :: Macro.t()
   defmacro __using__(opts) do
+    opts = Keyword.put_new(opts, :imports, true)
     config = Fledex.Config.create_config_ast(opts)
     # , import_ast: import_ast, use_ast: use_ast] do
     quote bind_quoted: [opts: opts, config: config] do

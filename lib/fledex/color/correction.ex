@@ -5,8 +5,8 @@
 defmodule Fledex.Color.Correction do
   import Bitwise
 
-  alias Fledex.Color, as: Protocol
   alias Fledex.Color.Conversion.CalcUtils
+  alias Fledex.Color.RGB
   alias Fledex.Color.Types
 
   defmodule Color do
@@ -177,8 +177,8 @@ defmodule Fledex.Color.Correction do
   def define_correction(scale \\ 255, color_correction, temperature_correction)
 
   def define_correction(scale, color_correction, temperature_correction) when scale > 0 do
-    {ccr, ccg, ccb} = Protocol.to_rgb(color_correction)
-    {tcr, tcg, tcb} = Protocol.to_rgb(temperature_correction)
+    %RGB{r: ccr, g: ccg, b: ccb} = RGB.new(color_correction)
+    %RGB{r: tcr, g: tcg, b: tcb} = RGB.new(temperature_correction)
 
     r = calculate_single_color_correction(scale, ccr, tcr)
     g = calculate_single_color_correction(scale, ccg, tcg)
