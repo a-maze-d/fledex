@@ -10,9 +10,11 @@ defmodule Fledex.Color.Names.Wiki do
   * https://en.wikipedia.org/wiki/List_of_colors:_G%E2%80%93M
   * https://en.wikipedia.org/wiki/List_of_colors:_N%E2%80%93Z
 
-  > #### Note {: .info}
+  > #### Notes {: .info}
   >
-  > This module implements the `Fledex.Color.Names.Interface` behaviour.
+  > * This module implements the `@behaviour` [`Fledex.Color.Names.Interface`](`m:Fledex.Color.Names.Interface`) (check it out for more details).
+  > * Every color has it's own function as explained in `Fledex.Color.Names.Interface` and supports all of the classical options (`:all`, `:descriptive_name`, `:hex`, `:hsl`, `:hsv`, `:index`, `:name`, `:rgb`, `:source`, `:module`)
+  > * A list of all available colors from this module can be found in the documentation under [Colors](colors.md#wiki).
   """
 
   alias Fledex.Color.Names.WikiUtils
