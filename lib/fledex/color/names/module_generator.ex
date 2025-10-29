@@ -89,9 +89,10 @@ defmodule Fledex.Color.Names.ModuleGenerator do
 
       @colors colors
       @color_names Map.keys(@colors)
-      @typedoc """
-      The allowed color names
-      """
+      # @typedoc """
+      # The allowed color names
+      # """
+      @typedoc false
       @type color_name_t ::
               unquote(
                 Map.keys(@colors)
@@ -99,37 +100,39 @@ defmodule Fledex.Color.Names.ModuleGenerator do
                 |> Code.string_to_quoted!()
               )
 
-      @doc ~S"""
-      Check whether the atom is a valid color name
-      """
+      # @doc ~S"""
+      # Check whether the atom is a valid color name
+      # """
       @impl Interface
-      @doc guard: true
+      # @doc guard: true
+      @doc false
       defguard is_color_name(atom) when is_atom(atom) and is_map_key(@colors, atom)
 
-      @doc ~S"""
-      Get all the data about the predefined colors
-      """
+      # @doc ~S"""
+      # Get all the data about the predefined colors
+      # """
+      @doc false
       @impl Interface
       @spec colors :: list(Types.color_struct_t())
       def colors do
         Map.values(@colors)
       end
 
-      @doc ~S"""
-      Get a list of all the predefined color (atom) names.
+      # @doc ~S"""
+      # Get a list of all the predefined color (atom) names.
 
-      The name can be used to either retrieve the info by calling `info/2` or by calling the function with that
-      name (see also the description at the top and take a look at this [example
-      livebook](3b_fledex_everything_about_colors.livemd))
-      """
+      # The name can be used to either retrieve the info by calling `info/2` or by calling the function with that name (see also the description at the top and take a look at this [example livebook](3b_fledex_everything_about_colors.livemd))
+      # """
+      @doc false
       @impl Interface
       @spec names :: list(color_name_t)
       def names, do: Map.keys(@colors)
 
-      @standard_fields fields
-      @doc """
-      Retrieve information about the color with the given name
-      """
+      # @standard_fields fields
+      # @doc """
+      # Retrieve information about the color with the given name
+      # """
+      @doc false
       @impl Interface
       def info(name, what \\ :hex)
 
@@ -143,19 +146,20 @@ defmodule Fledex.Color.Names.ModuleGenerator do
 
       @base16 16
       for {name, color} <- colors do
-        {r, g, b} = color.rgb
+        # {r, g, b} = color.rgb
 
-        hex =
-          color.hex
-          |> Integer.to_string(@base16)
-          |> String.pad_leading(6, "0")
+        # hex =
+        #   color.hex
+        #   |> Integer.to_string(@base16)
+        #   |> String.pad_leading(6, "0")
 
-        @doc """
-        Defines the color rgb(#{r}, #{g}, #{b}).
+        # @doc """
+        # Defines the color rgb(#{r}, #{g}, #{b}).
 
-        <div style="width: 25px; height: 25px; display: inline-block; background-color: ##{hex}; border: 1px solid black"></div>
-        """
-        @doc color_name: true
+        # <div style="width: 25px; height: 25px; display: inline-block; background-color: ##{hex}; border: 1px solid black"></div>
+        # """
+        # @doc color_name: true
+        @doc false
         @spec unquote(name)(Types.color_props_t()) :: Types.color_vals_t()
         def unquote(name)(what \\ :hex)
 

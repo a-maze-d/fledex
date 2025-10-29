@@ -23,12 +23,12 @@ defmodule Fledex.Color.Names.Interface do
   retrieve the information for the color `:almond` by calling the function with the same
   name, i.e. `almond/1`.
 
-  The additional parameter determines which additional information should be provided. The options are:
+  The additional parameter determines which additional information should be provided. Each color module can define it's own set of parameters (except `:all`, `:hex`, and `:name` that are mandatory), but the classical options are:
 
     * `:all`: This retrieves the full data set
     * `:descriptive_name`: a string with name (from this the Atom is derived)
     * `:hex` (default): This is the same as `almond/0`
-    * `:hsl`: This retrieves an HSL struct, i.e. `{h, s, l}`
+    * `:hsl`: This retrieves an HSL struct, i.e. `Fledex.Color.HSL`
     * `:hsv`: This retrieves an HSV struct, i.e. `Fledex.Color.HSV`
     * `:index`: The index of this color in the list of all colors
     * `:rgb`: This retrieves an RGB struct, i.e. `{r, g, b}`

@@ -9,10 +9,11 @@ defmodule Fledex.Color.Names.RAL do
 
   > #### Note {: .info}
   >
-  > This module implements the `Fledex.Color.Names.Interface` behaviour.
+  > * This module implements the `@behaviour` [`Fledex.Color.Names.Interface`](`m:Fledex.Color.Names.Interface`) (check it out for more details).
+  > * Every color has it's own function as explained in `Fledex.Color.Names.Interface` and supports the following options (`:all`, `:descriptive_name`, `:hex`, `:index`, `:name`, `:rgb`, `:source`, `:module`)
+  > * A list of all available colors from this module can be found in the documentation under [Colors](colors.md#ral).
   """
   alias Fledex.Color
-  # alias Fledex.Color.Conversion.Approximate
   alias Fledex.Color.Names.LoadUtils
 
   @external_resource Path.dirname(__DIR__) <> "/ral/ral_colors.csv"
@@ -22,13 +23,6 @@ defmodule Fledex.Color.Names.RAL do
     drop: 0,
     splitter_opts: [separator: ~r/\t+/, split_opts: [trim: true]],
     converter: fn [index, name, _h, _l, _c, r, g, b, code] ->
-      # I don't know how to convert the CIELAB 1931 colorspace
-      # with Hue, Lightness, Chromacity to HSV or HSL. Is there
-      # maybe even an overlap? Is it the same as the XYZ color space?
-      # Is it the LAB model?
-      # Maybe look at color conversion library
-      # https://github.com/colormine/colormine/blob/master/colormine/src/main/org/colormine/colorspace/ColorSpaceConverter.java#L29
-      # Thus, we only use the RGB values
       rgb = {LoadUtils.a2i(r), LoadUtils.a2i(g), LoadUtils.a2i(b)}
 
       %{
@@ -37,10 +31,6 @@ defmodule Fledex.Color.Names.RAL do
         descriptive_name: String.trim(name),
         hex: Color.to_colorint(rgb),
         rgb: rgb,
-        # convert the rgb to other color spaces
-        # {LoadUtils.a2b(h), LoadUtils.a2b(s1), LoadUtils.a2b(l1)},
-        # hsl: %Fledex.Color.HSL{h: 0, s: 0, l: 0},
-        # hsv: Approximate.rgb2hsv(rgb),
         source: "RAL design system+: #{code}"
       }
     end
