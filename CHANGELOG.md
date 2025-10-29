@@ -48,7 +48,7 @@ As part of this refactoring a lot of smaller refactorings happened at the same t
 * Removed `Fledex.Color.to_rgb/1`. use `Fledex.Color.RGB.to_tuple(color)` instead 
 * Cleaning up and restructuring the conversion modules
 
-## Cleanup and improved API docs (#64)
+## Cleanup and improved API docs (#64, #83 and others)
 BIG documentation improvement and cleanups including (also through other commits): 
 
 * Added and improved the API documenation (`@specs`, `@moduledoc`, and `@doc`s)
@@ -62,6 +62,10 @@ BIG documentation improvement and cleanups including (also through other commits
 * Added information about color correction to the 3b livebook
 * Added API documentation for the conversion functions
 
+## Improved Supervision tree (#84)
+The supervision tree has been improved. 
+* The `AnimationSystem` got some more functions (`led_strip_exists?/1`, `get_led_strips/0`, `stop_led_strip/1`) and the `LedStripSupervisor` got them as well (`animation_exists?/2`, `get_animations/1`, `stop_animation/2`, `coordinator_exists?/2`, `get_coordinators/1`, `stop_coordinator/2`)
+* Some utility functions got created and moved around to support the above functions
 
 ## Other changes
 ### Bugs
@@ -80,6 +84,7 @@ BIG documentation improvement and cleanups including (also through other commits
 * fixing coveralls compilation issue by only running coverage on the latest supported build. Also formatting check only happens on the latest elixir version
 * Adding expert to the .gitignore exclusion list
 * updated the max xref, since we have less compile connected files
+* Adding support for Elixir 1.19
 
 
 # Previous versions

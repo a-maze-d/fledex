@@ -386,7 +386,7 @@ defmodule Fledex.LedStripTestSync do
   alias Fledex.Driver.Impl.Spi
   alias Fledex.LedStrip
   alias Fledex.Supervisor.AnimationSystem
-  alias Fledex.Supervisor.LedStripSupervisor
+  alias Fledex.Supervisor.Utils
 
   setup do
     start_supervised(AnimationSystem.child_spec())
@@ -477,7 +477,7 @@ defmodule Fledex.LedStripTestSync do
       assert {:ok, timer_counter: 0} = LedStrip.change_config(@strip_name, timer_counter: 1)
 
       led_strip_pid =
-        Supervisor.which_children(LedStripSupervisor.supervisor_name(@strip_name))
+        Supervisor.which_children(Utils.supervisor_name(@strip_name))
         |> Enum.filter(fn {_name, _pid, type, _module} -> type == :worker end)
         |> List.first()
         |> elem(1)

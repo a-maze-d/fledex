@@ -98,37 +98,35 @@ defmodule Fledex.Supervisor.AnimationSystem do
     end
   end
 
+  @doc """
+  This checks whether a specific led_strip exists
+  """
   @spec led_strip_exists?(atom) :: boolean
   def led_strip_exists?(strip_name) do
-    case Registry.lookup(Utils.worker_registry(), {strip_name, :led_strip, :supervisor}) do
-      [{_pid, _value}] -> true
-      _other -> false
-    end
+    Utils.worker_exists?(strip_name, :led_strip, :supervisor)
   end
 
+  @doc """
+  This returns a list of all the defined led strips
+  """
   @spec get_led_strips() :: [atom]
   def get_led_strips do
-    Registry.select(Utils.worker_registry(), [
-      {
-        {{:"$1", :led_strip, :supervisor}, :_, :_},
-        [],
-        [:"$1"]
-      }
-    ])
+    Utils.get_workers(:"$1", :led_strip, :supervisor)
   end
 
+  @doc """
+  This stops an led_strip.
+
+  It is safe to call this function even if the led_strip does not exist
+  """
   @spec stop_led_strip(atom) :: :ok
   def stop_led_strip(strip_name) do
-    case Registry.lookup(Utils.worker_registry(), {strip_name, :led_strip, :supervisor}) do
-      [{pid, _value}] -> DynamicSupervisor.terminate_child(Utils.workers_supervisor(), pid)
-      _other -> :ok
-    end
-
-    :ok
+    Utils.stop_worker(Utils.workers_supervisor(), strip_name, :led_strip, :supervisor)
   end
 
   # MARK: server side
   @impl true
+  @doc false
   @spec init(keyword) ::
           {:ok, {Supervisor.sup_flags(), [Supervisor.child_spec() | :supervisor.child_spec()]}}
           | :ignore

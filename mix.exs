@@ -38,8 +38,13 @@ defmodule Fledex.MixProject do
         ]
       ],
       docs: docs(),
-      aliases: aliases(),
-      preferred_cli_env: [
+      aliases: aliases()
+    ]
+  end
+
+  def cli do
+    [
+      preferred_envs: [
         coveralls: :test,
         "coveralls.github": :test,
         "coveralls.detail": :test,

@@ -42,17 +42,7 @@ defmodule Fledex.SupervisorTest do
   end
 
   defp count_workers(strip_name) do
-    DynamicSupervisor.count_children(LedStripSupervisor.workers_name(strip_name))
-    |> Map.get(:active)
-  end
-
-  defp supervisor_workers(strip_name) do
-    DynamicSupervisor.count_children(LedStripSupervisor.supervisor_name(strip_name))
-    |> Map.get(:active)
-  end
-
-  defp animation_workers(strip_name) do
-    DynamicSupervisor.count_children(LedStripSupervisor.workers_name(strip_name))
+    DynamicSupervisor.count_children(Utils.workers_name(strip_name))
     |> Map.get(:active)
   end
 
@@ -79,7 +69,7 @@ defmodule Fledex.SupervisorTest do
     end
 
     defp get_led_strip_pid(strip_name) do
-      Supervisor.which_children(LedStripSupervisor.supervisor_name(strip_name))
+      Supervisor.which_children(Utils.supervisor_name(strip_name))
       |> Enum.filter(fn {_name, _pid, type, _module} -> type == :worker end)
       |> List.first()
       |> elem(1)
@@ -112,23 +102,21 @@ defmodule Fledex.SupervisorTest do
       assert count_workers() == 0
       AnimationSystem.start_led_strip(@test_strip)
 
-      assert count_workers() == 1
-      assert supervisor_workers(@test_strip) == 2
-      assert animation_workers(@test_strip) == 0
-      LedStripSupervisor.start_animation(@test_strip, @test_anim, %{type: :animation})
+      assert AnimationSystem.get_led_strips() |> length() == 1
+      assert LedStripSupervisor.get_animations(@test_strip) |> Enum.empty?()
 
-      assert count_workers() == 1
-      assert supervisor_workers(@test_strip) == 2
-      assert animation_workers(@test_strip) == 1
+      LedStripSupervisor.start_animation(@test_strip, @test_anim, %{type: :animation})
+      assert AnimationSystem.get_led_strips() |> length() == 1
+      assert LedStripSupervisor.get_animations(@test_strip) |> length() == 1
 
       Animator.stop(@test_strip, @test_anim)
-      assert count_workers() == 1
-      assert supervisor_workers(@test_strip) == 2
-      assert animation_workers(@test_strip) == 0
+      Process.sleep(500) # wait for the eshutdown
+      assert AnimationSystem.get_led_strips() |> length() == 1
+      assert LedStripSupervisor.get_animations(@test_strip) |> Enum.empty?()
 
       # cleanup
-      LedStripSupervisor.stop(@test_strip)
-      assert count_workers() == 0
+      AnimationSystem.stop_led_strip(@test_strip)
+      assert AnimationSystem.get_led_strips() |> Enum.empty?()
     end
 
     def worker_pid(strip_name, worker_type, worker_name) do
@@ -148,13 +136,10 @@ defmodule Fledex.SupervisorTest do
 
     test "kill animation" do
       # the animation requires an led strip
-      assert count_workers() == 0
       AnimationSystem.start_led_strip(@test_strip)
-
-      assert count_workers() == 1
-      assert supervisor_workers(@test_strip) == 2
-      assert animation_workers(@test_strip) == 0
       LedStripSupervisor.start_animation(@test_strip, @test_anim, %{type: :animation})
+      assert AnimationSystem.get_led_strips() |> length() == 1
+      assert LedStripSupervisor.get_animations(@test_strip) |> length() == 1
 
       animation_pid1 = worker_pid(@test_strip, :animator, @test_anim)
       assert animation_pid1 != nil
@@ -162,8 +147,8 @@ defmodule Fledex.SupervisorTest do
       # Logger.debug("killing animation #{inspect(animation_pid1)}...")
       Process.exit(animation_pid1, :kill)
 
-      # give it some time to recove
-      Process.sleep(2_000)
+      # give it some time to recover
+      Process.sleep(500)
 
       animation_pid2 = worker_pid(@test_strip, :animator, @test_anim)
       assert animation_pid2 != nil
