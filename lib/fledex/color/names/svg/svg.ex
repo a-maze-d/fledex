@@ -9,10 +9,11 @@ defmodule Fledex.Color.Names.SVG do
 
   > #### Note {: .info}
   >
-  > This module implements the `Fledex.Color.Names.Interface` behaviour.
+  > * This module implements the `@behaviour` [`Fledex.Color.Names.Interface`](`m:Fledex.Color.Names.Interface`) (check it out for more details).
+  > * Every color has it's own function as explained in `Fledex.Color.Names.Interface` and supports the following options (`:all`, `:descriptive_name`, `:hex`, `:index`, `:name`, `:rgb`, `:source`, `:module`)
+  > * A list of all available colors from this module can be found in the documentation under [Colors](colors.md#svg).
   """
   alias Fledex.Color
-  # alias Fledex.Color.Conversion.Approximate
   alias Fledex.Color.Names.LoadUtils
 
   @external_resource Path.dirname(__DIR__) <> "/svg/svg_colors.csv"
@@ -39,10 +40,6 @@ defmodule Fledex.Color.Names.SVG do
         descriptive_name: String.trim(name),
         hex: Color.to_colorint(rgb),
         rgb: rgb,
-        # convert the rgb to other color spaces
-        # {LoadUtils.a2b(h), LoadUtils.a2b(s1), LoadUtils.a2b(l1)},
-        # hsl: %Fledex.Color.HSL{h: 0, s: 0, l: 0},
-        # hsv: Approximate.rgb2hsv(rgb),
         source: "SVG standard"
       }
     end

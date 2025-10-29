@@ -29,6 +29,8 @@ All color name modules are now following the same behaviour `Fledex.Color.Names.
 > Therefore components should also `import Fledex` if they want to use the macros, instead of `use Fledex` (This does mean that you would need to be explicit on all the other module names (`Leds`, color names, ...), but that's rather a good thing.
 
 ### Related changes
+As part of this refactoring a lot of smaller refactorings happened at the same time within the color related modules:
+
 * With the new color handling and the new mix task we don't have a need for the custom `ex_doc` version anymore.
 * Changed the `color_name_t` to allow any atom as type and most fields are optional
 * Removed the most color functions from the color modules. We now only expose `:hex`, `:name`, and `:module`. The rest of the information is still present but can not be called directly. thus, you can't do `color_name(:rgb)` anymore. You can still do `info(:color_name, :rgb)` to retrieve the information.
@@ -39,9 +41,12 @@ All color name modules are now following the same behaviour `Fledex.Color.Names.
 * The `Fledex.Color.Names.ModuleGenerator` can now be configured to only create a set of functions (with the `fields` option) instead of exposing all fields directly. Other color properties can still be retrieved through `color_name(what)`, but it will be an indirection to `info(:color_name, what)`. Thus, you could use `info/1` or `info/2` also directly.
 * Removed the properties from the color name modules that are not "natural" (now that we can do it)
 * The `Fledex.Color.Names.ModuleGenerator` has been cleaned up and got added documentation
-* updated the max xref, since we have less compile connected files
 * updated the documentation and livebooks
 * integrating the color guards into the color names module
+* Renamed some functions in `Fledex.Color.Names.LoadUtils` to make their purpose more clear
+* Adding a module for HSV, HSL, RGB. `Fledex.Color.HSV` and `Fledex.Color.HSL` are now used instead of a triples. The goal is that triples are reserved for RGBs). For consistency also introduced a `Fledex.Color.RGB`.
+* Removed `Fledex.Color.to_rgb/1`. use `Fledex.Color.RGB.to_tuple(color)` instead 
+* Cleaning up and restructuring the conversion modules
 
 ## Cleanup and improved API docs (#64)
 BIG documentation improvement and cleanups including (also through other commits): 
@@ -66,11 +71,7 @@ BIG documentation improvement and cleanups including (also through other commits
 
 ### Cleanup
 * Renamed some modules to make their purpose more clear
-* Renamed some functions in `Fledex.Color.Names.LoadUtils` to make their purpose more clear
 * Changed the `> **Notes**` (and similar) to `> #### Note {: .info}` to be consistent and in accordance with the recommendation in the `ex_unit` documentation even though it does "break" things on `github`.
-* Adding a module for HSV, HSL, RGB. `Fledex.Color.HSV` and `Fledex.Color.HSL` are now used instead of a triples. The goal is that triples are reserved for RGBs). For consistency also introduced a `Fledex.Color.RGB`.
-* Removed `Fledex.Color.to_rgb/1`. use `Fledex.Color.RGB.new(color) |> Fledex.Color.RGB.to_tuple()` instead 
-* Cleaning up and restructuring the conversion modules
 
 ### Depedendencies
 * upgrading all dependencies to latest version
@@ -78,6 +79,7 @@ BIG documentation improvement and cleanups including (also through other commits
 ### Build
 * fixing coveralls compilation issue by only running coverage on the latest supported build. Also formatting check only happens on the latest elixir version
 * Adding expert to the .gitignore exclusion list
+* updated the max xref, since we have less compile connected files
 
 
 # Previous versions
