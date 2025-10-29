@@ -37,7 +37,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Rethink whether we really want to create a `Fledex.Config.Data` module or we shoudl store the information in a GenServer. The issue with the GenServer is that we need to start a server. But maybe that's not soo bad.
 - [ ] Missing functionality
   - [x] Allow selecting the color modules that can be loaded instead of loading always the same list by default. (v0.7)
-  - [x] We have the `Fledex.Color` protocol, but we actually don't make use of its type. This is maybe also a good opportunity to rethink on how we handle colors in general. Maybe we should define everything as `Fledex.Color` and encapsulate CSS, SVG, RAL colours in their own struct to then have the protocol implemented for them. (v0.7)
+  - [x] We have the `Fledex.Color` protocol, but we actually don't make use of its type. This is maybe also a good opportunity to rethink on how we handle colors in general. Maybe we should define everything as `Fledex.Color` and encapsulate CSS, SVG, RAL colors in their own struct to then have the protocol implemented for them. (v0.7)
   - [x] Allow color modules to not carry more information than just a pre-defined set (v0.7)
   - [x] convert the rgb to other color spaces (in the various color name modules). Considering the previous point we might not need to do this, because it should now be optional (v0.7) <-- reduced the generated color functions, and what gets exposed
   - [ ] we start things through the Supervisor, but we don't shut things down through it (v0.8)
@@ -54,7 +54,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] setting up livebook (a really working version) on windows is anything than easy :-( Can we do something about it? Investigate (v0.9)
   - [ ] Create smartcells? (v1.x)
 - [ ] License
-  - [ ] Ensure everything can be under an FSF approved open source license (see https://spdx.org/licenses/)
+  - [x] Ensure everything can be under an FSF approved open source license (see https://spdx.org/licenses/)
     - [x] wiki colors (v0.7)
     - [x] ral colors (v0.7)
     - [x] cone image (v0.7)
@@ -65,4 +65,3 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Get the library into nerves-livebook (v0.8)
   - [ ] Move repository to its own org (fledex as an org is already taken, but fled-ex is free and I took it) (v0.8) <-- Announce this in the next release notes that this will happen?
   - [ ] Create a github pages site for the project (v0.8)
-- [ ] Bugs (currently none known)
