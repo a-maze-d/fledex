@@ -58,6 +58,35 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
     )
   end
 
+  @spec animation_exists?(atom, atom) :: boolean
+  def animation_exists?(strip_name, animation_name) do
+    case Registry.lookup(Utils.worker_registry(), {strip_name, :animator, animation_name}) do
+      [{_pid, _value}] -> true
+      _other -> false
+    end
+  end
+
+  @spec get_animations(atom) :: list(atom)
+  def get_animations(strip_name) do
+    Registry.select(Utils.worker_registry(), [
+      {
+        {{strip_name, :animator, :"$1"}, :_, :_},
+        [],
+        [:"$1"]
+      }
+    ])
+  end
+
+  @spec stop_animation(atom, atom) :: :ok
+  def stop_animation(strip_name, animation_name) do
+    case Registry.lookup(Utils.worker_registry(), {strip_name, :animator, animation_name}) do
+      [{pid, _value}] -> DynamicSupervisor.terminate_child(workers_name(strip_name), pid)
+      _other -> :ok
+    end
+
+    :ok
+  end
+
   @doc """
   This starts a new coordinator. Which can receive events and react to those
   by impacting the running annimations.

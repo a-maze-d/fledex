@@ -98,6 +98,35 @@ defmodule Fledex.Supervisor.AnimationSystem do
     end
   end
 
+  @spec led_strip_exists?(atom) :: boolean
+  def led_strip_exists?(strip_name) do
+    case Registry.lookup(Utils.worker_registry(), {strip_name, :led_strip, :supervisor}) do
+      [{_pid, _value}] -> true
+      _other -> false
+    end
+  end
+
+  @spec get_led_strips() :: [atom]
+  def get_led_strips do
+    Registry.select(Utils.worker_registry(), [
+      {
+        {{:"$1", :led_strip, :supervisor}, :_, :_},
+        [],
+        [:"$1"]
+      }
+    ])
+  end
+
+  @spec stop_led_strip(atom) :: :ok
+  def stop_led_strip(strip_name) do
+    case Registry.lookup(Utils.worker_registry(), {strip_name, :led_strip, :supervisor}) do
+      [{pid, _value}] -> DynamicSupervisor.terminate_child(Utils.workers_supervisor(), pid)
+      _other -> :ok
+    end
+
+    :ok
+  end
+
   # MARK: server side
   @impl true
   @spec init(keyword) ::

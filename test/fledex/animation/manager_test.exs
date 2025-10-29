@@ -10,6 +10,7 @@ defmodule Fledex.Animation.ManagerTest do
   alias Fledex.Driver.Impl.Null
   alias Fledex.ManagerTestUtils
   alias Fledex.Supervisor.AnimationSystem
+  alias Fledex.Supervisor.LedStripSupervisor
   alias Quantum
 
   @strip_name :test_strip
@@ -37,29 +38,23 @@ defmodule Fledex.Animation.ManagerTest do
     end
 
     test "register/unregister led_strip", %{strip_name: strip_name} do
-      config = ManagerTestUtils.get_manager_config()
-      assert Map.keys(config) == [strip_name]
-      assert ManagerTestUtils.whereis(strip_name, :led_strip, :supervisor) != nil
+      assert AnimationSystem.led_strip_exists?(strip_name)
 
       Manager.unregister_strip(strip_name)
-      config = ManagerTestUtils.get_manager_config()
-      assert Map.keys(config) == []
-      assert ManagerTestUtils.whereis(strip_name, :led_strip, :supervisor) == nil
+      assert not AnimationSystem.led_strip_exists?(strip_name)
 
       Manager.register_strip(strip_name, [{Null, []}], [])
-      config = ManagerTestUtils.get_manager_config()
-      assert Map.keys(config) == [strip_name]
-      assert ManagerTestUtils.whereis(strip_name, :led_strip, :supervisor) != nil
+      assert AnimationSystem.led_strip_exists?(strip_name)
+
+      assert :ok == AnimationSystem.stop_led_strip(:non_existing_strip)
     end
 
     test "register/unregister 2 led_strips", %{strip_name: strip_name} do
-      config = ManagerTestUtils.get_manager_config()
-      assert Map.keys(config) == [strip_name]
+      assert AnimationSystem.led_strip_exists?(strip_name)
 
       Manager.register_strip(:strip_name2, [{Null, []}], [])
-
-      config = ManagerTestUtils.get_manager_config()
-      assert Map.keys(config) == [strip_name, :strip_name2]
+      assert AnimationSystem.led_strip_exists?(strip_name)
+      assert AnimationSystem.led_strip_exists?(:strip_name2)
     end
 
     test "re-register led_strip", %{strip_name: strip_name} do
@@ -77,11 +72,11 @@ defmodule Fledex.Animation.ManagerTest do
       }
 
       Manager.register_config(strip_name, config)
-      assert config == ManagerTestUtils.get_manager_config(strip_name)
+      assert LedStripSupervisor.animation_exists?(strip_name, :t11)
+      assert LedStripSupervisor.animation_exists?(strip_name, :t12)
+      assert not LedStripSupervisor.animation_exists?(strip_name, :t13)
 
-      Enum.each(Map.keys(config), fn key ->
-        assert ManagerTestUtils.whereis(strip_name, :animator, key) != nil
-      end)
+      assert :ok == LedStripSupervisor.stop_animation(strip_name, :non_existing_animation)
     end
 
     test "re-register animation", %{strip_name: strip_name} do
@@ -91,7 +86,9 @@ defmodule Fledex.Animation.ManagerTest do
       }
 
       Manager.register_config(strip_name, config)
-      assert ManagerTestUtils.whereis(strip_name, :animator, :t2) != nil
+      assert LedStripSupervisor.animation_exists?(strip_name, :t1)
+      assert LedStripSupervisor.animation_exists?(strip_name, :t2)
+      assert not LedStripSupervisor.animation_exists?(strip_name, :t3)
 
       config2 = %{
         t1: %{type: :animation},
@@ -99,13 +96,9 @@ defmodule Fledex.Animation.ManagerTest do
       }
 
       Manager.register_config(strip_name, config2)
-      assert config2 == ManagerTestUtils.get_manager_config(strip_name)
-
-      assert ManagerTestUtils.whereis(strip_name, :animator, :t2) == nil
-
-      Enum.each(Map.keys(config2), fn key ->
-        assert ManagerTestUtils.whereis(strip_name, :animator, key) != nil
-      end)
+      assert LedStripSupervisor.animation_exists?(strip_name, :t1)
+      assert not LedStripSupervisor.animation_exists?(strip_name, :t2)
+      assert LedStripSupervisor.animation_exists?(strip_name, :t3)
     end
   end
 
