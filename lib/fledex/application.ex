@@ -3,8 +3,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Application do
+  @moduledoc false
   use Application
 
+  @impl Application
+  @doc false
   def start(_type, _args) do
     children = [
       {DynamicSupervisor, name: Fledex.DynamicSupervisor, strategy: :one_for_one}

@@ -21,6 +21,7 @@ Even though this library is published, there are things I still want to do befor
 - [ ] Testing
   - [x] Test all the livebooks (v0.7)
   - [x] Restructure the tests, so they are not so fragile (due to `Fledex.Config`) (v0.7) <-- this does not seem to be an issue anymore.
+  - [x] Test with Elixir 1.19
   - [ ] Add tests for the Clock component (v0.8)
   - [ ] Add tests for the Thermometer components (v0.8)
 - [ ] Cleanup

@@ -3,6 +3,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Driver.Manager do
+  @moduledoc """
+  This modules manages a (set of) concrete driver(s).
+
+  This module is used by the `Fledex.LedStrip` and the dispatches to the concrete `Fledex.Driver.Impl`-driver (or even drivers).
+  """
   require Logger
 
   alias Fledex.Color.Types
@@ -144,9 +149,10 @@ defmodule Fledex.Driver.Manager do
     :ok
   end
 
+  @spec remove_invalid_drivers(list({module, keyword})) :: list({module, keyword})
   def remove_invalid_drivers(drivers) do
     Enum.filter(drivers, fn {driver_module, _driver_config} ->
-      if validate_driver(driver_module) do
+      if driver_valid(driver_module) do
         true
       else
         Logger.warning(
@@ -158,7 +164,8 @@ defmodule Fledex.Driver.Manager do
     end)
   end
 
-  def validate_driver(driver_module) when is_atom(driver_module) do
+  @spec driver_valid(atom) :: boolean
+  def driver_valid(driver_module) when is_atom(driver_module) do
     # this is only to do a rough validation to catch the biggest
     # issues early on.
     required_functions = Interface.behaviour_info(:callbacks)

@@ -40,8 +40,6 @@ defmodule Fledex.Animation.Manager do
         }
 
   @typep state_t :: %{
-           animations: %{atom => Animator.config_t()},
-           coordinators: %{atom => Coordinator.config_t()},
            jobs: %{atom => JobScheduler.config_t()}
          }
 
@@ -125,8 +123,6 @@ defmodule Fledex.Animation.Manager do
     Process.flag(:trap_exit, true)
 
     state = %{
-      animations: %{},
-      coordinators: %{},
       jobs: %{}
     }
 
@@ -142,7 +138,7 @@ defmodule Fledex.Animation.Manager do
           {:reply, :ok, state_t}
   def handle_call({:register_strip, strip_name, drivers, strip_config}, _pid, state)
       when is_atom(strip_name) do
-    if led_strip_registered?(strip_name, state) do
+    if AnimationSystem.led_strip_exists?(strip_name) do
       # we have a bit of a problem when using the kino driver, since it will not be reinitialized
       # when calling this function again (and thereby we don't get any frame/display).
       # Therefore we add here an extra step to reinitiate the the drivers while registering the strip.
@@ -179,7 +175,7 @@ defmodule Fledex.Animation.Manager do
   @spec terminate(atom, state_t) :: :ok
   def terminate(_reason, state) do
     Logger.debug("shutting down Animation.Manager")
-    strip_names = Map.keys(state.animations)
+    strip_names = AnimationSystem.get_led_strips()
 
     _state =
       Enum.reduce(strip_names, state, fn strip_name, state ->
@@ -188,8 +184,6 @@ defmodule Fledex.Animation.Manager do
 
     :ok
   end
-
-  ### MARK: public helper functions
 
   ### MARK: private helper fucntions
   # we split the "animation" into the different aspects
@@ -208,9 +202,6 @@ defmodule Fledex.Animation.Manager do
       raise RuntimeError, "An unknown type was encountered #{inspect(rest)}"
     end
 
-    # # animations = Enum.filter(config, fn {_key, value} -> value.type in [:animation, :static] end)
-    # # coordinators = Enum.filter(config, fn {_key, value} -> value.type in [:coordinator] end)
-    # # jobs = Enum.filter(config, fn {_key, value} -> value.type in [:job] end)
     {animations, coordinators, jobs}
   end
 
@@ -218,32 +209,19 @@ defmodule Fledex.Animation.Manager do
   defp register_strip(state, strip_name, drivers, strip_config) do
     _result = AnimationSystem.start_led_strip(strip_name, drivers, strip_config)
 
-    %{
-      state
-      | animations: Map.put_new(state.animations, strip_name, nil),
-        coordinators: Map.put_new(state.coordinators, strip_name, nil),
-        jobs: Map.put_new(state.jobs, strip_name, nil)
-    }
+    %{state | jobs: Map.put_new(state.jobs, strip_name, nil)}
   end
 
   @spec unregister_strip(state_t, atom) :: state_t
   defp unregister_strip(state, strip_name) do
     # Logger.info("unregistering led_strip_ #{strip_name}")
-    shutdown_coordinators(
-      strip_name,
-      Map.keys(state.coordinators[strip_name] || %{})
-    )
-
+    shutdown_coordinators(strip_name, LedStripSupervisor.get_coordinators(strip_name))
     shutdown_jobs(strip_name, Map.keys(state.jobs[strip_name] || %{}))
-    shutdown_animators(strip_name, Map.keys(state.animations[strip_name] || %{}))
-    :ok = LedStripSupervisor.stop(strip_name)
+    shutdown_animators(strip_name, LedStripSupervisor.get_animations(strip_name))
 
-    %{
-      state
-      | animations: Map.drop(state.animations, [strip_name]),
-        coordinators: Map.drop(state.coordinators, [strip_name]),
-        jobs: Map.drop(state.coordinators, [strip_name])
-    }
+    AnimationSystem.stop_led_strip(strip_name)
+
+    %{state | jobs: Map.drop(state.jobs, [strip_name])}
   end
 
   @spec register_animations(state_t, atom, map) :: state_t
@@ -254,20 +232,21 @@ defmodule Fledex.Animation.Manager do
     # we check the current state and drop any animator we didn't receive
     # we update every animator we did receive
     # and we create any new filter_configanimator
-    {dropped, updated, created} = filter_configs(Map.get(state.animations, strip_name), configs)
+    {dropped, updated, created} =
+      filter_configs2(LedStripSupervisor.get_animations(strip_name), configs)
 
     # Logger.debug("updating config: #{inspect {dropped, updated, created}}")
     shutdown_animators(strip_name, dropped)
     update_animators(strip_name, updated)
     create_animators(strip_name, created)
 
-    %{state | animations: Map.put(state.animations, strip_name, configs)}
+    state
   end
 
   @spec shutdown_animators(atom, [atom]) :: :ok
   defp shutdown_animators(strip_name, dropped_animations) do
     Enum.each(dropped_animations, fn animation_name ->
-      :ok = Animator.stop(strip_name, animation_name)
+      LedStripSupervisor.stop_animation(strip_name, animation_name)
     end)
   end
 
@@ -283,6 +262,31 @@ defmodule Fledex.Animation.Manager do
     Enum.each(created_animations, fn {animation_name, config} ->
       LedStripSupervisor.start_animation(strip_name, animation_name, config)
     end)
+  end
+
+  @spec filter_configs2(list, map) :: {[atom], map, map}
+  defp filter_configs2([], new_configs) do
+    # Logger.info("filter: nil, #{inspect new_animations}")
+    # since we have no animation, none need to be dropped or updated. All are new
+    {[], %{}, new_configs}
+  end
+
+  defp filter_configs2(animations, new_configs) do
+    # Logger.info("filter: #{inspect old_animations}, #{inspect new_animations}")
+    {dropped, present} =
+      Enum.reduce(animations, {[], []}, fn animation, {dropped, present} ->
+        # Logger.info("filtering: #{key}")
+        if Map.has_key?(new_configs, animation) do
+          # Logger.info("filtering2: #{key} is in configs")
+          {dropped, [animation | present]}
+        else
+          # Logger.info("filtering2: #{key} is NOT in configs")
+          {[animation | dropped], present}
+        end
+      end)
+
+    {existing, created} = Map.split(new_configs, present)
+    {dropped, existing, created}
   end
 
   @spec filter_configs(map, map) :: {[atom], map, map}
@@ -313,13 +317,13 @@ defmodule Fledex.Animation.Manager do
   @spec register_coordinators(state_t, atom, map) :: state_t
   defp register_coordinators(state, strip_name, coordinators) do
     {dropped, updated, created} =
-      filter_configs(Map.get(state.coordinators, strip_name), coordinators)
+      filter_configs2(LedStripSupervisor.get_coordinators(strip_name), coordinators)
 
     shutdown_coordinators(strip_name, dropped)
     update_coordinators(strip_name, updated)
     create_coordinators(strip_name, created)
 
-    %{state | coordinators: Map.put(state.coordinators, strip_name, coordinators)}
+    state
   end
 
   @spec create_coordinators(atom, map) :: :ok
@@ -339,7 +343,7 @@ defmodule Fledex.Animation.Manager do
   @spec shutdown_coordinators(atom, [atom]) :: :ok
   defp shutdown_coordinators(strip_name, coordinator_names) do
     Enum.each(coordinator_names, fn coordinator_name ->
-      :ok = Coordinator.stop(strip_name, coordinator_name)
+      LedStripSupervisor.stop_coordinator(strip_name, coordinator_name)
     end)
   end
 
@@ -379,10 +383,5 @@ defmodule Fledex.Animation.Manager do
 
       if Keyword.get(job_config.options, :run_once, false), do: JobScheduler.run_job(job)
     end)
-  end
-
-  @spec led_strip_registered?(atom, state_t) :: boolean
-  defp led_strip_registered?(strip_name, state) when is_atom(strip_name) do
-    Map.has_key?(state.animations, strip_name)
   end
 end

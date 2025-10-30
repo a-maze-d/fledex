@@ -3,13 +3,20 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Driver.Impl.Spi do
+  @moduledoc """
+  This module is a concrete driver that will push the led data through an SPI port.
+
+  The protocol used is the one as expected by an WS2801 chip. See the
+  [hardware](docs/hardware.md) documentation for more information on to wire it.
+  """
   @behaviour Fledex.Driver.Interface
 
   alias Fledex.Color.Correction
   alias Fledex.Color.RGB
   alias Fledex.Color.Types
+  alias Fledex.Driver.Interface
 
-  @impl true
+  @impl Interface
   @spec configure(keyword) :: keyword
   def configure(config) do
     [
@@ -24,7 +31,7 @@ defmodule Fledex.Driver.Impl.Spi do
     ]
   end
 
-  @impl true
+  @impl Interface
   @spec init(keyword, map) :: keyword
   def init(config, _global_config) do
     {clear_leds, config} = Keyword.pop(config, :clear_leds, 0)
@@ -33,7 +40,7 @@ defmodule Fledex.Driver.Impl.Spi do
     clear_leds(clear_leds, config, &transfer/3)
   end
 
-  @impl true
+  @impl Interface
   @spec reinit(keyword, keyword, map) :: keyword
   def reinit(old_config, new_config, _global_config) do
     config = Keyword.merge(old_config, new_config)
@@ -58,7 +65,7 @@ defmodule Fledex.Driver.Impl.Spi do
     ref
   end
 
-  @impl true
+  @impl Interface
   @spec transfer(list(Types.colorint()), pos_integer, keyword) :: {keyword, any}
   def transfer(leds, _counter, config) do
     binary =
@@ -73,7 +80,7 @@ defmodule Fledex.Driver.Impl.Spi do
     {config, response}
   end
 
-  @impl true
+  @impl Interface
   @spec terminate(reason, keyword) :: :ok
         when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(_reason, config) do

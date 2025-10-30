@@ -3,6 +3,15 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Utils.Cluster do
+  @moduledoc """
+  This module collects functionality around clustering and to connect several Fledex instances together. This allows to do some processing on one node and to pass some pixel definitions to another node to display them there.
+
+  See also the `m:Fledex.Driver.Impl.PubSub` for more inforamtion
+
+  > #### NOte {: .warning}
+  >
+  > This functionality is not yet working and therefore should not be used!
+  """
   # def create_cluster(config) do
   #   with
   #     # iex(1)> Node.self()

@@ -3,6 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Color.Functions do
+  @moduledoc """
+  A collection of color functions (namely rainbow and gradient)
+  """
   import Bitwise
 
   alias Fledex.Color.Conversion.Rainbow

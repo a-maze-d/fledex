@@ -27,7 +27,7 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
     Supervisor.start_link(
       __MODULE__,
       {strip_name, drivers, global_configs},
-      name: supervisor_name(strip_name)
+      name: Utils.supervisor_name(strip_name)
     )
   end
 
@@ -36,7 +36,8 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
   """
   @spec stop(atom) :: :ok
   def stop(strip_name) do
-    Supervisor.stop(supervisor_name(strip_name))
+    Utils.supervisor_name(strip_name)
+    |> Supervisor.stop()
   end
 
   @doc """
@@ -47,36 +48,76 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
   """
   @spec start_animation(atom, atom, Animator.config_t()) :: GenServer.on_start()
   def start_animation(strip_name, animation_name, config) do
-    DynamicSupervisor.start_child(
-      workers_name(strip_name),
-      %{
-        # no need to be unique
-        id: animation_name,
-        start: {Animator, :start_link, [strip_name, animation_name, config]},
-        restart: :transient
-      }
-    )
+    Utils.start_worker(strip_name, animation_name, Animator, config)
+  end
+
+  @doc """
+  This checks whether a specific animation exists (for the specified led strip)
+  """
+  @spec animation_exists?(atom, atom) :: boolean
+  def animation_exists?(strip_name, animation_name) do
+    Utils.worker_exists?(strip_name, :animator, animation_name)
+  end
+
+  @doc """
+  This returns a list of all the defined animations and returns their names
+  """
+  @spec get_animations(atom) :: list(atom)
+  def get_animations(strip_name) do
+    Utils.get_workers(strip_name, :animator, :"$1")
+  end
+
+  @doc """
+  This stops an animation.
+
+  It is safe to call this function even if the animation does not exist
+  """
+  @spec stop_animation(atom, atom) :: :ok
+  def stop_animation(strip_name, animation_name) do
+    Utils.workers_name(strip_name)
+    |> Utils.stop_worker(strip_name, :animator, animation_name)
   end
 
   @doc """
   This starts a new coordinator. Which can receive events and react to those
   by impacting the running annimations.
   """
-  @spec start_coordinator(atom, atom, Coordinator.config_t()) :: GenServer.on_start()
+  @spec start_coordinator(atom, atom, Coordinator.config_t()) ::
+          DynamicSupervisor.on_start_child()
   def start_coordinator(strip_name, coordinator_name, config) do
-    DynamicSupervisor.start_child(
-      workers_name(strip_name),
-      %{
-        # no need to be unique
-        id: coordinator_name,
-        start: {Coordinator, :start_link, [strip_name, coordinator_name, config]},
-        restart: :transient
-      }
-    )
+    Utils.start_worker(strip_name, coordinator_name, Coordinator, config)
+  end
+
+  @doc """
+  This checks whether a specified coordinator exists
+  """
+  @spec coordinator_exists?(atom, atom) :: boolean
+  def coordinator_exists?(strip_name, coordinator_name) do
+    Utils.worker_exists?(strip_name, :coordinator, coordinator_name)
+  end
+
+  @doc """
+  This returns a list of all the defined coordinators
+  """
+  @spec get_coordinators(atom) :: list(atom)
+  def get_coordinators(strip_name) do
+    Utils.get_workers(strip_name, :coordinator, :"$1")
+  end
+
+  @doc """
+  This stops a coordinator.
+
+  It is safe to call this function even if the coordinator does not exist
+  """
+  @spec stop_coordinator(atom, atom) :: :ok
+  def stop_coordinator(strip_name, coordinator_name) do
+    Utils.workers_name(strip_name)
+    |> Utils.stop_worker(strip_name, :coordinator, coordinator_name)
   end
 
   # MARK: Server side
-  @impl true
+  @impl Supervisor
+  @doc false
   @spec init({atom, LedStrip.drivers_config_t(), keyword}) ::
           {:ok,
            {Supervisor.sup_flags(),
@@ -86,20 +127,9 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
 
     children = [
       {LedStrip, init_args},
-      {DynamicSupervisor, name: workers_name(strip_name), strategy: :one_for_one}
+      {DynamicSupervisor, name: Utils.workers_name(strip_name), strategy: :one_for_one}
     ]
 
     Supervisor.init(children, strategy: :one_for_one)
-  end
-
-  # MARK: public helper functions
-  @spec supervisor_name(atom) :: GenServer.name()
-  def supervisor_name(strip_name) do
-    Utils.via_tuple(strip_name, :led_strip, :supervisor)
-  end
-
-  @spec workers_name(atom) :: GenServer.name()
-  def workers_name(strip_name) do
-    Utils.via_tuple(strip_name, :led_strip, :workers)
   end
 end

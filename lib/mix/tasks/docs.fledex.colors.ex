@@ -27,6 +27,7 @@ if Mix.env() == :dev do
     ]
 
     @doc false
+    @spec run([binary()]) :: any()
     def run(args) do
       {cli_opts, _args, _invalid} =
         OptionParser.parse(args, aliases: @aliases, switches: @switches)

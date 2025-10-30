@@ -11,6 +11,7 @@ defmodule Fledex.Test do
   alias Fledex.Animation.ManagerSupervisor
   alias Fledex.ManagerTestUtils
   alias Fledex.Supervisor.AnimationSystem
+  alias Fledex.Supervisor.LedStripSupervisor
 
   setup do
     on_exit(fn ->
@@ -106,12 +107,13 @@ defmodule Fledex.Test do
         end
       end
 
-      config = ManagerTestUtils.get_manager_config()
+      assert [:john] == AnimationSystem.get_led_strips()
+      assert AnimationSystem.led_strip_exists?(:john)
+      assert not AnimationSystem.led_strip_exists?(:merry)
 
-      assert Map.keys(config) == [:john]
-      assert Map.keys(config.john) == [:merry]
-      assert config.john.merry.def_func.(%{}) == leds(10)
-      # assert configs.john.merry.send_config_func.(%{}) == %{}
+      assert [:merry] == LedStripSupervisor.get_animations(:john)
+      assert LedStripSupervisor.animation_exists?(:john, :merry)
+      assert not LedStripSupervisor.animation_exists?(:john, :merry2)
 
       AnimationSystem.stop()
     end
@@ -125,12 +127,16 @@ defmodule Fledex.Test do
         end
       end
 
-      config = ManagerTestUtils.get_manager_config()
+      assert [:john] == AnimationSystem.get_led_strips()
+      assert AnimationSystem.led_strip_exists?(:john)
+      assert not AnimationSystem.led_strip_exists?(:merry)
 
-      assert Map.keys(config) == [:john]
-      assert Map.keys(config.john) == [:merry]
-      assert config.john.merry.def_func.(%{}) == leds(10)
-      # assert configs.john.merry.send_config_func.(%{}) == %{}
+      assert [:merry] == LedStripSupervisor.get_animations(:john)
+      assert LedStripSupervisor.animation_exists?(:john, :merry)
+      assert not LedStripSupervisor.animation_exists?(:john, :merry2)
+
+      config = ManagerTestUtils.get_animator_config(:john, :merry)
+      assert config.def_func.(%{}) == leds(10)
 
       AnimationSystem.stop()
     end
@@ -158,15 +164,19 @@ defmodule Fledex.Test do
         end
       end
 
-      config = ManagerTestUtils.get_manager_config()
+      assert [:doe, :john] == AnimationSystem.get_led_strips() |> Enum.sort()
+      assert [:kate, :merry] == LedStripSupervisor.get_animations(:john) |> Enum.sort()
+      assert [:caine, :smith] == LedStripSupervisor.get_animations(:doe) |> Enum.sort()
 
-      assert Map.keys(config) == [:john, :doe]
-      assert Map.keys(config.john) == [:merry, :kate]
-      assert config.john.merry.def_func.(%{}) == leds(10)
-      assert config.john.kate.def_func.(%{}) == leds(11)
-      assert Map.keys(config.doe) == [:caine, :smith]
-      assert config.doe.caine.def_func.(%{}) == leds(1)
-      assert config.doe.smith.def_func.(%{}) == leds(2)
+      merry_config = ManagerTestUtils.get_animator_config(:john, :merry)
+      assert merry_config.def_func.(%{}) == leds(10)
+      kate_config = ManagerTestUtils.get_animator_config(:john, :kate)
+      assert kate_config.def_func.(%{}) == leds(11)
+
+      caine_config = ManagerTestUtils.get_animator_config(:doe, :caine)
+      assert caine_config.def_func.(%{}) == leds(1)
+      smith_config = ManagerTestUtils.get_animator_config(:doe, :smith)
+      assert smith_config.def_func.(%{}) == leds(2)
 
       AnimationSystem.stop()
     end
@@ -185,18 +195,15 @@ defmodule Fledex.Test do
         end
       end
 
-      # give a chance to triggers (even though we shouldn't collect any)
-      Process.sleep(500)
-      config = ManagerTestUtils.get_manager_config()
-
-      # ensure that the block does not expect any triggers even though
-      # the function actually does contain it
-      assert config.sten.svenson.def_func.(%{}) == leds(5)
-
       config = ManagerTestUtils.get_animator_config(:sten, :svenson)
       # there should not be any triggers, since we are static
       assert config.triggers == %{}
+      assert config.def_func.(%{}) == leds(5)
       assert config.type == :static
+      assert config.strip_name == :sten
+      assert config.animation_name == :svenson
+      assert config.effects == []
+      assert config.options == []
 
       AnimationSystem.stop()
     end
@@ -271,7 +278,9 @@ defmodule Fledex.Test do
       defmodule Test do
         @behaviour Fledex.Component.Interface
 
-        @impl true
+        alias Fledex.Component.Interface
+
+        @impl Interface
         def configure(name, options) do
           %{
             name => %{

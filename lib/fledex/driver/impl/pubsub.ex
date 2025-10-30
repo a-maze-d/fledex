@@ -4,15 +4,22 @@
 
 defmodule Fledex.Driver.Impl.PubSub do
   @moduledoc """
-  Vert experimental. Might not work
+  This driver collects the led definitions and transfers them through PubSub
+  to somewhere else where they can be repainted through the `Fledex.Component.PubSub`
+  component
+
+  > #### Note {: .warning}
+  >
+  > Very experimental. Might not work
   """
   @behaviour Fledex.Driver.Interface
 
   alias Fledex.Color.Types
+  alias Fledex.Driver.Interface
   alias Fledex.Supervisor.Utils
   alias Fledex.Utils.PubSub
 
-  @impl true
+  @impl Interface
   @spec configure(keyword) :: keyword
   def configure(config \\ []) do
     [
@@ -20,19 +27,19 @@ defmodule Fledex.Driver.Impl.PubSub do
     ]
   end
 
-  @impl true
+  @impl Interface
   @spec init(keyword, map) :: keyword
   def init(config, _global_config) do
     configure(config)
   end
 
-  @impl true
+  @impl Interface
   @spec reinit(keyword, keyword, map) :: keyword
   def reinit(old_config, new_config, _global_config) do
     Keyword.merge(old_config, new_config)
   end
 
-  @impl true
+  @impl Interface
   @spec transfer(list(Types.colorint()), pos_integer, keyword) :: {keyword, any}
   def transfer(leds, counter, config) do
     PubSub.direct_broadcast!(
@@ -45,7 +52,7 @@ defmodule Fledex.Driver.Impl.PubSub do
     {config, :ok}
   end
 
-  @impl true
+  @impl Interface
   @spec terminate(reason, keyword) :: :ok
         when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(_reason, _config) do

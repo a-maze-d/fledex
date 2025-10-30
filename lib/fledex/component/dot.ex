@@ -2,10 +2,15 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 defmodule Fledex.Component.Dot do
+  @moduledoc """
+  A component that will draw a single "dot".
+  """
   @behaviour Fledex.Component.Interface
   import Fledex.Utils.Guards
 
-  @impl true
+  alias Fledex.Component.Interface
+
+  @impl Interface
   def configure(name, options) when is_atom(name) and is_list(options) do
     import Fledex
     import Fledex.Leds

@@ -71,6 +71,7 @@ defmodule Fledex.Color.Names.LoadUtils do
   * downcases it
   * converts it to an atom
   """
+  @spec str2atom(String.t()) :: atom
   def str2atom(name) do
     name
     |> String.normalize(:nfd)
@@ -84,6 +85,7 @@ defmodule Fledex.Color.Names.LoadUtils do
   @doc """
   Converts a hex string (potentially with a `#` sign) into an integer
   """
+  @spec hexstr2i(String.t()) :: integer
   def hexstr2i(hex_string) do
     hex_string
     |> String.replace("#", "")
@@ -101,6 +103,7 @@ defmodule Fledex.Color.Names.LoadUtils do
   * `°`: If the string contains a trailing degree sign, then
         the value is interpreted degree between 0 and 359 and mapped to a byte
   """
+  @spec a2b(String.t()) :: 0..255
   def a2b(value) do
     value =
       String.trim(value)
@@ -118,6 +121,7 @@ defmodule Fledex.Color.Names.LoadUtils do
 
   Any non-digit charaters will be removed before the conversion
   """
+  @spec a2i(String.t()) :: integer
   def a2i(value) do
     value
     |> String.replace(~r/[^0-9]/, "")

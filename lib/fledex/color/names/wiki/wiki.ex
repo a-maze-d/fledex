@@ -19,15 +19,8 @@ defmodule Fledex.Color.Names.Wiki do
 
   alias Fledex.Color.Names.WikiUtils
 
-  @external_resource Path.dirname(__DIR__) <> "/wiki/wiki_colors.csv"
-
   use Fledex.Color.Names.ModuleGenerator,
-    filename: @external_resource,
+    filename: WikiUtils.file_name(),
     converter: &WikiUtils.converter/1,
     splitter_opts: [separator: ",", split_opts: [parts: 11]]
-
-  @doc false
-  def file do
-    @external_resource
-  end
 end

@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
 including motivation and background --->
 
 ## Issue ticket number and link
-<!--- not requried for some simple typo corrections --->
+<!--- not required for some simple typo corrections --->
 
 ## Type of change
 

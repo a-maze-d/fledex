@@ -53,7 +53,7 @@ defmodule Fledex.Animation.JobScheduler do
   end
 
   # MARK server side
-  @impl true
+  @impl Quantum
   @spec init(keyword) :: keyword
   def init(opts) do
     Logger.debug("starting JobScheduler ")

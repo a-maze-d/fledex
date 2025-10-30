@@ -170,7 +170,7 @@ defmodule Fledex.Leds do
   @spec set_led_strip_info(t, server_name :: atom, namespace :: atom) :: t
   def set_led_strip_info(%{opts: opts} = leds, server_name \\ Fledex.LedStrip, namespace) do
     opts = %{opts | server_name: server_name, namespace: namespace}
-    %__MODULE__{leds | opts: opts}
+    %{leds | opts: opts}
   end
 
   @doc """
@@ -273,7 +273,7 @@ defmodule Fledex.Leds do
         Map.merge(acc, remap_leds(leds, count * (round - 1) + 1))
       end)
 
-    __MODULE__.leds(new_count, new_leds, opts, %{meta | index: new_index})
+    leds(new_count, new_leds, opts, %{meta | index: new_index})
   end
 
   @doc """
@@ -319,7 +319,6 @@ defmodule Fledex.Leds do
 
         do_light(leds, rgb, offset, repeat)
 
-      # __MODULE__.light(leds, rgb, offset)
       false ->
         raise ArgumentError, message: "The options are a list, but not a keyword list"
     end
@@ -348,36 +347,31 @@ defmodule Fledex.Leds do
     # convert led to a LEDs struct
     rgb =
       case rgb do
-        rgb
-        when is_integer(rgb) or
-               is_atom(rgb) or
-               tuple_size(rgb) == 3 ->
-          __MODULE__.leds(1, %{1 => Color.to_colorint(rgb)}, %{}, %{index: 2})
-
-        # rgb when is_atom(rgb) -> __MODULE__.leds(1,%{ 1 => rgb}) |> __MODULE__.light(rgb)
         %__MODULE__{} = rgb ->
           rgb
+
+        rgb ->
+          leds(1, %{1 => Color.to_colorint(rgb)}, %{}, %{index: 2})
       end
 
     # repeat the sequence
-    %__MODULE__{count: count2, leds: leds2} = rgb |> __MODULE__.repeat(repeat)
-    # merge in the sequence at the coorect offset
+    %__MODULE__{count: count2, leds: leds2} = rgb |> repeat(repeat)
+    # merge in the sequence at the correct offset
     # remap the indicies (1 indexed)
     remapped_new_leds = remap_leds(leds2, offset)
     leds = Map.merge(leds1, remapped_new_leds)
-    __MODULE__.leds(count1, leds, opts1, %{meta1 | index: offset + count2})
+    leds(count1, leds, opts1, %{meta1 | index: offset + count2})
   end
 
   @spec remap_leds(%{pos_integer => Types.colorint()}, pos_integer) :: %{
           pos_integer => Types.colorint()
         }
   defp remap_leds(leds, offset) do
-    Map.new(
-      Enum.map(leds, fn {key, value} ->
-        index = offset + key - 1
-        {index, value}
-      end)
-    )
+    Enum.map(leds, fn {key, value} ->
+      index = offset + key - 1
+      {index, value}
+    end)
+    |> Map.new()
   end
 
   @doc """
@@ -405,8 +399,9 @@ defmodule Fledex.Leds do
   def to_list(%__MODULE__{count: count, leds: _leds, opts: _opts, meta: _meta} = leds)
       when count > 0 do
     Enum.reduce(1..count, [], fn index, acc ->
-      acc ++ [get_light(leds, index)]
+      [get_light(leds, index) | acc]
     end)
+    |> Enum.reverse()
   end
 
   def to_list(_leds) do
@@ -491,12 +486,12 @@ defmodule Fledex.Leds do
     > `consolidate_protocols: false`
     """
     alias Fledex.Leds
+    alias Kino.Render
 
-    @doc delegate_to: {Kino.Reader, :to_livebook, 1}
-    @impl true
+    @impl Render
     @spec to_livebook(Fledex.Leds.t()) :: map
     def to_livebook(leds) do
-      md_kino = Kino.Markdown.new(Leds.to_markdown(leds))
+      md_kino = Leds.to_markdown(leds) |> Kino.Markdown.new()
       i_kino = Kino.Inspect.new(leds)
 
       kino =

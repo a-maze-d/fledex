@@ -3,6 +3,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Color.RGB do
+  @moduledoc """
+  This module represents an RGB color. `Fledex` does commonly use a `{r, g, b}`-tuple, but
+  this module makes the purpose more clear.
+
+  It also provides the necessary conversion functions to the 0xrrggbb ([`colorint`](`t:Fledex.Color.Types.colorint/0`)) and`{r,g,b}` (tuple) representations.
+  """
   import Bitwise
 
   alias Fledex.Color
@@ -33,9 +39,18 @@ defmodule Fledex.Color.RGB do
   end
 
   def to_tuple(color) when is_integer(color) do
-    r = color |> Bitwise.&&&(0xFF0000) |> Bitwise.>>>(16)
-    g = color |> Bitwise.&&&(0x00FF00) |> Bitwise.>>>(8)
+    r =
+      color
+      |> Bitwise.&&&(0xFF0000)
+      |> Bitwise.>>>(16)
+
+    g =
+      color
+      |> Bitwise.&&&(0x00FF00)
+      |> Bitwise.>>>(8)
+
     b = color |> Bitwise.&&&(0x0000FF)
+
     {r, g, b}
   end
 

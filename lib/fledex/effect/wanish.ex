@@ -3,6 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Effect.Wanish do
+  @moduledoc """
+  This is an effect that will slowly desolve the animation. Once it has desolved completely the effect will (by default) inverse itself and the leds will reappear.
+  """
   use Fledex.Effect.Interface
 
   # This function is a bit complicated. It calculates how many pixels should be switched off or not
@@ -28,6 +31,13 @@ defmodule Fledex.Effect.Wanish do
   # in the next round, to align it to the modulo). This becomes a bit more complicated if we have
   # a divisor, since the same state appears twice. Therefore we take the remainder of the divisor
   # into consideration  defp do_apply(leds, _count, _config, nil, triggers, _context), do: {leds, triggers}
+  @spec do_apply(
+          [Fledex.Color.Types.colorint()],
+          non_neg_integer(),
+          config :: keyword(),
+          triggers :: map(),
+          context :: map()
+        ) :: {[Fledex.Color.Types.colorint()], non_neg_integer(), map()}
   def do_apply(leds, count, config, triggers, _context) do
     trigger_name = Keyword.get(config, :trigger_name)
     left = Keyword.get(config, :direction, :left) != :right

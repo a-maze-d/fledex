@@ -98,8 +98,35 @@ defmodule Fledex.Supervisor.AnimationSystem do
     end
   end
 
+  @doc """
+  This checks whether a specific led_strip exists
+  """
+  @spec led_strip_exists?(atom) :: boolean
+  def led_strip_exists?(strip_name) do
+    Utils.worker_exists?(strip_name, :led_strip, :supervisor)
+  end
+
+  @doc """
+  This returns a list of all the defined led strips
+  """
+  @spec get_led_strips() :: [atom]
+  def get_led_strips do
+    Utils.get_workers(:"$1", :led_strip, :supervisor)
+  end
+
+  @doc """
+  This stops an led_strip.
+
+  It is safe to call this function even if the led_strip does not exist
+  """
+  @spec stop_led_strip(atom) :: :ok
+  def stop_led_strip(strip_name) do
+    Utils.stop_worker(Utils.workers_supervisor(), strip_name, :led_strip, :supervisor)
+  end
+
   # MARK: server side
-  @impl true
+  @impl Supervisor
+  @doc false
   @spec init(keyword) ::
           {:ok, {Supervisor.sup_flags(), [Supervisor.child_spec() | :supervisor.child_spec()]}}
           | :ignore

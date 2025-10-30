@@ -219,7 +219,11 @@ defmodule Fledex.LedsTest do
     end
 
     test "get light" do
-      leds = Leds.leds(10) |> Leds.light(0xFF0000, offset: 5) |> Leds.light(0x00FF00, offset: 20)
+      leds =
+        Leds.leds(10)
+        |> Leds.light(0xFF0000, offset: 5)
+        |> Leds.light(0x00FF00, offset: 20)
+
       assert Leds.get_light(leds, 1) == 0
       assert Leds.get_light(leds, 5) == 0xFF0000
       assert Leds.get_light(leds, 20) == 0x00FF00
@@ -361,7 +365,11 @@ defmodule Fledex.LedsTest do
       use Fledex.Config
 
       leds =
-        Leds.leds(3) |> Leds.light(:red) |> Leds.light(:red) |> Leds.light(:red) |> Leds.repeat(3)
+        Leds.leds(3)
+        |> Leds.light(:red)
+        |> Leds.light(:red)
+        |> Leds.light(:red)
+        |> Leds.repeat(3)
 
       assert leds.count == 9
       assert Leds.get_light(leds, 1) == 0xFF0000
@@ -439,7 +447,10 @@ defmodule Fledex.LedsTest do
     end
 
     test "out-of-range" do
-      assert Leds.leds(1) |> Leds.light({300, 0, 0}) |> Leds.get_light(1) == 0xFF0000
+      assert 0xFF0000 ==
+               Leds.leds(1)
+               |> Leds.light({300, 0, 0})
+               |> Leds.get_light(1)
     end
   end
 end

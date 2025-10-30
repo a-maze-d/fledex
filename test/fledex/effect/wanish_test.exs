@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Effect.WanishTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: false
 
   alias Fledex.Effect.Wanish
   @context %{strip_name: :strip_name, animation_name: :animation_name, effect: 1}

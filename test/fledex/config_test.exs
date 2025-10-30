@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.ConfigTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: false
 
   alias Fledex.Color.Names
   alias Fledex.Config

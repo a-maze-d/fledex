@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.LedStripTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
   import ExUnit.CaptureIO
 
   require Logger
@@ -63,21 +63,6 @@ defmodule Fledex.LedStripTest do
       assert {:stop, "Init args need to be a 3 element tuple with name, drivers, global config"} ==
                LedStrip.init([])
     end
-
-    # test "init drivers with single item throws warning" do
-    #   global_config = [
-    #     timer_disabled: true,
-    #     merge_strategy: :cap,
-    #   ]
-
-    #   {{:ok, _state}, log} =
-    #     with_log(fn ->
-    #       LedStrip.init({:strip_name, [{Null, []}], global_config})
-    #     end)
-
-    #   assert String.match?(log, ~r/warning/)
-    #   assert String.match?(log, ~r/driver_modules is not a list/)
-    # end
 
     test "change config" do
       {:ok, state} = LedStrip.init({:strip_name, [{Null, []}], timer_disabled: true})
@@ -277,7 +262,7 @@ defmodule Fledex.LedStripTest do
       name = :john
       response = LedStrip.handle_call({:define_namespace, name}, self(), state)
       assert match?({:reply, :ok, _}, response)
-      {:reply, _na, state} = response
+      {:reply, :ok, state} = response
       assert map_size(state.namespaces) == 1
       assert Map.keys(state.namespaces) == [:john]
     end
@@ -386,7 +371,7 @@ defmodule Fledex.LedStripTestSync do
   alias Fledex.Driver.Impl.Spi
   alias Fledex.LedStrip
   alias Fledex.Supervisor.AnimationSystem
-  alias Fledex.Supervisor.LedStripSupervisor
+  alias Fledex.Supervisor.Utils
 
   setup do
     start_supervised(AnimationSystem.child_spec())
@@ -477,7 +462,7 @@ defmodule Fledex.LedStripTestSync do
       assert {:ok, timer_counter: 0} = LedStrip.change_config(@strip_name, timer_counter: 1)
 
       led_strip_pid =
-        Supervisor.which_children(LedStripSupervisor.supervisor_name(@strip_name))
+        Supervisor.which_children(Utils.supervisor_name(@strip_name))
         |> Enum.filter(fn {_name, _pid, type, _module} -> type == :worker end)
         |> List.first()
         |> elem(1)
