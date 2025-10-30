@@ -84,6 +84,7 @@ The supervision tree has been improved.
 * fixing coveralls compilation issue by only running coverage on the latest supported build. Also formatting check only happens on the latest elixir version
 * Adding expert to the .gitignore exclusion list
 * updated the max xref, since we have less compile connected files
+* Made `credo` more strict. enabled all checks that I consider as reasonable and fixed the resulting issues.
 * Adding support for Elixir 1.19
 
 

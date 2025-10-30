@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 defmodule Fledex.Component.DotTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: false
   alias Fledex.Component.Dot
   alias Fledex.Leds
 

@@ -3,6 +3,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Utils.PubSub do
+  @moduledoc """
+  This module collects all functions that are about publish and subscribe (PubSub)
+  functionality.
+
+  PubSub is used for 2 things (more things are likely to be added in the future):
+  * Notifications related to `trigger`s (when repaints happen). You can inject into this information flow by calling `broadcast_trigger/1`
+  * Notifications related to `state` changes. Those are triggered mainly by effects, but also an animation can publish them. `Fledex.Animation.Coordinator`s are the main consumer of those events to then take appopriate actions. Those events are published through `broadcast_state/2`
+  """
   alias Fledex.Supervisor.Utils
 
   @channel_trigger "trigger"

@@ -14,10 +14,11 @@ defmodule Fledex.Component.Thermometer do
   @behaviour Fledex.Component.Interface
 
   alias Fledex.Color.Names.Wiki
+  alias Fledex.Component.Interface
   alias Fledex.Component.Utils
   alias Fledex.Leds
 
-  @impl true
+  @impl Interface
   def configure(name, options) when is_atom(name) and is_list(options) do
     name_helper = Utils.create_name(name, :helper)
 
@@ -77,13 +78,17 @@ defmodule Fledex.Component.Thermometer do
            |> cond_add(pos_in_range, pos_color, pos_offset, range.last), 1}
 
         temp when temp < 0 and temp > range.first ->
-          {Leds.leds(1) |> Leds.light(neg_color) |> Leds.repeat(abs(temp)), pos_offset + temp - 1}
+          {Leds.leds(1)
+           |> Leds.light(neg_color)
+           |> Leds.repeat(abs(temp)), pos_offset + temp - 1}
 
         temp when temp == 0 ->
           {Leds.leds(1) |> Leds.light(null_color), null_offset}
 
         temp when temp > 0 ->
-          {Leds.leds(1) |> Leds.light(pos_color) |> Leds.repeat(abs(temp)), pos_offset}
+          {Leds.leds(1)
+           |> Leds.light(pos_color)
+           |> Leds.repeat(abs(temp)), pos_offset}
       end
 
     Leds.leds(total_leds) |> Leds.light(leds, offset: offset)
@@ -104,7 +109,8 @@ defmodule Fledex.Component.Thermometer do
       |> Leds.light(marker, offset: marker_distance)
       |> Leds.repeat(trunc(range.last / marker_distance))
 
-    Leds.leds(Range.size(range))
+    Range.size(range)
+    |> Leds.leds()
     |> Leds.light(negative_scale)
     |> Leds.light(marker)
     |> Leds.light(positive_scale)

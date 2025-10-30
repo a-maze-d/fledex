@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 defmodule Fledex.Animation.JobSchedulerTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   import Crontab.CronExpression
 
   alias Fledex.Animation.JobScheduler

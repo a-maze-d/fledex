@@ -3,12 +3,24 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Effect.Dimming do
+  @moduledoc """
+  This is an effect that will dimm all the leds to a certain level
+  """
+
   use Fledex.Effect.Interface
 
   alias Fledex.Color
   alias Fledex.Color.Conversion.CalcUtils
   alias Fledex.Color.RGB
+  alias Fledex.Color.Types
 
+  @spec do_apply(
+          [Types.colorint()],
+          non_neg_integer(),
+          config :: keyword(),
+          triggers :: map(),
+          context :: map()
+        ) :: {[Types.colorint()], non_neg_integer(), map()}
   def do_apply(leds, count, config, triggers, _context) do
     trigger_name = config[:trigger_name] || :default
     divisor = config[:divisor] || 1

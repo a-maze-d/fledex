@@ -6,10 +6,11 @@ defmodule Fledex.Animation.CoordinatorTest do
   alias ExUnit.CaptureLog
   alias Fledex.Animation.Coordinator
   alias Fledex.Supervisor.AnimationSystem
+  alias Fledex.Supervisor.LedStripSupervisor
   alias Fledex.Supervisor.Utils
   alias Fledex.Utils.PubSub
 
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   @spec subscribers() :: [{pid(), Registry.value()}]
   defp subscribers do
@@ -25,7 +26,7 @@ defmodule Fledex.Animation.CoordinatorTest do
   describe "test client functions" do
     test "cycle through all" do
       assert {:ok, pid} = Coordinator.start_link(:strip_name, :coordinator_name, %{})
-      assert Process.alive?(pid) == true
+      assert LedStripSupervisor.coordinator_exists?(:strip_name, :coordinator_name)
 
       assert :ok =
                Coordinator.config(:strip_name, :coordinator_name, %{
@@ -47,7 +48,7 @@ defmodule Fledex.Animation.CoordinatorTest do
       assert counter_2 == counter_1 + 1
 
       assert :ok = Coordinator.stop(:strip_name, :coordinator_name)
-      assert Process.alive?(pid) == false
+      assert not LedStripSupervisor.coordinator_exists?(:strip_name, :coordinator_name)
     end
   end
 

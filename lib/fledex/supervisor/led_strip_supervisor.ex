@@ -36,7 +36,8 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
   """
   @spec stop(atom) :: :ok
   def stop(strip_name) do
-    Supervisor.stop(Utils.supervisor_name(strip_name))
+    Utils.supervisor_name(strip_name)
+    |> Supervisor.stop()
   end
 
   @doc """
@@ -73,7 +74,8 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
   """
   @spec stop_animation(atom, atom) :: :ok
   def stop_animation(strip_name, animation_name) do
-    Utils.stop_worker(Utils.workers_name(strip_name), strip_name, :animator, animation_name)
+    Utils.workers_name(strip_name)
+    |> Utils.stop_worker(strip_name, :animator, animation_name)
   end
 
   @doc """
@@ -109,11 +111,12 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
   """
   @spec stop_coordinator(atom, atom) :: :ok
   def stop_coordinator(strip_name, coordinator_name) do
-    Utils.stop_worker(Utils.workers_name(strip_name), strip_name, :coordinator, coordinator_name)
+    Utils.workers_name(strip_name)
+    |> Utils.stop_worker(strip_name, :coordinator, coordinator_name)
   end
 
   # MARK: Server side
-  @impl true
+  @impl Supervisor
   @doc false
   @spec init({atom, LedStrip.drivers_config_t(), keyword}) ::
           {:ok,

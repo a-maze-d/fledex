@@ -278,7 +278,9 @@ defmodule Fledex.Test do
       defmodule Test do
         @behaviour Fledex.Component.Interface
 
-        @impl true
+        alias Fledex.Component.Interface
+
+        @impl Interface
         def configure(name, options) do
           %{
             name => %{

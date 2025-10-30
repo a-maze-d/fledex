@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Driver.Impl.SpiTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: false
 
   alias Fledex.Color.Correction
   alias Fledex.Driver.Impl.Spi

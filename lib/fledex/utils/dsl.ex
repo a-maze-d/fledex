@@ -11,6 +11,9 @@ defmodule Fledex.Utils.Dsl do
   """
   require Logger
 
+  alias Crontab.CronExpression
+  alias Fledex.Animation.Coordinator
+  alias Fledex.Animation.JobScheduler
   alias Fledex.Animation.Manager
   alias Fledex.Leds
   alias Fledex.LedStrip
@@ -152,6 +155,9 @@ defmodule Fledex.Utils.Dsl do
     end
   end
 
+  @spec create_job(atom, CronExpression.t(), keyword, (-> any())) :: %{
+          atom => JobScheduler.config_t()
+        }
   def create_job(name, pattern, options, function) do
     %{
       name => %{
@@ -163,6 +169,7 @@ defmodule Fledex.Utils.Dsl do
     }
   end
 
+  @spec create_coordinator(atom, keyword, (-> any())) :: %{atom => Coordinator.config_t()}
   def create_coordinator(name, options, function) do
     %{
       name => %{

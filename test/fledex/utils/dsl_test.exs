@@ -14,7 +14,7 @@ defmodule Fledex.Utils.DslTest do
     def info(_name, _val), do: nil
   end
 
-  use ExUnit.Case
+  use ExUnit.Case, async: false
 
   alias Fledex.Utils.Dsl
 

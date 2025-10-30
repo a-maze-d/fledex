@@ -168,10 +168,8 @@ defmodule Fledex.LedStrip do
   @spec define_namespace(atom, atom) :: :ok | {:error, String.t()}
   def define_namespace(strip_name, namespace) do
     # Logger.info("defining namespace: #{strip_name}-#{namespace}")
-    GenServer.call(
-      Utils.via_tuple(strip_name, :led_strip, :strip),
-      {:define_namespace, namespace}
-    )
+    Utils.via_tuple(strip_name, :led_strip, :strip)
+    |> GenServer.call({:define_namespace, namespace})
   end
 
   @doc """
@@ -179,7 +177,8 @@ defmodule Fledex.LedStrip do
   """
   @spec drop_namespace(atom, atom) :: :ok
   def drop_namespace(strip_name, namespace) do
-    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :strip), {:drop_namespace, namespace})
+    Utils.via_tuple(strip_name, :led_strip, :strip)
+    |> GenServer.call({:drop_namespace, namespace})
   end
 
   @doc """
@@ -187,7 +186,8 @@ defmodule Fledex.LedStrip do
   """
   @spec exist_namespace(atom, atom) :: boolean
   def exist_namespace(strip_name, namespace) do
-    GenServer.call(Utils.via_tuple(strip_name, :led_strip, :strip), {:exist_namespace, namespace})
+    Utils.via_tuple(strip_name, :led_strip, :strip)
+    |> GenServer.call({:exist_namespace, namespace})
   end
 
   @doc """
@@ -209,10 +209,8 @@ defmodule Fledex.LedStrip do
   def set_leds(strip_name, namespace, leds, count \\ nil)
       when (count == nil or (is_integer(count) and count >= 0)) and is_atom(strip_name) and
              is_atom(namespace) do
-    GenServer.call(
-      Utils.via_tuple(strip_name, :led_strip, :strip),
-      {:set_leds, namespace, leds, count}
-    )
+    Utils.via_tuple(strip_name, :led_strip, :strip)
+    |> GenServer.call({:set_leds, namespace, leds, count})
   end
 
   @doc """
@@ -246,10 +244,8 @@ defmodule Fledex.LedStrip do
   """
   @spec change_config(atom, keyword) :: {:ok, [keyword]}
   def change_config(strip_name, global_config) do
-    GenServer.call(
-      Utils.via_tuple(strip_name, :led_strip, :strip),
-      {:change_config, global_config}
-    )
+    Utils.via_tuple(strip_name, :led_strip, :strip)
+    |> GenServer.call({:change_config, global_config})
   end
 
   @doc """
@@ -269,10 +265,8 @@ defmodule Fledex.LedStrip do
   end
 
   def reinit(strip_name, drivers, strip_config) do
-    GenServer.call(
-      Utils.via_tuple(strip_name, :led_strip, :strip),
-      {:reinit, drivers, strip_config}
-    )
+    Utils.via_tuple(strip_name, :led_strip, :strip)
+    |> GenServer.call({:reinit, drivers, strip_config})
 
     :ok
   end
@@ -458,8 +452,9 @@ defmodule Fledex.LedStrip do
   @spec get_leds(map) :: list(list(Types.colorint()))
   def get_leds(namespaces) do
     Enum.reduce(namespaces, [], fn {_key, value}, acc ->
-      acc ++ [value]
+      [value | acc]
     end)
+    |> Enum.reverse()
   end
 
   @doc false
@@ -570,8 +565,8 @@ defmodule Fledex.LedStrip do
   defp extend(sequence, 0), do: sequence
 
   defp extend(sequence, extra) do
-    extra_length = Enum.reduce(1..extra, [], fn _index, acc -> acc ++ [0x000000] end)
-    sequence ++ extra_length
+    extra_length = Enum.reduce(1..extra, [], fn _index, acc -> [0x000000 | acc] end)
+    Enum.concat(sequence, extra_length)
   end
 
   @spec apply_merge_strategy(list(RGB.t()), atom) :: Types.rgb()

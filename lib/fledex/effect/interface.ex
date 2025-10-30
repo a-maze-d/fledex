@@ -82,14 +82,15 @@ defmodule Fledex.Effect.Interface do
   defmacro __using__(_opts) do
     quote do
       @behaviour Fledex.Effect.Interface
+      alias Fledex.Effect.Interface
 
-      @impl true
+      @impl Interface
       @spec enabled?(config :: keyword) :: boolean
       def enabled?(config) do
         Keyword.get(config, :enabled, true)
       end
 
-      @impl true
+      @impl Interface
       @spec apply(
               leds :: list(Types.colorint()),
               count :: non_neg_integer,

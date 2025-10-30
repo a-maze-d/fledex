@@ -125,7 +125,7 @@ defmodule Fledex.Supervisor.AnimationSystem do
   end
 
   # MARK: server side
-  @impl true
+  @impl Supervisor
   @doc false
   @spec init(keyword) ::
           {:ok, {Supervisor.sup_flags(), [Supervisor.child_spec() | :supervisor.child_spec()]}}

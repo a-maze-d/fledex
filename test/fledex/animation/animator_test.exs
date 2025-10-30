@@ -11,7 +11,7 @@ defmodule Fledex.Animation.TestEffect do
 end
 
 defmodule Fledex.Animation.AnimatorTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: false
 
   import ExUnit.CaptureLog
   require Logger

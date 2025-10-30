@@ -41,6 +41,8 @@ defmodule Fledex.Animation.ManagerTest do
       assert AnimationSystem.led_strip_exists?(strip_name)
 
       Manager.unregister_strip(strip_name)
+      # wait a bit
+      Process.sleep(500)
       assert not AnimationSystem.led_strip_exists?(strip_name)
 
       Manager.register_strip(strip_name, [{Null, []}], [])
@@ -302,7 +304,7 @@ defmodule Fledex.Animation.ManagerTest do
 end
 
 defmodule Fledex.Animation.ManagerTest2 do
-  use ExUnit.Case
+  use ExUnit.Case, async: false
 
   alias Fledex.Animation.Manager
   alias Fledex.Driver.Impl.Null

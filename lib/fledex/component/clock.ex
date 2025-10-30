@@ -2,12 +2,20 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 defmodule Fledex.Component.Clock do
+  @moduledoc """
+  This component creates a clock
+
+  > #### Note {: .warning}
+  >
+  > This component is still in a very rough state
+  """
   @behaviour Fledex.Component.Interface
 
   alias Fledex.Component.Dot
+  alias Fledex.Component.Interface
   alias Fledex.Component.Utils
 
-  @impl true
+  @impl Interface
   def configure(name, options) do
     trigger_name = Keyword.fetch!(options, :trigger_name)
     {trigger_hour, trigger_minute, trigger_second} = split_trigger(trigger_name)
@@ -38,7 +46,9 @@ defmodule Fledex.Component.Clock do
       )
 
       static Utils.create_name(name, :helper) do
-        leds(5) |> light(helper_color) |> repeat(12)
+        leds(5)
+        |> light(helper_color)
+        |> repeat(12)
       end
     end
   end

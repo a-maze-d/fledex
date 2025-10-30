@@ -84,10 +84,8 @@ defmodule Fledex.Animation.Coordinator do
   """
   @spec config(atom, atom, config_t) :: :ok
   def config(strip_name, coordinator_name, config) do
-    GenServer.cast(
-      Utils.via_tuple(strip_name, :coordinator, coordinator_name),
-      {:config, config}
-    )
+    Utils.via_tuple(strip_name, :coordinator, coordinator_name)
+    |> GenServer.cast({:config, config})
   end
 
   @doc """
@@ -95,10 +93,8 @@ defmodule Fledex.Animation.Coordinator do
   """
   @spec stop(atom, atom) :: :ok
   def stop(strip_name, coordinator_name) do
-    GenServer.stop(
-      Utils.via_tuple(strip_name, :coordinator, coordinator_name),
-      :normal
-    )
+    Utils.via_tuple(strip_name, :coordinator, coordinator_name)
+    |> GenServer.stop(:normal)
   end
 
   # MARK: server side

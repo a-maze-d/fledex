@@ -3,18 +3,23 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Driver.Impl.Kino do
+  @moduledoc """
+  This is a concrete driver to display the leds in a `Kino` environment, like
+  a [livebook](https://livebook.dev/).
+  """
   @behaviour Fledex.Driver.Interface
 
   require Logger
 
   alias Fledex.Color.Correction
   alias Fledex.Color.Types
+  alias Fledex.Driver.Interface
 
   @default_update_freq 1
   @base16 16
   @block <<"\u2588">>
 
-  @impl true
+  @impl Interface
   @spec configure(keyword) :: keyword
   def configure(config) do
     [
@@ -25,13 +30,14 @@ defmodule Fledex.Driver.Impl.Kino do
     ]
   end
 
-  @impl true
+  @impl Interface
   @spec init(keyword, map) :: keyword
   def init(config, global_config) do
     set_group_leader(global_config)
     configure(config)
   end
 
+  @spec set_group_leader(map) :: true
   defp set_group_leader(global_config) do
     # we need to ensure that we set the correct group leader, otherwise
     # the output will might go the wrong direction.
@@ -39,7 +45,7 @@ defmodule Fledex.Driver.Impl.Kino do
     Process.group_leader(self(), group_leader)
   end
 
-  @impl true
+  @impl Interface
   @spec reinit(keyword, keyword, map) :: keyword
   # def reinit(_old_config, new_config, _global_config), do: new_config
   def reinit(old_config, new_config, global_config) do
@@ -51,7 +57,7 @@ defmodule Fledex.Driver.Impl.Kino do
     )
   end
 
-  @impl true
+  @impl Interface
   @spec transfer(list(Types.colorint()), pos_integer, keyword) :: {keyword, any}
   def transfer(leds, counter, config) do
     if rem(counter, Keyword.fetch!(config, :update_freq)) == 0 and length(leds) > 0 do
@@ -59,7 +65,11 @@ defmodule Fledex.Driver.Impl.Kino do
         leds
         |> Correction.apply_rgb_correction(Keyword.fetch!(config, :color_correction))
         |> Enum.reduce(<<>>, fn value, acc ->
-          hex = value |> Integer.to_string(@base16) |> String.pad_leading(6, "0")
+          hex =
+            value
+            |> Integer.to_string(@base16)
+            |> String.pad_leading(6, "0")
+
           acc <> "<span style=\"color: ##{hex}\">" <> @block <> "</span>"
         end)
 
@@ -73,7 +83,7 @@ defmodule Fledex.Driver.Impl.Kino do
     {config, :ok}
   end
 
-  @impl true
+  @impl Interface
   @spec terminate(reason, keyword) :: :ok
         when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(_reason, _config) do

@@ -2,9 +2,19 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 defmodule Fledex.Component.PubSubPainter do
+  @moduledoc """
+  This components receives some color information through PubSub and
+  colors the leds accordingly.
+
+  > #### Note {: .warning}
+  >
+  > This component is not fully working and therefore shouldn't be used yet.
+  """
   @behaviour Fledex.Component.Interface
 
-  @impl true
+  alias Fledex.Component.Interface
+
+  @impl Interface
   def configure(name, options) do
     trigger_name = Keyword.get(options, :trigger_name, :pixel_data)
 

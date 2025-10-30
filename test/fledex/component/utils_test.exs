@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Component.UtilsTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   alias Fledex.Component.Utils
 
   test "create_name" do

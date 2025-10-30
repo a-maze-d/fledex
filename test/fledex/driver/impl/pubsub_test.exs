@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Driver.Impl.PubSubTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: false
 
+  # credo:disable-for-next-line
   alias Fledex.Driver.Impl.PubSub, as: Driver
   alias Fledex.Supervisor.Utils
   alias Fledex.Utils.PubSub

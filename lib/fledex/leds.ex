@@ -367,12 +367,11 @@ defmodule Fledex.Leds do
           pos_integer => Types.colorint()
         }
   defp remap_leds(leds, offset) do
-    Map.new(
-      Enum.map(leds, fn {key, value} ->
-        index = offset + key - 1
-        {index, value}
-      end)
-    )
+    Enum.map(leds, fn {key, value} ->
+      index = offset + key - 1
+      {index, value}
+    end)
+    |> Map.new()
   end
 
   @doc """
@@ -400,8 +399,9 @@ defmodule Fledex.Leds do
   def to_list(%__MODULE__{count: count, leds: _leds, opts: _opts, meta: _meta} = leds)
       when count > 0 do
     Enum.reduce(1..count, [], fn index, acc ->
-      acc ++ [get_light(leds, index)]
+      [get_light(leds, index) | acc]
     end)
+    |> Enum.reverse()
   end
 
   def to_list(_leds) do
@@ -486,12 +486,12 @@ defmodule Fledex.Leds do
     > `consolidate_protocols: false`
     """
     alias Fledex.Leds
+    alias Kino.Render
 
-    @doc delegate_to: {Kino.Reader, :to_livebook, 1}
-    @impl true
+    @impl Render
     @spec to_livebook(Fledex.Leds.t()) :: map
     def to_livebook(leds) do
-      md_kino = Kino.Markdown.new(Leds.to_markdown(leds))
+      md_kino = Leds.to_markdown(leds) |> Kino.Markdown.new()
       i_kino = Kino.Inspect.new(leds)
 
       kino =

@@ -16,12 +16,13 @@ defmodule Fledex.Driver.Impl.Logger do
 
   alias Fledex.Color.RGB
   alias Fledex.Color.Types
+  alias Fledex.Driver.Interface
 
   @default_update_freq 10
   @divisor 255 / 5
   @block <<"\u2588">>
 
-  @impl true
+  @impl Interface
   @spec configure(keyword) :: keyword
   def configure(config) do
     [
@@ -31,19 +32,19 @@ defmodule Fledex.Driver.Impl.Logger do
     ]
   end
 
-  @impl true
+  @impl Interface
   @spec init(keyword, map) :: keyword
   def init(config, _global_config) do
     configure(config)
   end
 
-  @impl true
+  @impl Interface
   @spec reinit(keyword, keyword, map) :: keyword
   def reinit(old_config, new_config, _global_config) do
     Keyword.merge(old_config, new_config)
   end
 
-  @impl true
+  @impl Interface
   @spec transfer(list(Types.colorint()), pos_integer, keyword) :: {keyword, any}
   def transfer(leds, _counter, config) when leds == [] do
     {config, :ok}
@@ -59,6 +60,7 @@ defmodule Fledex.Driver.Impl.Logger do
         end)
 
       if Keyword.fetch!(config, :terminal) do
+        # credo:disable-for-next-line
         IO.puts(output <> "\r")
       else
         Logger.info(output <> "\r")
@@ -83,7 +85,7 @@ defmodule Fledex.Driver.Impl.Logger do
     IO.ANSI.color(trunc(r / @divisor), trunc(g / @divisor), trunc(b / @divisor))
   end
 
-  @impl true
+  @impl Interface
   @spec terminate(reason, keyword) :: :ok
         when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(_reason, _config) do

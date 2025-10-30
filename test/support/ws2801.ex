@@ -18,7 +18,9 @@ defmodule Fledex.Test.CircuitsSim.Device.WS2801 do
   end
 
   defimpl CircuitsSim.SPI.SPIDevice do
-    @impl true
+    alias CircuitsSim.SPI.SPIDevice
+
+    @impl SPIDevice
     def transfer(state, data) do
       # The device is write only, so just return zeros.
       # result = :binary.copy(<<0>>, byte_size(data))
@@ -26,14 +28,14 @@ defmodule Fledex.Test.CircuitsSim.Device.WS2801 do
       {result, state}
     end
 
-    @impl true
+    @impl SPIDevice
     def render(_state) do
       [
         "leds: "
       ]
     end
 
-    @impl true
+    @impl SPIDevice
     def handle_message(state, _message) do
       {:unimplemented, state}
     end

@@ -107,10 +107,8 @@ defmodule Fledex.Animation.Animator do
   """
   @spec config(atom, atom, config_t) :: :ok
   def config(strip_name, animation_name, config) do
-    GenServer.cast(
-      Utils.via_tuple(strip_name, :animator, animation_name),
-      {:config, config}
-    )
+    Utils.via_tuple(strip_name, :animator, animation_name)
+    |> GenServer.cast({:config, config})
   end
 
   @doc """
@@ -123,10 +121,8 @@ defmodule Fledex.Animation.Animator do
   """
   @spec update_effect(atom, atom, :all | pos_integer, keyword) :: :ok
   def update_effect(strip_name, animation_name, what, config_update) do
-    GenServer.cast(
-      Utils.via_tuple(strip_name, :animator, animation_name),
-      {:update_effect, what, config_update}
-    )
+    Utils.via_tuple(strip_name, :animator, animation_name)
+    |> GenServer.cast({:update_effect, what, config_update})
   end
 
   @doc """
@@ -134,10 +130,8 @@ defmodule Fledex.Animation.Animator do
   """
   @spec stop(atom, atom) :: :ok
   def stop(strip_name, animation_name) do
-    GenServer.stop(
-      Utils.via_tuple(strip_name, :animator, animation_name),
-      :normal
-    )
+    Utils.via_tuple(strip_name, :animator, animation_name)
+    |> GenServer.stop(:normal)
   end
 
   ### MARK: server side

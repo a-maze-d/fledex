@@ -3,6 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Color.Names.Types do
+  @moduledoc """
+  This module defines a couple of types related to color names
+  """
   alias Fledex.Color.Types
 
   @typedoc """

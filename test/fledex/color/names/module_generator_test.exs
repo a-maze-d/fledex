@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Color.Names.ModuleGeneratorTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: false
 
   alias Fledex.Color
   alias Fledex.Color.Names.LoadUtils
@@ -14,7 +14,7 @@ defmodule Fledex.Color.Names.ModuleGeneratorTest do
 
   defmodule TestNames do
     use Fledex.Color.Names.ModuleGenerator,
-      filename: Wiki.file(),
+      filename: WikiUtils.file_name(),
       name_pattern: ~r/^[a].*$/i,
       drop: 1,
       splitter_opts: [separator: ",", split_opts: [parts: 11]],
@@ -54,7 +54,7 @@ defmodule Fledex.Color.Names.ModuleGeneratorTest do
     test "loading color file" do
       colors =
         LoadUtils.load_color_file(
-          Wiki.file(),
+          WikiUtils.file_name(),
           &WikiUtils.converter/1,
           module: __MODULE__,
           name_pattern: ~r/^.*$/i,
@@ -121,13 +121,22 @@ defmodule Fledex.Color.Names.ModuleGeneratorTest do
 
     test "Leds addition" do
       alias Fledex.Color.Names.Wiki
-      leds = Leds.leds(3) |> Wiki.red() |> Wiki.green() |> Wiki.blue()
+
+      leds =
+        Leds.leds(3)
+        |> Wiki.red()
+        |> Wiki.green()
+        |> Wiki.blue()
+
       assert Leds.get_light(leds, 1) == 0xFF0000
       assert Leds.get_light(leds, 2) == 0x00FF00
       assert Leds.get_light(leds, 3) == 0x0000FF
 
       leds =
-        Leds.leds(3) |> Wiki.blue(offset: 3) |> Wiki.green(offset: 2) |> Wiki.red(offset: 1)
+        Leds.leds(3)
+        |> Wiki.blue(offset: 3)
+        |> Wiki.green(offset: 2)
+        |> Wiki.red(offset: 1)
 
       assert Leds.get_light(leds, 1) == 0xFF0000
       assert Leds.get_light(leds, 2) == 0x00FF00

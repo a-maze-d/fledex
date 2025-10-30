@@ -2,8 +2,17 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 defmodule Fledex.Color.Names.WikiUtils do
+  @moduledoc false
   alias Fledex.Color.Names.LoadUtils
+  alias Fledex.Color.Names.Types
 
+  @doc false
+  @spec file_name() :: String.t()
+  def file_name do
+    Path.dirname(__DIR__) <> "/wiki/wiki_colors.csv"
+  end
+
+  @spec converter([integer | String.t()]) :: Types.color_struct_t()
   def converter([index, name, hex, r, g, b, h, s1, l1, s2, v2, source]) do
     %{
       index: index,

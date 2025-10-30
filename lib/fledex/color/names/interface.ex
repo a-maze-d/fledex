@@ -50,6 +50,7 @@ defmodule Fledex.Color.Names.Interface do
   """
 
   alias Fledex.Color.Names.Types
+  # credo:disable-for-next-line
   alias Fledex.Color.Types, as: ColorTypes
 
   @doc ~S"""

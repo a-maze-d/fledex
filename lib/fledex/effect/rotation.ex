@@ -3,11 +3,21 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Effect.Rotation do
+  @moduledoc """
+  This effect will apply a rotation to the leds
+  """
   use Fledex.Effect.Interface
 
   alias Fledex.Color.Types
   alias Fledex.Utils.PubSub
 
+  @spec do_apply(
+          [Fledex.Color.Types.colorint()],
+          non_neg_integer(),
+          config :: keyword(),
+          triggers :: map(),
+          context :: map()
+        ) :: {[Fledex.Color.Types.colorint()], non_neg_integer(), map()}
   def do_apply(leds, count, config, triggers, context) do
     left = Keyword.get(config, :direction, :left) != :right
     publish = Keyword.get(config, :publish, true)
@@ -39,6 +49,8 @@ defmodule Fledex.Effect.Rotation do
   # stretch the number of led_count to be the same as stretch
   # we ignore the stretching if a too small number is specified
   # (we don't support shrinking, i.e. negative stretching)
+  @spec stretch({[Fledex.Color.Types.colorint()], non_neg_integer()}, integer) ::
+          {[Fledex.Color.Types.colorint()], non_neg_integer()}
   def stretch({leds, led_count}, stretch)
       when stretch == led_count or
              stretch < led_count do

@@ -35,6 +35,7 @@ defmodule Fledex do
   on the version
   """
   @doc since: "0.5"
+  @spec version :: String.t()
   def version, do: Mix.Project.config()[:version]
 
   @doc """

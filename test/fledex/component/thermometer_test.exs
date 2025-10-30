@@ -3,5 +3,5 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Component.ThermometerTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 end

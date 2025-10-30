@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 defmodule Fledex.Utils.GuardsTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: false
 
   import Fledex.Utils.Guards
 

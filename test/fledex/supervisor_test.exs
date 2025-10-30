@@ -110,7 +110,8 @@ defmodule Fledex.SupervisorTest do
       assert LedStripSupervisor.get_animations(@test_strip) |> length() == 1
 
       Animator.stop(@test_strip, @test_anim)
-      Process.sleep(500) # wait for the eshutdown
+      # wait for the eshutdown
+      Process.sleep(500)
       assert AnimationSystem.get_led_strips() |> length() == 1
       assert LedStripSupervisor.get_animations(@test_strip) |> Enum.empty?()
 
