@@ -48,7 +48,8 @@ defmodule Fledex.Animation.CoordinatorTest do
       assert counter_2 == counter_1 + 1
 
       assert :ok = Coordinator.stop(:strip_name, :coordinator_name)
-      Process.sleep(500) # we need to wait for the shutdown
+      # we need to wait for the shutdown
+      Process.sleep(500)
       assert not LedStripSupervisor.coordinator_exists?(:strip_name, :coordinator_name)
     end
   end
