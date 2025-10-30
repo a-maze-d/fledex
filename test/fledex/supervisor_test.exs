@@ -117,6 +117,8 @@ defmodule Fledex.SupervisorTest do
 
       # cleanup
       AnimationSystem.stop_led_strip(@test_strip)
+      # we need to wait for shutdown
+      Process.sleep(500)
       assert AnimationSystem.get_led_strips() |> Enum.empty?()
     end
 
