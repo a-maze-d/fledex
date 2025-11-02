@@ -354,6 +354,8 @@ Currently the following color name modules exist:
 * `Fledex.Color.Names.SVG`
 * `Fledex.Color.Names.RAL`
 
+See the [full list of color names](colors.md)
+
 ### Examples
 
 <table>
