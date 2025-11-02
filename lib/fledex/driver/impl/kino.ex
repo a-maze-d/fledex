@@ -6,6 +6,12 @@ defmodule Fledex.Driver.Impl.Kino do
   @moduledoc """
   This is a concrete driver to display the leds in a `Kino` environment, like
   a [livebook](https://livebook.dev/).
+
+  ## Options
+  This driver accepts the following options:
+  * `:update_freq`: specifies how often the leds shoudl be updated (default: `1`, meaning that only every (`n`th) redraw is printed out)
+  * `:color_correction`: you can specify a color correction, see `Fledex.Color.Correction`
+  * `:frame`: a frame to which the leds will be written to, see [`Kino.Frame`](https://hexdocs.pm/kino/Kino.Frame.html).
   """
   @behaviour Fledex.Driver.Interface
 

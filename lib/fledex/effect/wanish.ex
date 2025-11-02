@@ -9,9 +9,7 @@ defmodule Fledex.Effect.Wanish do
   use Fledex.Effect.Interface
 
   # This function is a bit complicated. It calculates how many pixels should be switched off or not
-  # It starts with just getting the appropriate counter, rescaling it and circuling between to the number
-  # of leds. If we also want to reappear, it gets a bit complicated. The following table should help to
-  # understand the algorithm illustrating the case of 3 (=count) leds (* = led on, o = led off).
+  # It starts with just getting the appropriate counter, rescaling it and circling between the number of leds. If we also want to reappear, it gets a bit complicated. The following table should help to understand the algorithm, illustrating the case of 3 (=count) leds (* = led on, o = led off).
   # Note: The actual direction is not determined here.
   # counter | leds  | counter%count | offset        | direction
   # -------------------------------------------------------------
@@ -24,16 +22,18 @@ defmodule Fledex.Effect.Wanish do
   #   6     | ***   | 0             | 0 / count - 3 | -> / <-
   #   7     | o**   | 1             | 1             | ->
   # ...
-  # As can be seen we have two cycles. We can decide on when we indicate the change. We change it
-  # when our offset is 2 (because with an offset of 3 the direction doesn't matter but it's
-  # nice to be aligned with the modulo).
-  # We change back the direction when our offset is at 1 (here again, the direction doesn't matter
-  # in the next round, to align it to the modulo). This becomes a bit more complicated if we have
-  # a divisor, since the same state appears twice. Therefore we take the remainder of the divisor
-  # into consideration  defp do_apply(leds, _count, _config, nil, triggers, _context), do: {leds, triggers}
+  #
+  # As can be seen we have two cycles. We can decide on when we indicate the change.
+  # We change it when our offset is 2 (because with an offset of 3 the direction doesn't
+  # matter but it's nice to be aligned with the modulo).
+  # We change back the direction when our offset is at 1 (here again, the direction doesn't
+  # matter in the next round, to align it to the modulo). This becomes a bit more
+  # complicated if we have a divisor, since the same state appears twice. Therefore we take
+  # the remainder of the divisor into consideration
+  @doc false
   @spec do_apply(
           [Fledex.Color.Types.colorint()],
-          non_neg_integer(),
+          count :: non_neg_integer(),
           config :: keyword(),
           triggers :: map(),
           context :: map()

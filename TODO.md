@@ -13,15 +13,16 @@ Even though this library is published, there are things I still want to do befor
   - [x] Improve API documentation (v0.7)
   - [x] Update the documentation with new color name information (v0.7)
   - [x] Create a new color page, since the colors will not be available through `Fledex.Color.Names` directly (v0.7)
-  - [ ] Document the driver options (v0.7)
+  - [x] Document the driver options (v0.7)
+  - [x] Update the cheatsheet with coordinator info (v0.7)
   - [ ] Add a livebook with coordinator examples (v0.7)
-  - [ ] Update the cheatsheet with coordinator info (v0.7)
   - [ ] Update documentation with the Supervision tree (v0.7)
   - [ ] hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.8)
 - [ ] Testing
   - [x] Test all the livebooks (v0.7)
   - [x] Restructure the tests, so they are not so fragile (due to `Fledex.Config`) (v0.7) <-- this does not seem to be an issue anymore.
-  - [x] Test with Elixir 1.19
+  - [x] Test with Elixir 1.19 (v0.7)
+  - [x] Increase the credo checks (enable all reasonable ones) (v0.7)
   - [ ] Add tests for the Clock component (v0.8)
   - [ ] Add tests for the Thermometer components (v0.8)
 - [ ] Cleanup
@@ -35,16 +36,16 @@ Even though this library is published, there are things I still want to do befor
   - [x] Introduce a `Fledex.Color.RGB` and reduce the reliance on `{r, g, b}` tuples
   - [x] Remove `Fledex.Color.to_rgb/1`
   - [x] Avoid the `RGB.new(color) |> RGB.to_tuple()` constructs, by changing the various functions to take RGB structures. The RGB-tuple should only be used by clients but not internally.
-  - [ ] Rethink whether we really want to create a `Fledex.Config.Data` module or we shoudl store the information in a GenServer. The issue with the GenServer is that we need to start a server. But maybe that's not soo bad.
+  - [ ] Rethink whether we really want to create a `Fledex.Config.Data` module or we should store the information in a GenServer. The issue with the GenServer is that we need to start a server. But maybe that's not soo bad.
 - [ ] Missing functionality
   - [x] Allow selecting the color modules that can be loaded instead of loading always the same list by default. (v0.7)
   - [x] We have the `Fledex.Color` protocol, but we actually don't make use of its type. This is maybe also a good opportunity to rethink on how we handle colors in general. Maybe we should define everything as `Fledex.Color` and encapsulate CSS, SVG, RAL colors in their own struct to then have the protocol implemented for them. (v0.7)
   - [x] Allow color modules to not carry more information than just a pre-defined set (v0.7)
   - [x] convert the rgb to other color spaces (in the various color name modules). Considering the previous point we might not need to do this, because it should now be optional (v0.7) <-- reduced the generated color functions, and what gets exposed
-  - [ ] we start things through the Supervisor, but we don't shut things down through it (v0.8)
+  - [x] we start things through the Supervisor, but we don't shut things down through it (v0.7)
+  - [ ] Put some more effort into the coordinator to make it work well (v0.7)
   - [ ] The Job should (at least appear) to be connected to the LedStrip (v0.8)
   - [ ] Lower than sec precision is not possible with Quantum. Replace it with a different library (maybe SchedEx? https://hexdocs.pm/sched_ex/readme.html) (v0.8)
-  - [ ] Put some more effort into the coordinator to make it work well (v0.7)
   - [ ] Enable Telemetry? (v0.8)
   - [ ] Add support for WS2811/12/13/14/15 LED strips controlled through phase modulation. (v0.8)
   - [ ] Clustering (v0.8)

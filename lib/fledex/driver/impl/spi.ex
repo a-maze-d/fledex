@@ -8,6 +8,17 @@ defmodule Fledex.Driver.Impl.Spi do
 
   The protocol used is the one as expected by an WS2801 chip. See the
   [hardware](docs/hardware.md) documentation for more information on to wire it.
+
+  ## Options
+  This driver accepts the following options (most of them are very SPI specific and the defaults are probably good enough):
+  * `:dev`: SPI device name (default "spidev0.0", see [`Circuits.SPI.spi_option/0`](https://hexdocs.pm/circuits_spi/Circuits.SPI.html#t:spi_option/0) for details).
+  * `:mode`: set clock polarity and phase (default: mode `0`, see [`Circuits.SPI.spi_option/0`](https://hexdocs.pm/circuits_spi/Circuits.SPI.html#t:spi_option/0) for details),
+  * `:bits_per_word`: set the bits per word on the bus (default: `8`, see [`Circuits.SPI.spi_option/0`](https://hexdocs.pm/circuits_spi/Circuits.SPI.html#t:spi_option/0) for details).
+  * `:speed_hz`: set the bus speed (default: `1_000_000`, see [`Circuits.SPI.spi_option/0`](https://hexdocs.pm/circuits_spi/Circuits.SPI.html#t:spi_option/0) for details).
+  * `:delay_us`: set the delay between transactions (default: `10`, see [`Circuits.SPI.spi_option/0`](https://hexdocs.pm/circuits_spi/Circuits.SPI.html#t:spi_option/0) for details).
+  * `:lsb_first`: sets whether the least significant bit is first (default: `false`, see [`Circuits.SPI.spi_option/0`](https://hexdocs.pm/circuits_spi/Circuits.SPI.html#t:spi_option/0) for details).
+  * `:color_correction`: specifies the color correction (see `Fledex.Color.Correction` for details)
+  * `:clear_leds`: Sets the number of leds that should be cleared during startup (default: `0`)
   """
   @behaviour Fledex.Driver.Interface
 
@@ -50,21 +61,6 @@ defmodule Fledex.Driver.Impl.Spi do
     Keyword.put(config, :ref, open_spi(config))
   end
 
-  @spec open_spi(keyword) :: reference
-  def open_spi(config) do
-    {:ok, ref} =
-      Circuits.SPI.open(
-        Keyword.fetch!(config, :dev),
-        mode: Keyword.fetch!(config, :mode),
-        bits_per_word: Keyword.fetch!(config, :bits_per_word),
-        speed_hz: Keyword.fetch!(config, :speed_hz),
-        delay_us: Keyword.fetch!(config, :delay_us),
-        lsb_first: Keyword.fetch!(config, :lsb_first)
-      )
-
-    ref
-  end
-
   @impl Interface
   @spec transfer(list(Types.colorint()), pos_integer, keyword) :: {keyword, any}
   def transfer(leds, _counter, config) do
@@ -87,6 +83,8 @@ defmodule Fledex.Driver.Impl.Spi do
     Circuits.SPI.close(Keyword.fetch!(config, :ref))
   end
 
+  # MARK: utility functions
+  @doc false
   @spec clear_leds(
           count :: non_neg_integer | {count :: non_neg_integer, color :: non_neg_integer},
           config :: keyword,
@@ -109,4 +107,19 @@ defmodule Fledex.Driver.Impl.Spi do
   end
 
   def clear_leds({0, _color} = _clear_leds, config, _clear_func), do: config
+
+  @spec open_spi(keyword) :: reference
+  defp open_spi(config) do
+    {:ok, ref} =
+      Circuits.SPI.open(
+        Keyword.fetch!(config, :dev),
+        mode: Keyword.fetch!(config, :mode),
+        bits_per_word: Keyword.fetch!(config, :bits_per_word),
+        speed_hz: Keyword.fetch!(config, :speed_hz),
+        delay_us: Keyword.fetch!(config, :delay_us),
+        lsb_first: Keyword.fetch!(config, :lsb_first)
+      )
+
+    ref
+  end
 end

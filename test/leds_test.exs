@@ -476,7 +476,7 @@ defmodule Fledex.LedsTestSync do
         [
           {
             Fledex.Driver.Impl.Logger,
-            [terminal: false, log_color_code: true, update_freq: 1]
+            [terminal: false, color: true, update_freq: 1]
           }
         ],
         []

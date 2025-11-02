@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 
 ```elixir
 Mix.install([
-  {:fledex, "~>0.6"}
+  {:fledex, path: "/home/maze/Documents/code/fledex"}
 ])
 ```
 
@@ -38,6 +38,88 @@ led_strip :john, Kino do
 end
 ```
 
-```elixir
+But getting things working well is not that simple. But before we go into the details, let's take a step back.
 
+## The use case
+
+Let's look at a usecase where a coordinator would be useful. Let's look at a simple animation. A rainbow pattern that rotates from left to right:
+
+```elixir
+led_strip :example, Kino do
+  effect Fledex.Effect.Rotation, trigger_name: :example, stretch: 40, direction: :right do
+    animation :rainbow do
+      leds(10) |> rainbow()
+    end
+  end
+end
+```
+
+We can have a second animation that does the same thing with a gradient, but moving into the other direction.
+
+```elixir
+led_strip :example2, Kino do
+  effect Fledex.Effect.Rotation, trigger_name: :example, stretch: 40, direction: :left do
+    animation :gradient do
+      leds(10) |> gradient(:red, :blue)
+    end
+  end
+end
+```
+
+But how do we implement for example that we want to have those two animation on the LED strip, but we want to change between them every 10sec?
+
+A naive approach might look like the following:
+
+```elixir
+require Integer
+led_strip :example3, Kino do
+  effect Fledex.Effect.Rotation, trigger_name: :example, stretch: 40, direction: :right do
+    animation :rainbow do
+     %{swap: %{second: second}} when Integer.is_odd(trunc(second/2)) ->
+      leds(10) |> rainbow()
+      _ -> leds(10)
+    end
+  end
+  effect Fledex.Effect.Rotation, trigger_name: :example, stretch: 40, direction: :left do
+    animation :gradient do
+     %{swap: %{second: second}} when Integer.is_even(trunc(second/2)) ->
+        leds(10) |> gradient(:red, :blue)
+      _ -> leds(10)
+    end
+  end
+  job :change, ~e[*/2 * * * * * *]e do
+    broadcast_trigger(%{swap: Time.utc_now()})
+  end
+end
+```
+
+Even though this approach works, it's not ideal. the transitions are not smooth, we need to add the "switching" code into our animation - even though that's not really what we want, and we have to "guess" how much time it takes from left to right.
+
+Let's see what happens if we add a `coordinator` that just looks at the events that reach it. Let's start doing this first for a single animation. We need to provide a function that takes 3 arguments:
+
+* `state`: The state of the animation. This is very much dependent on the `context`
+* `context`: Information where the event is coming from. Whoever triggered it determines what the `state` really means.
+* `options`: some options that we configured the coordinator with and/or some settings that we retain betwene calls. Here we add a simple counter that increments between every call.
+
+> ##### Note
+> 
+> You might have realized that we filter the context for our animation name and don't do anything
+>  with those events coming from other led strips. This is because coordinators (even thoough they
+>  are specific to a certain led strip) are getting events globaly. For now, we surely do not want
+> to see the events form the led strips we have defined above.
+
+```elixir
+led_strip :example4, Kino do
+  effect Fledex.Effect.Rotation, trigger_name: :example, stretch: 40, direction: :right do
+    animation :rainbow do
+      leds(10) |> rainbow()
+    end
+  end
+  coordinator :coord, [] do
+      state, %{strip_name: :example4} = context, options -> 
+        IO.puts(inspect {state, context, options})
+        Keyword.update(options, :counter, 0, fn old -> old + 1 end)
+      _x, _y, options -> options 
+  end
+end
 ```

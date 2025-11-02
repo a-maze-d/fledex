@@ -1,15 +1,18 @@
-# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Effect.Offset do
   @moduledoc """
-  An effect that will offset the colors
+  An effect that will offset the colors.
+
+  This is a static version. If you want to have a more dynamic version, then take a look at `Fledex.Effect.Rotation`.
   """
   use Fledex.Effect.Interface
 
   alias Fledex.Color.Types
 
+  @doc false
   @spec do_apply(
           [Types.colorint()],
           non_neg_integer(),

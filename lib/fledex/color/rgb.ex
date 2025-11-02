@@ -17,6 +17,20 @@ defmodule Fledex.Color.RGB do
   defstruct r: 0, g: 0, b: 0
   @type t :: %__MODULE__{r: 0..255, g: 0..255, b: 0..255}
 
+  defimpl Fledex.Color do
+    alias Fledex.Color.RGB
+
+    @max_value 255
+
+    @doc """
+    Merges the rgb colors together to a single integer
+    """
+    @spec to_colorint(RGB.t()) :: Types.colorint()
+    def to_colorint(%RGB{r: r, g: g, b: b} = _rgb) do
+      (min(r, @max_value) <<< 16) + (min(g, @max_value) <<< 8) + min(b, @max_value)
+    end
+  end
+
   @doc """
   creates a new RGB structure from any kind of color structure
   """
@@ -57,18 +71,5 @@ defmodule Fledex.Color.RGB do
   def to_tuple(color) do
     Color.to_colorint(color)
     |> to_tuple()
-  end
-
-  defimpl Fledex.Color do
-    alias Fledex.Color.RGB
-
-    @max_value 255
-    @doc """
-    Merges the rgb colors together to a single integer
-    """
-    @spec to_colorint(RGB.t()) :: Types.colorint()
-    def to_colorint(%RGB{r: r, g: g, b: b} = _rgb) do
-      (min(r, @max_value) <<< 16) + (min(g, @max_value) <<< 8) + min(b, @max_value)
-    end
   end
 end

@@ -233,7 +233,7 @@ defmodule Fledex.LedStripTest do
   describe "e2e tests" do
     test "e2e flow" do
       drivers = [
-        {Logger, update_freq: 1, log_color_code: false}
+        {Logger, update_freq: 1, color: false}
       ]
 
       global_config = [
