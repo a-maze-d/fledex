@@ -32,13 +32,12 @@ defmodule Fledex.Effect.Rotation do
   lets rotate to the right, we then have the
   following interesting points:
 
-  * we start with the rotation left aligned (as shown above)
-  * we move slowly to the right
-  * we touch with the right side of the leds at the right side of the stretched part
-  * we are in the run-out, i.e. leds are moving "out" of the stretched part
-  * the last led has reached the right side of the stretched part (no more rotation is visible, except if we wrap around)
+  * we start with the rotation left aligned (as shown above) (`:start`)
+  * we move slowly to the right. crossing through the mid-point (`:middle`)
+  * we touch with the right side of the leds at the right side of the stretched part (`:touch`). We are in the run-out, i.e. leds are moving "out" of the stretched part
+  * the last led has reached the right side of the stretched part (no more rotation is visible). The next step will correspond to the first one where we started. (`:end`)
 
-  Don't forget that the effect is a rotation, so leds that "drop out on the right will reappear on the left.
+  Don't forget that the effect is a rotation, so leds that "drop out on the right will reappear on the left. You might be wondering on what happens if you don't stretch your animation. The same events will be published, but
 
   """
   use Fledex.Effect.Interface

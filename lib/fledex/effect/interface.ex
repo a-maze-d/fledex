@@ -18,25 +18,21 @@ defmodule Fledex.Effect.Interface do
   alias Fledex.Color.Types
 
   @typedoc """
-  Typical states of an effect that should be published
+  Typical states of an effect or an animation that should be published
+
+  An animation or effect can publish state events that a `Fledex.Animation.Coordinator (or anyone who listens to them) can react to. Any atom can be used as an event and animations and effects can create their own, but this list are the most common and re-occuring ones.
+  If possible try to use them.
+
+  * `:start`: effect will start with the next iteration (and will move into the :progress state).
+  * `:middle`: offen an effect consists of 2 phases (back and forth, wanish and reappear, ...). This event indicates the mid-point.
+  * `:end`:  effect has reached it's final state. IF the effect cycles in rounds, the the next step will restart the effect.
+  * `:disabled`: the effect or animation has been disabled
 
   > #### Note {: .info}
   >
   > This is not used yet and still very much in flux
-
-  An effect can be in different states
-  * `:static`: effect is a static effect (and hence can not be used in a sequencer)
-  * `:start`: effect will start with the next iteration (and will move into the :progress state).
-      An effect can skip this state and go directly into the :progress state
-  * `:progress`: effect is in progress (and will either go into the :stop_start or :stop state)
-  * `:stop_start`:  effect is done with one round and will start the next round. THe next state
-      can either be :start or :progress
-  * `:stop`: effect is done with it's effect and will stop
-  * `:disabled`: effect is currently disabled (by enabling it goes into the :start state)
-
-  This information can be used by some effect sequencer that plays one effect after the next.
   """
-  @type effect_state_t :: :static | :start | :progress | :stop_start | :stop | :disabled
+  @type effect_state_t :: :start | :middle| :end | :disabled
 
   @doc """
   Applies an effect to the list of LEDs.
@@ -55,17 +51,20 @@ defmodule Fledex.Effect.Interface do
   The function returns
 
   * a list of LEDs (color integers),
-  * the new count of the list,
-  * and a (potentially modified) `triggers` map. This allows to retain some state between applying
-  the filter in consecutive calls.
+  * the new count of the list (usually it's the same, but does not need to be)
+  * and a (potentially modified) `triggers` map. This allows to retain some state between applying the filter in consecutive calls.
 
-  The most simplest filter is the one that simply returns the passed in parameters:
+  The most simplest effect is the one that simply returns the passed in parameters:
 
   ```elixir
   def apply(leds, count, _config, trigggers, _context) do
     {leds, count, triggers}
   end
   ```
+
+  You probably do not want to implement this function, which has a default
+  implementation, but the `do_apply/5` version (which takes the same arguments).
+  This way you don't need to explicitly handle the case that the effect is disabled.
   """
   @callback apply(
               leds :: [Types.colorint()],

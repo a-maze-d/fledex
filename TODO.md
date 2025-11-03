@@ -24,7 +24,7 @@ Even though this library is published, there are things I still want to do befor
   - [x] Test with Elixir 1.19 (v0.7)
   - [x] Increase the credo checks (enable all reasonable ones) (v0.7)
   - [ ] Add tests for the Clock component (v0.8)
-  - [ ] Add tests for the Thermometer components (v0.8)
+  - [ ] Add tests for the Thermometer component (v0.8)
 - [ ] Cleanup
   - [x] Cleanup the color conversion functions. There are a lot of unused parts, providing flexibility that is not required.
   - [x] Add more guards to functions to make them more robust (v0.7)

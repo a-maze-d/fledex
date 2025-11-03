@@ -61,6 +61,10 @@ BIG documentation improvement and cleanups including (also through other commits
 * Minor improvements to the livebooks for the school (German). This is still WIP
 * Added information about color correction to the 3b livebook
 * Added API documentation for the conversion functions
+* Updated the cheatsheet with coordinator information
+* worked on the coordinator livebook (WIP)
+* Documented the effect options
+* Documented the driver options
 
 ## Improved Supervision tree (#84)
 The supervision tree has been improved. 
@@ -72,6 +76,7 @@ The supervision tree has been improved.
 * Fixed a documentation bug. The hue value in HSV is a byte representing 360 degrees.
 * Fixed a bug in the `Fledex.Supervisor.AnimationSystem` that prevented options to be passed correctly to the Manager. This only became apparent with 2 or more options.
 * Fixed a bug in `LoadUtils.a2b/1` The value wasn't truncated to an integer
+* Fixed a bug that the `Fledex.Color` protocol for `Fledex.Color.RGB didn't work in the livebook. Repositioning it solved the issue. Not sure why.
 
 ### Cleanup
 * Renamed some modules to make their purpose more clear
