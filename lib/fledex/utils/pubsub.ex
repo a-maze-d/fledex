@@ -25,8 +25,6 @@ defmodule Fledex.Utils.PubSub do
   defdelegate direct_broadcast!(node, pubsub \\ Utils.pubsub_name(), topic, message),
     to: Phoenix.PubSub
 
-  # @spec app() :: atom
-  # def app, do: @app
   @spec channel_trigger() :: String.t()
   def channel_trigger, do: @channel_trigger
   @spec channel_state() :: String.t()

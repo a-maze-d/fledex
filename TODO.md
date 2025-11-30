@@ -16,7 +16,7 @@ Even though this library is published, there are things I still want to do befor
   - [x] Document the driver options (v0.7)
   - [x] Update the cheatsheet with coordinator info (v0.7)
   - [ ] Add a livebook with coordinator examples (v0.7)
-  - [ ] Update documentation with the Supervision tree (v0.7)
+  - [ ] Update documentation with the Supervision tree (v0.8)
   - [ ] hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.8)
 - [ ] Testing
   - [x] Test all the livebooks (v0.7)
@@ -36,7 +36,8 @@ Even though this library is published, there are things I still want to do befor
   - [x] Introduce a `Fledex.Color.RGB` and reduce the reliance on `{r, g, b}` tuples
   - [x] Remove `Fledex.Color.to_rgb/1`
   - [x] Avoid the `RGB.new(color) |> RGB.to_tuple()` constructs, by changing the various functions to take RGB structures. The RGB-tuple should only be used by clients but not internally.
-  - [ ] Rethink whether we really want to create a `Fledex.Config.Data` module or we should store the information in a GenServer. The issue with the GenServer is that we need to start a server. But maybe that's not soo bad.
+  - [ ] Rename `docs` to `pages`. Some people find it confusing to have a `docs` and a `doc` (created by `ex_doc`) (v0.7)
+  - [ ] Rethink whether we really want to create a `Fledex.Config.Data` module or we should store the information in a GenServer. The issue with the GenServer is that we need to start a server. But maybe that's not soo bad. (v0.9)
 - [ ] Missing functionality
   - [x] Allow selecting the color modules that can be loaded instead of loading always the same list by default. (v0.7)
   - [x] We have the `Fledex.Color` protocol, but we actually don't make use of its type. This is maybe also a good opportunity to rethink on how we handle colors in general. Maybe we should define everything as `Fledex.Color` and encapsulate CSS, SVG, RAL colors in their own struct to then have the protocol implemented for them. (v0.7)
@@ -44,10 +45,14 @@ Even though this library is published, there are things I still want to do befor
   - [x] convert the rgb to other color spaces (in the various color name modules). Considering the previous point we might not need to do this, because it should now be optional (v0.7) <-- reduced the generated color functions, and what gets exposed
   - [x] we start things through the Supervisor, but we don't shut things down through it (v0.7)
   - [ ] Put some more effort into the coordinator to make it work well (v0.7)
-  - [ ] The Job should (at least appear) to be connected to the LedStrip (v0.8)
-  - [ ] Lower than sec precision is not possible with Quantum. Replace it with a different library (maybe SchedEx? https://hexdocs.pm/sched_ex/readme.html) (v0.8)
+  - [ ] Rework the `:job` implementation (v0.8):
+    - [ ] The Job should (at least appear) to be connected to the LedStrip
+    - [ ] Replace it with a different library (maybe `SchedEx`? https://hexdocs.pm/sched_ex/readme.html) (v0.8)
+      - [x] Investigate various libraries and how they fit into Fledex. I looked at various different libraries (`erlcron`, `sched_ex`, `exq_scheduler`, `ecron`, ...), but none really fulfils the needs :-( `SchedEx` is the one that is simple and comes closest. Therefore the plan is to take it (it's MIT license), modify it, and integrate it into Fledex
+      - [ ] It's not possible to inject a context to the job, because you either have to provide an `{M, F, [Args]}` or a `(-> any())` function. The former is not possible, since we don't have amodule (but just an anonymous function) and the latter is not possible, because we can't pass in any argument :-(. We would need to extend Quantum to accept an {F, [Args]}
   - [ ] Enable Telemetry? (v0.8)
   - [ ] Add support for WS2811/12/13/14/15 LED strips controlled through phase modulation. (v0.8)
+  - [ ] Add Perlin noise functions (see: https://hackaday.com/2019/12/28/led-flame-illuminates-the-beauty-of-noise/, https://hexdocs.pm/perlin/Perlin.html)
   - [ ] Clustering (v0.8)
     - [ ] Rethink the clusering and check whether the new livebook API endpoints might make it easier to cluster. Currently it seems to be quite complicated.
     - [ ] Provide examples on how to cluster

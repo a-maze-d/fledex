@@ -68,7 +68,7 @@ defmodule Fledex.MixProject do
   def application do
     [
       extra_applications:
-        [:logger, :wx, :observer, :runtime_tools] ++ extra_applications(Mix.env()),
+        [:logger, :wx, :observer, :runtime_tools, :tzdata] ++ extra_applications(Mix.env()),
       mod: {Fledex.Application, []}
     ]
   end
@@ -101,6 +101,8 @@ defmodule Fledex.MixProject do
       {:kino, "~> 0.11"},
       {:phoenix_pubsub, "~> 2.1"},
       {:libcluster, "~> 3.3"},
+      {:tzdata, "~> 1.1", optional: true},
+      # deprecated
       {:quantum, "~> 3.0"},
 
       # observability

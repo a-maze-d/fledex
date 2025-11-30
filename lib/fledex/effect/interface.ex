@@ -20,7 +20,7 @@ defmodule Fledex.Effect.Interface do
   @typedoc """
   Typical states of an effect or an animation that should be published
 
-  An animation or effect can publish state events that a `Fledex.Animation.Coordinator (or anyone who listens to them) can react to. Any atom can be used as an event and animations and effects can create their own, but this list are the most common and re-occuring ones.
+  An animation or effect can publish state events that a `Fledex.Animation.Coordinator` (or anyone who listens to them) can react to. Any atom can be used as an event and animations and effects can create their own, but this list are the most common and re-occuring ones.
   If possible try to use them.
 
   * `:start`: effect will start with the next iteration (and will move into the :progress state).
@@ -32,7 +32,7 @@ defmodule Fledex.Effect.Interface do
   >
   > This is not used yet and still very much in flux
   """
-  @type effect_state_t :: :start | :middle| :end | :disabled
+  @type effect_state_t :: :start | :middle | :end | :disabled
 
   @doc """
   Applies an effect to the list of LEDs.

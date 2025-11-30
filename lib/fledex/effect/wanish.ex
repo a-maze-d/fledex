@@ -8,8 +8,11 @@ defmodule Fledex.Effect.Wanish do
   """
   use Fledex.Effect.Interface
 
-  # This function is a bit complicated. It calculates how many pixels should be switched off or not
-  # It starts with just getting the appropriate counter, rescaling it and circling between the number of leds. If we also want to reappear, it gets a bit complicated. The following table should help to understand the algorithm, illustrating the case of 3 (=count) leds (* = led on, o = led off).
+  # This function is a bit complicated. It calculates how many pixels should be switched
+  # off or not. It starts with just getting the appropriate counter, rescaling it and
+  # circling between the number of leds. If we also want to reappear, it gets a bit
+  # complicated. The following table should help to understand the algorithm, illustrating
+  # the case of 3 (=count) leds (* = led on, o = led off).
   # Note: The actual direction is not determined here.
   # counter | leds  | counter%count | offset        | direction
   # -------------------------------------------------------------

@@ -5,6 +5,7 @@
 import Config
 
 config :logger, level: :info
+config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
 config :fledex, Fledex.Animation.JobScheduler, debug_logging: false
 
 config :circuits_sim,
