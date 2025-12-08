@@ -52,7 +52,8 @@ Even though this library is published, there are things I still want to do befor
       - [ ] It's not possible to inject a context to the job, because you either have to provide an `{M, F, [Args]}` or a `(-> any())` function. The former is not possible, since we don't have amodule (but just an anonymous function) and the latter is not possible, because we can't pass in any argument :-(. We would need to extend Quantum to accept an {F, [Args]}
   - [ ] Enable Telemetry? (v0.8)
   - [ ] Add support for WS2811/12/13/14/15 LED strips controlled through phase modulation. (v0.8)
-  - [ ] Add Perlin noise functions (see: https://hackaday.com/2019/12/28/led-flame-illuminates-the-beauty-of-noise/, https://hexdocs.pm/perlin/Perlin.html)
+  - [ ] Get it working on AtomVM (v0.9)
+  - [ ] Add Perlin noise functions (see: https://hackaday.com/2019/12/28/led-flame-illuminates-the-beauty-of-noise/, https://hexdocs.pm/perlin/Perlin.html) (v0.9)
   - [ ] Clustering (v0.8)
     - [ ] Rethink the clusering and check whether the new livebook API endpoints might make it easier to cluster. Currently it seems to be quite complicated.
     - [ ] Provide examples on how to cluster

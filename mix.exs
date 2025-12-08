@@ -215,6 +215,7 @@ defmodule Fledex.MixProject do
         "Details: Animation": ~r/Fledex.Animation/,
         "Details: Color": ~r/Fledex.Color/,
         "Details: Driver": ~r/Fledex.Driver/,
+        "Details: Scheduler": ~r/Fledex.Scheduler/,
         "Details: Supervisor": [~r/Fledex.Supervisor/, Fledex.Application],
         "Details: Utils": ~r/Fledex.Utils/
       ],
