@@ -14,6 +14,7 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
   alias Fledex.Animation.Animator
   alias Fledex.Animation.Coordinator
   alias Fledex.LedStrip
+  alias Fledex.Scheduler.SchedEx.Runner
   alias Fledex.Supervisor.Utils
 
   # MARK: client side
@@ -76,6 +77,45 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
   def stop_animation(strip_name, animation_name) do
     Utils.workers_name(strip_name)
     |> Utils.stop_worker(strip_name, :animator, animation_name)
+  end
+
+  @doc """
+  This starts a new job.
+
+  This allows to run some task at a well defined time or interval
+  """
+  @spec start_job(atom, atom, Job.config_t()) ::
+  DynamicSupervisor.on_start_child()
+  def start_job(strip_name, job_name, config) do
+    Utils.start_worker(strip_name, job_name, Runner, config)
+    # |> dbg()
+  end
+
+  @doc """
+  This checks whether a specified job exists
+  """
+  @spec job_exists?(atom, atom) :: boolean
+  def job_exists?(strip_name, coordinator_name) do
+    Utils.worker_exists?(strip_name, :job, coordinator_name)
+  end
+
+  @doc """
+  This returns a list of all the defined jobs
+  """
+  @spec get_jobs(atom) :: list(atom)
+  def get_jobs(strip_name) do
+    Utils.get_workers(strip_name, :job, :"$1")
+  end
+
+  @doc """
+  This stops a coordinator.
+
+  It is safe to call this function even if the job does not exist
+  """
+  @spec stop_job(atom, atom) :: :ok
+  def stop_job(strip_name, coordinator_name) do
+    Utils.workers_name(strip_name)
+    |> Utils.stop_worker(strip_name, :job, coordinator_name)
   end
 
   @doc """

@@ -68,7 +68,7 @@ defmodule Fledex.MixProject do
   def application do
     [
       extra_applications:
-        [:logger, :wx, :observer, :runtime_tools, :tzdata] ++ extra_applications(Mix.env()),
+        [:logger, :wx, :observer, :runtime_tools] ++ extra_applications(Mix.env()),
       mod: {Fledex.Application, []}
     ]
   end

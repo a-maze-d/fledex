@@ -12,6 +12,7 @@ defmodule Fledex.ManagerTestUtils do
   def get_manager_config(what, strip) do
     pid = GenServer.whereis(Manager)
     config = :sys.get_state(pid)
+    # IO.puts("get-manager_config: #{inspect {what, config}}")
 
     case what do
       :all ->

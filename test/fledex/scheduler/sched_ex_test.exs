@@ -155,7 +155,7 @@ defmodule Fledex.Scheduler.SchedExTest do
 
     @name :unit_check
     test "check delay with implicit milliseconds" do
-      job = Job.new(@name, fn -> :ok end, 1_000, %{}, [])
+      job = Job.new(@name, fn -> :ok end, 1_000, %{}, [repeat: true])
 
       SchedEx.run_job(job, name: @name)
       {_sched, _quant_sched, delay} = Runner.next_schedule(job)
@@ -171,7 +171,7 @@ defmodule Fledex.Scheduler.SchedExTest do
     end
 
     test "check bigger delays are correct (sec)" do
-      job = Job.new(@name, fn -> :ok end, {1, :sec}, %{}, [])
+      job = Job.new(@name, fn -> :ok end, {1, :sec}, %{}, [repeat: true])
 
       SchedEx.run_job(job, name: @name)
       {_sched, _quant_sched, delay} = Runner.next_schedule(job)
@@ -687,7 +687,7 @@ defmodule Fledex.Scheduler.SchedExTest do
         |> Job.set_repeat(true)
         |> Job.set_timezone("Etc/UTC")
 
-      {:ok, pid} = SchedEx.run_job(job, time_scale: TestTimeScale)
+      {:ok, _pid} = SchedEx.run_job(job, time_scale: TestTimeScale)
       Process.sleep(@sleep_duration_plus_margin)
 
       now = DateTime.utc_now()
@@ -703,10 +703,7 @@ defmodule Fledex.Scheduler.SchedExTest do
         |> Job.set_task(fn -> TestCallee.append(context.agent, 2) end)
         |> Job.set_schedule(crontab)
 
-      SchedEx.update_job(job2, time_scale: TestTimeScale)
-      Process.sleep(100)
-
-      refute Process.alive?(pid)
+      assert :shutdown == SchedEx.update_job(job2, time_scale: TestTimeScale)
     end
   end
 

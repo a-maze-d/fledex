@@ -68,6 +68,8 @@ defmodule Fledex.Scheduler.SchedEx do
     {job_opts, opts} =
       Keyword.split(opts, [:name, :repeat, :timezone, :overlap, :context, :run_once])
 
+    job_opts = Keyword.put_new(job_opts, :repeat, 1)
+
     job = Runner.to_job(func, delay, job_opts)
 
     Runner.run(job, opts)
@@ -77,6 +79,8 @@ defmodule Fledex.Scheduler.SchedEx do
   def run_in(func, delay, opts) when is_function(func) and is_integer(delay) do
     {job_opts, opts} =
       Keyword.split(opts, [:name, :repeat, :timezone, :overlap, :context, :run_once])
+
+    job_opts = Keyword.put_new(job_opts, :repeat, 1)
 
     job = Runner.to_job(func, delay, job_opts)
 
@@ -108,6 +112,7 @@ defmodule Fledex.Scheduler.SchedEx do
   @spec run_every(module(), atom(), list(), String.t() | CronExpression.t(), keyword) ::
           GenServer.on_start()
   def run_every(m, f, a, crontab, opts \\ []) when is_atom(m) and is_atom(f) and is_list(a) do
+    opts = Keyword.put_new(opts, :repeat, true)
     run_every(mfa_to_fn(m, f, a), crontab, opts)
   end
 

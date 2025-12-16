@@ -4,7 +4,7 @@
 
 defmodule Fledex.Supervisor.Utils do
   @moduledoc """
-  Some utilities related to the animatino system.
+  Some utilities related to the animation system.
   """
 
   alias Fledex.Animation.Animator
@@ -60,7 +60,7 @@ defmodule Fledex.Supervisor.Utils do
   @spec start_worker(
           atom,
           atom,
-          Animator | Coordinator,
+          Animator | Coordinator | Runner,
           Animator.config_t() | Coordinator.config_t()
         ) :: DynamicSupervisor.on_start_child()
   def start_worker(strip_name, name, type, config) do
@@ -83,7 +83,7 @@ defmodule Fledex.Supervisor.Utils do
     end
   end
 
-  @spec get_workers(atom, :coordinator | :animator | :led_strip, atom) :: list(atom)
+  @spec get_workers(atom, :coordinator | :animator | :job | :led_strip, atom) :: list(atom)
   def get_workers(strip_name, type, name) do
     Registry.select(worker_registry(), [
       {
@@ -94,7 +94,7 @@ defmodule Fledex.Supervisor.Utils do
     ])
   end
 
-  @spec stop_worker(GenServer.name(), atom, :coordinator | :animator | :led_strip, atom) :: :ok
+  @spec stop_worker(GenServer.name(), atom, :coordinator | :job | :animator | :led_strip, atom) :: :ok
   def stop_worker(supervisor, strip_name, type, name) do
     case Registry.lookup(worker_registry(), {strip_name, type, name}) do
       [{pid, _value}] -> DynamicSupervisor.terminate_child(supervisor, pid)

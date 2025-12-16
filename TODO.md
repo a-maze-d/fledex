@@ -38,6 +38,7 @@ Even though this library is published, there are things I still want to do befor
   - [x] Avoid the `RGB.new(color) |> RGB.to_tuple()` constructs, by changing the various functions to take RGB structures. The RGB-tuple should only be used by clients but not internally.
   - [ ] Rename `docs` to `pages`. Some people find it confusing to have a `docs` and a `doc` (created by `ex_doc`) (v0.7)
   - [ ] Rethink whether we really want to create a `Fledex.Config.Data` module or we should store the information in a GenServer. The issue with the GenServer is that we need to start a server. But maybe that's not soo bad. (v0.9)
+  - [ ] Change the `start_links` to take just one arg (the parameters) and an `opts` passed as opts to GenServer. Through this we define the name and therefore can move the `via_tuple` outside of the modules.
 - [ ] Missing functionality
   - [x] Allow selecting the color modules that can be loaded instead of loading always the same list by default. (v0.7)
   - [x] We have the `Fledex.Color` protocol, but we actually don't make use of its type. This is maybe also a good opportunity to rethink on how we handle colors in general. Maybe we should define everything as `Fledex.Color` and encapsulate CSS, SVG, RAL colors in their own struct to then have the protocol implemented for them. (v0.7)

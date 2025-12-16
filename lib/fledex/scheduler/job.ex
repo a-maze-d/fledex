@@ -78,6 +78,10 @@ defmodule Job do
   def set_repeat(%Job{opts: opts} = job, repeat),
     do: %{job | opts: Keyword.put(opts, :repeat, repeat)}
 
+  @spec set_run_once(__MODULE__.t(), boolean) :: __MODULE__.t()
+  def set_run_once(%Job{opts: opts} = job, run_once),
+    do: %{job | opts: Keyword.put(opts, :run_once, run_once)}
+
   @spec set_context(__MODULE__.t(), map) :: __MODULE__.t()
   def set_context(%Job{} = job, context), do: %{job | context: context}
 
