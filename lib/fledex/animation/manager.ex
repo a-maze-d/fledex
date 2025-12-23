@@ -34,6 +34,7 @@ defmodule Fledex.Animation.Manager do
   alias Fledex.LedStrip
   alias Fledex.Supervisor.AnimationSystem
   alias Fledex.Supervisor.LedStripSupervisor
+  alias Fledex.Supervisor.Utils
 
   @type config_t :: %{
           atom => Animator.config_t() | JobScheduler.config_t() | Coordinator.config_t()
@@ -142,10 +143,10 @@ defmodule Fledex.Animation.Manager do
       # we have a bit of a problem when using the kino driver, since it will not be reinitialized
       # when calling this function again (and thereby we don't get any frame/display).
       # Therefore we add here an extra step to reinitiate the the drivers while registering the strip.
-      LedStrip.reinit(strip_name, drivers, strip_config)
+      LedStrip.reinit(Utils.via_tuple(strip_name, :led_strip, :strip), drivers, strip_config)
       {:reply, :ok, state}
     else
-      {:reply, :ok, register_strip(state, strip_name, drivers, strip_config)}
+      {:reply, :ok, do_register_strip(state, strip_name, drivers, strip_config)}
     end
   end
 
@@ -168,7 +169,7 @@ defmodule Fledex.Animation.Manager do
   @spec handle_call({:unregister_strip, atom}, GenServer.from(), state_t) ::
           {:reply, :ok, state_t}
   def handle_call({:unregister_strip, strip_name}, _pid, state) when is_atom(strip_name) do
-    {:reply, :ok, unregister_strip(state, strip_name)}
+    {:reply, :ok, do_unregister_strip(state, strip_name)}
   end
 
   @impl GenServer
@@ -179,7 +180,7 @@ defmodule Fledex.Animation.Manager do
 
     _state =
       Enum.reduce(strip_names, state, fn strip_name, state ->
-        unregister_strip(state, strip_name)
+        do_unregister_strip(state, strip_name)
       end)
 
     :ok
@@ -205,15 +206,15 @@ defmodule Fledex.Animation.Manager do
     {animations, coordinators, jobs}
   end
 
-  @spec register_strip(state_t, atom, LedStrip.drivers_config_t(), keyword) :: state_t
-  defp register_strip(state, strip_name, drivers, strip_config) do
-    _result = AnimationSystem.start_led_strip(strip_name, drivers, strip_config)
+  @spec do_register_strip(state_t, atom, LedStrip.drivers_config_t(), keyword) :: state_t
+  defp do_register_strip(state, strip_name, drivers, strip_config) do
+    _result = AnimationSystem.start_led_strip(strip_name, drivers, strip_config, [])
 
     %{state | jobs: Map.put_new(state.jobs, strip_name, nil)}
   end
 
-  @spec unregister_strip(state_t, atom) :: state_t
-  defp unregister_strip(state, strip_name) do
+  @spec do_unregister_strip(state_t, atom) :: state_t
+  defp do_unregister_strip(state, strip_name) do
     # Logger.info("unregistering led_strip_ #{strip_name}")
     shutdown_coordinators(strip_name, LedStripSupervisor.get_coordinators(strip_name))
     shutdown_jobs(strip_name, Map.keys(state.jobs[strip_name] || %{}))
@@ -253,14 +254,19 @@ defmodule Fledex.Animation.Manager do
   @spec update_animators(atom, map) :: :ok
   defp update_animators(strip_name, animations) do
     Enum.each(animations, fn {animation_name, config} ->
-      Animator.config(strip_name, animation_name, config)
+      Animator.change_config(Utils.via_tuple(strip_name, :animator, animation_name), config)
     end)
   end
 
   @spec create_animators(atom, map) :: :ok
   defp create_animators(strip_name, created_animations) do
     Enum.each(created_animations, fn {animation_name, config} ->
-      LedStripSupervisor.start_animation(strip_name, animation_name, config)
+      LedStripSupervisor.start_animation(
+        strip_name,
+        animation_name,
+        config,
+        name: Utils.via_tuple(strip_name, :animator, animation_name)
+      )
     end)
   end
 
@@ -329,14 +335,22 @@ defmodule Fledex.Animation.Manager do
   @spec create_coordinators(atom, map) :: :ok
   defp create_coordinators(strip_name, created_coordinators) do
     Enum.each(created_coordinators, fn {coordinator_name, config} ->
-      LedStripSupervisor.start_coordinator(strip_name, coordinator_name, config)
+      LedStripSupervisor.start_coordinator(
+        strip_name,
+        coordinator_name,
+        config,
+        name: Utils.via_tuple(strip_name, :coordinator, coordinator_name)
+      )
     end)
   end
 
   @spec update_coordinators(atom, map) :: :ok
   defp update_coordinators(strip_name, coordinators) do
     Enum.each(coordinators, fn {coordinator_name, config} ->
-      Coordinator.config(strip_name, coordinator_name, config)
+      Coordinator.change_config(
+        Utils.via_tuple(strip_name, :coordinator, coordinator_name),
+        config
+      )
     end)
   end
 

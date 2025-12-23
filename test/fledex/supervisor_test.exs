@@ -37,12 +37,12 @@ defmodule Fledex.SupervisorTest do
   end
 
   defp count_workers do
-    DynamicSupervisor.count_children(Utils.workers_supervisor())
+    DynamicSupervisor.count_children(Utils.strip_supervisors())
     |> Map.get(:active)
   end
 
   defp count_workers(strip_name) do
-    DynamicSupervisor.count_children(Utils.workers_name(strip_name))
+    DynamicSupervisor.count_children(Utils.strip_workers_name(strip_name))
     |> Map.get(:active)
   end
 
@@ -109,7 +109,7 @@ defmodule Fledex.SupervisorTest do
       assert AnimationSystem.get_led_strips() |> length() == 1
       assert LedStripSupervisor.get_animations(@test_strip) |> length() == 1
 
-      Animator.stop(@test_strip, @test_anim)
+      Animator.stop(Utils.via_tuple(@test_strip, :animator, @test_anim))
       # wait for the eshutdown
       Process.sleep(500)
       assert AnimationSystem.get_led_strips() |> length() == 1
@@ -171,7 +171,7 @@ defmodule Fledex.SupervisorTest do
       })
 
       assert count_workers(@test_strip) == 1
-      Coordinator.stop(@test_strip, @test_coord)
+      Coordinator.stop(Utils.via_tuple(@test_strip, :coordinator, @test_coord))
       assert count_workers(@test_strip) == 0
     end
   end

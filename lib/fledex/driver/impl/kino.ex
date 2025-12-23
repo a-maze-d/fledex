@@ -66,7 +66,7 @@ defmodule Fledex.Driver.Impl.Kino do
   @impl Interface
   @spec transfer(list(Types.colorint()), pos_integer, keyword) :: {keyword, any}
   def transfer(leds, counter, config) do
-    if rem(counter, Keyword.fetch!(config, :update_freq)) == 0 and length(leds) > 0 do
+    if rem(counter, Keyword.fetch!(config, :update_freq)) == 0 and not Enum.empty?(leds) do
       output =
         leds
         |> Correction.apply_rgb_correction(Keyword.fetch!(config, :color_correction))

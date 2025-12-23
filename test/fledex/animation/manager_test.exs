@@ -5,6 +5,8 @@
 defmodule Fledex.Animation.ManagerTest do
   use ExUnit.Case, async: false
 
+  import ExUnit.CaptureLog
+
   alias Fledex.Animation.JobScheduler
   alias Fledex.Animation.Manager
   alias Fledex.Driver.Impl.Null
@@ -48,7 +50,9 @@ defmodule Fledex.Animation.ManagerTest do
       Manager.register_strip(strip_name, [{Null, []}], [])
       assert AnimationSystem.led_strip_exists?(strip_name)
 
-      assert :ok == AnimationSystem.stop_led_strip(:non_existing_strip)
+      capture_log(fn ->
+        assert :ok == AnimationSystem.stop_led_strip(:non_existing_strip)
+      end)
     end
 
     test "register/unregister 2 led_strips", %{strip_name: strip_name} do
@@ -78,7 +82,9 @@ defmodule Fledex.Animation.ManagerTest do
       assert LedStripSupervisor.animation_exists?(strip_name, :t12)
       assert not LedStripSupervisor.animation_exists?(strip_name, :t13)
 
-      assert :ok == LedStripSupervisor.stop_animation(strip_name, :non_existing_animation)
+      capture_log(fn ->
+        assert :ok == LedStripSupervisor.stop_animation(strip_name, :non_existing_animation)
+      end)
     end
 
     test "re-register animation", %{strip_name: strip_name} do

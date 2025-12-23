@@ -7,13 +7,19 @@ defmodule Fledex.Supervisor.Utils do
   Some utilities related to the animation system.
   """
 
+  require Logger
+
   alias Fledex.Animation.Animator
   alias Fledex.Animation.Coordinator
+  alias Fledex.Animation.JobScheduler2
+  alias Fledex.Scheduler.SchedEx.Runner
 
   @pubsub Mix.Project.config()[:app]
   @app_supervisor Fledex.DynamicSupervisor
   @registry Fledex.Supervisor.WorkersRegistry
-  @supervisor Fledex.Supervisor.WorkersSupervisor
+  @strip_supervisors Fledex.Supervisor.Strips
+
+  @type worker_types :: :animator | :coordinator | :job | :led_strip
 
   @doc """
   Defines the name of the pubsub system that is used by Fledex
@@ -37,13 +43,13 @@ defmodule Fledex.Supervisor.Utils do
   @doc """
   The name of the supervisor that observes all the workers in the AnimationSystem
   """
-  @spec workers_supervisor() :: module
-  def workers_supervisor, do: @supervisor
+  @spec strip_supervisors() :: module
+  def strip_supervisors, do: @strip_supervisors
 
   @doc """
   used to register the workers with the registry
   """
-  @spec via_tuple(atom, :animator | :job | :coordinator | :led_strip, atom) :: GenServer.name()
+  @spec via_tuple(atom, worker_types(), atom) :: GenServer.name()
   def via_tuple(strip_name, type, animation_name),
     do: {:via, Registry, {@registry, {strip_name, type, animation_name}}}
 
@@ -52,8 +58,8 @@ defmodule Fledex.Supervisor.Utils do
     via_tuple(strip_name, :led_strip, :supervisor)
   end
 
-  @spec workers_name(atom) :: GenServer.name()
-  def workers_name(strip_name) do
+  @spec strip_workers_name(atom) :: GenServer.name()
+  def strip_workers_name(strip_name) do
     via_tuple(strip_name, :led_strip, :workers)
   end
 
@@ -61,21 +67,37 @@ defmodule Fledex.Supervisor.Utils do
           atom,
           atom,
           Animator | Coordinator | Runner,
-          Animator.config_t() | Coordinator.config_t()
+          Animator.config_t() | Coordinator.config_t() | JobScheduler2.config_t(),
+          keyword
         ) :: DynamicSupervisor.on_start_child()
-  def start_worker(strip_name, name, type, config) do
+  def start_worker(strip_name, name, type, config, opts) do
     DynamicSupervisor.start_child(
-      workers_name(strip_name),
+      strip_workers_name(strip_name),
       %{
         # no need to be unique
         id: name,
-        start: {type, :start_link, [strip_name, name, config]},
+        start: {type, :start_link, [strip_name, name, config, opts]},
         restart: :transient
       }
     )
   end
 
-  @spec worker_exists?(atom, :coordinator | :animator | :led_strip, atom) :: boolean
+  @spec get_worker(atom, worker_types(), atom) :: pid()
+  def get_worker(strip_name, type, name) do
+    case Registry.lookup(worker_registry(), {strip_name, type, name}) do
+      [{pid, _value}] ->
+        pid
+
+      other ->
+        Logger.warning(
+          "Looking for worker #{inspect({strip_name, type, name})}, but got: #{inspect(other)}"
+        )
+
+        nil
+    end
+  end
+
+  @spec worker_exists?(atom, worker_types(), atom) :: boolean
   def worker_exists?(strip_name, type, name) do
     case Registry.lookup(worker_registry(), {strip_name, type, name}) do
       [{_pid, _value}] -> true
@@ -83,7 +105,7 @@ defmodule Fledex.Supervisor.Utils do
     end
   end
 
-  @spec get_workers(atom, :coordinator | :animator | :job | :led_strip, atom) :: list(atom)
+  @spec get_workers(atom, worker_types(), atom) :: list(atom)
   def get_workers(strip_name, type, name) do
     Registry.select(worker_registry(), [
       {
@@ -94,11 +116,11 @@ defmodule Fledex.Supervisor.Utils do
     ])
   end
 
-  @spec stop_worker(GenServer.name(), atom, :coordinator | :job | :animator | :led_strip, atom) :: :ok
+  @spec stop_worker(GenServer.name(), atom, worker_types(), atom) :: :ok
   def stop_worker(supervisor, strip_name, type, name) do
-    case Registry.lookup(worker_registry(), {strip_name, type, name}) do
-      [{pid, _value}] -> DynamicSupervisor.terminate_child(supervisor, pid)
-      _other -> :ok
+    case get_worker(strip_name, type, name) do
+      nil -> :ok
+      pid -> DynamicSupervisor.terminate_child(supervisor, pid)
     end
 
     :ok

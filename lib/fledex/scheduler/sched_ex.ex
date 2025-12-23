@@ -10,6 +10,7 @@ defmodule Fledex.Scheduler.SchedEx do
 
   alias Crontab.CronExpression
   alias Crontab.CronExpression.Parser
+  alias Fledex.Scheduler.SchedEx.Job
   alias Fledex.Scheduler.SchedEx.Runner
   alias Fledex.Scheduler.SchedEx.Stats
 
@@ -147,18 +148,18 @@ defmodule Fledex.Scheduler.SchedEx do
     Runner.run(job, opts)
   end
 
-  @spec update_job(Job.t(), keyword) :: :ok
-  def update_job(job, opts \\ []) do
+  @spec update_job(GenServer.server(), Job.t(), keyword) :: :ok
+  def update_job(server, job, opts \\ []) do
     opts = Keyword.put_new(opts, :repeat, true)
-    Runner.update(job, opts)
+    Runner.change_config(server, job, opts)
   end
 
   @doc """
   Cancels the given scheduled job
   """
   @spec cancel(GenServer.server()) :: :ok
-  def cancel(name) do
-    Runner.cancel(name)
+  def cancel(server) do
+    Runner.cancel(server)
   end
 
   @doc """

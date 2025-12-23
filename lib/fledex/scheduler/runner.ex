@@ -9,8 +9,8 @@ defmodule Fledex.Scheduler.SchedEx.Runner do
   use GenServer
 
   alias Fledex.Scheduler.SchedEx.IdentityTimeScale
+  alias Fledex.Scheduler.SchedEx.Job
   alias Fledex.Scheduler.SchedEx.Stats
-  alias Fledex.Supervisor.Utils
 
   @type executor_opts :: keyword
   @type t :: %{
@@ -31,10 +31,8 @@ defmodule Fledex.Scheduler.SchedEx.Runner do
     GenServer.start_link(__MODULE__, {job, opts}, name: name)
   end
 
-  # this is temporary only until we move the via_tuple out.
-  @spec start_link(atom, atom, Job.t(), keyword) :: GenServer.on_start()
-  def start_link(led_strip, job_name, job, server_opts \\ []) do
-    server_opts = Keyword.put_new(server_opts, :name, Utils.via_tuple(led_strip, :job, job_name))
+  @spec start_link(Job.t(), keyword) :: GenServer.on_start()
+  def start_link(job, server_opts \\ []) do
     GenServer.start_link(__MODULE__, {job, []}, server_opts)
   end
 
@@ -45,15 +43,15 @@ defmodule Fledex.Scheduler.SchedEx.Runner do
   allowed to change. The arguments are otherwise the same as for `run/2`.
   If there is nothing to schedule (or an error happens, the process will terminate)
   """
-  @spec update(Job.t(), executor_opts()) :: :ok
-  def update(%Job{name: name} = job, opts) do
-    GenServer.call(name, {:update, job, opts})
-  end
-
+  # @spec update(Job.t(), executor_opts()) :: :ok
+  # def update(%Job{name: name} = job, opts) do
+  #   GenServer.call(name, {:change_config, job, opts})
+  # end
+  #
   # temporarily
-  def update(strip_name, %Job{name: job_name} = job, opts) do
-    server = Utils.via_tuple(strip_name, :job, job_name)
-    GenServer.call(server, {:update, job, opts})
+  @spec change_config(GenServer.server(), Job.t(), keyword()) :: :ok
+  def change_config(server, %Job{} = job, opts) do
+    GenServer.call(server, {:change_config, job, opts})
   end
 
   @doc """
@@ -63,29 +61,28 @@ defmodule Fledex.Scheduler.SchedEx.Runner do
   The response is a tuple with the `scheduled date/time`, the `quantized
   scheduled date/time`, and the `delay` (in milliseconds) until the next run.
   """
-  @spec next_schedule(Job.t()) :: {DateTime.t(), DateTime.t(), pos_integer}
-  def next_schedule(%Job{name: name} = _job) do
-    GenServer.call(name, :next_schedule)
-  end
-
-  def next_schedule(name) do
-    GenServer.call(name, :next_schedule)
+  @spec next_schedule(GenServer.server()) :: {DateTime.t(), DateTime.t(), pos_integer}
+  # def next_schedule(%Job{name: name} = _job) do
+  #   GenServer.call(name, :next_schedule)
+  # end
+  def next_schedule(server) do
+    GenServer.call(server, :next_schedule)
   end
 
   @doc """
   Returns stats for the given process.
   """
   @spec stats(GenServer.server()) :: Stats.t()
-  def stats(name) do
-    GenServer.call(name, :stats)
+  def stats(server) do
+    GenServer.call(server, :stats)
   end
 
   @doc """
   Cancels future invocation of the given process. If it has already been invoked, does nothing.
   """
   @spec cancel(GenServer.server()) :: :ok
-  def cancel(name) do
-    :shutdown = GenServer.call(name, :shutdown)
+  def cancel(server) do
+    :shutdown = GenServer.call(server, :shutdown)
     :ok
   end
 
@@ -120,17 +117,19 @@ defmodule Fledex.Scheduler.SchedEx.Runner do
         {_value, _unit} = delay -> delay
         %Crontab.CronExpression{} = crontab -> crontab
       end
+
+    # we need to ensure that we run our scheduler at least
+    # once, therefore we translate it to the integer version
+    # except if we always want to run it
     repeat =
-      # we need to ensure that we run our scheduler at least
-      # once, therefore we translate it to the integer version
-      # except if we always want to run it
       case Keyword.get(job_opts, :repeat) do
         nil -> 1
         false -> 1
         true -> true
         other when is_integer(other) -> other
-        _ -> raise "repeat is neither a boolean nor a positive integer"
+        _other -> raise "repeat is neither a boolean nor a positive integer"
       end
+
     %Job{
       name: Keyword.get(job_opts, :name, :default_name),
       func: func,
@@ -172,17 +171,19 @@ defmodule Fledex.Scheduler.SchedEx.Runner do
   end
 
   def handle_call(
-        {:update, %Job{} = job, opts},
+        {:change_config, %Job{} = job, opts},
         _from,
         %{
-          timer_ref: timer_ref,
+          timer_ref: timer_ref
         } = state
       ) do
     _ignore = Process.cancel_timer(timer_ref)
 
     start_time = Keyword.get(opts, :start_time, DateTime.utc_now())
-    state = %{state |
-        job: job,
+
+    state = %{
+      state
+      | job: job,
         timer_ref: nil,
         scheduled_at: start_time,
         quantized_scheduled_at: start_time,
@@ -190,9 +191,10 @@ defmodule Fledex.Scheduler.SchedEx.Runner do
         opts: opts
     }
 
-    result = state
-    |> run_func_if_necessary(Keyword.get(job.opts, :run_once, false))
-    |> prepare_for_next_iteration()
+    result =
+      state
+      |> run_func_if_necessary(Keyword.get(job.opts, :run_once, false))
+      |> prepare_for_next_iteration()
 
     # IO.puts("result: #{inspect result}")
 
@@ -357,12 +359,16 @@ defmodule Fledex.Scheduler.SchedEx.Runner do
   end
 
   defp run_func_if_necessary(state, false), do: state
-  defp run_func_if_necessary(%{
-    job: job,
-    scheduled_at: this_time,
-    quantized_scheduled_at: quantized_this_time,
-    stats: stats
-  } = state, true) do
+
+  defp run_func_if_necessary(
+         %{
+           job: job,
+           scheduled_at: this_time,
+           quantized_scheduled_at: quantized_this_time,
+           stats: stats
+         } = state,
+         true
+       ) do
     start_time = DateTime.utc_now()
     run_func(this_time, job.func)
     end_time = DateTime.utc_now()
@@ -370,22 +376,29 @@ defmodule Fledex.Scheduler.SchedEx.Runner do
     stats = Stats.update(stats, this_time, quantized_this_time, start_time, end_time)
     %{state | stats: stats}
   end
-  defp prepare_for_next_iteration(%{
-    job: job,
-    opts: opts,
-    scheduled_at: start_time
-    } = state) do
+
+  defp prepare_for_next_iteration(
+         %{
+           job: job,
+           opts: opts,
+           scheduled_at: start_time
+         } = state
+       ) do
     # IO.puts("prepare_for_next_iteration: #{inspect state}")
     repeat = Keyword.get(job.opts, :repeat, false)
     # IO.puts("repeat: #{inspect repeat}")
 
-    if is_integer(repeat) and repeat > 0 || is_boolean(repeat) and repeat do
-      state = %{state | job: %{
-        job |
-        opts: Keyword.update(job.opts, :repeat, false, fn
-          old when is_integer(old) and old > 0 -> old - 1
-          old -> old
-        end)}
+    if (is_integer(repeat) and repeat > 0) || (is_boolean(repeat) and repeat) do
+      state = %{
+        state
+        | job: %{
+            job
+            | opts:
+                Keyword.update(job.opts, :repeat, false, fn
+                  old when is_integer(old) and old > 0 -> old - 1
+                  old -> old
+                end)
+          }
       }
 
       case schedule_next(start_time, job, opts) do
@@ -401,14 +414,14 @@ defmodule Fledex.Scheduler.SchedEx.Runner do
           # stats = %Stats{}
 
           {:noreply,
-          %{
-            state
-            | timer_ref: timer_ref,
-            quantized_scheduled_at: quantized_next_time,
-            scheduled_at: next_time,
-            delay: next_delay,
-            opts: opts
-          }}
+           %{
+             state
+             | timer_ref: timer_ref,
+               quantized_scheduled_at: quantized_next_time,
+               scheduled_at: next_time,
+               delay: next_delay,
+               opts: opts
+           }}
       end
     else
       {:stop, :normal, state}

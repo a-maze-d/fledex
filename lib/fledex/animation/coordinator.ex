@@ -22,7 +22,7 @@ defmodule Fledex.Animation.Coordinator do
 
   require Logger
 
-  alias Fledex.Supervisor.Utils
+  # alias Fledex.Supervisor.Utils
   alias Fledex.Utils.PubSub
 
   @typedoc """
@@ -70,31 +70,31 @@ defmodule Fledex.Animation.Coordinator do
   @doc """
   Start a new coordinator for the given led strip with the specified config
   """
-  @spec start_link(strip_name :: atom, coordinator_name :: atom, config :: config_t) ::
+  @spec start_link(strip_name :: atom, coordinator_name :: atom, config :: config_t, keyword) ::
           GenServer.on_start()
-  def start_link(strip_name, coordinator_name, config) do
+  def start_link(strip_name, coordinator_name, config, opts) do
     {:ok, _pid} =
-      GenServer.start_link(__MODULE__, {strip_name, coordinator_name, config},
-        name: Utils.via_tuple(strip_name, :coordinator, coordinator_name)
+      GenServer.start_link(
+        __MODULE__,
+        {strip_name, coordinator_name, config},
+        opts
       )
   end
 
   @doc """
   Change the config of the given coordinator
   """
-  @spec config(atom, atom, config_t) :: :ok
-  def config(strip_name, coordinator_name, config) do
-    Utils.via_tuple(strip_name, :coordinator, coordinator_name)
-    |> GenServer.cast({:config, config})
+  @spec change_config(GenServer.server(), config_t) :: :ok
+  def change_config(server, config) do
+    GenServer.cast(server, {:change_config, config})
   end
 
   @doc """
   Stop the coordinator
   """
-  @spec stop(atom, atom) :: :ok
-  def stop(strip_name, coordinator_name) do
-    Utils.via_tuple(strip_name, :coordinator, coordinator_name)
-    |> GenServer.stop(:normal)
+  @spec stop(GenServer.server()) :: :ok
+  def stop(server) do
+    GenServer.stop(server, :normal)
   end
 
   # MARK: server side
@@ -121,8 +121,9 @@ defmodule Fledex.Animation.Coordinator do
   end
 
   @impl GenServer
-  @spec handle_cast({:config, config_t}, state_t) :: {:noreply, state_t}
-  def handle_cast({:config, config}, %__MODULE__{options: options} = state) do
+  @spec handle_cast({:change_config, config_t}, state_t) :: {:noreply, state_t}
+  def handle_cast({:change_config, config}, %__MODULE__{options: options} = state) do
+    # IO.puts("config: #{inspect {config, state}}")
     # make sure to keep options, because they might be added as part of the coordination
     {:noreply,
      %__MODULE__{state | func: config.func, options: Keyword.merge(options, config.options)}}

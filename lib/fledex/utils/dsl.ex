@@ -18,6 +18,7 @@ defmodule Fledex.Utils.Dsl do
   alias Fledex.Leds
   alias Fledex.LedStrip
   alias Fledex.Supervisor.AnimationSystem
+  alias Fledex.Supervisor.Utils
 
   @fledex_macros [
     :animation,
@@ -142,7 +143,7 @@ defmodule Fledex.Utils.Dsl do
         AnimationSystem.start_link(opts)
 
       :app ->
-        DynamicSupervisor.start_child(Fledex.DynamicSupervisor, AnimationSystem.child_spec(opts))
+        DynamicSupervisor.start_child(Utils.app_supervisor(), AnimationSystem.child_spec(opts))
 
       :kino ->
         Kino.start_child(AnimationSystem.child_spec(opts))

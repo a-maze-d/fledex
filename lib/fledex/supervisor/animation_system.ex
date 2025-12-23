@@ -81,15 +81,17 @@ defmodule Fledex.Supervisor.AnimationSystem do
   This starts a new led_strip to which we can send some led sequences,
   and, if we update it in regular intervals, can play an animation
   """
-  @spec start_led_strip(atom, LedStrip.drivers_config_t(), keyword) ::
+  @spec start_led_strip(atom, LedStrip.drivers_config_t(), keyword, keyword) ::
           GenServer.on_start()
-  def start_led_strip(strip_name, drivers \\ Null, strip_config \\ []) do
+  def start_led_strip(strip_name, drivers \\ Null, strip_config \\ [], opts \\ []) do
+    opts = Keyword.put_new(opts, :name, Utils.via_tuple(strip_name, :led_strip, :strip))
+
     case DynamicSupervisor.start_child(
-           Utils.workers_supervisor(),
+           Utils.strip_supervisors(),
            %{
              # no need to be unique
              id: strip_name,
-             start: {LedStripSupervisor, :start_link, [strip_name, drivers, strip_config]},
+             start: {LedStripSupervisor, :start_link, [strip_name, drivers, strip_config, opts]},
              restart: :transient
            }
          ) do
@@ -121,7 +123,7 @@ defmodule Fledex.Supervisor.AnimationSystem do
   """
   @spec stop_led_strip(atom) :: :ok
   def stop_led_strip(strip_name) do
-    Utils.stop_worker(Utils.workers_supervisor(), strip_name, :led_strip, :supervisor)
+    Utils.stop_worker(Utils.strip_supervisors(), strip_name, :led_strip, :supervisor)
   end
 
   # MARK: server side
@@ -136,7 +138,7 @@ defmodule Fledex.Supervisor.AnimationSystem do
     children = [
       {Registry, keys: :unique, name: Utils.worker_registry()},
       {Phoenix.PubSub, adapter_name: :pg2, name: Utils.pubsub_name()},
-      {DynamicSupervisor, strategy: :one_for_one, name: Utils.workers_supervisor()},
+      {DynamicSupervisor, strategy: :one_for_one, name: Utils.strip_supervisors()},
       JobScheduler,
       {Manager, [init_args]}
     ]

@@ -479,13 +479,14 @@ defmodule Fledex.LedsTestSync do
             [terminal: false, color: true, update_freq: 1]
           }
         ],
-        []
+        [],
+        [name: Utils.via_tuple(@test_strip, :led_strip, :strip)]
       }
 
       start_supervised({Registry, keys: :unique, name: Utils.worker_registry()})
       start_supervised({Phoenix.PubSub, adapter_name: :pg2, name: Utils.pubsub_name()})
       start_supervised({LedStrip, init_args})
-      LedStrip.define_namespace(@test_strip, @test_namespace)
+      LedStrip.define_namespace(Utils.via_tuple(@test_strip, :led_strip, :strip), @test_namespace)
       :ok
     end
 
@@ -501,7 +502,10 @@ defmodule Fledex.LedsTestSync do
           |> Leds.light(:red)
           |> Leds.light(:green)
           |> Leds.light(:blue)
-          |> Leds.set_led_strip_info(@test_strip, @test_namespace)
+          |> Leds.set_led_strip_info(
+            Utils.via_tuple(@test_strip, :led_strip, :strip),
+            @test_namespace
+          )
           |> Leds.send()
 
           # the Logger driver is rather slow, therefore waiting a bit

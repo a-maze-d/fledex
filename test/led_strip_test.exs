@@ -380,7 +380,9 @@ defmodule Fledex.LedStripTestSync do
 
   describe "startup tests" do
     test "start server with custom parameters" do
-      assert {:ok, pid} = LedStrip.start_link(:test_strip_name, {Null, []}, timer_disabled: true)
+      assert {:ok, pid} =
+               LedStrip.start_link(:test_strip_name, {Null, []}, [timer_disabled: true], [])
+
       :ok = GenServer.stop(pid)
     end
 
@@ -419,7 +421,8 @@ defmodule Fledex.LedStripTestSync do
     end
 
     test "client API calls" do
-      {:ok, _pid} = AnimationSystem.start_led_strip(@strip_name, [{Null, []}], [])
+      {:ok, _pid} =
+        AnimationSystem.start_led_strip(@strip_name, [{Null, []}], [], name: @strip_name)
 
       # we only make sure that they are correctly wired to the server side calls
       # that are tested independently
