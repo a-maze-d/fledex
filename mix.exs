@@ -102,6 +102,7 @@ defmodule Fledex.MixProject do
       {:phoenix_pubsub, "~> 2.1"},
       {:libcluster, "~> 3.3"},
       {:tzdata, "~> 1.1", optional: true},
+      {:fledex_scheduler, git: "file:///home/maze/Documents/code/fledex_scheduler", branch: "job"},
       # deprecated
       {:quantum, "~> 3.0"},
 

@@ -12,7 +12,9 @@ defmodule Fledex.Animation.JobScheduler2 do
   A job scheduler
   """
 
-  @type job :: Fledex.Scheduler.SchedEx.Job.t()
+  alias Fledex.Scheduler.Job
+
+  @type job :: Job.t()
   @typedoc """
   The configuration of a job.
 
