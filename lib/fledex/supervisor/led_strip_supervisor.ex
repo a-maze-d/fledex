@@ -169,7 +169,7 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
   # MARK: Server side
   @impl Supervisor
   @doc false
-  @spec init({atom, LedStrip.drivers_config_t(), keyword}) ::
+  @spec init({atom, LedStrip.drivers_config_t(), keyword, keyword}) ::
           {:ok,
            {Supervisor.sup_flags(),
             [Supervisor.child_spec() | (old_erlang_child_spec :: :supervisor.child_spec())]}}

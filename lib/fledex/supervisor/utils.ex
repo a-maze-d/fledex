@@ -85,10 +85,11 @@ defmodule Fledex.Supervisor.Utils do
         restart: :transient
       }
     )
+
     # |> dbg()
   end
 
-  @spec get_worker(atom, worker_types(), atom) :: pid()
+  @spec get_worker(atom, worker_types(), atom) :: pid() | nil
   def get_worker(strip_name, type, name) do
     case Registry.lookup(worker_registry(), {strip_name, type, name}) do
       [{pid, _value}] ->

@@ -49,7 +49,7 @@ As a secondary sorting criteria we can use the (merged) configuration.
 # Questions
 How can we make sure we compare the most important parts of a driver config first? For example, in the case of an SPI driver, it would probably be the most important compare the SPI device first before we compare all the other settings.
 
-It turns out that the standard Elixir sorting for collection types is already doing hwat we are looking for (except maybe sorting the keywords in the correct order), see:
+It turns out that the standard Elixir sorting for collection types is already doing what we are looking for (except maybe sorting the keywords in the correct order), see:
 https://hexdocs.pm/elixir/1.15.7/Kernel.html#module-structural-comparison. 
 
 Thus (as a first step) it would be as simple as doing the following:

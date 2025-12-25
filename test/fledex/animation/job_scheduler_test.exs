@@ -24,16 +24,16 @@ defmodule Fledex.Animation.JobSchedulerTest do
         )
 
       assert %Fledex.Scheduler.Job{
-        func: _func,
-        schedule: schedule,
-        context: %{},
-        opts: [
-          run_once: false,
-          repeat: true,
-          overlap: false,
-          timezone: "Etc/UTC"
-        ]
-      } = job
+               func: _func,
+               schedule: schedule,
+               context: %{},
+               opts: [
+                 run_once: false,
+                 repeat: true,
+                 overlap: false,
+                 timezone: "Etc/UTC"
+               ]
+             } = job
 
       assert %Crontab.CronExpression{
                extended: true,

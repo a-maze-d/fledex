@@ -28,11 +28,11 @@ defmodule Fledex.Animation.Manager do
 
   require Logger
 
-  alias Fledex.Scheduler.Runner
   alias Fledex.Animation.Animator
   alias Fledex.Animation.Coordinator
   alias Fledex.Animation.JobScheduler
   alias Fledex.LedStrip
+  alias Fledex.Scheduler.Runner
   alias Fledex.Supervisor.AnimationSystem
   alias Fledex.Supervisor.LedStripSupervisor
   alias Fledex.Supervisor.Utils
@@ -42,7 +42,7 @@ defmodule Fledex.Animation.Manager do
         }
 
   @typep state_t :: %{
-           jobs: %{atom => JobScheduler.config_t()}
+           configs: %{atom => config_t()}
          }
 
   @doc """
@@ -145,9 +145,17 @@ defmodule Fledex.Animation.Manager do
       # when calling this function again (and thereby we don't get any frame/display).
       # Therefore we add here an extra step to reinitiate the the drivers while registering the strip.
       LedStrip.reinit(Utils.via_tuple(strip_name, :led_strip, :strip), drivers, strip_config)
-      {:reply, :ok, %{state | configs: Map.update(state.configs, strip_name, {drivers, strip_config, nil}, fn {_old_drivers, _old_strip_config, configs} ->
-        {drivers, strip_config, configs}
-      end)}}
+
+      {:reply, :ok,
+       %{
+         state
+         | configs:
+             Map.update(state.configs, strip_name, {drivers, strip_config, nil}, fn {_old_drivers,
+                                                                                     _old_strip_config,
+                                                                                     configs} ->
+               {drivers, strip_config, configs}
+             end)
+       }}
     else
       {:reply, :ok, do_register_strip(state, strip_name, drivers, strip_config)}
     end
@@ -162,9 +170,15 @@ defmodule Fledex.Animation.Manager do
     register_coordinators(strip_name, coordinators)
     register_jobs(strip_name, jobs)
 
-    {:reply, :ok, %{state | configs: Map.update(state.configs, strip_name,  "shouldn't happen", fn {drivers, strip_config, _config} ->
-      {drivers, strip_config, configs}
-    end)}}
+    {:reply, :ok,
+     %{
+       state
+       | configs:
+           Map.update(state.configs, strip_name, "shouldn't happen", fn {drivers, strip_config,
+                                                                         _config} ->
+             {drivers, strip_config, configs}
+           end)
+     }}
   rescue
     e in RuntimeError -> {:reply, {:error, e.message}, state}
   end
@@ -228,7 +242,7 @@ defmodule Fledex.Animation.Manager do
     %{state | configs: Map.drop(state.configs, [strip_name])}
   end
 
-  @spec register_animations(atom, map) :: state_t
+  @spec register_animations(atom, map) :: :ok
   defp register_animations(strip_name, configs) do
     # Logger.debug(("defining config for #{strip_name}, animations: #{inspect Map.keys(configs)}")
 
@@ -296,7 +310,7 @@ defmodule Fledex.Animation.Manager do
     {dropped, existing, created}
   end
 
-  @spec register_coordinators(atom, map) :: state_t
+  @spec register_coordinators(atom, map) :: :ok
   defp register_coordinators(strip_name, coordinators) do
     {dropped, updated, created} =
       filter_configs(LedStripSupervisor.get_coordinators(strip_name), coordinators)
@@ -335,7 +349,7 @@ defmodule Fledex.Animation.Manager do
     end)
   end
 
-  @spec register_jobs(atom, map) :: state_t
+  @spec register_jobs(atom, map) :: :ok
   defp register_jobs(strip_name, jobs) do
     {dropped, updated, created} = filter_configs(LedStripSupervisor.get_jobs(strip_name), jobs)
 

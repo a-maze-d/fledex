@@ -36,6 +36,10 @@ Even though this library is published, there are things I still want to do befor
   - [x] Introduce a `Fledex.Color.RGB` and reduce the reliance on `{r, g, b}` tuples
   - [x] Remove `Fledex.Color.to_rgb/1`
   - [x] Avoid the `RGB.new(color) |> RGB.to_tuple()` constructs, by changing the various functions to take RGB structures. The RGB-tuple should only be used by clients but not internally.
+  - [ ] Cleanup `Supervisor.Utils` (combine functions) (v0.7)
+  - [ ] Cleanup `Animation.Manager` (combine functions) (v0.7)
+  - [ ] Rename reinit to `Manager.change_config` (v0.7)
+  - [ ] Move `change_config` from `Animation.Manager` to the `Supervisors` (v0.7)
   - [ ] Rename `docs` to `pages`. Some people find it confusing to have a `docs` and a `doc` (created by `ex_doc`) (v0.7)
   - [ ] Rethink whether we really want to create a `Fledex.Config.Data` module or we should store the information in a GenServer. The issue with the GenServer is that we need to start a server. But maybe that's not soo bad. (v0.9)
   - [x] Change the `start_links` to take just one arg (the parameters) and an `opts` passed as opts to GenServer. Through this we define the name and therefore can move the `via_tuple` outside of the modules.

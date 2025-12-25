@@ -146,7 +146,7 @@ defmodule Fledex.Animation.Animator do
       options: [send_config: &default_send_config_func/1],
       effects: [],
       strip_name: strip_name,
-      # TODO: the strip server should not be set here, but externally
+      # we set it to the same name as the strip by default.
       strip_server: strip_name,
       animation_name: animation_name
     }
