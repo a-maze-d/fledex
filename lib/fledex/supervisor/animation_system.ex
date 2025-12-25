@@ -41,7 +41,6 @@ defmodule Fledex.Supervisor.AnimationSystem do
 
   require Logger
 
-  alias Fledex.Animation.JobScheduler
   alias Fledex.Animation.Manager
   alias Fledex.Driver.Impl.Null
   alias Fledex.LedStrip
@@ -139,7 +138,6 @@ defmodule Fledex.Supervisor.AnimationSystem do
       {Registry, keys: :unique, name: Utils.worker_registry()},
       {Phoenix.PubSub, adapter_name: :pg2, name: Utils.pubsub_name()},
       {DynamicSupervisor, strategy: :one_for_one, name: Utils.strip_supervisors()},
-      JobScheduler,
       {Manager, [init_args]}
     ]
 

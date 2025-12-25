@@ -13,7 +13,7 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
 
   alias Fledex.Animation.Animator
   alias Fledex.Animation.Coordinator
-  alias Fledex.Animation.JobScheduler2
+  alias Fledex.Animation.JobScheduler
   alias Fledex.LedStrip
   alias Fledex.Supervisor.Utils
 
@@ -91,7 +91,7 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
 
   This allows to run some task at a well defined time or interval
   """
-  @spec start_job(atom, atom, JobScheduler2.config_t(), keyword) ::
+  @spec start_job(atom, atom, JobScheduler.config_t(), keyword) ::
           DynamicSupervisor.on_start_child()
   def start_job(strip_name, job_name, config, opts) do
     opts = Keyword.put_new(opts, :name, Utils.via_tuple(strip_name, :job, job_name))

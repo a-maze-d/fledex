@@ -11,7 +11,7 @@ defmodule Fledex.Supervisor.Utils do
 
   alias Fledex.Animation.Animator
   alias Fledex.Animation.Coordinator
-  alias Fledex.Animation.JobScheduler2
+  alias Fledex.Animation.JobScheduler
 
   @pubsub Mix.Project.config()[:app]
   @app_supervisor Fledex.DynamicSupervisor
@@ -66,14 +66,13 @@ defmodule Fledex.Supervisor.Utils do
   @mapping %{
     animator: Animator,
     coordinator: Coordinator,
-    job: JobScheduler2
+    job: JobScheduler
   }
   @spec start_worker(
           atom,
           atom,
           led_strip_worker_types(),
-          # Animator | Coordinator | JobScheduler2,
-          Animator.config_t() | Coordinator.config_t() | JobScheduler2.config_t(),
+          Animator.config_t() | Coordinator.config_t() | JobScheduler.config_t(),
           keyword
         ) :: DynamicSupervisor.on_start_child()
   def start_worker(strip_name, name, type, config, opts) do

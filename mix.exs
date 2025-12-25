@@ -103,8 +103,6 @@ defmodule Fledex.MixProject do
       {:libcluster, "~> 3.3"},
       {:tzdata, "~> 1.1", optional: true},
       {:fledex_scheduler, git: "file:///home/maze/Documents/code/fledex_scheduler", branch: "job"},
-      # deprecated
-      {:quantum, "~> 3.0"},
 
       # observability
       {:telemetry, "~> 1.2"},

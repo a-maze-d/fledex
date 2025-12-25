@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-defmodule Fledex.Animation.JobScheduler2 do
+defmodule Fledex.Animation.JobScheduler do
   @moduledoc """
   This module is a small wrapper around hte Fledex.Scheduler library and adds
   Fledex specific aspsects into the scheduler.

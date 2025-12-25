@@ -23,15 +23,17 @@ defmodule Fledex.Animation.JobSchedulerTest do
           }
         )
 
-      assert %Quantum.Job{
-               run_strategy: %Quantum.RunStrategy.Random{nodes: :cluster},
-               overlap: false,
-               timezone: :utc,
-               name: :the_job,
-               schedule: schedule,
-               task: _func,
-               state: :active
-             } = job
+      assert %Fledex.Scheduler.Job{
+        func: _func,
+        schedule: schedule,
+        context: %{},
+        opts: [
+          run_once: false,
+          repeat: true,
+          overlap: false,
+          timezone: "Etc/UTC"
+        ]
+      } = job
 
       assert %Crontab.CronExpression{
                extended: true,

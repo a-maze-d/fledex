@@ -12,7 +12,6 @@ defmodule Fledex.Animation.ManagerTest do
   alias Fledex.ManagerTestUtils
   alias Fledex.Supervisor.AnimationSystem
   alias Fledex.Supervisor.LedStripSupervisor
-  alias Quantum
 
   @strip_name :test_strip
   describe "init" do
