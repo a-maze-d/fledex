@@ -12,14 +12,14 @@ defmodule Fledex.Supervisor.Utils do
   alias Fledex.Animation.Animator
   alias Fledex.Animation.Coordinator
   alias Fledex.Animation.JobScheduler2
-  alias Fledex.Scheduler.SchedEx.Runner
 
   @pubsub Mix.Project.config()[:app]
   @app_supervisor Fledex.DynamicSupervisor
   @registry Fledex.Supervisor.WorkersRegistry
   @strip_supervisors Fledex.Supervisor.Strips
 
-  @type worker_types :: :animator | :coordinator | :job | :led_strip
+  @type worker_types :: led_strip_worker_types | :led_strip
+  @type led_strip_worker_types :: :animator | :coordinator | :job
 
   @doc """
   Defines the name of the pubsub system that is used by Fledex
@@ -63,10 +63,16 @@ defmodule Fledex.Supervisor.Utils do
     via_tuple(strip_name, :led_strip, :workers)
   end
 
+  @mapping %{
+    animator: Animator,
+    coordinator: Coordinator,
+    job: JobScheduler2
+  }
   @spec start_worker(
           atom,
           atom,
-          Animator | Coordinator | Runner,
+          led_strip_worker_types(),
+          # Animator | Coordinator | JobScheduler2,
           Animator.config_t() | Coordinator.config_t() | JobScheduler2.config_t(),
           keyword
         ) :: DynamicSupervisor.on_start_child()
@@ -76,10 +82,11 @@ defmodule Fledex.Supervisor.Utils do
       %{
         # no need to be unique
         id: name,
-        start: {type, :start_link, [strip_name, name, config, opts]},
+        start: {@mapping[type], :start_link, [strip_name, name, config, opts]},
         restart: :transient
       }
     )
+    # |> dbg()
   end
 
   @spec get_worker(atom, worker_types(), atom) :: pid()

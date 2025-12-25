@@ -15,7 +15,6 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
   alias Fledex.Animation.Coordinator
   alias Fledex.Animation.JobScheduler2
   alias Fledex.LedStrip
-  alias Fledex.Scheduler.SchedEx.Runner
   alias Fledex.Supervisor.Utils
 
   # MARK: client side
@@ -57,7 +56,7 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
       |> Map.put_new(:strip_server, Utils.via_tuple(strip_name, :led_strip, :strip))
 
     opts = Keyword.put_new(opts, :name, Utils.via_tuple(strip_name, :animator, animation_name))
-    Utils.start_worker(strip_name, animation_name, Animator, config, opts)
+    Utils.start_worker(strip_name, animation_name, :animator, config, opts)
   end
 
   @doc """
@@ -95,7 +94,8 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
   @spec start_job(atom, atom, JobScheduler2.config_t(), keyword) ::
           DynamicSupervisor.on_start_child()
   def start_job(strip_name, job_name, config, opts) do
-    Utils.start_worker(strip_name, job_name, Runner, config, opts)
+    opts = Keyword.put_new(opts, :name, Utils.via_tuple(strip_name, :job, job_name))
+    Utils.start_worker(strip_name, job_name, :job, config, opts)
     # |> dbg()
   end
 
@@ -136,7 +136,7 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
     opts =
       Keyword.put_new(opts, :name, Utils.via_tuple(strip_name, :coordinator, coordinator_name))
 
-    Utils.start_worker(strip_name, coordinator_name, Coordinator, config, opts)
+    Utils.start_worker(strip_name, coordinator_name, :coordinator, config, opts)
   end
 
   @doc """

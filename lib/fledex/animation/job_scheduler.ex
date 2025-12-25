@@ -42,8 +42,8 @@ defmodule Fledex.Animation.JobScheduler do
   responsibility to avoid interferences (the strip_name is currently
   not used, but this might change in the future)
   """
-  @spec create_job(atom, config_t(), atom) :: job()
-  def create_job(job, job_config, _strip_name) do
+  @spec create_job(atom, atom, config_t()) :: job()
+  def create_job(_strip_name, job, job_config) do
     new_job([])
     |> Job.set_name(job)
     |> Job.set_schedule(job_config.pattern)

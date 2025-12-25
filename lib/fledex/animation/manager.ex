@@ -28,9 +28,10 @@ defmodule Fledex.Animation.Manager do
 
   require Logger
 
+  alias Fledex.Scheduler.Runner
   alias Fledex.Animation.Animator
   alias Fledex.Animation.Coordinator
-  alias Fledex.Animation.JobScheduler
+  alias Fledex.Animation.JobScheduler2, as: JobScheduler
   alias Fledex.LedStrip
   alias Fledex.Supervisor.AnimationSystem
   alias Fledex.Supervisor.LedStripSupervisor
@@ -373,29 +374,24 @@ defmodule Fledex.Animation.Manager do
   end
 
   @spec shutdown_jobs(atom, [atom]) :: :ok
-  defp shutdown_jobs(_strip_name, job_names) do
+  defp shutdown_jobs(strip_name, job_names) do
     Enum.each(job_names, fn job_name ->
-      JobScheduler.delete_job(job_name)
+      LedStripSupervisor.stop_job(strip_name, job_name)
     end)
   end
 
   @spec update_jobs(atom, map) :: :ok
   defp update_jobs(strip_name, jobs) do
-    Enum.each(jobs, fn {job, job_config} ->
-      JobScheduler.delete_job(job)
-
-      JobScheduler.create_job(job, job_config, strip_name)
-      |> JobScheduler.add_job()
+    Enum.each(jobs, fn {job_name, job_config} ->
+      job = JobScheduler.create_job(strip_name, job_name, job_config)
+      Runner.change_config(Utils.via_tuple(strip_name, :job, job_name), job, [])
     end)
   end
 
   @spec create_jobs(atom, map) :: :ok
   defp create_jobs(strip_name, jobs) do
-    Enum.each(jobs, fn {job, job_config} ->
-      JobScheduler.create_job(job, job_config, strip_name)
-      |> JobScheduler.add_job()
-
-      if Keyword.get(job_config.options, :run_once, false), do: JobScheduler.run_job(job)
+    Enum.each(jobs, fn {job_name, job_config} ->
+      LedStripSupervisor.start_job(strip_name, job_name, job_config, [])
     end)
   end
 end

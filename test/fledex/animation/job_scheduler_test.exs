@@ -11,6 +11,7 @@ defmodule Fledex.Animation.JobSchedulerTest do
     test "full job specs" do
       job =
         JobScheduler.create_job(
+          :strip_name,
           :the_job,
           %{
             pattern: ~e[* * * * * * *]e,
@@ -19,8 +20,7 @@ defmodule Fledex.Animation.JobSchedulerTest do
               timezone: :utc,
               overlap: false
             ]
-          },
-          :strip_name
+          }
         )
 
       assert %Quantum.Job{

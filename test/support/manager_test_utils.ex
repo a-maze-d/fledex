@@ -3,30 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.ManagerTestUtils do
-  alias Fledex.Animation.Manager
   alias Fledex.Supervisor.Utils
-
-  def get_manager_config, do: get_manager_config(:animations, :all)
-  def get_manager_config(strip), do: get_manager_config(:animations, strip)
-
-  def get_manager_config(what, strip) do
-    pid = GenServer.whereis(Manager)
-    config = :sys.get_state(pid)
-    # IO.puts("get-manager_config: #{inspect {what, config}}")
-
-    case what do
-      :all ->
-        config
-
-      type ->
-        config = config[type]
-
-        case strip do
-          :all -> config
-          name -> config[name]
-        end
-    end
-  end
 
   def get_animator_config(strip_name, animation_name) do
     pid = GenServer.whereis(Utils.via_tuple(strip_name, :animator, animation_name))
@@ -43,5 +20,10 @@ defmodule Fledex.ManagerTestUtils do
     if pid != nil do
       GenServer.stop(pid, reason)
     end
+  end
+
+  def get_job_config(strip_name, job_name) do
+    pid = whereis(strip_name, :job, job_name)
+    :sys.get_state(pid)
   end
 end

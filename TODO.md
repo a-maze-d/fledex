@@ -46,9 +46,9 @@ Even though this library is published, there are things I still want to do befor
   - [x] convert the rgb to other color spaces (in the various color name modules). Considering the previous point we might not need to do this, because it should now be optional (v0.7) <-- reduced the generated color functions, and what gets exposed
   - [x] we start things through the Supervisor, but we don't shut things down through it (v0.7)
   - [ ] Put some more effort into the coordinator to make it work well (v0.7)
-  - [ ] Rework the `:job` implementation (v0.8):
+  - [ ] Rework the `:job` implementation (v0.7):
     - [ ] The Job should (at least appear) to be connected to the LedStrip
-    - [ ] Replace it with a different library (maybe `SchedEx`? https://hexdocs.pm/sched_ex/readme.html) (v0.8)
+    - [ ] Replace it with a different library (maybe `SchedEx`? https://hexdocs.pm/sched_ex/readme.html) (v0.7)
       - [x] Investigate various libraries and how they fit into Fledex. I looked at various different libraries (`erlcron`, `sched_ex`, `exq_scheduler`, `ecron`, ...), but none really fulfils the needs :-( `SchedEx` is the one that is simple and comes closest. Therefore the plan is to take it (it's MIT license), modify it, and integrate it into Fledex
       - [ ] It's not possible to inject a context to the job, because you either have to provide an `{M, F, [Args]}` or a `(-> any())` function. The former is not possible, since we don't have amodule (but just an anonymous function) and the latter is not possible, because we can't pass in any argument :-(. We would need to extend Quantum to accept an {F, [Args]}
   - [ ] Enable Telemetry? (v0.8)
