@@ -40,6 +40,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Cleanup `Animation.Manager` (combine functions) (v0.7)
   - [ ] Rename reinit to `Manager.change_config` (v0.7)
   - [ ] Move `change_config` from `Animation.Manager` to the `Supervisors` (v0.7)
+  - [ ] Rename the job property `pattern` to `schedule` in the DSL created config (v0.7)
   - [ ] Rename `docs` to `pages`. Some people find it confusing to have a `docs` and a `doc` (created by `ex_doc`) (v0.7)
   - [ ] Rethink whether we really want to create a `Fledex.Config.Data` module or we should store the information in a GenServer. The issue with the GenServer is that we need to start a server. But maybe that's not soo bad. (v0.9)
   - [x] Change the `start_links` to take just one arg (the parameters) and an `opts` passed as opts to GenServer. Through this we define the name and therefore can move the `via_tuple` outside of the modules.
@@ -55,7 +56,7 @@ Even though this library is published, there are things I still want to do befor
     - [x] Replace it with a different library (maybe `SchedEx`? https://hexdocs.pm/sched_ex/readme.html) (v0.7)
       - [x] Investigate various libraries and how they fit into Fledex. I looked at various different libraries (`erlcron`, `sched_ex`, `exq_scheduler`, `ecron`, ...), but none really fulfils the needs :-( `SchedEx` is the one that is simple and comes closest. Therefore the plan is to take it (it's MIT license), modify it, and integrate it into Fledex
       - [x] It's not possible to inject a context to the job, because you either have to provide an `{M, F, [Args]}` or a `(-> any())` function. The former is not possible, since we don't have amodule (but just an anonymous function) and the latter is not possible, because we can't pass in any argument :-(. We would need to extend Quantum to accept an {F, [Args]}
-      - [ ] Switch to a released version of `:fledex_scheduler` (v0.7)
+      - [x] Switch to a released version of `:fledex_scheduler` (v0.7)
   - [ ] Enable Telemetry? (v0.8)
     - [ ] Switch also the `fledex_scheduler` stats to telemetry (v0.8)
   - [ ] Add support for WS2811/12/13/14/15 LED strips controlled through phase modulation. (v0.8)

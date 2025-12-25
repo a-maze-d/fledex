@@ -49,6 +49,7 @@ defmodule Fledex.SupervisorTest do
   @test_strip :test_strip
   @test_anim :my_anim
   @test_coord :my_coordinator
+  @test_job :my_job
   describe "workers" do
     setup do
       start_supervised(AnimationSystem.child_spec())
@@ -170,8 +171,34 @@ defmodule Fledex.SupervisorTest do
         func: fn _state, _context, _options -> :ok end
       })
 
+      assert LedStripSupervisor.coordinator_exists?(@test_strip, @test_coord)
+
       assert count_workers(@test_strip) == 1
       Coordinator.stop(Utils.via_tuple(@test_strip, :coordinator, @test_coord))
+      assert count_workers(@test_strip) == 0
+    end
+
+    test "job worker" do
+      assert count_workers() == 0
+      AnimationSystem.start_led_strip(@test_strip)
+      assert count_workers() == 1
+      assert count_workers(@test_strip) == 0
+
+      LedStripSupervisor.start_job(
+        @test_strip,
+        @test_job,
+        %{
+          pattern: {1, :h},
+          func: fn -> :ok end,
+          options: []
+        },
+        []
+      )
+
+      assert LedStripSupervisor.job_exists?(@test_strip, @test_job)
+
+      assert count_workers(@test_strip) == 1
+      Coordinator.stop(Utils.via_tuple(@test_strip, :job, @test_job))
       assert count_workers(@test_strip) == 0
     end
   end
