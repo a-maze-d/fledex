@@ -34,10 +34,10 @@ jobs:
             otp: 27
           - elixir: 1.18.x
             otp: 28
-            coverage: true
-            other_checks: true
           - elixir: 1.19.x
             otp: 28
+            coverage: true
+            other_checks: true
     steps:
     - name: Harden the runner (Audit all outbound calls)
       uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
