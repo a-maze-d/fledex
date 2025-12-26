@@ -220,6 +220,9 @@ defmodule Fledex.Animation.ManagerTest do
       assert length(LedStripSupervisor.get_jobs(:john)) == 1
 
       Manager.register_config(:john, after_config)
+
+      Process.sleep(10)
+
       assert not LedStripSupervisor.job_exists?(:john, :before_timer)
       assert Enum.empty?(LedStripSupervisor.get_jobs(:john))
     end
