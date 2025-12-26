@@ -85,8 +85,6 @@ defmodule Fledex.Supervisor.Utils do
         restart: :transient
       }
     )
-
-    # |> dbg()
   end
 
   @spec get_worker(atom, worker_types(), atom) :: pid() | nil

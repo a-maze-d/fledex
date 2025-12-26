@@ -96,7 +96,6 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
   def start_job(strip_name, job_name, config, opts) do
     opts = Keyword.put_new(opts, :name, Utils.via_tuple(strip_name, :job, job_name))
     Utils.start_worker(strip_name, job_name, :job, config, opts)
-    # |> dbg()
   end
 
   @doc """
@@ -121,9 +120,9 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
   It is safe to call this function even if the job does not exist
   """
   @spec stop_job(atom, atom) :: :ok
-  def stop_job(strip_name, coordinator_name) do
+  def stop_job(strip_name, job_name) do
     Utils.strip_workers_name(strip_name)
-    |> Utils.stop_worker(strip_name, :job, coordinator_name)
+    |> Utils.stop_worker(strip_name, :job, job_name)
   end
 
   @doc """

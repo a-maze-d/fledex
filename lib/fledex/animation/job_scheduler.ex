@@ -63,6 +63,5 @@ defmodule Fledex.Animation.JobScheduler do
     server_opts = Keyword.put_new(server_opts, :name, Utils.via_tuple(strip_name, :job, job_name))
     job = create_job(strip_name, job_name, config)
     Runner.start_link(job, [], server_opts)
-    # |> dbg()
   end
 end

@@ -102,6 +102,7 @@ defmodule Fledex.Animation.ManagerTest do
       }
 
       Manager.register_config(strip_name, config2)
+
       assert LedStripSupervisor.animation_exists?(strip_name, :t1)
       assert not LedStripSupervisor.animation_exists?(strip_name, :t2)
       assert LedStripSupervisor.animation_exists?(strip_name, :t3)
@@ -215,9 +216,11 @@ defmodule Fledex.Animation.ManagerTest do
       Manager.register_strip(:john, [{Null, []}], [])
       Manager.register_config(:john, before_config)
 
+      assert LedStripSupervisor.job_exists?(:john, :before_timer)
       assert length(LedStripSupervisor.get_jobs(:john)) == 1
 
       Manager.register_config(:john, after_config)
+      assert not LedStripSupervisor.job_exists?(:john, :before_timer)
       assert Enum.empty?(LedStripSupervisor.get_jobs(:john))
     end
   end
