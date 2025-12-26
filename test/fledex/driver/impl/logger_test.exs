@@ -15,7 +15,7 @@ defmodule Fledex.Driver.Impl.LoggerTest do
     test "defaults" do
       config = Logger.init([], %{})
       assert Keyword.fetch!(config, :update_freq) == 10
-      assert Keyword.fetch!(config, :log_color_code) == false
+      assert Keyword.fetch!(config, :color) == false
       assert Keyword.fetch!(config, :terminal) == true
     end
 
@@ -24,14 +24,14 @@ defmodule Fledex.Driver.Impl.LoggerTest do
         Logger.init(
           [
             update_freq: 12,
-            log_color_code: true,
+            color: true,
             terminal: false
           ],
           %{}
         )
 
       assert Keyword.fetch!(config, :update_freq) == 12
-      assert Keyword.fetch!(config, :log_color_code) == true
+      assert Keyword.fetch!(config, :color) == true
       assert Keyword.fetch!(config, :terminal) == false
     end
 
@@ -40,7 +40,7 @@ defmodule Fledex.Driver.Impl.LoggerTest do
         Logger.init(
           [
             update_freq: 12,
-            log_color_code: true
+            color: true
           ],
           %{}
         )
@@ -54,7 +54,7 @@ defmodule Fledex.Driver.Impl.LoggerTest do
           Logger.init(
             [
               update_freq: 1,
-              log_color_code: false,
+              color: false,
               terminal: false
             ],
             %{}
@@ -82,7 +82,7 @@ defmodule Fledex.Driver.Impl.LoggerTest do
             Logger.init(
               [
                 update_freq: 1,
-                log_color_code: false,
+                color: false,
                 terminal: false
               ],
               %{}
@@ -101,7 +101,7 @@ defmodule Fledex.Driver.Impl.LoggerTest do
           Logger.init(
             [
               update_freq: 1,
-              log_color_code: true,
+              color: true,
               terminal: false
             ],
             %{}
@@ -110,10 +110,10 @@ defmodule Fledex.Driver.Impl.LoggerTest do
         leds = [0xFF0000, 0x00FF00, 0x0000FF]
         Logger.transfer(leds, 0, config)
       end)
-      |> assert_log_color_code()
+      |> assert_color()
     end
 
-    defp assert_log_color_code(log) do
+    defp assert_color(log) do
       assert String.match?(log, ~r/16711680,65280,255,/)
     end
 
@@ -123,7 +123,7 @@ defmodule Fledex.Driver.Impl.LoggerTest do
           Logger.init(
             [
               update_freq: 10,
-              log_color_code: true,
+              color: true,
               terminal: true
             ],
             %{}
@@ -144,7 +144,7 @@ defmodule Fledex.Driver.Impl.LoggerTest do
         Logger.init(
           [
             update_freq: 12,
-            log_color_code: true
+            color: true
           ],
           %{}
         )

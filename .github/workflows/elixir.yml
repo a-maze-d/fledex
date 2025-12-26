@@ -34,10 +34,10 @@ jobs:
             otp: 27
           - elixir: 1.18.x
             otp: 28
-            coverage: true
-            format: true
           - elixir: 1.19.x
             otp: 28
+            coverage: true
+            other_checks: true
     steps:
     - name: Harden the runner (Audit all outbound calls)
       uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
@@ -82,7 +82,7 @@ jobs:
       uses: fsfe/reuse-action@676e2d560c9a403aa252096d99fcab3e1132b0f5 # v6.0.0
 
     - name: Check format
-      if: "${{ matrix.format }}"
+      if: ${{ matrix.other_checks }}
       run: mix format --check-formatted
 
     - name: Run tests
@@ -92,12 +92,13 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
     - name: Check coverage
-      if: "${{ matrix.coverage }}"
+      if: ${{ matrix.coverage }}
       run: mix coveralls.github
       env:
         MIX_ENV: test
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Check for transitive compilation dependencies
-      run: mix xref graph --label compile-connected --fail-above 9
+      if: ${{ matrix.other_checks }}
+      run: mix xref graph --label compile-connected --fail-above 7
 

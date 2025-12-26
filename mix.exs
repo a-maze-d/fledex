@@ -101,7 +101,8 @@ defmodule Fledex.MixProject do
       {:kino, "~> 0.11"},
       {:phoenix_pubsub, "~> 2.1"},
       {:libcluster, "~> 3.3"},
-      {:quantum, "~> 3.0"},
+      {:tzdata, "~> 1.1", optional: true},
+      {:fledex_scheduler, "~>0.1"},
 
       # observability
       {:telemetry, "~> 1.2"},
@@ -213,6 +214,7 @@ defmodule Fledex.MixProject do
         "Details: Animation": ~r/Fledex.Animation/,
         "Details: Color": ~r/Fledex.Color/,
         "Details: Driver": ~r/Fledex.Driver/,
+        "Details: Scheduler": ~r/Fledex.Scheduler/,
         "Details: Supervisor": [~r/Fledex.Supervisor/, Fledex.Application],
         "Details: Utils": ~r/Fledex.Utils/
       ],

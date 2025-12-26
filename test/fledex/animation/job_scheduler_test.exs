@@ -11,6 +11,7 @@ defmodule Fledex.Animation.JobSchedulerTest do
     test "full job specs" do
       job =
         JobScheduler.create_job(
+          :strip_name,
           :the_job,
           %{
             pattern: ~e[* * * * * * *]e,
@@ -19,18 +20,19 @@ defmodule Fledex.Animation.JobSchedulerTest do
               timezone: :utc,
               overlap: false
             ]
-          },
-          :strip_name
+          }
         )
 
-      assert %Quantum.Job{
-               run_strategy: %Quantum.RunStrategy.Random{nodes: :cluster},
-               overlap: false,
-               timezone: :utc,
-               name: :the_job,
+      assert %Fledex.Scheduler.Job{
+               func: _func,
                schedule: schedule,
-               task: _func,
-               state: :active
+               context: %{},
+               opts: [
+                 run_once: false,
+                 repeat: true,
+                 overlap: false,
+                 timezone: "Etc/UTC"
+               ]
              } = job
 
       assert %Crontab.CronExpression{

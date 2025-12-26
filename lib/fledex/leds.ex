@@ -167,7 +167,7 @@ defmodule Fledex.Leds do
   This is used when the led sequence is sent to the `Fledex.LedStrip` when the
   `send/2` function is called.
   """
-  @spec set_led_strip_info(t, server_name :: atom, namespace :: atom) :: t
+  @spec set_led_strip_info(t, server_name :: GenServer.server(), namespace :: atom) :: t
   def set_led_strip_info(%{opts: opts} = leds, server_name \\ Fledex.LedStrip, namespace) do
     opts = %{opts | server_name: server_name, namespace: namespace}
     %{leds | opts: opts}
@@ -455,6 +455,7 @@ defmodule Fledex.Leds do
   > Through the `:offset` it is possible to create simple animations by simply counting up
   > the counter.
   """
+  @doc deprecated: "Use the `AnimationSystem` through the Fledex DSL instead"
   @spec send(t, keyword) :: :ok | {:error, String.t()}
   def send(leds, opts \\ []) do
     strip_name = leds.opts.server_name || Keyword.get(opts, :server_name, Fledex.LedStrip)

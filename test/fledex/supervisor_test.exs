@@ -37,18 +37,14 @@ defmodule Fledex.SupervisorTest do
   end
 
   defp count_workers do
-    DynamicSupervisor.count_children(Utils.workers_supervisor())
-    |> Map.get(:active)
-  end
-
-  defp count_workers(strip_name) do
-    DynamicSupervisor.count_children(Utils.workers_name(strip_name))
+    DynamicSupervisor.count_children(Utils.strip_supervisors())
     |> Map.get(:active)
   end
 
   @test_strip :test_strip
   @test_anim :my_anim
   @test_coord :my_coordinator
+  @test_job :my_job
   describe "workers" do
     setup do
       start_supervised(AnimationSystem.child_spec())
@@ -60,11 +56,19 @@ defmodule Fledex.SupervisorTest do
                {:via, Registry, {Fledex.Supervisor.WorkersRegistry, {:testA, :animator, :testB}}}
     end
 
-    test "led strip worker" do
+    test "led strip worker (stopped directly)" do
       assert count_workers() == 0
       AnimationSystem.start_led_strip(@test_strip)
       assert count_workers() == 1
       LedStripSupervisor.stop(@test_strip)
+      assert count_workers() == 0
+    end
+
+    test "led strip worker (stopped through system)" do
+      assert count_workers() == 0
+      AnimationSystem.start_led_strip(@test_strip)
+      assert count_workers() == 1
+      AnimationSystem.stop_led_strip(@test_strip)
       assert count_workers() == 0
     end
 
@@ -109,7 +113,7 @@ defmodule Fledex.SupervisorTest do
       assert AnimationSystem.get_led_strips() |> length() == 1
       assert LedStripSupervisor.get_animations(@test_strip) |> length() == 1
 
-      Animator.stop(@test_strip, @test_anim)
+      Animator.stop(Utils.via_tuple(@test_strip, :animator, @test_anim))
       # wait for the eshutdown
       Process.sleep(500)
       assert AnimationSystem.get_led_strips() |> length() == 1
@@ -164,15 +168,47 @@ defmodule Fledex.SupervisorTest do
       assert count_workers() == 0
       AnimationSystem.start_led_strip(@test_strip)
       assert count_workers() == 1
-      assert count_workers(@test_strip) == 0
+      assert Enum.empty?(LedStripSupervisor.get_coordinators(@test_strip))
 
       LedStripSupervisor.start_coordinator(@test_strip, @test_coord, %{
         func: fn _state, _context, _options -> :ok end
       })
 
-      assert count_workers(@test_strip) == 1
-      Coordinator.stop(@test_strip, @test_coord)
-      assert count_workers(@test_strip) == 0
+      assert LedStripSupervisor.coordinator_exists?(@test_strip, @test_coord)
+
+      assert length(LedStripSupervisor.get_coordinators(@test_strip)) == 1
+      Coordinator.stop(Utils.via_tuple(@test_strip, :coordinator, @test_coord))
+
+      Process.sleep(10)
+
+      assert Enum.empty?(LedStripSupervisor.get_coordinators(@test_strip))
+    end
+
+    test "job worker" do
+      assert count_workers() == 0
+      AnimationSystem.start_led_strip(@test_strip)
+      assert count_workers() == 1
+      assert Enum.empty?(LedStripSupervisor.get_jobs(@test_strip))
+
+      LedStripSupervisor.start_job(
+        @test_strip,
+        @test_job,
+        %{
+          pattern: {1, :h},
+          func: fn -> :ok end,
+          options: []
+        },
+        []
+      )
+
+      assert LedStripSupervisor.job_exists?(@test_strip, @test_job)
+
+      assert length(LedStripSupervisor.get_jobs(@test_strip)) == 1
+      LedStripSupervisor.stop_job(@test_strip, @test_job)
+
+      Process.sleep(10)
+
+      assert Enum.empty?(LedStripSupervisor.get_jobs(@test_strip))
     end
   end
 

@@ -61,17 +61,37 @@ BIG documentation improvement and cleanups including (also through other commits
 * Minor improvements to the livebooks for the school (German). This is still WIP
 * Added information about color correction to the 3b livebook
 * Added API documentation for the conversion functions
+* Updated the cheatsheet with coordinator information
+* worked on the coordinator livebook (WIP)
+* Documented the effect options
+* Documented the driver options
 
 ## Improved Supervision tree (#84)
 The supervision tree has been improved. 
 * The `AnimationSystem` got some more functions (`led_strip_exists?/1`, `get_led_strips/0`, `stop_led_strip/1`) and the `LedStripSupervisor` got them as well (`animation_exists?/2`, `get_animations/1`, `stop_animation/2`, `coordinator_exists?/2`, `get_coordinators/1`, `stop_coordinator/2`)
 * Some utility functions got created and moved around to support the above functions
 
+## Improved Coordinator (#110)
+Started to document and improve on the coordinator. It turned out that the `job` couldn't carry a context that might be important in the coordinator. This was the point to redo the scheduler. The work on the coordinator didn't get as far as I was hoping:
+* Replaced Quantum as a job scheduler with a heavily modified version of [SchedEx](https://github.com/SchedEx/SchedEx) (pulled in as a dependency. The fork can be found as [Fledex_Scheduler](https://github.com/a-maze-d/fledex_scheduler))
+* Reworked the Supervision Tree. The jobs are now properly attached to the LedStrip. Also changed how the process naming is done so it's limited to the supervisors and the manager. Nobody else is aware of process names and the registry.
+* Updated the cheatsheet.cheatmd (added espeically coordinator related information)
+* Updated the Coordinator livebook
+* Documented the allowed options for the drivers and the effects (Note: due to the coordinator work some minor changes can still happen). It turned out this is an important step to better understand how the coordinator should work :-)
+* Added `tzdata` as an optional dependency
+
+As working on the above some minor changes were made:
+* Updated the CREDITS.md file
+* Aligned the various function names that changed the config to `change_config` (instead of `update_`, `change_`, `config`). The only one that is not yet aligned are the `reinit` functions.
+* Implemented the `Fledex.Color` protocol for the new `%RGB{}` struct to be consistent with `%HSL{}` and `%HSV{}`
+
+
 ## Other changes
 ### Bugs
 * Fixed a documentation bug. The hue value in HSV is a byte representing 360 degrees.
 * Fixed a bug in the `Fledex.Supervisor.AnimationSystem` that prevented options to be passed correctly to the Manager. This only became apparent with 2 or more options.
 * Fixed a bug in `LoadUtils.a2b/1` The value wasn't truncated to an integer
+* Fixed a bug that the `Fledex.Color` protocol for `Fledex.Color.RGB didn't work in the livebook. Repositioning it solved the issue. Not sure why.
 
 ### Cleanup
 * Renamed some modules to make their purpose more clear
@@ -81,11 +101,11 @@ The supervision tree has been improved.
 * upgrading all dependencies to latest version
 
 ### Build
-* fixing coveralls compilation issue by only running coverage on the latest supported build. Also formatting check only happens on the latest elixir version
 * Adding expert to the .gitignore exclusion list
 * updated the max xref, since we have less compile connected files
 * Made `credo` more strict. enabled all checks that I consider as reasonable and fixed the resulting issues.
-* Adding support for Elixir 1.19
+* Adding support for Elixir 1.19. The latest Elixir version also helped to also reduce the max xref (9 --> 7)
+* Made the latest version to run extra tests like formatting, xref, coverage instead of doing it on all versions (since the different versions have different behaviors)
 
 
 # Previous versions

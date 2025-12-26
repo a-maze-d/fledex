@@ -5,6 +5,7 @@
 import Config
 
 config :logger, level: :info
-config :fledex, Fledex.Animation.JobScheduler, debug_logging: false
+# TODO: check whether we should replace it with something
+# config :fledex, Fledex.Animation.JobScheduler, debug_logging: false
 
 import_config "config_#{Mix.env()}.exs"

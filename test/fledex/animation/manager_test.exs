@@ -5,13 +5,13 @@
 defmodule Fledex.Animation.ManagerTest do
   use ExUnit.Case, async: false
 
-  alias Fledex.Animation.JobScheduler
+  import ExUnit.CaptureLog
+
   alias Fledex.Animation.Manager
   alias Fledex.Driver.Impl.Null
   alias Fledex.ManagerTestUtils
   alias Fledex.Supervisor.AnimationSystem
   alias Fledex.Supervisor.LedStripSupervisor
-  alias Quantum
 
   @strip_name :test_strip
   describe "init" do
@@ -48,7 +48,9 @@ defmodule Fledex.Animation.ManagerTest do
       Manager.register_strip(strip_name, [{Null, []}], [])
       assert AnimationSystem.led_strip_exists?(strip_name)
 
-      assert :ok == AnimationSystem.stop_led_strip(:non_existing_strip)
+      capture_log(fn ->
+        assert :ok == AnimationSystem.stop_led_strip(:non_existing_strip)
+      end)
     end
 
     test "register/unregister 2 led_strips", %{strip_name: strip_name} do
@@ -78,7 +80,9 @@ defmodule Fledex.Animation.ManagerTest do
       assert LedStripSupervisor.animation_exists?(strip_name, :t12)
       assert not LedStripSupervisor.animation_exists?(strip_name, :t13)
 
-      assert :ok == LedStripSupervisor.stop_animation(strip_name, :non_existing_animation)
+      capture_log(fn ->
+        assert :ok == LedStripSupervisor.stop_animation(strip_name, :non_existing_animation)
+      end)
     end
 
     test "re-register animation", %{strip_name: strip_name} do
@@ -98,6 +102,7 @@ defmodule Fledex.Animation.ManagerTest do
       }
 
       Manager.register_config(strip_name, config2)
+
       assert LedStripSupervisor.animation_exists?(strip_name, :t1)
       assert not LedStripSupervisor.animation_exists?(strip_name, :t2)
       assert LedStripSupervisor.animation_exists?(strip_name, :t3)
@@ -123,8 +128,7 @@ defmodule Fledex.Animation.ManagerTest do
       Manager.register_strip(:john, [{Null, []}], [])
       Manager.register_config(:john, config)
 
-      assert ManagerTestUtils.get_manager_config(:jobs, :john) == config
-      assert length(JobScheduler.jobs()) == 1
+      assert length(LedStripSupervisor.get_jobs(:john)) == 1
     end
 
     test "change job" do
@@ -147,23 +151,17 @@ defmodule Fledex.Animation.ManagerTest do
       Manager.register_strip(:john, [{Null, []}], [])
       Manager.register_config(:john, before_config)
 
-      jobs = ManagerTestUtils.get_manager_config(:jobs, :john)
-      assert Map.has_key?(jobs, :before_timer)
-      assert not Map.has_key?(jobs, :after_timer)
-      jobs = JobScheduler.jobs()
+      jobs = LedStripSupervisor.get_jobs(:john)
       assert length(jobs) == 1
-      assert Keyword.has_key?(jobs, :before_timer)
-      assert not Keyword.has_key?(jobs, :after_timer)
+      assert :before_timer in jobs
+      assert :after_timer not in jobs
 
       Manager.register_config(:john, after_config)
 
-      jobs = ManagerTestUtils.get_manager_config(:jobs, :john)
-      assert not Map.has_key?(jobs, :before_timer)
-      assert Map.has_key?(jobs, :after_timer)
-      jobs = JobScheduler.jobs()
+      jobs = LedStripSupervisor.get_jobs(:john)
       assert length(jobs) == 1
-      assert not Keyword.has_key?(jobs, :before_timer)
-      assert Keyword.has_key?(jobs, :after_timer)
+      assert :before_timer not in jobs
+      assert :after_timer in jobs
     end
 
     test "update job" do
@@ -186,23 +184,19 @@ defmodule Fledex.Animation.ManagerTest do
       Manager.register_strip(:john, [{Null, []}], [])
       Manager.register_config(:john, before_config)
 
-      jobs1 = ManagerTestUtils.get_manager_config(:jobs, :john)
-      assert Map.has_key?(jobs1, :timer)
-      jobs1 = JobScheduler.jobs()
+      jobs1 = LedStripSupervisor.get_jobs(:john)
       assert length(jobs1) == 1
-      assert Keyword.has_key?(jobs1, :timer)
+      assert :timer in jobs1
+      job1 = ManagerTestUtils.get_job_config(:john, :timer)
+      assert job1.job.schedule == ~e[2 * * * * * *]e
 
       Manager.register_config(:john, after_config)
 
-      jobs2 = ManagerTestUtils.get_manager_config(:jobs, :john)
-      assert Map.has_key?(jobs2, :timer)
-      jobs2 = JobScheduler.jobs()
+      jobs2 = LedStripSupervisor.get_jobs(:john)
       assert length(jobs2) == 1
-      assert Keyword.has_key?(jobs2, :timer)
-
-      schedule1 = Keyword.fetch!(jobs1, :timer) |> Map.fetch!(:schedule)
-      schedule2 = Keyword.fetch!(jobs2, :timer) |> Map.fetch!(:schedule)
-      assert schedule1 != schedule2
+      assert :timer in jobs2
+      job2 = ManagerTestUtils.get_job_config(:john, :timer)
+      assert job2.job.schedule == ~e[1 * * * * * *]e
     end
 
     test "delete job" do
@@ -222,10 +216,15 @@ defmodule Fledex.Animation.ManagerTest do
       Manager.register_strip(:john, [{Null, []}], [])
       Manager.register_config(:john, before_config)
 
-      assert length(JobScheduler.jobs()) == 1
+      assert LedStripSupervisor.job_exists?(:john, :before_timer)
+      assert length(LedStripSupervisor.get_jobs(:john)) == 1
 
       Manager.register_config(:john, after_config)
-      assert Enum.empty?(JobScheduler.jobs())
+
+      Process.sleep(10)
+
+      assert not LedStripSupervisor.job_exists?(:john, :before_timer)
+      assert Enum.empty?(LedStripSupervisor.get_jobs(:john))
     end
   end
 

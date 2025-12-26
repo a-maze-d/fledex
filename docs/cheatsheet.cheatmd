@@ -81,10 +81,12 @@ The following structures inside the `do ... end` block are allowed:
 | Structure   | Description       |
 | ---         | ---               |
 | [`animation`](#the-animation) | Defines an animation that can change over time        |
-| [`static`](#the-static)    | Defines a certain pattern, it cannot change over time |
-| [`effect`](#the-effect)    | Defines an effect that gets applied to an animation   |
-| [`job`](#the-job)       | Does not define any LEDs, but some job that should be executed in regular intervals |
 | [`component`](#the-component) | Defines a component. It's equivalent to a set of `static`, `animation`, `job`, including `effect`s. It allows to reuse certain aspects |
+| [`coordinator`](#the-coordinator) | Defines a coordinator that can synchronize various animations |
+| [`effect`](#the-effect)    | Defines an effect that gets applied to an animation   |
+| [`job`](#the-job)       | Defines some job that should be executed in regular intervals |
+| [`static`](#the-static)    | Defines a certain pattern, it cannot change over time |
+
 
 See below for more details about them
 
@@ -252,8 +254,42 @@ The `component` takes the following parameters:
 | Parameters | Description |
 | `name`     | (mandatory) Every component needs a name, but since a component consists of potentially several animations, the component could also take a tuple of names that are then assigned to the different animations (otherwise they are generated from the base name passed in) |
 | `component` | (mandatory) The name of the module that defines the component (that implements the `Fledex.Component.Interface` behaviour) |
-| `options` | (mandatory) A lit of options. The exact options are dependent on the component |
+| `options` | (mandatory) A list of options. The exact options are dependent on the component |
 
+## The `coordinator`
+{: .col-2}
+
+The `coordinator` implements a state machine that can coordinate various animations.
+It receives events from animations (and effects) and can decide on what to do with those. 
+
+**CAUTION:** This is an advanced concept. Also coordinators, even though they belong to a specific led strip, receive events from all animations, all led strips. It's up to you to filter them to the ones you are interested in.
+
+### Example
+
+```elixir
+  coordinator :coordinator_name, options do
+    state, context, config ->
+      take_some_action()
+      config
+  end
+```
+
+### Parameters
+
+The `coordinator` takes the following parameters:
+
+| Parameters | Description |
+| `name`     | (mandatory) Every coordinator needs a unique name |
+| `options` | (optional) The name of the module that defines the component (that implements the `Fledex.Component.Interface` behaviour) |
+
+### The `do ... end` block
+
+The `do ... end` implements an anonymous function that receives 3 parameter:
+* `state`: An atom describing the state of the animation (or effect)
+* `context`: Information on who published the event.
+* `config`: the configuration that has been passed in as parameters. This can also be used to store some extra information between calls
+
+The function will either manipulate an animation (or effect) or publish some event. At the end the function needs to return the `config` (or an updated version thereof).
 
 ## The `leds`
 {: .col-2}
@@ -317,6 +353,8 @@ Currently the following color name modules exist:
 * `Fledex.Color.Names.CSS`
 * `Fledex.Color.Names.SVG`
 * `Fledex.Color.Names.RAL`
+
+See the [full list of color names](colors.md)
 
 ### Examples
 

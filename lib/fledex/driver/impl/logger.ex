@@ -4,12 +4,18 @@
 
 defmodule Fledex.Driver.Impl.Logger do
   @moduledoc """
-    This driver can log the data either to `IO` or to a `Logger`.
+  This driver can log the data either to `IO` or to a `Logger`.
 
-    When logging to IO an attempt is made to preserve the colors, which
-    is difficult due to the more restrictive nature of the IO colors
-    (5bit instead of 8bit). It's probably best to stick to the
-    [ANSI defined colors](https://www.ditig.com/256-colors-cheat-sheet)
+  When logging to IO an attempt is made to preserve the colors, which
+  is difficult due to the more restrictive nature of the IO colors
+  (5bit instead of 8bit). It's probably best to stick to the
+  [ANSI defined colors](https://www.ditig.com/256-colors-cheat-sheet)
+
+  ## Options
+  The following options can be passed to this driver:
+  * `:update_freq`: the frequency on how often the data is dumped (default: `10`, meaning that only every `10`th redraw is printed out).
+  * `:color`: whether to use terminal colors in the output (default: `false`)
+  * `:terminal`: whether to dump to the terminal (`true`, default) or to the `Logger` (`false`)
   """
   @behaviour Fledex.Driver.Interface
   require Logger
@@ -27,7 +33,7 @@ defmodule Fledex.Driver.Impl.Logger do
   def configure(config) do
     [
       update_freq: Keyword.get(config, :update_freq, @default_update_freq),
-      log_color_code: Keyword.get(config, :log_color_code, false),
+      color: Keyword.get(config, :color, false),
       terminal: Keyword.get(config, :terminal, true)
     ]
   end
@@ -52,7 +58,7 @@ defmodule Fledex.Driver.Impl.Logger do
 
   def transfer(leds, counter, config) do
     if rem(counter, Keyword.fetch!(config, :update_freq)) == 0 do
-      log_color_mode = Keyword.fetch!(config, :log_color_code)
+      log_color_mode = Keyword.fetch!(config, :color)
 
       output =
         Enum.reduce(leds, <<>>, fn value, acc ->
@@ -70,6 +76,15 @@ defmodule Fledex.Driver.Impl.Logger do
     {config, :ok}
   end
 
+  @impl Interface
+  @spec terminate(reason, keyword) :: :ok
+        when reason: :normal | :shutdown | {:shutdown, term()} | term()
+  def terminate(_reason, _config) do
+    # nothing needs to be done here
+    :ok
+  end
+
+  # MARK: private utilty functions
   @spec add(acc :: String.t(), value :: Types.colorint(), log_color_mode :: boolean) :: String.t()
   defp add(acc, value, true) do
     acc <> Integer.to_string(value) <> ","
@@ -83,13 +98,5 @@ defmodule Fledex.Driver.Impl.Logger do
   defp to_ansi_color(value) do
     %RGB{r: r, g: g, b: b} = RGB.new(value)
     IO.ANSI.color(trunc(r / @divisor), trunc(g / @divisor), trunc(b / @divisor))
-  end
-
-  @impl Interface
-  @spec terminate(reason, keyword) :: :ok
-        when reason: :normal | :shutdown | {:shutdown, term()} | term()
-  def terminate(_reason, _config) do
-    # nothing needs to be done here
-    :ok
   end
 end

@@ -25,17 +25,24 @@ defmodule Fledex.Animation.CoordinatorTest do
 
   describe "test client functions" do
     test "cycle through all" do
-      assert {:ok, pid} = Coordinator.start_link(:strip_name, :coordinator_name, %{})
-      assert LedStripSupervisor.coordinator_exists?(:strip_name, :coordinator_name)
+      assert {:ok, pid} =
+               Coordinator.start_link(:strip_name, :coordinator_name, %{},
+                 name: :coordinator_name
+               )
+
+      # assert LedStripSupervisor.coordinator_exists?(:strip_name, :coordinator_name)
 
       assert :ok =
-               Coordinator.config(:strip_name, :coordinator_name, %{
-                 type: :coordinator,
-                 options: [counter: 0],
-                 func: fn _broadcast_state, _context, options ->
-                   Keyword.update!(options, :counter, fn old_val -> old_val + 1 end)
-                 end
-               })
+               Coordinator.change_config(
+                 pid,
+                 %{
+                   type: :coordinator,
+                   options: [counter: 0],
+                   func: fn _broadcast_state, _context, options ->
+                     Keyword.update!(options, :counter, fn old_val -> old_val + 1 end)
+                   end
+                 }
+               )
 
       %Coordinator{options: options1} = :sys.get_state(pid)
       counter_1 = Keyword.fetch!(options1, :counter)
@@ -47,7 +54,7 @@ defmodule Fledex.Animation.CoordinatorTest do
       counter_2 = Keyword.fetch!(options2, :counter)
       assert counter_2 == counter_1 + 1
 
-      assert :ok = Coordinator.stop(:strip_name, :coordinator_name)
+      assert :ok = Coordinator.stop(:coordinator_name)
       # we need to wait for the shutdown
       Process.sleep(500)
       assert not LedStripSupervisor.coordinator_exists?(:strip_name, :coordinator_name)
@@ -93,7 +100,7 @@ defmodule Fledex.Animation.CoordinatorTest do
         type: :coordinator
       }
 
-      assert {:noreply, state} = Coordinator.handle_cast({:config, config}, state)
+      assert {:noreply, state} = Coordinator.handle_cast({:change_config, config}, state)
       assert state.options == [old: true]
       assert state.func.(:bstate, %{}, []) == [function2: true]
     end

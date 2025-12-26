@@ -17,6 +17,7 @@ defmodule Fledex.Utils.PubSub do
   @channel_state "state"
 
   require Phoenix.PubSub
+  @doc delegate_to: {Phoenix.PubSub, :subscribe, 2}
   defdelegate subscribe(pubsub \\ Utils.pubsub_name(), topic), to: Phoenix.PubSub
   defdelegate unsubscribe(pubsub \\ Utils.pubsub_name(), topic), to: Phoenix.PubSub
   defdelegate broadcast(pubsub \\ Utils.pubsub_name(), topic, message), to: Phoenix.PubSub
@@ -24,8 +25,6 @@ defmodule Fledex.Utils.PubSub do
   defdelegate direct_broadcast!(node, pubsub \\ Utils.pubsub_name(), topic, message),
     to: Phoenix.PubSub
 
-  # @spec app() :: atom
-  # def app, do: @app
   @spec channel_trigger() :: String.t()
   def channel_trigger, do: @channel_trigger
   @spec channel_state() :: String.t()

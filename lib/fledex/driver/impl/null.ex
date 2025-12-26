@@ -10,7 +10,7 @@ defmodule Fledex.Driver.Impl.Null do
 
   @moduledoc """
     This is a dummy implementation of the Driver that doesn't do
-    anything (similar to a /dev/null device). This can be useful if you
+    anything (similar to a `/dev/null` device). This can be useful if you
     want to run some tests without getting any output or sending it to hardware.
   """
 

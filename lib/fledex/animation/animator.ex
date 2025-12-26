@@ -53,7 +53,7 @@ defmodule Fledex.Animation.Animator do
 
   alias Fledex.Leds
   alias Fledex.LedStrip
-  alias Fledex.Supervisor.Utils
+  # alias Fledex.Supervisor.Utils
   alias Fledex.Utils.PubSub
 
   @typedoc """
@@ -77,6 +77,7 @@ defmodule Fledex.Animation.Animator do
            :options => keyword,
            :effects => [{module, keyword}],
            :strip_name => atom,
+           :strip_server => GenServer.server(),
            :animation_name => atom
          }
 
@@ -86,29 +87,22 @@ defmodule Fledex.Animation.Animator do
   Create a new animation (with a given name and configuration) for the led strip
   with the specified name.
   """
-  @spec start_link(strip_name :: atom, animation_name :: atom, config :: config_t) ::
+  @spec start_link(strip_name :: atom, animation_name :: atom, config :: config_t, keyword) ::
           GenServer.on_start()
-  def start_link(strip_name, animation_name, config) do
-    GenServer.start_link(__MODULE__, {strip_name, animation_name, config},
-      name: Utils.via_tuple(strip_name, :animator, animation_name)
+  def start_link(strip_name, animation_name, config, opts) do
+    GenServer.start_link(
+      __MODULE__,
+      {strip_name, animation_name, config},
+      opts
     )
   end
 
   @doc """
-  (Re-)Configure this animation. You will have to implement this function on server side.
-  This will look something like the following:
-  ```elixir
-    @spec handle_cast({:config, config_t}, state_t) :: {:noreply, state_t}
-    def handle_cast({:config, config}, state) do
-      # do something here
-      {:noreply, state}
-    end
-  ```
+  (Re-)Configure this animation.
   """
-  @spec config(atom, atom, config_t) :: :ok
-  def config(strip_name, animation_name, config) do
-    Utils.via_tuple(strip_name, :animator, animation_name)
-    |> GenServer.cast({:config, config})
+  @spec change_config(GenServer.server(), config_t) :: :ok
+  def change_config(server, config) do
+    GenServer.cast(server, {:change_config, config})
   end
 
   @doc """
@@ -119,19 +113,17 @@ defmodule Fledex.Animation.Animator do
   It is possible to apply the configuration change to ALL effects of the animator, which
   can be convenient especially if you want to enable/disable all effects at once.
   """
-  @spec update_effect(atom, atom, :all | pos_integer, keyword) :: :ok
-  def update_effect(strip_name, animation_name, what, config_update) do
-    Utils.via_tuple(strip_name, :animator, animation_name)
-    |> GenServer.cast({:update_effect, what, config_update})
+  @spec update_effect(GenServer.server(), :all | pos_integer, keyword) :: :ok
+  def update_effect(server, what, config_update) do
+    GenServer.cast(server, {:update_effect, what, config_update})
   end
 
   @doc """
   When the animation is no long required, this function should be called.
   """
-  @spec stop(atom, atom) :: :ok
-  def stop(strip_name, animation_name) do
-    Utils.via_tuple(strip_name, :animator, animation_name)
-    |> GenServer.stop(:normal)
+  @spec stop(GenServer.server()) :: :ok
+  def stop(server) do
+    GenServer.stop(server, :normal)
   end
 
   ### MARK: server side
@@ -154,12 +146,14 @@ defmodule Fledex.Animation.Animator do
       options: [send_config: &default_send_config_func/1],
       effects: [],
       strip_name: strip_name,
+      # we set it to the same name as the strip by default.
+      strip_server: strip_name,
       animation_name: animation_name
     }
 
-    state = update_config(state, init_args)
+    state = do_update_config(state, init_args)
 
-    _ignore = LedStrip.define_namespace(state.strip_name, state.animation_name)
+    _ignore = LedStrip.define_namespace(state.strip_server, state.animation_name)
     # Logger.debug("namespce: #{inspect(ignore)}")
 
     _ignore =
@@ -203,9 +197,9 @@ defmodule Fledex.Animation.Animator do
   end
 
   @impl GenServer
-  @spec handle_cast({:config, config_t}, state_t) :: {:noreply, state_t}
-  def handle_cast({:config, config}, state) do
-    state = update_config(state, config)
+  @spec handle_cast({:change_config, config_t}, state_t) :: {:noreply, state_t}
+  def handle_cast({:change_config, config}, state) do
+    state = do_update_config(state, config)
 
     {:noreply, update_leds(state)}
   end
@@ -236,14 +230,14 @@ defmodule Fledex.Animation.Animator do
   def terminate(
         _reason,
         %{
-          strip_name: strip_name,
+          strip_server: strip_server,
           animation_name: animation_name,
           type: type
         } = _state
       ) do
     Logger.debug(
-      "shutting down animation #{inspect({strip_name, animation_name})}",
-      %{strip_name: strip_name, animation_name: animation_name, type: type}
+      "shutting down animation #{inspect({strip_server, animation_name})}",
+      %{strip_server: strip_server, animation_name: animation_name, type: type}
     )
 
     case type do
@@ -252,7 +246,7 @@ defmodule Fledex.Animation.Animator do
       :static -> :ok
     end
 
-    LedStrip.drop_namespace(strip_name, animation_name)
+    LedStrip.drop_namespace(strip_server, animation_name)
   end
 
   # MARK: public helper functions
@@ -294,6 +288,7 @@ defmodule Fledex.Animation.Animator do
   defp update_leds(
          %{
            strip_name: strip_name,
+           strip_server: strip_server,
            animation_name: animation_name,
            def_func: def_func,
            options: options,
@@ -313,7 +308,7 @@ defmodule Fledex.Animation.Animator do
     {config, triggers} = send_config_func.(triggers) |> get_with_triggers(triggers)
 
     LedStrip.set_leds_with_rotation(
-      strip_name,
+      strip_server,
       animation_name,
       Leds.to_list(leds),
       leds.count,
@@ -342,8 +337,8 @@ defmodule Fledex.Animation.Animator do
   defp call_def_func(def_func, triggers, options) when is_function(def_func, 2),
     do: def_func.(triggers, options)
 
-  @spec update_config(state_t, config_t) :: state_t
-  defp update_config(state, config) do
+  @spec do_update_config(state_t, config_t) :: state_t
+  defp do_update_config(state, config) do
     %{
       type: config[:type] || state.type,
       triggers: Map.merge(state.triggers, config[:triggers] || state[:triggers]),
@@ -352,6 +347,7 @@ defmodule Fledex.Animation.Animator do
       effects: update_effects(state.effects, config[:effects], state.strip_name),
       # not to be updated
       strip_name: state.strip_name,
+      strip_server: config[:strip_server] || state.strip_server,
       # not to be updated
       animation_name: state.animation_name
     }
