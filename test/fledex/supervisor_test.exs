@@ -178,6 +178,9 @@ defmodule Fledex.SupervisorTest do
 
       assert length(LedStripSupervisor.get_coordinators(@test_strip)) == 1
       Coordinator.stop(Utils.via_tuple(@test_strip, :coordinator, @test_coord))
+
+      Process.sleep(10)
+
       assert Enum.empty?(LedStripSupervisor.get_coordinators(@test_strip))
     end
 
@@ -202,6 +205,9 @@ defmodule Fledex.SupervisorTest do
 
       assert length(LedStripSupervisor.get_jobs(@test_strip)) == 1
       LedStripSupervisor.stop_job(@test_strip, @test_job)
+
+      Process.sleep(10)
+
       assert Enum.empty?(LedStripSupervisor.get_jobs(@test_strip))
     end
   end
