@@ -7,11 +7,11 @@ defmodule Fledex.SupervisorTest do
 
   require Logger
 
-  alias Fledex.Application
-  alias Fledex.Animation.JobScheduler
   alias Fledex.Animation.Animator
   alias Fledex.Animation.Coordinator
+  alias Fledex.Animation.JobScheduler
   alias Fledex.Animation.Manager
+  alias Fledex.Application
   alias Fledex.Supervisor.AnimationSystem
   alias Fledex.Supervisor.LedStripSupervisor
   alias Fledex.Supervisor.Utils

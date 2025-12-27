@@ -266,19 +266,15 @@ defmodule Fledex.Animation.Manager do
     end)
   end
 
-  @spec update_workers(atom, Utils.led_strip_worker_types(), [
-          {atom, Utils.led_strip_worker_configs()}
-        ]) :: :ok
-  defp update_workers(strip_name, type, animations) do
-    Enum.each(animations, fn {worker_name, config} ->
-      config = adjust_config(strip_name, type, worker_name, config)
-      LedStripSupervisor.reconfigure_worker(strip_name, type, worker_name, config)
+  @spec update_workers(atom, Utils.led_strip_worker_types(), %{atom => config_t()}) :: :ok
+  defp update_workers(strip_name, type, updated_workers) do
+    Enum.each(updated_workers, fn {worker_name, worker_config} ->
+      worker_config = adjust_config(strip_name, type, worker_name, worker_config)
+      LedStripSupervisor.reconfigure_worker(strip_name, type, worker_name, worker_config)
     end)
   end
 
-  @spec create_workers(atom, Utils.led_strip_worker_types(), [
-          {atom, Utils.led_strip_worker_configs()}
-        ]) :: :ok
+  @spec create_workers(atom, Utils.led_strip_worker_types(), %{atom => config_t()}) :: :ok
   defp create_workers(strip_name, type, created_workers) do
     Enum.each(created_workers, fn {worker_name, config} ->
       LedStripSupervisor.start_worker(
@@ -290,7 +286,7 @@ defmodule Fledex.Animation.Manager do
     end)
   end
 
-  @spec adjust_config(atom, Utils.led_strip_worker_types(), atom, map) ::
+  @spec adjust_config(atom, Utils.led_strip_worker_types(), atom, config_t()) ::
           Utils.led_strip_worker_configs()
   defp adjust_config(strip_name, type, worker_name, config) do
     strip_server = AnimationSystem.get_strip_server(strip_name)

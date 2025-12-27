@@ -11,10 +11,10 @@ defmodule Fledex.Utils.Dsl do
   """
   require Logger
 
-  alias Fledex.Application
   alias Fledex.Animation.Coordinator
   alias Fledex.Animation.JobScheduler
   alias Fledex.Animation.Manager
+  alias Fledex.Application
   alias Fledex.Leds
   alias Fledex.LedStrip
   alias Fledex.Scheduler.Job

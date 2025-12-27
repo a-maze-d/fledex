@@ -94,7 +94,7 @@ defmodule Fledex.Supervisor.LedStripSupervisor do
   @doc """
   This checks whether a specified worker exists
   """
-  @spec worker_exists?(atom, Utils.led_strip_woerker_types(), atom) :: boolean
+  @spec worker_exists?(atom, Utils.led_strip_worker_types(), atom) :: boolean
   def worker_exists?(strip_name, type, worker_name) do
     Utils.worker_exists?(strip_name, type, worker_name)
   end
