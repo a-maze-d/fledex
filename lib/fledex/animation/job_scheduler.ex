@@ -24,7 +24,7 @@ defmodule Fledex.Animation.JobScheduler do
   The configuration of a job.
 
   * `:type`: This must be `:job`
-  * `:pattern`: This is the crontab pattern describing when to trigger the job
+  * `:schedule`: This is the crontab pattern or interval describing when to trigger the job
   * `:options`: Some options to finetune the job
   ** `:timezone`: default `UTC`
   ** `:overlap`: whether jobs are allowed to overlap (if execution is longer than the interval between runs)
@@ -32,24 +32,20 @@ defmodule Fledex.Animation.JobScheduler do
   """
   @type config_t :: %{
           type: :job,
-          pattern: Crontab.CronExpression.t(),
+          schedule: Job.schedule(),
           options: keyword,
           func: (-> any)
         }
 
   @doc """
-  creates a new job
-
-  **Note:** The job name is NOT unique across led strips. It's your
-  responsibility to avoid interferences (the strip_name is currently
-  not used, but this might change in the future)
+  converts a config to a job
   """
-  @spec create_job(atom, atom, config_t()) :: job()
-  def create_job(strip_name, job_name, job_config) do
+  @spec to_job(atom, atom, config_t()) :: job()
+  def to_job(strip_name, job_name, job_config) do
     Job.new()
     |> Job.set_name(job_name)
     |> Job.set_task(job_config.func)
-    |> Job.set_schedule(job_config.pattern)
+    |> Job.set_schedule(job_config.schedule)
     |> Job.set_timezone(Keyword.get(job_config.options, :timezone, "Etc/UTC"))
     |> Job.set_overlap(Keyword.get(job_config.options, :overlap, false))
     |> Job.set_repeat(Keyword.get(job_config.options, :repeat, true))
@@ -57,11 +53,16 @@ defmodule Fledex.Animation.JobScheduler do
     |> Job.set_context(%{strip_name: strip_name, job: job_name})
   end
 
-  @spec start_link(atom, atom, config_t(), keyword) :: GenServer.on_start()
-  def start_link(strip_name, job_name, config, server_opts) do
+  @spec start_link(atom, atom, job(), keyword) :: GenServer.on_start()
+  def start_link(strip_name, job_name, job, server_opts) do
     # IO.puts("Starting job: #{inspect {strip_name, job_name, config, server_opts}}")
     server_opts = Keyword.put_new(server_opts, :name, Utils.via_tuple(strip_name, :job, job_name))
-    job = create_job(strip_name, job_name, config)
     Runner.start_link(job, [], server_opts)
+  end
+
+  @spec change_config(GenServer.server(), job()) :: :ok
+  def change_config(server, job) do
+    Runner.change_config(server, job, [])
+    :ok
   end
 end

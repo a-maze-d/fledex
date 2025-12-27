@@ -19,8 +19,7 @@ defmodule Fledex.LedStrip do
   > #### Note {: .info}
   >
   > In general you shouldn't require to start an LedStrip directly, but you should
-  > use the `Fledex DSL`. In order to start an `LedStrip` a Registry (with name as provided by
-  > `Fledex.Supervisor.Utils.worker_registry/0`) is required.
+  > use the `Fledex DSL`.
 
   To see how to configure an led strip, look at `start_link/3`
   """
@@ -241,34 +240,39 @@ defmodule Fledex.LedStrip do
   end
 
   @doc """
-  Change the config of the led strip.
+  Change the global config of the led strip.
 
   Change some aspect of the configuration for an led strip. The configuration
   will be updated and the old values will be returned.
+
+  > #### Note: {: .info}
+  > Usually you want to change the full configuration of the led strip (i.e.
+  > including the drivers) and not just the gloal config, which you can do
+  > through `change_config/3`
   """
-  @spec change_config(GenServer.server(), keyword) :: {:ok, [keyword]}
-  def change_config(server, global_config) do
-    GenServer.call(server, {:change_config, global_config})
+  @spec change_global_config(GenServer.server(), keyword) :: {:ok, [keyword]}
+  def change_global_config(server, global_config) do
+    GenServer.call(server, {:change_global_config, global_config})
   end
 
   @doc """
-  This reinitializes the led strip. You probably don't need it.
+  This changes the config of the led strip. You probably don't need it.
 
-  In some circumstances it might be necessary to reinitialize the led_strip
-  (including the drivers). Most of the time you don't need to call this.
-  If you do, you surely will know about it :)
+  In some circumstances it might be necessary to change the config of
+  the led_strip (including the drivers). Most of the time you don't need
+  to call this If you do, you surely will know about it :)
   """
-  @spec reinit(GenServer.server(), drivers_config_t, keyword) :: :ok
-  def reinit(server, driver, strip_config) when is_atom(driver) do
-    reinit(server, {driver, []}, strip_config)
+  @spec change_config(GenServer.server(), drivers_config_t, keyword) :: :ok
+  def change_config(server, driver, strip_config) when is_atom(driver) do
+    change_config(server, {driver, []}, strip_config)
   end
 
-  def reinit(server, {_driver_module, _driver_config} = driver, strip_config) do
-    reinit(server, [driver], strip_config)
+  def change_config(server, {_driver_module, _driver_config} = driver, strip_config) do
+    change_config(server, [driver], strip_config)
   end
 
-  def reinit(server, drivers, strip_config) do
-    GenServer.call(server, {:reinit, drivers, strip_config})
+  def change_config(server, drivers, strip_config) do
+    GenServer.call(server, {:change_config, drivers, strip_config})
     :ok
   end
 
@@ -338,8 +342,8 @@ defmodule Fledex.LedStrip do
   end
 
   @impl GenServer
-  @spec handle_call({:change_config, keyword}, {pid, any}, state_t) :: {:ok, keyword}
-  def handle_call({:change_config, global_config}, _from, state) do
+  @spec handle_call({:change_global_config, keyword}, {pid, any}, state_t) :: {:ok, keyword}
+  def handle_call({:change_global_config, global_config}, _from, state) do
     {new_config, rets} = do_update_config(state.config, global_config)
     {:reply, {:ok, rets}, %{state | config: new_config}}
   end
@@ -366,11 +370,11 @@ defmodule Fledex.LedStrip do
   end
 
   @impl GenServer
-  @spec handle_call({:reinit, Manager.drivers_t(), keyword}, {pid, any}, state_t) ::
+  @spec handle_call({:change_config, Manager.drivers_t(), keyword}, {pid, any}, state_t) ::
           {:reply, :ok, state_t}
-  def handle_call({:reinit, drivers, config}, _from, state) do
+  def handle_call({:change_config, drivers, config}, _from, state) do
     {updated_config, _rets} = do_update_config(state.config, config)
-    updated_drivers = Manager.reinit(state.drivers, drivers, updated_config)
+    updated_drivers = Manager.change_config(state.drivers, drivers, updated_config)
 
     {:reply, :ok,
      %{

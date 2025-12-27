@@ -25,7 +25,7 @@ This document is investigating the approach we want to take.
 > configuration), we do have to "reconfigure" the drivers.
 > Usually the drivers don't change in this scenario, so tearing everything down and
 > rebuildnig it feels wrong.
-> A bit of a middle ground could be that we reinit ONLY if the number of drivers, their
+> A bit of a middle ground could be that we reinit (change_config) ONLY if the number of drivers, their
 > types, and their orders is exactly the same.
 
 # driver structure

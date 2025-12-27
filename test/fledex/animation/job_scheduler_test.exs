@@ -10,11 +10,11 @@ defmodule Fledex.Animation.JobSchedulerTest do
   describe "job creation" do
     test "full job specs" do
       job =
-        JobScheduler.create_job(
+        JobScheduler.to_job(
           :strip_name,
           :the_job,
           %{
-            pattern: ~e[* * * * * * *]e,
+            schedule: ~e[* * * * * * *]e,
             func: fn -> :ok end,
             options: [
               timezone: :utc,

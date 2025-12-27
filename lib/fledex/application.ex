@@ -6,13 +6,19 @@ defmodule Fledex.Application do
   @moduledoc false
   use Application
 
-  alias Fledex.Supervisor.Utils
+  @doc """
+  The name of the application Supervisor to which we can add
+  dynamically supervisors. The AnimationSystem can be added to it
+  """
+  @app_supervisor Fledex.DynamicSupervisor
+  @spec app_supervisor() :: module
+  def app_supervisor, do: @app_supervisor
 
   @impl Application
   @doc false
   def start(_type, _args) do
     children = [
-      {DynamicSupervisor, name: Utils.app_supervisor(), strategy: :one_for_one}
+      {DynamicSupervisor, name: app_supervisor(), strategy: :one_for_one}
       # {Phoenix.PubSub, [name: :fledex, adapter_name: :pg2]},
     ]
 

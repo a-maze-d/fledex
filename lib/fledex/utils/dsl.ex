@@ -11,14 +11,14 @@ defmodule Fledex.Utils.Dsl do
   """
   require Logger
 
-  alias Crontab.CronExpression
+  alias Fledex.Application
   alias Fledex.Animation.Coordinator
   alias Fledex.Animation.JobScheduler
   alias Fledex.Animation.Manager
   alias Fledex.Leds
   alias Fledex.LedStrip
+  alias Fledex.Scheduler.Job
   alias Fledex.Supervisor.AnimationSystem
-  alias Fledex.Supervisor.Utils
 
   @fledex_macros [
     :animation,
@@ -143,7 +143,10 @@ defmodule Fledex.Utils.Dsl do
         AnimationSystem.start_link(opts)
 
       :app ->
-        DynamicSupervisor.start_child(Utils.app_supervisor(), AnimationSystem.child_spec(opts))
+        DynamicSupervisor.start_child(
+          Application.app_supervisor(),
+          AnimationSystem.child_spec(opts)
+        )
 
       :kino ->
         Kino.start_child(AnimationSystem.child_spec(opts))
@@ -156,14 +159,14 @@ defmodule Fledex.Utils.Dsl do
     end
   end
 
-  @spec create_job(atom, CronExpression.t(), keyword, (-> any())) :: %{
+  @spec create_job(atom, Job.schedule(), keyword, (-> any())) :: %{
           atom => JobScheduler.config_t()
         }
-  def create_job(name, pattern, options, function) do
+  def create_job(name, schedule, options, function) do
     %{
       name => %{
         type: :job,
-        pattern: pattern,
+        schedule: schedule,
         options: options,
         func: function
       }

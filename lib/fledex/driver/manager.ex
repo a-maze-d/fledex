@@ -62,12 +62,12 @@ defmodule Fledex.Driver.Manager do
   end
 
   @doc false
-  @spec reinit(old_drivers :: drivers_t, new_drivers :: drivers_t, map) :: drivers_t
-  def reinit(old_drivers, [], global_config) do
-    reinit(old_drivers, [{Null, []}], global_config)
+  @spec change_config(old_drivers :: drivers_t, new_drivers :: drivers_t, map) :: drivers_t
+  def change_config(old_drivers, [], global_config) do
+    change_config(old_drivers, [{Null, []}], global_config)
   end
 
-  def reinit(old_drivers, new_drivers, global_config) do
+  def change_config(old_drivers, new_drivers, global_config) do
     new_drivers = Enum.sort(new_drivers)
 
     case same_drivers(old_drivers, new_drivers) do
@@ -81,10 +81,10 @@ defmodule Fledex.Driver.Manager do
             # set by calling the configure function to get the defaults and overlay
             # with the new configs. This is now the "new_config" that we can compare
             # with the old config.
-            # It is the responsibility of the reinit function to "merge" the old and
+            # It is the responsibility of the `change_config/3` function to "merge" the old and
             # new config to ensure extra parameters are preserved.
             new_config = old_module.configure(new_config)
-            config = old_module.reinit(old_config, new_config, global_config)
+            config = old_module.change_config(old_config, new_config, global_config)
             {old_module, config}
           end)
 

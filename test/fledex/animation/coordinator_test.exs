@@ -30,8 +30,6 @@ defmodule Fledex.Animation.CoordinatorTest do
                  name: :coordinator_name
                )
 
-      # assert LedStripSupervisor.coordinator_exists?(:strip_name, :coordinator_name)
-
       assert :ok =
                Coordinator.change_config(
                  pid,
@@ -57,7 +55,7 @@ defmodule Fledex.Animation.CoordinatorTest do
       assert :ok = Coordinator.stop(:coordinator_name)
       # we need to wait for the shutdown
       Process.sleep(500)
-      assert not LedStripSupervisor.coordinator_exists?(:strip_name, :coordinator_name)
+      assert not LedStripSupervisor.worker_exists?(:strip_name, :coordinator, :coordinator_name)
     end
   end
 

@@ -50,16 +50,16 @@ defmodule Fledex.Driver.Interface do
   """
   @callback init(module_config :: keyword, global_config :: map) :: keyword
   @doc """
-  In some cases it is necessary to reinitialize the driver when a new LED strip
+  In some cases it is necessary to change the config when a new LED strip
   is defined (see the `Fledex.Driver.Impl.Kino` as an example). The
   driver should know whether it needs to do anything or not. If it does not need
   to do anything, then simply return the passed in keyword list, i.e.:
 
   ```elixir
-  def reinit(_old_module_config, new_module_config, _global_config), do: new_module_config
+  def change_config(_old_module_config, new_module_config, _global_config), do: new_module_config
   ```
   """
-  @callback reinit(
+  @callback change_config(
               old_module_config :: keyword,
               new_module_config :: keyword,
               global_config :: map
@@ -70,7 +70,7 @@ defmodule Fledex.Driver.Interface do
   hexadecimal format).
   The `counter` is a counter that gets incremented in each update loop and thereby allows
   to transfer the data with a lower frequency by not transferring it in every loop.
-  The `module_config` is the config that got returned by the `init/1` or `reinit/1`
+  The `module_config` is the config that got returned by the `init/2` or `change_config/3`
   functions
   """
   @callback transfer(leds :: list(Types.colorint()), counter :: pos_integer, config :: keyword) ::

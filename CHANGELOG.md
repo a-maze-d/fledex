@@ -82,7 +82,7 @@ Started to document and improve on the coordinator. It turned out that the `job`
 
 As working on the above some minor changes were made:
 * Updated the CREDITS.md file
-* Aligned the various function names that changed the config to `change_config` (instead of `update_`, `change_`, `config`). The only one that is not yet aligned are the `reinit` functions.
+* Aligned the various function names that changed the config to `change_config` (instead of `update_`, `change_`, `config`).
 * Implemented the `Fledex.Color` protocol for the new `%RGB{}` struct to be consistent with `%HSL{}` and `%HSV{}`
 
 
@@ -96,6 +96,11 @@ As working on the above some minor changes were made:
 ### Cleanup
 * Renamed some modules to make their purpose more clear
 * Changed the `> **Notes**` (and similar) to `> #### Note {: .info}` to be consistent and in accordance with the recommendation in the `ex_unit` documentation even though it does "break" things on `github`.
+* Cleanued up the `Supervisor.Utils` (combined functions)
+* Cleaned up the `AnimationManager` (combined functions)
+* Changed `LedStrip.reinit` to `change_config` (including the drivers). Changed the `LedStrip.change_config` to `change_global_config` because it only changes the global settings and not the drivers.
+* Renamed the Job pattern to schedule (since it now also allows intervals)
+
 
 ### Depedendencies
 * upgrading all dependencies to latest version
@@ -106,7 +111,6 @@ As working on the above some minor changes were made:
 * Made `credo` more strict. enabled all checks that I consider as reasonable and fixed the resulting issues.
 * Adding support for Elixir 1.19. The latest Elixir version also helped to also reduce the max xref (9 --> 7)
 * Made the latest version to run extra tests like formatting, xref, coverage instead of doing it on all versions (since the different versions have different behaviors)
-
 
 # Previous versions
 The Changelog of previous versions can be found [here](https://github.com/a-maze-d/fledex/releases) 

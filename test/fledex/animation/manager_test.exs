@@ -76,12 +76,13 @@ defmodule Fledex.Animation.ManagerTest do
       }
 
       Manager.register_config(strip_name, config)
-      assert LedStripSupervisor.animation_exists?(strip_name, :t11)
-      assert LedStripSupervisor.animation_exists?(strip_name, :t12)
-      assert not LedStripSupervisor.animation_exists?(strip_name, :t13)
+      assert LedStripSupervisor.worker_exists?(strip_name, :animator, :t11)
+      assert LedStripSupervisor.worker_exists?(strip_name, :animator, :t12)
+      assert not LedStripSupervisor.worker_exists?(strip_name, :animator, :t13)
 
       capture_log(fn ->
-        assert :ok == LedStripSupervisor.stop_animation(strip_name, :non_existing_animation)
+        assert :ok ==
+                 LedStripSupervisor.stop_worker(strip_name, :animator, :non_existing_animation)
       end)
     end
 
@@ -92,9 +93,9 @@ defmodule Fledex.Animation.ManagerTest do
       }
 
       Manager.register_config(strip_name, config)
-      assert LedStripSupervisor.animation_exists?(strip_name, :t1)
-      assert LedStripSupervisor.animation_exists?(strip_name, :t2)
-      assert not LedStripSupervisor.animation_exists?(strip_name, :t3)
+      assert LedStripSupervisor.worker_exists?(strip_name, :animator, :t1)
+      assert LedStripSupervisor.worker_exists?(strip_name, :animator, :t2)
+      assert not LedStripSupervisor.worker_exists?(strip_name, :animator, :t3)
 
       config2 = %{
         t1: %{type: :animation},
@@ -103,9 +104,11 @@ defmodule Fledex.Animation.ManagerTest do
 
       Manager.register_config(strip_name, config2)
 
-      assert LedStripSupervisor.animation_exists?(strip_name, :t1)
-      assert not LedStripSupervisor.animation_exists?(strip_name, :t2)
-      assert LedStripSupervisor.animation_exists?(strip_name, :t3)
+      Process.sleep(10)
+
+      assert LedStripSupervisor.worker_exists?(strip_name, :animator, :t1)
+      assert not LedStripSupervisor.worker_exists?(strip_name, :animator, :t2)
+      assert LedStripSupervisor.worker_exists?(strip_name, :animator, :t3)
     end
   end
 
@@ -128,7 +131,7 @@ defmodule Fledex.Animation.ManagerTest do
       Manager.register_strip(:john, [{Null, []}], [])
       Manager.register_config(:john, config)
 
-      assert length(LedStripSupervisor.get_jobs(:john)) == 1
+      assert length(LedStripSupervisor.get_workers(:john, :job)) == 1
     end
 
     test "change job" do
@@ -151,14 +154,16 @@ defmodule Fledex.Animation.ManagerTest do
       Manager.register_strip(:john, [{Null, []}], [])
       Manager.register_config(:john, before_config)
 
-      jobs = LedStripSupervisor.get_jobs(:john)
+      jobs = LedStripSupervisor.get_workers(:john, :job)
       assert length(jobs) == 1
       assert :before_timer in jobs
       assert :after_timer not in jobs
 
       Manager.register_config(:john, after_config)
 
-      jobs = LedStripSupervisor.get_jobs(:john)
+      Process.sleep(10)
+
+      jobs = LedStripSupervisor.get_workers(:john, :job)
       assert length(jobs) == 1
       assert :before_timer not in jobs
       assert :after_timer in jobs
@@ -184,7 +189,7 @@ defmodule Fledex.Animation.ManagerTest do
       Manager.register_strip(:john, [{Null, []}], [])
       Manager.register_config(:john, before_config)
 
-      jobs1 = LedStripSupervisor.get_jobs(:john)
+      jobs1 = LedStripSupervisor.get_workers(:john, :job)
       assert length(jobs1) == 1
       assert :timer in jobs1
       job1 = ManagerTestUtils.get_job_config(:john, :timer)
@@ -192,7 +197,7 @@ defmodule Fledex.Animation.ManagerTest do
 
       Manager.register_config(:john, after_config)
 
-      jobs2 = LedStripSupervisor.get_jobs(:john)
+      jobs2 = LedStripSupervisor.get_workers(:john, :job)
       assert length(jobs2) == 1
       assert :timer in jobs2
       job2 = ManagerTestUtils.get_job_config(:john, :timer)
@@ -216,15 +221,15 @@ defmodule Fledex.Animation.ManagerTest do
       Manager.register_strip(:john, [{Null, []}], [])
       Manager.register_config(:john, before_config)
 
-      assert LedStripSupervisor.job_exists?(:john, :before_timer)
-      assert length(LedStripSupervisor.get_jobs(:john)) == 1
+      assert LedStripSupervisor.worker_exists?(:john, :job, :before_timer)
+      assert length(LedStripSupervisor.get_workers(:john, :job)) == 1
 
       Manager.register_config(:john, after_config)
 
       Process.sleep(10)
 
-      assert not LedStripSupervisor.job_exists?(:john, :before_timer)
-      assert Enum.empty?(LedStripSupervisor.get_jobs(:john))
+      assert not LedStripSupervisor.worker_exists?(:john, :job, :before_timer)
+      assert Enum.empty?(LedStripSupervisor.get_workers(:john, :job))
     end
   end
 

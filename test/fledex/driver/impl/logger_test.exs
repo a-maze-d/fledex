@@ -35,7 +35,7 @@ defmodule Fledex.Driver.Impl.LoggerTest do
       assert Keyword.fetch!(config, :terminal) == false
     end
 
-    test "reinit" do
+    test "change_config" do
       config =
         Logger.init(
           [
@@ -45,7 +45,7 @@ defmodule Fledex.Driver.Impl.LoggerTest do
           %{}
         )
 
-      assert Logger.reinit(config, [], %{}) == config
+      assert Logger.change_config(config, [], %{}) == config
     end
 
     test "transfer (logger without color code)" do
