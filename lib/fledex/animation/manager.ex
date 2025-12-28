@@ -17,7 +17,7 @@ defmodule Fledex.Animation.Manager do
 
   The 3 main functions are:
 
-  * `register_strip/2`: to add a new led strip. This will also create
+  * `register_strip/3`: to add a new led strip. This will also create
   the necessary `Fledex.LedStrip` and configures it.
   * `unregister_strip/1`: this will remove an led strip again
   * `register_config/2`: this registers (or reregisters) a set of

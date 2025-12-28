@@ -67,7 +67,7 @@ defmodule Fledex do
     >
     > This will not stop the `AnimationSystem` if it was already started by someone else.
   * `:supervisor`: specifies how we want to supervise it. See the [Supervisor](#supervisor) section for more details.
-  * `:log_level`: specifies the log level. This is important if none is already specified in a config file. This is important if Fledex is not started as an application.
+  * `:log_level`: specifies the log level. This is important if none is already specified in a config file.
   * `:colors`: defines the colors that should be imported (i.e can be called without namespace). See the [Colors](#colors) section for more details.
 
   <a name="supervisor"></a>
@@ -326,7 +326,9 @@ defmodule Fledex do
   * `schedule`- a cron pattern or an interval (as specified in
      [this cheatsheet](https://hexdocs.pm/crontab/cron_notation.html#expressions)).
      Note: `Crontab.CronExpression` gets imported and therefore the sigil can directly
-     be used, i.e. `~e[* * * * * * * *]e`
+     be used, i.e. `~e[* * * * * * * *]e`. An interval is specified with as tuple
+     with an amount and a unit `{10, :min}`. See
+     [fledex_scheduler](https://github.com/a-maze-d/fledex_scheduler) for more details
   * `options`- a keyword list with some options. The following options exist:
     * `:run_once`- a boolean that indicates whether the job should be run once
       at creation time. This can be important, because you might otherwise have

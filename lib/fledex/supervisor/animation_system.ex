@@ -122,6 +122,9 @@ defmodule Fledex.Supervisor.AnimationSystem do
     Utils.get_workers(:"$1", :led_strip, :supervisor)
   end
 
+  @doc """
+  This returns the name of the `LedStrip` server for the strip with the name `strip_name`
+  """
   @spec get_strip_server(atom) :: GenServer.name()
   def get_strip_server(strip_name) do
     Utils.via_tuple(strip_name, :led_strip, :strip)

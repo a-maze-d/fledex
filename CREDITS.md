@@ -63,7 +63,9 @@ Permission to copy, and distribute the contents of this document, or the W3C doc
     If it exists, the STATUS of the W3C document.
 
 # SchedEx
-The scheduler used in Fledex is a heavily modified version of [SchedEx](https://github.com/SchedEx/SchedEx) (taken from mainline in Oct 2025) which now can be found [here](https://github.com/a-maze-d/fledex_scheduler). Thanks for this lovely small library.
+The scheduler used in Fledex is a heavily modified version of [SchedEx](https://github.com/SchedEx/SchedEx) (taken from mainline in Oct 2025) which now can be found [here](https://github.com/a-maze-d/fledex_scheduler). 
+
+Thanks for this lovely small library.
 
 ## License
 [MIT License](https://github.com/FastLED/FastLED/blob/master/LICENSE) 

@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 # Intro
 This is a description of the livebooks in this folder. The examples are structured in such a way that we slowly walk up the abstraction stack. From very low level to a high level language. If are not interested in the technical details, the motivations, and the decisions then you probably want to only look at livebook "[#1 First steps with an led strip](livebooks/README.md#1-first-steps-with-an-led-strip)" (which has nothing to do with Fledex as such but how to set up your LED strip correctly) and the dsl specific chapters starting with livebook [#6 Fledex DSL](livebooks/README.md#6-fledex-dsl) (to define your animations). Only the whole set will give you, however, a good overview.
 
-It is recommended that when you look at the different livebooks you look at the [Architecture Overview](../docs/architecture.md) in parallel. Take also a look at the [Hardware](../docs/hardware.md) description, because you need to have your hardware setup ready to run anything on a real led strip. Most examples can be run in the livebook and don't require any additional hardware.
+It is recommended that when you look at the different livebooks you look at the [Architecture Overview](../pages/architecture.md) in parallel. Take also a look at the [Hardware](../pages/hardware.md) description, because you need to have your hardware setup ready to run anything on a real led strip. Most examples can be run in the livebook and don't require any additional hardware.
 
 The different livebooks have been categorized:
 

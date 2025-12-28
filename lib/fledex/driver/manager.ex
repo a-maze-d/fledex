@@ -149,6 +149,10 @@ defmodule Fledex.Driver.Manager do
     :ok
   end
 
+  @doc """
+  This function removes from a list of drivers (with their driver_configs) all those that are not
+  adhering to the Interface specification
+  """
   @spec remove_invalid_drivers(list({module, keyword})) :: list({module, keyword})
   def remove_invalid_drivers(drivers) do
     Enum.filter(drivers, fn {driver_module, _driver_config} ->
@@ -165,7 +169,7 @@ defmodule Fledex.Driver.Manager do
   end
 
   @spec driver_valid(atom) :: boolean
-  def driver_valid(driver_module) when is_atom(driver_module) do
+  defp driver_valid(driver_module) when is_atom(driver_module) do
     # this is only to do a rough validation to catch the biggest
     # issues early on.
     required_functions = Interface.behaviour_info(:callbacks)

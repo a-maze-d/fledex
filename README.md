@@ -133,12 +133,12 @@ mix compile
 Once done you follow the [standard installation instructions](https://github.com/nerves-livebook/nerves_livebook?tab=readme-ov-file#burning-the-firmware-for-devices-that-boot-from-microsd)
 
 ## Further Docs
-you can find some further documentation in the `docs` folder about:
+You can find some further documentation in the `pages` folder about:
 
-* An Overview over the [Architecture](docs/architecture.md)
-* How to setup and connect real [Hardware](docs/hardware.md)
+* An Overview over the [Architecture](pages/architecture.md)
+* How to setup and connect real [Hardware](pages/hardware.md)
 * You might find in the folder also some temporary documenation with some thoughts, but I delete them again, once they have fulfilled their purpose, except for: 
-* A bit of history with the [Project Plan](docs/project_plan.md) as created with my son, since it's a nostalgic document (partially in German)
+* A bit of history with the [Project Plan](pages/project_plan.md) as created with my son, since it's a nostalgic document (partially in German)
 
 ## Known Limitations
 If you want to run this library in nerves-livebook, you currently have to compile your own livebook with the library included in your `mix.exs` file, since you can't add any libraries that are not already bundled.

@@ -7,7 +7,7 @@ defmodule Fledex.Driver.Impl.Spi do
   This module is a concrete driver that will push the led data through an SPI port.
 
   The protocol used is the one as expected by an WS2801 chip. See the
-  [hardware](docs/hardware.md) documentation for more information on to wire it.
+  [hardware](pages/hardware.md) documentation for more information on to wire it.
 
   ## Options
   This driver accepts the following options (most of them are very SPI specific and the defaults are probably good enough):

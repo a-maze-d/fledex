@@ -145,7 +145,7 @@ defmodule Fledex.MixProject do
       source_url: @source_url,
       assets: %{
         "assets" => "assets",
-        "docs/assets" => "assets",
+        "pages/assets" => "assets",
         "livebooks/school/assets" => "assets"
       },
       main: "readme-1",
@@ -160,11 +160,11 @@ defmodule Fledex.MixProject do
         "CONTRIBUTING.md",
         "CONTRIBUTORS.md",
         "CODE_OF_CONDUCT.md",
-        "docs/architecture.md",
-        "docs/hardware.md",
-        "docs/project_plan.md",
-        "docs/cheatsheet.cheatmd",
-        "docs/colors.md",
+        "pages/architecture.md",
+        "pages/hardware.md",
+        "pages/project_plan.md",
+        "pages/cheatsheet.cheatmd",
+        "pages/colors.md",
         "livebooks/README.md",
         "livebooks/1_first_steps_with_an_led_strip.livemd",
         "livebooks/2_fledex_first_steps.livemd",
@@ -238,17 +238,4 @@ defmodule Fledex.MixProject do
     {response, _exit_status} = System.cmd("pipx", ["run", "reuse", "lint"])
     IO.puts(response)
   end
-
-  # defp copy_doc_images(_) do
-  #   images = [
-  #     {"fledex_logo.svg", "fledex_logo.svg"},
-  #     {"docs/architecture.drawio.svg", "doc/architecture.drawio.svg"},
-  #     {"docs/hardware.drawio.svg", "doc/hardware.drawio.svg"},
-  #     {"docs/hardware-Page-2.drawio.svg", "doc/hardware-Page-2.drawio.svg"}
-  #   ]
-
-  #   Enum.each(images, fn {from, to} ->
-  #     File.cp(from, to, on_conflict: fn _source, _destination -> true end)
-  #   end)
-  # end
 end

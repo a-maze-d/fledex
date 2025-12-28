@@ -15,8 +15,16 @@ Even though this library is published, there are things I still want to do befor
   - [x] Create a new color page, since the colors will not be available through `Fledex.Color.Names` directly (v0.7)
   - [x] Document the driver options (v0.7)
   - [x] Update the cheatsheet with coordinator info (v0.7)
-  - [ ] Add a livebook with coordinator examples (v0.7)
+  - [ ] Add documentation to `Fledex.Supervisor.Utils` (v0.7)
+  - [ ] Add documentation to `Fledex.Animation.JobScheduler` (v0.7)
+  - [ ] Add documentation to `Fledex.Driver.Manager` (v0.7)
+  - [ ] Add documentation to `Fledex.Utils.Dsl` (v0.7)
+  - [ ] Add documentation to `Fledex.Utils.PubSub` (v0.7)
+  - [ ] Add documentation to `Fledex.Color.Types` (v0.7)
+  - [ ] Add a livebook with coordinator examples (v0.7) <-- WIP
   - [ ] Update documentation with the Supervision tree (v0.8)
+  - [ ] Add documentation to `Fledex.Color.Conversion.Spectrum` (v0.8)
+  - [ ] Add documentation to `Fledex.Color.KinoRender` (v0.8)
   - [ ] hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.8)
 - [ ] Testing
   - [x] Test all the livebooks (v0.7)
@@ -43,7 +51,8 @@ Even though this library is published, there are things I still want to do befor
   - [x] Move `change_config` for `LedStrip` from `Animation.Manager` to the `AnimationSystem` (v0.7)
   - [x] Rename the job property `pattern` to `schedule` in the DSL created config (v0.7)
   - [x] The refactoring made the debug_logging property unnecessary. It's unclear on what to do with it. (v0.7)
-  - [ ] Rename `docs` to `pages`. Some people find it confusing to have a `docs` and a `doc` (created by `ex_doc`) (v0.7)
+  - [x] Rename `docs` to `pages`. Some people find it confusing to have a `docs` and a `doc` (created by `ex_doc`) (v0.7)
+  - [ ] Make sure that all the job options are correctly honored (adjust documentation if necessary) (v0.7)
   - [ ] Rethink whether we really want to create a `Fledex.Config.Data` module or we should store the information in a GenServer. The issue with the GenServer is that we need to start a server. But maybe that's not soo bad. (v0.9)
   - [x] Change the `start_links` to take just one arg (the parameters) and an `opts` passed as opts to GenServer. Through this we define the name and therefore can move the `via_tuple` outside of the modules.
 - [ ] Missing functionality

@@ -33,13 +33,12 @@ fledex-*.tar
 /livebooks_private/
 
 # backup files
-/docs/*.bkp
+/pages/*.bkp
+# ignore the auto generated color.md file
+/pages/colors.md
 
 # tool versions
 .tool-versions
 
 # ignore the expert files (expert is the new Elixr LS)
 /.expert/
-
-# ignore the auto generated color.md file
-/docs/colors.md
