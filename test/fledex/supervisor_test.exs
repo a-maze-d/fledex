@@ -9,7 +9,9 @@ defmodule Fledex.SupervisorTest do
 
   alias Fledex.Animation.Animator
   alias Fledex.Animation.Coordinator
+  alias Fledex.Animation.JobScheduler
   alias Fledex.Animation.Manager
+  alias Fledex.Application
   alias Fledex.Supervisor.AnimationSystem
   alias Fledex.Supervisor.LedStripSupervisor
   alias Fledex.Supervisor.Utils
@@ -37,7 +39,7 @@ defmodule Fledex.SupervisorTest do
   end
 
   defp count_workers do
-    DynamicSupervisor.count_children(Utils.strip_supervisors())
+    DynamicSupervisor.count_children(AnimationSystem.strip_supervisors())
     |> Map.get(:active)
   end
 
@@ -73,7 +75,7 @@ defmodule Fledex.SupervisorTest do
     end
 
     defp get_led_strip_pid(strip_name) do
-      Supervisor.which_children(Utils.supervisor_name(strip_name))
+      Supervisor.which_children(LedStripSupervisor.supervisor_name(strip_name))
       |> Enum.filter(fn {_name, _pid, type, _module} -> type == :worker end)
       |> List.first()
       |> elem(1)
@@ -107,17 +109,21 @@ defmodule Fledex.SupervisorTest do
       AnimationSystem.start_led_strip(@test_strip)
 
       assert AnimationSystem.get_led_strips() |> length() == 1
-      assert LedStripSupervisor.get_animations(@test_strip) |> Enum.empty?()
+      assert LedStripSupervisor.get_workers(@test_strip, :animator) |> Enum.empty?()
 
-      LedStripSupervisor.start_animation(@test_strip, @test_anim, %{type: :animation})
+      LedStripSupervisor.start_worker(@test_strip, :animator, @test_anim, %{
+        type: :animation,
+        strip_server: AnimationSystem.get_strip_server(@test_strip)
+      })
+
       assert AnimationSystem.get_led_strips() |> length() == 1
-      assert LedStripSupervisor.get_animations(@test_strip) |> length() == 1
+      assert LedStripSupervisor.get_workers(@test_strip, :animator) |> length() == 1
 
       Animator.stop(Utils.via_tuple(@test_strip, :animator, @test_anim))
       # wait for the eshutdown
       Process.sleep(500)
       assert AnimationSystem.get_led_strips() |> length() == 1
-      assert LedStripSupervisor.get_animations(@test_strip) |> Enum.empty?()
+      assert LedStripSupervisor.get_workers(@test_strip, :animator) |> Enum.empty?()
 
       # cleanup
       AnimationSystem.stop_led_strip(@test_strip)
@@ -144,9 +150,14 @@ defmodule Fledex.SupervisorTest do
     test "kill animation" do
       # the animation requires an led strip
       AnimationSystem.start_led_strip(@test_strip)
-      LedStripSupervisor.start_animation(@test_strip, @test_anim, %{type: :animation})
+
+      LedStripSupervisor.start_worker(@test_strip, :animator, @test_anim, %{
+        type: :animation,
+        strip_server: AnimationSystem.get_strip_server(@test_strip)
+      })
+
       assert AnimationSystem.get_led_strips() |> length() == 1
-      assert LedStripSupervisor.get_animations(@test_strip) |> length() == 1
+      assert LedStripSupervisor.get_workers(@test_strip, :animator) |> length() == 1
 
       animation_pid1 = worker_pid(@test_strip, :animator, @test_anim)
       assert animation_pid1 != nil
@@ -168,47 +179,48 @@ defmodule Fledex.SupervisorTest do
       assert count_workers() == 0
       AnimationSystem.start_led_strip(@test_strip)
       assert count_workers() == 1
-      assert Enum.empty?(LedStripSupervisor.get_coordinators(@test_strip))
+      assert Enum.empty?(LedStripSupervisor.get_workers(@test_strip, :coordinator))
 
-      LedStripSupervisor.start_coordinator(@test_strip, @test_coord, %{
+      LedStripSupervisor.start_worker(@test_strip, :coordinator, @test_coord, %{
         func: fn _state, _context, _options -> :ok end
       })
 
-      assert LedStripSupervisor.coordinator_exists?(@test_strip, @test_coord)
+      assert LedStripSupervisor.worker_exists?(@test_strip, :coordinator, @test_coord)
 
-      assert length(LedStripSupervisor.get_coordinators(@test_strip)) == 1
+      assert length(LedStripSupervisor.get_workers(@test_strip, :coordinator)) == 1
       Coordinator.stop(Utils.via_tuple(@test_strip, :coordinator, @test_coord))
 
       Process.sleep(10)
 
-      assert Enum.empty?(LedStripSupervisor.get_coordinators(@test_strip))
+      assert Enum.empty?(LedStripSupervisor.get_workers(@test_strip, :coordinator))
     end
 
     test "job worker" do
       assert count_workers() == 0
       AnimationSystem.start_led_strip(@test_strip)
       assert count_workers() == 1
-      assert Enum.empty?(LedStripSupervisor.get_jobs(@test_strip))
+      assert Enum.empty?(LedStripSupervisor.get_workers(@test_strip, :job))
 
-      LedStripSupervisor.start_job(
+      LedStripSupervisor.start_worker(
         @test_strip,
+        :job,
         @test_job,
-        %{
-          pattern: {1, :h},
+        JobScheduler.to_job(@test_strip, @test_job, %{
+          schedule: {1, :h},
           func: fn -> :ok end,
           options: []
-        },
+        }),
         []
       )
 
-      assert LedStripSupervisor.job_exists?(@test_strip, @test_job)
+      assert LedStripSupervisor.worker_exists?(@test_strip, :job, @test_job)
 
-      assert length(LedStripSupervisor.get_jobs(@test_strip)) == 1
-      LedStripSupervisor.stop_job(@test_strip, @test_job)
+      assert length(LedStripSupervisor.get_workers(@test_strip, :job)) == 1
+      LedStripSupervisor.stop_worker(@test_strip, :job, @test_job)
 
       Process.sleep(10)
 
-      assert Enum.empty?(LedStripSupervisor.get_jobs(@test_strip))
+      assert Enum.empty?(LedStripSupervisor.get_workers(@test_strip, :job))
     end
   end
 
@@ -216,15 +228,15 @@ defmodule Fledex.SupervisorTest do
     test "app supervisor" do
       start_supervised(
         {DynamicSupervisor,
-         name: Utils.app_supervisor(), strategy: :one_for_one, restart: :transient}
+         name: Application.app_supervisor(), strategy: :one_for_one, restart: :transient}
       )
 
-      assert Enum.empty?(DynamicSupervisor.which_children(Utils.app_supervisor()))
+      assert Enum.empty?(DynamicSupervisor.which_children(Application.app_supervisor()))
 
       use Fledex, supervisor: :app, colors: :none, imports: false
-      assert not Enum.empty?(DynamicSupervisor.which_children(Utils.app_supervisor()))
+      assert not Enum.empty?(DynamicSupervisor.which_children(Application.app_supervisor()))
 
-      Supervisor.stop(Utils.app_supervisor(), :normal)
+      Supervisor.stop(Application.app_supervisor(), :normal)
     end
 
     test "kino supervisor" do

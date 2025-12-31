@@ -7,7 +7,7 @@ defmodule Fledex.Driver.Impl.Spi do
   This module is a concrete driver that will push the led data through an SPI port.
 
   The protocol used is the one as expected by an WS2801 chip. See the
-  [hardware](docs/hardware.md) documentation for more information on to wire it.
+  [hardware](pages/hardware.md) documentation for more information on to wire it.
 
   ## Options
   This driver accepts the following options (most of them are very SPI specific and the defaults are probably good enough):
@@ -52,8 +52,8 @@ defmodule Fledex.Driver.Impl.Spi do
   end
 
   @impl Interface
-  @spec reinit(keyword, keyword, map) :: keyword
-  def reinit(old_config, new_config, _global_config) do
+  @spec change_config(keyword, keyword, map) :: keyword
+  def change_config(old_config, new_config, _global_config) do
     config = Keyword.merge(old_config, new_config)
     # Maybe the following code could be optimized
     # to only reopen the port if it's necessary. But this is safe

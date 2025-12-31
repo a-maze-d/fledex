@@ -52,9 +52,8 @@ defmodule Fledex.Driver.Impl.Kino do
   end
 
   @impl Interface
-  @spec reinit(keyword, keyword, map) :: keyword
-  # def reinit(_old_config, new_config, _global_config), do: new_config
-  def reinit(old_config, new_config, global_config) do
+  @spec change_config(keyword, keyword, map) :: keyword
+  def change_config(old_config, new_config, global_config) do
     set_group_leader(global_config)
 
     Keyword.merge(

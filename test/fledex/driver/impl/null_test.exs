@@ -12,8 +12,8 @@ defmodule Fledex.Driver.Impl.NullTest do
       assert Null.init([], %{}) == []
     end
 
-    test "reinit" do
-      assert Null.reinit([], [], %{}) == []
+    test "change_config" do
+      assert Null.change_config([], [], %{}) == []
     end
 
     test "transfer" do

@@ -75,20 +75,33 @@ defmodule Fledex.Effect.Interface do
             ) ::
               {list(Types.colorint()), non_neg_integer, map}
 
+  @doc """
+  a standardized interface to check whether the effect is enabled or disabled
+  """
   @callback enabled?(config :: keyword) :: boolean
 
+  @doc """
+  By using this Interface you get a lot boilerplate functionality of
+  enabling and disabling the effect for free.
+
+  The only thing you need to implement is the `do_apply/5` function.
+  Both `apply/5` and `do_apply/5` have a default implementation and can
+  be overwritten.
+  """
   @spec __using__(keyword) :: Macro.t()
   defmacro __using__(_opts) do
     quote do
       @behaviour Fledex.Effect.Interface
       alias Fledex.Effect.Interface
 
+      @doc delegate_to: {Interface, :enabled?, 1}
       @impl Interface
       @spec enabled?(config :: keyword) :: boolean
       def enabled?(config) do
         Keyword.get(config, :enabled, true)
       end
 
+      @doc delegate_to: {Interface, :apply, 5}
       @impl Interface
       @spec apply(
               leds :: list(Types.colorint()),
@@ -110,6 +123,13 @@ defmodule Fledex.Effect.Interface do
         end
       end
 
+      @doc """
+      Similar to the `apply/5` function, but you don't have to handle
+      the enable/disable states.
+
+      The default implementation of `apply/5` will handle that for you
+      and you can focus purely on the effect aspect.
+      """
       @spec do_apply(
               leds :: list(Types.colorint()),
               count :: non_neg_integer,

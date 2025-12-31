@@ -67,7 +67,7 @@ defmodule Fledex do
     >
     > This will not stop the `AnimationSystem` if it was already started by someone else.
   * `:supervisor`: specifies how we want to supervise it. See the [Supervisor](#supervisor) section for more details.
-  * `:log_level`: specifies the log level. This is important if none is already specified in a config file. This is important if Fledex is not started as an application.
+  * `:log_level`: specifies the log level. This is important if none is already specified in a config file.
   * `:colors`: defines the colors that should be imported (i.e can be called without namespace). See the [Colors](#colors) section for more details.
 
   <a name="supervisor"></a>
@@ -312,7 +312,7 @@ defmodule Fledex do
 
   @doc """
   A job is a [cron job](https://en.wikipedia.org/wiki/Cron) that will trigger in regular
-  intervals (depending on the pattern specified). You can run any function and the most
+  intervals (depending on the schedule specified). You can run any function and the most
   likely event you will trigger is to publish an event to the triggers (see the [weather
   example livebook](5_fledex_weather_example.livemd)):
 
@@ -323,16 +323,19 @@ defmodule Fledex do
   Each job consists of:
 
   * `name`- a unique name
-  * `pattern`- a cron pattern (as specified in
+  * `schedule`- a cron pattern or an interval (as specified in
      [this cheatsheet](https://hexdocs.pm/crontab/cron_notation.html#expressions)).
      Note: `Crontab.CronExpression` gets imported and therefore the sigil can directly
-     be used, i.e. `~e[* * * * * * * *]e`
+     be used, i.e. `~e[* * * * * * * *]e`. An interval is specified with as tuple
+     with an amount and a unit `{10, :min}`. See
+     [fledex_scheduler](https://github.com/a-maze-d/fledex_scheduler) for more details
   * `options`- a keyword list with some options. The following options exist:
     * `:run_once`- a boolean that indicates whether the job should be run once
       at creation time. This can be important, because you might otherwise have
       to wait for an extended time before the function will be executed.
     * `:timezone`- The timezone the cron pattern applies to. If nothing is specified
-      `:utc` is assumed
+      `"Etc/UTC"` is assumed. Make sure that the `tzdata` dependency is specified to use
+      other timezones
     * `:overlap`- This indicates whether jobs should overlap or not. An overlap can
       happen when running the job takes more time than the interval between job runs.
       For safety reason the default is `false`.
@@ -355,13 +358,13 @@ defmodule Fledex do
   end
   ```
   """
-  defmacro job(name, pattern, options \\ [], do: block) do
+  defmacro job(name, schedule, options \\ [], do: block) do
     ast_func = Dsl.ast_create_anonymous_func([], block)
 
     quote do
       Dsl.create_job(
         unquote(name),
-        unquote(pattern),
+        unquote(schedule),
         unquote(options),
         unquote(ast_func)
       )

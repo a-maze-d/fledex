@@ -47,6 +47,9 @@ defmodule Fledex.Color.RGB do
     |> new()
   end
 
+  @doc """
+  Converts an `Fledex.Color.RGB` color to a rgb tuple
+  """
   @spec to_tuple(t() | Types.color()) :: Types.rgb()
   def to_tuple(%__MODULE__{r: r, g: g, b: b} = _rgb) do
     {r, g, b}

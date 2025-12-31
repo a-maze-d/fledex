@@ -28,6 +28,13 @@ defmodule Fledex.Color.Conversion.Approximate do
   @frac_24_128 trunc(24 * 257 / 128)
   @frac_8_42 trunc(8 * 256 / 42)
 
+  @doc """
+  convert an RGB tuple (`{r, g, b}`) to a `Fledex.Color.HSV` struct.
+
+  > #### Note: {: .info}
+  > This conversion is only an approximation, hence the name of the module, optimized
+  > rather for speed than for accuracy.
+  """
   @spec rgb2hsv(Types.rgb()) :: Types.hsv()
   def rgb2hsv({r, g, b}) do
     # based on: https://github.com/FastLED/FastLED/blob/95d0a5582b2052729f345719e65edf7a4b9e7098/src/hsv2rgb.cpp#L550

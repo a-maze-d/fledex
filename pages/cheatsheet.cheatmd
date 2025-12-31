@@ -209,11 +209,11 @@ This will trigger every second (note the extended cron-tab syntax used)
 
 The `job` takes a couple of parameters:
 
-| Parameter | Description |
-|---        |---          |
-| `name`    | (mandatory) Every job needs to get a unique name. This must be an atom |
-| `pattern` | (mandatory) You need to specify a pattern when the job should run. The pattern can eithe rbe a normal crontab pattern (e.g. `~e[*/15]`) with minute precision or an extended one (e.g. `~e[*/15]e`) with second precision. More details can be found in [this cheatsheet](https://hexdocs.pm/crontab/cron_notation.html#expressions). |
-| `options` | (optional) one or more options can be specified (see below for details) |
+| Parameter  | Description |
+|---         |---          |
+| `name`     | (mandatory) Every job needs to get a unique name. This must be an atom |
+| `scnedule:`| (mandatory) You need to specify a schedule when the job should run. The schedule can either be a normal crontab pattern (e.g. `~e[*/15]`) with minute precision or an extended one (e.g. `~e[*/15]e`) with second precision. More details can be found in [this cheatsheet](https://hexdocs.pm/crontab/cron_notation.html#expressions). You can also specify a run interval in `:milliseconds` (`:ms`), `:seconds` (`:sec`, `:s`), `:minutes` (`:min`, `:m`), `:hours` (`:h`), `:days` (`'d`), or `:weeks` (`:w`) by specifying a tuple, e.g. `{10, :sec}`|
+| `options`  | (optional) one or more options can be specified (see below for details) |
 
 ### Options
 

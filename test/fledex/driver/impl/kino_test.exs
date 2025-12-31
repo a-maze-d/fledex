@@ -18,10 +18,10 @@ defmodule Fledex.Driver.Impl.KinoTest do
       assert Keyword.fetch!(config, :color_correction) == Correction.no_color_correction()
     end
 
-    test "reinit" do
+    test "change_config" do
       config = Kino.init([], %{})
-      config_reinit = Kino.reinit(config, [], %{})
-      assert Keyword.fetch!(config, :frame) != Keyword.fetch!(config_reinit, :frame)
+      change_config = Kino.change_config(config, [], %{})
+      assert Keyword.fetch!(config, :frame) != Keyword.fetch!(change_config, :frame)
     end
 
     test "transfer" do

@@ -59,9 +59,9 @@ defmodule Fledex.Driver.Impl.SpiTest do
       Spi.terminate(:normal, config)
     end
 
-    test "reinit" do
+    test "change_config" do
       config = Spi.init([], [])
-      assert config == Spi.reinit(config, [], [])
+      assert config == Spi.change_config(config, [], [])
       :ok = Spi.terminate(:normal, config)
     end
 

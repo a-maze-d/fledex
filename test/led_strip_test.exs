@@ -70,7 +70,7 @@ defmodule Fledex.LedStripTest do
 
       {:reply, {:ok, old_values}, state} =
         LedStrip.handle_call(
-          {:change_config, timer_update_timeout: 100},
+          {:change_global_config, timer_update_timeout: 100},
           {self(), :tag},
           state
         )
@@ -343,7 +343,7 @@ defmodule Fledex.LedStripTest.TestDriver do
     Keyword.put_new(config, :test2, 321)
   end
 
-  def reinit(old_config, new_config, _global_config) do
+  def change_config(old_config, new_config, _global_config) do
     assert Keyword.get(old_config, :test2, nil) == 123
     old_config = Keyword.put_new(old_config, :test3, "abc")
     Keyword.merge(old_config, new_config)
@@ -371,7 +371,7 @@ defmodule Fledex.LedStripTestSync do
   alias Fledex.Driver.Impl.Spi
   alias Fledex.LedStrip
   alias Fledex.Supervisor.AnimationSystem
-  alias Fledex.Supervisor.Utils
+  alias Fledex.Supervisor.LedStripSupervisor
 
   setup do
     start_supervised(AnimationSystem.child_spec())
@@ -462,10 +462,11 @@ defmodule Fledex.LedStripTestSync do
                )
 
       # successful config change
-      assert {:ok, timer_counter: 0} = LedStrip.change_config(@strip_name, timer_counter: 1)
+      assert {:ok, timer_counter: 0} =
+               LedStrip.change_global_config(@strip_name, timer_counter: 1)
 
       led_strip_pid =
-        Supervisor.which_children(Utils.supervisor_name(@strip_name))
+        Supervisor.which_children(LedStripSupervisor.supervisor_name(@strip_name))
         |> Enum.filter(fn {_name, _pid, type, _module} -> type == :worker end)
         |> List.first()
         |> elem(1)
@@ -474,16 +475,16 @@ defmodule Fledex.LedStripTestSync do
 
       # unsuccessful config change
       assert capture_log(fn ->
-               assert {:ok, []} = LedStrip.change_config(@strip_name, counter: 2)
+               assert {:ok, []} = LedStrip.change_global_config(@strip_name, counter: 2)
              end) =~ "Unknown config key (:counter with value 2) was specified"
 
       assert %{config: %{timer: %{counter: 1}}} = :sys.get_state(led_strip_pid)
 
-      # test all 3 reinit functions (they all lead to the same result)
-      # This is the reason why we expect the configure and reinit to be called 3 times
-      assert :ok == LedStrip.reinit(@strip_name, Null, [])
-      assert :ok == LedStrip.reinit(@strip_name, {Null, []}, [])
-      assert :ok == LedStrip.reinit(@strip_name, [{Null, []}], [])
+      # test all 3 change_config functions (they all lead to the same result)
+      # This is the reason why we expect the configure and change_config to be called 3 times
+      assert :ok == LedStrip.change_config(@strip_name, Null, [])
+      assert :ok == LedStrip.change_config(@strip_name, {Null, []}, [])
+      assert :ok == LedStrip.change_config(@strip_name, [{Null, []}], [])
     end
   end
 end

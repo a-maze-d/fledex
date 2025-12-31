@@ -13,6 +13,7 @@
     "skip_files": [
         "lib/fledex/component/thermometer.ex",
         "lib/fledex/component/clock.ex",
+        "lib/mix/tasks",
         "test"
     ],
 

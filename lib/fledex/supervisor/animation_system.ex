@@ -60,6 +60,13 @@ defmodule Fledex.Supervisor.AnimationSystem do
   end
 
   @doc """
+  The name of the supervisor that observes all the workers in the AnimationSystem
+  """
+  @strip_supervisors Fledex.Supervisor.Strips
+  @spec strip_supervisors() :: module
+  def strip_supervisors, do: @strip_supervisors
+
+  @doc """
   starts the AnimationSystem and all necessary subsystems
   """
   @spec start_link(keyword) ::
@@ -86,7 +93,7 @@ defmodule Fledex.Supervisor.AnimationSystem do
     opts = Keyword.put_new(opts, :name, Utils.via_tuple(strip_name, :led_strip, :strip))
 
     case DynamicSupervisor.start_child(
-           Utils.strip_supervisors(),
+           strip_supervisors(),
            %{
              # no need to be unique
              id: strip_name,
@@ -116,13 +123,32 @@ defmodule Fledex.Supervisor.AnimationSystem do
   end
 
   @doc """
+  This returns the name of the `LedStrip` server for the strip with the name `strip_name`
+  """
+  @spec get_strip_server(atom) :: GenServer.name()
+  def get_strip_server(strip_name) do
+    Utils.via_tuple(strip_name, :led_strip, :strip)
+  end
+
+  @doc """
+  THis reconfigures the `LedStrip`
+
+  Note: this function assumes that the led_strip does already exist.
+  """
+  @spec reconfigure_led_strip(atom, LedStrip.drivers_config_t(), keyword) :: :ok
+  def reconfigure_led_strip(strip_name, drivers, strip_config) do
+    LedStrip.change_config(Utils.via_tuple(strip_name, :led_strip, :strip), drivers, strip_config)
+    :ok
+  end
+
+  @doc """
   This stops an led_strip.
 
   It is safe to call this function even if the led_strip does not exist
   """
   @spec stop_led_strip(atom) :: :ok
   def stop_led_strip(strip_name) do
-    Utils.stop_worker(Utils.strip_supervisors(), strip_name, :led_strip, :supervisor)
+    Utils.stop_worker(strip_supervisors(), strip_name, :led_strip, :supervisor)
   end
 
   # MARK: server side
@@ -137,7 +163,7 @@ defmodule Fledex.Supervisor.AnimationSystem do
     children = [
       {Registry, keys: :unique, name: Utils.worker_registry()},
       {Phoenix.PubSub, adapter_name: :pg2, name: Utils.pubsub_name()},
-      {DynamicSupervisor, strategy: :one_for_one, name: Utils.strip_supervisors()},
+      {DynamicSupervisor, strategy: :one_for_one, name: strip_supervisors()},
       {Manager, [init_args]}
     ]
 

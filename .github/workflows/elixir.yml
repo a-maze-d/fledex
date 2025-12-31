@@ -20,14 +20,6 @@ jobs:
     strategy:
       matrix:
         include:
-          # - elixir: 1.14.x
-          #   otp: 25
-          # - elixir: 1.15.x
-          #   otp: 25
-          # - elixir: 1.15.x
-          #   otp: 26
-          # - elixir: 1.16.x
-          #   otp: 26
           - elixir: 1.17.x
             otp: 27
           - elixir: 1.18.x
@@ -78,27 +70,19 @@ jobs:
     - name: Compile app
       run: mix compile --warning-as-error
 
-    - name: REUSE Compliance Check
-      uses: fsfe/reuse-action@676e2d560c9a403aa252096d99fcab3e1132b0f5 # v6.0.0
-
-    - name: Check format
-      if: ${{ matrix.other_checks }}
-      run: mix format --check-formatted
-
     - name: Run tests
       run: mix test
       env:
         MIX_ENV: test
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
+
+    - name: run all quality checks
+      if: ${{ matrix.other_checks }}
+      run: mix check
+
     - name: Check coverage
       if: ${{ matrix.coverage }}
       run: mix coveralls.github
       env:
         MIX_ENV: test
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Check for transitive compilation dependencies
-      if: ${{ matrix.other_checks }}
-      run: mix xref graph --label compile-connected --fail-above 7
-

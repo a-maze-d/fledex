@@ -3,12 +3,12 @@
 # SPDX-License-Identifier: Apache-2.0
 defmodule Fledex.Color.Names.Wiki do
   @moduledoc ~S"""
-  This module defines all the named colors specified on wikipedia, which is a collection
+  This module defines all the named colors specified on [Wikipedia](https://www.wikipedia.org/), which is a collection
   of various sources.
   See:
-  * https://en.wikipedia.org/wiki/List_of_colors:_A%E2%80%93F
-  * https://en.wikipedia.org/wiki/List_of_colors:_G%E2%80%93M
-  * https://en.wikipedia.org/wiki/List_of_colors:_N%E2%80%93Z
+  * [List of colors: A–F](https://en.wikipedia.org/wiki/List_of_colors:_A%E2%80%93F)
+  * [List of colors: G–M](https://en.wikipedia.org/wiki/List_of_colors:_G%E2%80%93M)
+  * [List of colors: N–Z](https://en.wikipedia.org/wiki/List_of_colors:_N%E2%80%93Z)
 
   > #### Notes {: .info}
   >
@@ -17,10 +17,10 @@ defmodule Fledex.Color.Names.Wiki do
   > * A list of all available colors from this module can be found in the documentation under [Colors](colors.md#wiki).
   """
 
-  alias Fledex.Color.Names.WikiUtils
+  alias Fledex.Color.Names.Wiki.Converter
 
   use Fledex.Color.Names.ModuleGenerator,
-    filename: WikiUtils.file_name(),
-    converter: &WikiUtils.converter/1,
+    filename: "wiki_colors.csv",
+    converter: &Converter.converter/1,
     splitter_opts: [separator: ",", split_opts: [parts: 11]]
 end

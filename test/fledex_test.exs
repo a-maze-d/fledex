@@ -111,9 +111,9 @@ defmodule Fledex.Test do
       assert AnimationSystem.led_strip_exists?(:john)
       assert not AnimationSystem.led_strip_exists?(:merry)
 
-      assert [:merry] == LedStripSupervisor.get_animations(:john)
-      assert LedStripSupervisor.animation_exists?(:john, :merry)
-      assert not LedStripSupervisor.animation_exists?(:john, :merry2)
+      assert [:merry] == LedStripSupervisor.get_workers(:john, :animator)
+      assert LedStripSupervisor.worker_exists?(:john, :animator, :merry)
+      assert not LedStripSupervisor.worker_exists?(:john, :animator, :merry2)
 
       AnimationSystem.stop()
     end
@@ -131,9 +131,9 @@ defmodule Fledex.Test do
       assert AnimationSystem.led_strip_exists?(:john)
       assert not AnimationSystem.led_strip_exists?(:merry)
 
-      assert [:merry] == LedStripSupervisor.get_animations(:john)
-      assert LedStripSupervisor.animation_exists?(:john, :merry)
-      assert not LedStripSupervisor.animation_exists?(:john, :merry2)
+      assert [:merry] == LedStripSupervisor.get_workers(:john, :animator)
+      assert LedStripSupervisor.worker_exists?(:john, :animator, :merry)
+      assert not LedStripSupervisor.worker_exists?(:john, :animator, :merry2)
 
       config = ManagerTestUtils.get_animator_config(:john, :merry)
       assert config.def_func.(%{}) == leds(10)
@@ -165,8 +165,8 @@ defmodule Fledex.Test do
       end
 
       assert [:doe, :john] == AnimationSystem.get_led_strips() |> Enum.sort()
-      assert [:kate, :merry] == LedStripSupervisor.get_animations(:john) |> Enum.sort()
-      assert [:caine, :smith] == LedStripSupervisor.get_animations(:doe) |> Enum.sort()
+      assert [:kate, :merry] == LedStripSupervisor.get_workers(:john, :animator) |> Enum.sort()
+      assert [:caine, :smith] == LedStripSupervisor.get_workers(:doe, :animator) |> Enum.sort()
 
       merry_config = ManagerTestUtils.get_animator_config(:john, :merry)
       assert merry_config.def_func.(%{}) == leds(10)
@@ -407,7 +407,7 @@ defmodule Fledex.Test do
           end
         end
 
-      assert %{john: %{type: :animation}, john_job: %{type: :job, pattern: "* * * * * *"}} =
+      assert %{john: %{type: :animation}, john_job: %{type: :job, schedule: "* * * * * *"}} =
                config
     end
 

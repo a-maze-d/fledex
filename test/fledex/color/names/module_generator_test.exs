@@ -8,17 +8,17 @@ defmodule Fledex.Color.Names.ModuleGeneratorTest do
   alias Fledex.Color
   alias Fledex.Color.Names.LoadUtils
   alias Fledex.Color.Names.Wiki
-  alias Fledex.Color.Names.WikiUtils
+  alias Fledex.Color.Names.Wiki.Converter
 
   alias Fledex.Leds
 
   defmodule TestNames do
     use Fledex.Color.Names.ModuleGenerator,
-      filename: WikiUtils.file_name(),
+      filename: "module_generator_test_file.csv",
       name_pattern: ~r/^[a].*$/i,
       drop: 1,
       splitter_opts: [separator: ",", split_opts: [parts: 11]],
-      converter: &WikiUtils.converter/1,
+      converter: &Converter.converter/1,
       module: __MODULE__
   end
 
@@ -38,15 +38,33 @@ defmodule Fledex.Color.Names.ModuleGeneratorTest do
         end)
 
       # check how many color names (starting with a) we found and how many other functions
-      # We onlyl load the colors with a, so all the "other functions are those that we define
+      # We only load the colors with a, so all the "other functions are those that we define
       # in addition to the color names and those are:
-      # `info/1`, `info/2`, `names/0`, `colors/0`
-      assert {96, 4} = {a_func, o_func}
+      # `info/1`, `info/2`, `names/0`, `colors/0`, `filename/0`
+      assert {96, 5} = {a_func, o_func}
 
       # check one concrete example that it exists in the correct arities
       assert {:android_green, 0} in functions
       assert {:android_green, 1} in functions
       assert {:android_green, 2} in functions
+
+      assert TestNames.filename() ==
+               Path.dirname(__DIR__) <> "/names/module_generator_test_file.csv"
+    end
+
+    test "try directory traversal" do
+      assert_raise(ArgumentError, fn ->
+        Code.compile_string("""
+          alias Fledex.Color.Names.Wiki.Converter
+          use Fledex.Color.Names.ModuleGenerator,
+            filename: "../module_generator_test_file.csv",
+            name_pattern: ~r/^[a].*$/i,
+            drop: 1,
+            splitter_opts: [separator: ",", split_opts: [parts: 11]],
+            converter: &Converter.converter/1,
+            module: __MODULE__
+        """)
+      end)
     end
   end
 
@@ -54,8 +72,8 @@ defmodule Fledex.Color.Names.ModuleGeneratorTest do
     test "loading color file" do
       colors =
         LoadUtils.load_color_file(
-          WikiUtils.file_name(),
-          &WikiUtils.converter/1,
+          Path.dirname(__DIR__) <> "/names/module_generator_test_file.csv",
+          &Converter.converter/1,
           module: __MODULE__,
           name_pattern: ~r/^.*$/i,
           drop: 1,

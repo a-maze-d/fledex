@@ -8,7 +8,7 @@ defmodule Fledex.Utils.Cluster do
 
   See also the `m:Fledex.Driver.Impl.PubSub` for more inforamtion
 
-  > #### NOte {: .warning}
+  > #### Note {: .warning}
   >
   > This functionality is not yet working and therefore should not be used!
   """

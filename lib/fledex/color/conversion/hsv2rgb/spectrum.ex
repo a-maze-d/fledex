@@ -15,6 +15,9 @@ defmodule Fledex.Color.Conversion.Spectrum do
   alias Fledex.Color.HSV
   alias Fledex.Color.Types
 
+  @doc """
+  Convert a `Fledex.Color.HSV` struct into an rgb tuple (`{r, g, b}`)
+  """
   @spec hsv2rgb(Types.hsv(), (Types.rgb() -> Types.rgb())) :: Types.rgb()
   def hsv2rgb(%HSV{h: h, s: _s, v: _v} = hsv, extra_color_correction) do
     # based on https://github.com/FastLED/FastLED/blob/95d0a5582b2052729f345719e65edf7a4b9e7098/src/hsv2rgb.cpp#L236
@@ -47,6 +50,7 @@ defmodule Fledex.Color.Conversion.Spectrum do
     set_colors(section, brightness_floor, rampup_adj_with_floor, rampdown_adj_with_floor)
   end
 
+  @doc false
   @spec set_colors(byte, byte, byte, byte) :: Types.rgb()
   def set_colors(section, brightness_floor, rampup_adj_with_floor, rampdown_adj_with_floor)
 

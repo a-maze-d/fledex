@@ -29,8 +29,8 @@ defmodule Fledex.Driver.Impl.Null do
   end
 
   @impl Interface
-  @spec reinit(keyword, keyword, map) :: keyword
-  def reinit(old_config, new_config, _global_config) do
+  @spec change_config(keyword, keyword, map) :: keyword
+  def change_config(old_config, new_config, _global_config) do
     Keyword.merge(old_config, new_config)
   end
 
