@@ -16,10 +16,10 @@ defmodule Fledex.Color.Names.RAL do
   alias Fledex.Color
   alias Fledex.Color.Names.LoadUtils
 
-  @external_resource Path.dirname(__DIR__) <> "/ral/ral_colors.csv"
+  # @external_resource Path.dirname(__DIR__) <> "/ral/ral_colors.csv"
 
   use Fledex.Color.Names.ModuleGenerator,
-    filename: @external_resource,
+    filename: "ral_colors.csv",
     drop: 0,
     splitter_opts: [separator: ~r/\t+/, split_opts: [trim: true]],
     converter: fn [index, name, _h, _l, _c, r, g, b, code] ->

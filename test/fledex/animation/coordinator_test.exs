@@ -42,13 +42,13 @@ defmodule Fledex.Animation.CoordinatorTest do
                  }
                )
 
-      %Coordinator{options: options1} = :sys.get_state(pid)
+      %{options: options1} = :sys.get_state(pid)
       counter_1 = Keyword.fetch!(options1, :counter)
       assert counter_1 == 0
 
       PubSub.broadcast_state(:stop_start, %{})
 
-      %Coordinator{options: options2} = :sys.get_state(pid)
+      %{options: options2} = :sys.get_state(pid)
       counter_2 = Keyword.fetch!(options2, :counter)
       assert counter_2 == counter_1 + 1
 
@@ -61,7 +61,7 @@ defmodule Fledex.Animation.CoordinatorTest do
 
   describe "test server functions" do
     test "init" do
-      assert {:ok, %Coordinator{} = state} =
+      assert {:ok, %{} = state} =
                Coordinator.init({:strip_name, :coordinator_name, %{}})
 
       assert state.strip_name == :strip_name
@@ -83,7 +83,7 @@ defmodule Fledex.Animation.CoordinatorTest do
     end
 
     test "config change" do
-      state = %Coordinator{
+      state = %{
         options: [old: true],
         func: fn _broadcast_state, _context, options -> Keyword.put(options, :function1, true) end,
         strip_name: :strip_name,
@@ -104,7 +104,7 @@ defmodule Fledex.Animation.CoordinatorTest do
     end
 
     test "state change" do
-      state = %Coordinator{
+      state = %{
         options: [old: true],
         func: fn _broadcast_state, context, options ->
           case Map.get(context, :raise, false) do

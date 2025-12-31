@@ -21,14 +21,15 @@ defmodule Fledex.MixProject do
       name: "fledex",
       source_url: @source_url,
       dialyzer: [
+        # plt_add_deps: :apps_direct,
+        plt_add_apps: [:mix],
         flags: [
           # :missing_return,
           # :extra_return,
           # :unmatched_returns,
           :error_handling
           # :underspecs
-        ],
-        plt_add_apps: [:mix]
+        ]
       ],
       test_coverage: [
         tool: ExCoveralls,
@@ -51,7 +52,15 @@ defmodule Fledex.MixProject do
         "coveralls.post": :test,
         "coveralls.html": :test,
         "coveralls.cobertura": :test,
-        "coveralls.multiple": :test
+        "coveralls.multiple": :test,
+        # credo: :test,
+        check: :test,
+        dialyzer: :dev
+        # "deps.audit": :test,
+        # docs: :dev,
+        # "docs.fledex.colors": :dev,
+        # doctor: :test
+        # sobelow: :dev
       ]
     ]
   end
@@ -127,15 +136,18 @@ defmodule Fledex.MixProject do
       {:credo_binary_patterns, "~> 0.2.3", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.18", only: :test},
+      {:ex_check, "~> 0.16.0", only: [:dev, :test], runtime: false},
+      {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
+      {:doctor, "~> 0.22.0", only: [:dev, :test], runtime: false},
       # required by excoveralls
-      {:castore, "~> 1.0", only: :test}
+      {:castore, "~> 1.0", only: :test},
       # check licenses by calling `mix licenses` disabled by default (because the
       # library is not well maintained and throws some warnings), but when we want
       # to check licenses we can enable it easily.
       # {:licensir, "~>0.7.0", only: :test}
       # we are not a phoenix app, but can still reveal some interesting stuff.
       # leaving it out by default though
-      # {:sobelow, "~> 0.13", only: [:test, :dev], runtime: false}
+      {:sobelow, "~> 0.14", only: [:dev, :test], runtime: false, warn_if_outdated: true}
     ]
   end
 
@@ -235,7 +247,12 @@ defmodule Fledex.MixProject do
   end
 
   defp run_reuse(_) do
-    {response, _exit_status} = System.cmd("pipx", ["run", "reuse", "lint"])
+    {response, exit_status} = System.cmd("pipx", ["run", "reuse", "lint"])
     IO.puts(response)
+
+    case exit_status do
+      0 -> :ok
+      error -> Mix.raise("Reuse failed with error code: #{error}")
+    end
   end
 end

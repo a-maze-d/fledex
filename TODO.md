@@ -15,16 +15,9 @@ Even though this library is published, there are things I still want to do befor
   - [x] Create a new color page, since the colors will not be available through `Fledex.Color.Names` directly (v0.7)
   - [x] Document the driver options (v0.7)
   - [x] Update the cheatsheet with coordinator info (v0.7)
-  - [ ] Add documentation to `Fledex.Supervisor.Utils` (v0.7)
-  - [ ] Add documentation to `Fledex.Animation.JobScheduler` (v0.7)
-  - [ ] Add documentation to `Fledex.Driver.Manager` (v0.7)
-  - [ ] Add documentation to `Fledex.Utils.Dsl` (v0.7)
-  - [ ] Add documentation to `Fledex.Utils.PubSub` (v0.7)
-  - [ ] Add documentation to `Fledex.Color.Types` (v0.7)
+  - [x] Resolve all important `doctor` issues (v0.7)
   - [ ] Add a livebook with coordinator examples (v0.7) <-- WIP
   - [ ] Update documentation with the Supervision tree (v0.8)
-  - [ ] Add documentation to `Fledex.Color.Conversion.Spectrum` (v0.8)
-  - [ ] Add documentation to `Fledex.Color.KinoRender` (v0.8)
   - [ ] hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.8)
 - [ ] Testing
   - [x] Test all the livebooks (v0.7)
@@ -39,7 +32,7 @@ Even though this library is published, there are things I still want to do befor
   - [x] All Color name modules have the same interface (through the DSL it's even enforced). Let's make this more explicit by introducting a Color.Names.Interface with the appropriate callbacks (v0.7)
   - [x] We could change the `Fledex.Color` for `Atom` to delegate to any of the color modules until we find the module that implements it. Defaulting to black if the color does not exist. Thus, we wouldn't even need any specific `color_name` guard, since any atom would be "kind of" valid. I think that would dramatically reduce the dependencies. Downside is that it wouldn't be possible to look at all the colors that are implemented at compiletime, but for that we have runtime functions and that's probably where we would need them the most. (v0;7)
   - [x] Change the import of `Fledex.Color.Names` and import the different color components individually instead. `Fledex.Color.Names` still makes sense to bind those together. The import can be done in a flexible way. This should reduce the complexity of the code, the dependencies, and increase the flexibility without loss of convenience for the user (v0.8)
-  - [x] Check whether we could unload the module first before we we redefine it. The unloading could be done with [`:code.delete(module)](https://www.erlang.org/doc/apps/kernel/code.html#delete/1). This could allow us to ALLWAYS define the module and redefine an inner module. (v0.7)
+  - [x] Check whether we could unload the module first before we redefine it. The unloading could be done with [`:code.delete(module)](https://www.erlang.org/doc/apps/kernel/code.html#delete/1). This could allow us to ALLWAYS define the module and redefine an inner module. (v0.7)
   - [x] components shouldn't `use` but `import` Fledex. This way we would solve a lot of issues.
   - [x] Introduce a `Fledex.Color.RGB` and reduce the reliance on `{r, g, b}` tuples
   - [x] Remove `Fledex.Color.to_rgb/1`
@@ -85,6 +78,9 @@ Even though this library is published, there are things I still want to do befor
     - [x] wiki colors (v0.7)
     - [x] ral colors (v0.7)
     - [x] cone image (v0.7)
+- [ ] Security
+  - [x] Remove the directory traversal issue reported by sobelow (v0.7)
+  - [ ] Investigate whether the creation of atoms in events can be avoided, example in trigger_names? (v0.9)
 - [ ] Increase consumption
   - [ ] Create a video (once v0.6 is released)
   - [ ] Migrate outstanding TODOs to github (v0.8)

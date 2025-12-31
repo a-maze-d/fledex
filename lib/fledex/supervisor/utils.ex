@@ -41,6 +41,12 @@ defmodule Fledex.Supervisor.Utils do
   def via_tuple(strip_name, type, animation_name),
     do: {:via, Registry, {@registry, {strip_name, type, animation_name}}}
 
+  @doc """
+  Get the worker of the led strip with the name `strip_name` of tye type `type` and with the
+  name `name`.
+
+  The fucntion retruns the `pid` of the worker. If the worker can not be found `nil` is being returned
+  """
   @spec get_worker(atom, worker_types(), atom) :: pid() | nil
   def get_worker(strip_name, type, name) do
     case Registry.lookup(worker_registry(), {strip_name, type, name}) do
@@ -56,6 +62,9 @@ defmodule Fledex.Supervisor.Utils do
     end
   end
 
+  @doc """
+  Check whether a spcific worker exists. See also `get_worker/3`
+  """
   @spec worker_exists?(atom, worker_types(), atom) :: boolean
   def worker_exists?(strip_name, type, name) do
     case Registry.lookup(worker_registry(), {strip_name, type, name}) do
@@ -64,6 +73,9 @@ defmodule Fledex.Supervisor.Utils do
     end
   end
 
+  @doc """
+  Get a list of worker names of a specific `type` defined for the led strip with the name `strip_name`
+  """
   @spec get_workers(atom, worker_types(), atom) :: list(atom)
   def get_workers(strip_name, type, name) do
     Registry.select(worker_registry(), [
@@ -75,6 +87,9 @@ defmodule Fledex.Supervisor.Utils do
     ])
   end
 
+  @doc """
+  Stop the worker defined under a specific supervisor
+  """
   @spec stop_worker(GenServer.name(), atom, worker_types(), atom) :: :ok
   def stop_worker(supervisor, strip_name, type, name) do
     case get_worker(strip_name, type, name) do

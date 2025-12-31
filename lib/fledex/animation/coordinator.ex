@@ -53,18 +53,14 @@ defmodule Fledex.Animation.Coordinator do
           :func => (broadcast_state :: any, context :: map, state :: keyword ->
                       new_state :: keyword)
         }
-  @typep state_t :: %__MODULE__{
+
+  @typep state_t :: %{
            strip_name: atom,
            coordinator_name: atom,
            func: (broadcast_state :: any, context :: map(), options :: keyword() ->
                     new_options :: keyword()),
            options: keyword
          }
-
-  defstruct strip_name: :default,
-            coordinator_name: :default,
-            func: &__MODULE__.default_func/3,
-            options: []
 
   # MARK: client side
   @doc """
@@ -109,7 +105,7 @@ defmodule Fledex.Animation.Coordinator do
     # make sure we call the terminate function whenever possible
     Process.flag(:trap_exit, true)
 
-    state = %__MODULE__{
+    state = %{
       options: Map.get(configs, :options, []),
       func: Map.get(configs, :func, &__MODULE__.default_func/3),
       strip_name: strip_name,
@@ -122,22 +118,21 @@ defmodule Fledex.Animation.Coordinator do
 
   @impl GenServer
   @spec handle_cast({:change_config, config_t}, state_t) :: {:noreply, state_t}
-  def handle_cast({:change_config, config}, %__MODULE__{options: options} = state) do
+  def handle_cast({:change_config, config}, %{options: options} = state) do
     # IO.puts("config: #{inspect {config, state}}")
     # make sure to keep options, because they might be added as part of the coordination
-    {:noreply,
-     %__MODULE__{state | func: config.func, options: Keyword.merge(options, config.options)}}
+    {:noreply, %{state | func: config.func, options: Keyword.merge(options, config.options)}}
   end
 
   @impl GenServer
   @spec handle_info({:state_change, any, map}, state_t) :: {:noreply, state_t}
   def handle_info(
         {:state_change, broadcast_state, context},
-        %__MODULE__{func: func, options: options} = state
+        %{func: func, options: options} = state
       ) do
     state =
       try do
-        %__MODULE__{state | options: func.(broadcast_state, context, options)}
+        %{state | options: func.(broadcast_state, context, options)}
       rescue
         value ->
           Logger.warning(

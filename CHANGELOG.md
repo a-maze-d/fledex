@@ -89,9 +89,11 @@ The supervision tree has been improved.
 * Changed `LedStrip.reinit` to `change_config` (including the drivers). Changed the `LedStrip.change_config` to `change_global_config` because it only changes the global settings and not the drivers.
 * Renamed the Job pattern to schedule (since it now also allows intervals)
 * Aligned the various function names that changed the config to `change_config` (instead of `update_`, `change_`, `config`).
+* Renamed `WikiUtils` to `Wiki.Converter` and removed the `filename` function which is not necessary anymore
 
 ### Depedendencies
 * upgrading all dependencies to latest version
+* Added `tzdata` as an optional dependency
 
 ### Build
 * Adding expert to the .gitignore exclusion list
@@ -99,7 +101,12 @@ The supervision tree has been improved.
 * Made `credo` more strict. enabled all checks that I consider as reasonable and fixed the resulting issues.
 * Adding support for Elixir 1.19. The latest Elixir version also helped to also reduce the max xref (9 --> 7)
 * Made the latest version to run extra tests like formatting, xref, coverage instead of doing it on all versions (since the different versions have different behaviors)
-* Added `tzdata` as an optional dependency
+* added `ex_check`, `doctor`, `mix_audit`, `sobelow` and configured `ex_check` to run all tests.
+* changed excoveralls to create html and json output so that we can use the same `mix check` and to then upload the coverage result.
+* Using `ex_check` in the CI pipeline (github action)
+
+### Security
+* Fixed a directory traversal issue (even though I don't think it could be exploited since it's at compile time, but better safe than sorry!)
 
 # Previous versions
 The Changelog of previous versions can be found [here](https://github.com/a-maze-d/fledex/releases) 

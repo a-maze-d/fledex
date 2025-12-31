@@ -53,6 +53,9 @@ defmodule Fledex.Animation.JobScheduler do
     |> Job.set_context(%{strip_name: strip_name, job: job_name})
   end
 
+  @doc """
+  starts a new JobScheduler with the given `strip_name` and `job_name`
+  """
   @spec start_link(atom, atom, job(), keyword) :: GenServer.on_start()
   def start_link(strip_name, job_name, job, server_opts) do
     # IO.puts("Starting job: #{inspect {strip_name, job_name, config, server_opts}}")
@@ -60,6 +63,9 @@ defmodule Fledex.Animation.JobScheduler do
     Runner.start_link(job, [], server_opts)
   end
 
+  @doc """
+  Changes the scheduling configuration of an already existing `JobScheduler`
+  """
   @spec change_config(GenServer.server(), job()) :: :ok
   def change_config(server, job) do
     Runner.change_config(server, job, [])

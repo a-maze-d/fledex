@@ -39,13 +39,23 @@ defmodule Fledex.Color.Names.ModuleGenerator do
   """
   defmacro __using__(opts) do
     filename = Keyword.fetch!(opts, :filename)
+    %Macro.Env{file: path, module: caller_module} = __CALLER__
+    base_path = Path.expand(Path.dirname(path))
+    file_path = Path.expand(Path.dirname(path) <> "/" <> filename)
+
+    if not String.starts_with?(file_path, base_path) do
+      raise(
+        ArgumentError,
+        "Invalid file path, probably trying to move out of the module directory"
+      )
+    end
+
     converter = Keyword.fetch!(opts, :converter)
     opts = Keyword.drop(opts, [:filename, :converter, :fields])
-    %{module: caller_module} = __CALLER__
     opts = Keyword.put_new(opts, :module, caller_module)
 
     create_color_functions_ast(
-      filename,
+      file_path,
       converter,
       opts
     )
@@ -87,12 +97,13 @@ defmodule Fledex.Color.Names.ModuleGenerator do
 
       colors = LoadUtils.load_color_file(filename, converter, opts)
 
+      @external_resource filename
       @colors colors
       @color_names Map.keys(@colors)
-      # @typedoc """
-      # The allowed color names
-      # """
-      @typedoc false
+
+      @typedoc """
+      The allowed color names
+      """
       @type color_name_t ::
               unquote(
                 Map.keys(@colors)
@@ -100,40 +111,25 @@ defmodule Fledex.Color.Names.ModuleGenerator do
                 |> Code.string_to_quoted!()
               )
 
-      # @doc ~S"""
-      # Check whether the atom is a valid color name
-      # """
       @impl Interface
-      # @doc guard: true
-      @doc false
+      @doc delegate_to: {Interface, :is_color_name, 1}
+      @doc guard: true
       defguard is_color_name(atom) when is_atom(atom) and is_map_key(@colors, atom)
 
-      # @doc ~S"""
-      # Get all the data about the predefined colors
-      # """
-      @doc false
       @impl Interface
+      @doc delegate_to: {Interface, :colors, 0}
       @spec colors :: list(Types.color_struct_t())
       def colors do
         Map.values(@colors)
       end
 
-      # @doc ~S"""
-      # Get a list of all the predefined color (atom) names.
-
-      # The name can be used to either retrieve the info by calling `info/2` or by calling the function with that name (see also the description at the top and take a look at this [example livebook](3b_fledex_everything_about_colors.livemd))
-      # """
-      @doc false
       @impl Interface
+      @doc delegate_to: {Interface, :names, 0}
       @spec names :: list(color_name_t)
       def names, do: Map.keys(@colors)
 
-      # @standard_fields fields
-      # @doc """
-      # Retrieve information about the color with the given name
-      # """
-      @doc false
       @impl Interface
+      @doc delegate_to: {Interface, :info, 2}
       def info(name, what \\ :hex)
 
       def info(name, what) when is_color_name(name) do
@@ -146,39 +142,34 @@ defmodule Fledex.Color.Names.ModuleGenerator do
 
       @base16 16
       for {name, color} <- colors do
-        # {r, g, b} = color.rgb
-
-        # hex =
-        #   color.hex
-        #   |> Integer.to_string(@base16)
-        #   |> String.pad_leading(6, "0")
-
-        # @doc """
-        # Defines the color rgb(#{r}, #{g}, #{b}).
-
-        # <div style="width: 25px; height: 25px; display: inline-block; background-color: ##{hex}; border: 1px solid black"></div>
-        # """
-        # @doc color_name: true
         @doc false
         @spec unquote(name)(Types.color_props_t()) :: Types.color_vals_t()
         def unquote(name)(what \\ :hex)
 
+        @doc false
         def unquote(name)(what) when is_atom(what) and what not in unquote(fields) do
           info(unquote(name), what)
         end
 
         for field <- fields do
+          @doc false
           def unquote(name)(unquote(field)), do: unquote(Macro.escape(color))[unquote(field)]
         end
 
+        @doc false
         @spec unquote(name)(Leds.t()) :: Leds.t()
         def unquote(name)(leds), do: leds |> Leds.light(unquote(Macro.escape(color)).hex)
+
         @doc false
         @spec unquote(name)(Leds.t(), opts :: keyword) :: Leds.t()
         def unquote(name)(leds, opts) do
           leds |> Leds.light(unquote(Macro.escape(color)).hex, opts)
         end
       end
+
+      @doc false
+      @spec filename :: String.t()
+      def filename, do: hd(@external_resource)
     end
   end
 end

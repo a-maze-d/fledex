@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-if Mix.env() == :dev do
+if Mix.env() in [:test, :dev] do
   defmodule Mix.Tasks.Docs.Fledex.Colors do
     use Mix.Task
 
@@ -117,13 +117,16 @@ if Mix.env() == :dev do
 
       ### Table of Content
       """
+
       Enum.reduce(modules, header, fn module, acc ->
         # long = Atom.to_string(elem(module,0))
-        type = Atom.to_string(elem(module,1))
-        short = Atom.to_string(elem(module,2))
-        acc <> """
-        * [`:#{short}`](##{short}) (#{type})
-        """
+        type = Atom.to_string(elem(module, 1))
+        short = Atom.to_string(elem(module, 2))
+
+        acc <>
+          """
+          * [`:#{short}`](##{short}) (#{type})
+          """
       end)
     end
 

@@ -29,9 +29,13 @@ defmodule Fledex.Utils.Dsl do
     :effect
   ]
 
-  @spec create_config(atom, atom, (map -> Leds.t()), keyword | nil) :: Manager.config_t()
+  @doc """
+  This function creates a configuration for an animator
+  """
+  @spec create_config(atom, :animation | :static, (map -> Leds.t()), keyword | nil) ::
+          Manager.config_t()
   def create_config(name, type, def_func, options)
-      when is_atom(name) and is_atom(type) and
+      when is_atom(name) and (type == :animation or type == :static) and
              (is_function(def_func, 1) or is_function(def_func, 2)) do
     %{
       name => %{
@@ -43,11 +47,17 @@ defmodule Fledex.Utils.Dsl do
     }
   end
 
+  @doc """
+  This function creates the configuration for a component
+  """
   @spec create_config(atom, atom, keyword | nil) :: Manager.config_t()
   def create_config(name, module, opts) do
     module.configure(name, opts)
   end
 
+  @doc """
+  This function applies an effect to some configurations
+  """
   @spec apply_effect(atom, keyword, Manager.config_t() | [Manager.config_t()]) ::
           Manager.config_t()
   def apply_effect(module, options, block)
@@ -75,6 +85,9 @@ defmodule Fledex.Utils.Dsl do
           "Unknown block. I don't know how to apply the effect #{module} with options #{inspect(options)} on #{inspect(block)}"
   end
 
+  @doc """
+  This function creates the configuration for an led strip
+  """
   @spec configure_strip(
           atom,
           :config | LedStrip.drivers_config_t(),
@@ -159,6 +172,9 @@ defmodule Fledex.Utils.Dsl do
     end
   end
 
+  @doc """
+  This function creates the confguration for a job
+  """
   @spec create_job(atom, Job.schedule(), keyword, (-> any())) :: %{
           atom => JobScheduler.config_t()
         }
@@ -173,6 +189,9 @@ defmodule Fledex.Utils.Dsl do
     }
   end
 
+  @doc """
+  This function creates the configuration for a coordinator
+  """
   @spec create_coordinator(atom, keyword, (-> any())) :: %{atom => Coordinator.config_t()}
   def create_coordinator(name, options, function) do
     %{
@@ -184,6 +203,9 @@ defmodule Fledex.Utils.Dsl do
     }
   end
 
+  @doc """
+  This function extracts teh configs from an AST
+  """
   @spec ast_extract_configs(Macro.t()) :: Macro.t()
   def ast_extract_configs(block) do
     {_ast, configs_ast} =

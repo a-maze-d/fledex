@@ -17,10 +17,10 @@ defmodule Fledex.Color.Names.Wiki do
   > * A list of all available colors from this module can be found in the documentation under [Colors](colors.md#wiki).
   """
 
-  alias Fledex.Color.Names.WikiUtils
+  alias Fledex.Color.Names.Wiki.Converter
 
   use Fledex.Color.Names.ModuleGenerator,
-    filename: WikiUtils.file_name(),
-    converter: &WikiUtils.converter/1,
+    filename: "wiki_colors.csv",
+    converter: &Converter.converter/1,
     splitter_opts: [separator: ",", split_opts: [parts: 11]]
 end

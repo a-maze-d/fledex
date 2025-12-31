@@ -26,7 +26,7 @@ defmodule Fledex.Color.Names.LoadUtils do
   @spec load_color_file(String.t(), ([String.t() | integer] -> Types.color_struct_t()), keyword) ::
           %{atom => Types.color_struct_t()}
   def load_color_file(
-        names_file,
+        filename,
         converter,
         opts
       ) do
@@ -39,7 +39,7 @@ defmodule Fledex.Color.Names.LoadUtils do
     # Example how the structure of the CSV might look like
     # Name, Hex (RGB), Red (RGB), Green (RGB), Blue (RGB), Hue (HSL/HSV), Satur. (HSL),
     #   Light (HSL), Satur.(HSV), Value (HSV), Source
-    names_file
+    filename
     |> File.stream!()
     # drop the first columns (like the header line)
     |> Stream.drop(drop)
