@@ -80,10 +80,9 @@ jobs:
       if: ${{ matrix.other_checks }}
       run: mix check
 
-    - name: upload code coverage
-      if: ${{ matrix.other_checks }}
-      run: mix coveralls.post
-      env: 
+    - name: Check coverage
+      if: ${{ matrix.coverage }}
+      run: mix coveralls.github
+      env:
+        MIX_ENV: test
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-
