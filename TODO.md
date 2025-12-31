@@ -82,7 +82,7 @@ Even though this library is published, there are things I still want to do befor
   - [x] Remove the directory traversal issue reported by sobelow (v0.7)
   - [ ] Investigate whether the creation of atoms in events can be avoided, example in trigger_names? (v0.9)
 - [ ] Increase consumption
-  - [ ] Create a video (once v0.6 is released)
+  - [ ] Create a video (once v0.7 is released)
   - [ ] Migrate outstanding TODOs to github (v0.8)
   - [ ] Publish/announce on Elixirforum (v0.8)
   - [ ] Get the library into nerves-livebook (v0.8)

@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
 ```elixir
 Mix.install(
   [
-    {:fledex, "~>0.6"}
+    {:fledex, "~>0.7"}
   ],
   # necessary to enable the nicer rendering
   consolidate_protocols: false

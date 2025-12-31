@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
 # the libraries will be loaded, but on a nerves_livebook you can only use
 # what has been compiled into your image
 Mix.install([
-  {:fledex, "~>0.6"}
+  {:fledex, "~>0.7"}
 ])
 ```
 

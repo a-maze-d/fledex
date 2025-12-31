@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 
 ```elixir
 Mix.install([
-  {:fledex, "~>0.6"}
+  {:fledex, "~>0.7"}
 ])
 
 # we define a couple of aliases to not have to type that much
