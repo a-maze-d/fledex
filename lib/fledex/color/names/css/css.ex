@@ -15,10 +15,9 @@ defmodule Fledex.Color.Names.CSS do
   """
   alias Fledex.Color.Names.LoadUtils
 
-  @external_resource Path.dirname(__DIR__) <> "/css/css_colors.csv"
-
+  # @external_resource Path.dirname(__DIR__) <> "/css/css_colors.csv"
   use Fledex.Color.Names.ModuleGenerator,
-    filename: @external_resource,
+    filename: "css_colors.csv",
     splitter_opts: [separator: ~r/\s+/, split_opts: [trim: true]],
     converter: fn [index, name, hex, r, g, b] ->
       rgb = {LoadUtils.a2i(r), LoadUtils.a2i(g), LoadUtils.a2i(b)}

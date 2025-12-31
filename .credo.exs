@@ -189,6 +189,8 @@
           {Credo.Check.Warning.UnusedStringOperation, []},
           {Credo.Check.Warning.UnusedTupleOperation, []},
           {Credo.Check.Warning.UnsafeExec, []},
+          # From credo_binary_patterns
+          {CredoBinaryPatterns.Check.Consistency.Pattern}
         ],
         disabled: [
           #

@@ -43,6 +43,9 @@ defmodule Fledex.Color.KinoRender do
           colors: [Types.color()]
         }
 
+  @doc """
+  Create a new KinoRender for the specified color
+  """
   @spec new(Types.color() | [Types.color()]) :: t
   def new(colors) when is_list(colors) do
     %__MODULE__{colors: colors}
@@ -60,6 +63,9 @@ defmodule Fledex.Color.KinoRender do
     new([color])
   end
 
+  @doc """
+  convert to a list of `Fledex.Leds`
+  """
   @spec to_leds(t) :: Leds.t()
   def to_leds(%__MODULE__{colors: colors}) do
     colors =
@@ -78,6 +84,9 @@ defmodule Fledex.Color.KinoRender do
     )
   end
 
+  @doc """
+  Convert to markdown (i.e. a string)
+  """
   @spec to_markdown(t) :: binary
   def to_markdown(%__MODULE__{} = colors) do
     colors

@@ -1,17 +1,14 @@
 # Copyright 2025, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
-defmodule Fledex.Color.Names.WikiUtils do
+defmodule Fledex.Color.Names.Wiki.Converter do
   @moduledoc false
   alias Fledex.Color.Names.LoadUtils
   alias Fledex.Color.Names.Types
 
-  @doc false
-  @spec file_name() :: String.t()
-  def file_name do
-    Path.dirname(__DIR__) <> "/wiki/wiki_colors.csv"
-  end
-
+  @doc """
+  This converts a csv line into a a map of color properties
+  """
   @spec converter([integer | String.t()]) :: Types.color_struct_t()
   def converter([index, name, hex, r, g, b, h, s1, l1, s2, v2, source]) do
     %{

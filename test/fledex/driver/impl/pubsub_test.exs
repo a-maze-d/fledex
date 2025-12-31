@@ -23,9 +23,9 @@ defmodule Fledex.Driver.Impl.PubSubTest do
       assert Keyword.fetch!(config, :data_name) == :pixel_data
     end
 
-    test "reinit" do
+    test "change_config" do
       config = [data_name: :pixel_data]
-      assert config == Driver.reinit(config, [], [])
+      assert config == Driver.change_config(config, [], [])
     end
 
     test "transfer" do

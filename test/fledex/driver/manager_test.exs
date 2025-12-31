@@ -22,7 +22,7 @@ defmodule Fledex.Driver.ManagerTest do
       configure(config)
     end
 
-    def reinit(old_config, new_config, _global_config) do
+    def change_config(old_config, new_config, _global_config) do
       Keyword.merge(old_config, new_config)
     end
 
@@ -48,7 +48,7 @@ defmodule Fledex.Driver.ManagerTest do
       configure(config)
     end
 
-    def reinit(old_config, new_config, _global_config) do
+    def change_config(old_config, new_config, _global_config) do
       Keyword.merge(old_config, new_config)
     end
 
@@ -94,7 +94,7 @@ defmodule Fledex.Driver.ManagerTest do
       configure(config)
     end
 
-    def reinit(old_config, new_config, _global_config) do
+    def change_config(old_config, new_config, _global_config) do
       Keyword.merge(old_config, new_config)
     end
 
@@ -169,7 +169,7 @@ defmodule Fledex.Driver.ManagerTest do
 
       assert length(drivers) == 1
       assert drivers == [{TestDriver, a1: 1, a2: 1}]
-      assert log =~ "NonCompliantDriver does not implement the function :reinit"
+      assert log =~ "NonCompliantDriver does not implement the function :change_config"
       assert log =~ "with the wrong arity 2 vs 3"
     end
 
@@ -185,7 +185,7 @@ defmodule Fledex.Driver.ManagerTest do
 
       assert length(drivers) == 1
       assert drivers == [{Null, []}]
-      assert log =~ "NonCompliantDriver does not implement the function :reinit"
+      assert log =~ "NonCompliantDriver does not implement the function :change_config"
       assert log =~ "with the wrong arity 2 vs 3"
     end
   end
@@ -197,35 +197,39 @@ defmodule Fledex.Driver.ManagerTest do
     config
   end
 
-  describe "reinit drivers" do
+  describe "change_config drivers" do
     test "without drivers" do
-      drivers = Manager.reinit([], [], [])
+      drivers = Manager.change_config([], [], [])
       assert drivers == [{Null, []}]
     end
 
     test "with existing default" do
-      drivers = Manager.reinit([{Null, []}], [], [])
+      drivers = Manager.change_config([{Null, []}], [], [])
       assert drivers == [{Null, []}]
     end
 
     test "with overlapping driver" do
-      drivers = Manager.reinit([{TestDriver4, []}], [{TestDriver4, []}], [])
+      drivers = Manager.change_config([{TestDriver4, []}], [{TestDriver4, []}], [])
       assert drivers == [{TestDriver4, []}]
     end
 
     test "with overlapping driver, new config" do
-      drivers = Manager.reinit([{TestDriver4, [abc: 123]}], [{TestDriver4, [abc: 345]}], [])
+      drivers =
+        Manager.change_config([{TestDriver4, [abc: 123]}], [{TestDriver4, [abc: 345]}], [])
+
       assert drivers == [{TestDriver4, abc: 345}]
     end
 
     test "with overlapping driver, non-overlapping config" do
-      drivers = Manager.reinit([{TestDriver4, [abc: 123]}], [{TestDriver4, [efg: 345]}], [])
+      drivers =
+        Manager.change_config([{TestDriver4, [abc: 123]}], [{TestDriver4, [efg: 345]}], [])
+
       assert drivers == [{TestDriver4, [abc: 123, efg: 345]}]
     end
 
     test "with overlapping driver and extra driver" do
       drivers =
-        Manager.reinit(
+        Manager.change_config(
           [{TestDriver4, [abc: 123]}],
           [{TestDriver4, [abc: 345]}, {Null, []}],
           []
@@ -235,20 +239,20 @@ defmodule Fledex.Driver.ManagerTest do
     end
 
     test "drivers stay sorted" do
-      drivers = Manager.reinit([], [{TestDriver4, []}, {Null, []}], [])
+      drivers = Manager.change_config([], [{TestDriver4, []}, {Null, []}], [])
       assert drivers == [{Null, []}, {TestDriver4, []}]
     end
 
     test "with dropped driver, config retained" do
       old_drivers = Enum.sort([{TestDriver4, [abc: 123]}, {Null, []}])
-      drivers = Manager.reinit(old_drivers, [{TestDriver4, []}, {Null, []}], [])
+      drivers = Manager.change_config(old_drivers, [{TestDriver4, []}, {Null, []}], [])
 
       assert drivers == [{Null, []}, {TestDriver4, [abc: 123]}]
     end
 
     test "with dropped driver, config retained (second order)" do
       old_drivers = Enum.sort([{TestDriver4, [abc: 123]}, {Null, []}])
-      drivers = Manager.reinit(old_drivers, [{Null, []}, {TestDriver4, []}], [])
+      drivers = Manager.change_config(old_drivers, [{Null, []}, {TestDriver4, []}], [])
 
       assert drivers == [{Null, []}, {TestDriver4, [abc: 123]}]
     end

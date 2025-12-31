@@ -16,10 +16,10 @@ defmodule Fledex.Color.Names.SVG do
   alias Fledex.Color
   alias Fledex.Color.Names.LoadUtils
 
-  @external_resource Path.dirname(__DIR__) <> "/svg/svg_colors.csv"
+  # @external_resource Path.dirname(__DIR__) <> "/svg/svg_colors.csv"
 
   use Fledex.Color.Names.ModuleGenerator,
-    filename: @external_resource,
+    filename: "svg_colors.csv",
     splitter_opts: [separator: ~r/\s+/, split_opts: [trim: true]],
     converter: fn all ->
       [index, name, r, g, b] =

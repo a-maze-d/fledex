@@ -45,7 +45,11 @@ defmodule Fledex.Effect.Rotation do
   alias Fledex.Color.Types
   alias Fledex.Utils.PubSub
 
-  @doc false
+  @doc """
+  Implementation of the Rotation effect.
+
+  This is making use of the `Fledex.Effect.Interface.__using__/1` functionalty.
+  """
   @spec do_apply(
           [Fledex.Color.Types.colorint()],
           non_neg_integer(),
@@ -87,13 +91,13 @@ defmodule Fledex.Effect.Rotation do
   # (we don't support shrinking, i.e. negative stretching)
   @spec stretch([Fledex.Color.Types.colorint()], non_neg_integer(), integer) ::
           {[Fledex.Color.Types.colorint()], non_neg_integer()}
-  def stretch(leds, led_count, stretch)
-      when stretch == led_count or
-             stretch < led_count do
+  defp stretch(leds, led_count, stretch)
+       when stretch == led_count or
+              stretch < led_count do
     {leds, led_count}
   end
 
-  def stretch(leds, led_count, stretch) when stretch > led_count do
+  defp stretch(leds, led_count, stretch) when stretch > led_count do
     missing = stretch - led_count
     missng_leds = Enum.map(1..missing, fn _index -> 0x000000 end)
     {leds ++ missng_leds, stretch}

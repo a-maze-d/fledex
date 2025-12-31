@@ -13,13 +13,13 @@ defmodule Fledex.Supervisor.Utils do
   alias Fledex.Animation.Coordinator
   alias Fledex.Animation.JobScheduler
 
-  @pubsub Mix.Project.config()[:app]
-  @app_supervisor Fledex.DynamicSupervisor
-  @registry Fledex.Supervisor.WorkersRegistry
-  @strip_supervisors Fledex.Supervisor.Strips
+  # Mix.Project.config()[:app]
+  @pubsub Fledex
 
   @type worker_types :: led_strip_worker_types | :led_strip
   @type led_strip_worker_types :: :animator | :coordinator | :job
+  @type led_strip_worker_configs ::
+          Animator.config_t() | Coordinator.config_t() | JobScheduler.job()
 
   @doc """
   Defines the name of the pubsub system that is used by Fledex
@@ -28,23 +28,11 @@ defmodule Fledex.Supervisor.Utils do
   def pubsub_name, do: @pubsub
 
   @doc """
-  The name of the application Supervisor to which we can add
-  dynamically supervisors. The AnimationSystem can be added to it
-  """
-  @spec app_supervisor() :: module
-  def app_supervisor, do: @app_supervisor
-
-  @doc """
   The name of the registry to which the workers will be registered
   """
+  @registry Fledex.Supervisor.WorkersRegistry
   @spec worker_registry() :: module
   def worker_registry, do: @registry
-
-  @doc """
-  The name of the supervisor that observes all the workers in the AnimationSystem
-  """
-  @spec strip_supervisors() :: module
-  def strip_supervisors, do: @strip_supervisors
 
   @doc """
   used to register the workers with the registry
@@ -53,40 +41,12 @@ defmodule Fledex.Supervisor.Utils do
   def via_tuple(strip_name, type, animation_name),
     do: {:via, Registry, {@registry, {strip_name, type, animation_name}}}
 
-  @spec supervisor_name(atom) :: GenServer.name()
-  def supervisor_name(strip_name) do
-    via_tuple(strip_name, :led_strip, :supervisor)
-  end
+  @doc """
+  Get the worker of the led strip with the name `strip_name` of tye type `type` and with the
+  name `name`.
 
-  @spec strip_workers_name(atom) :: GenServer.name()
-  def strip_workers_name(strip_name) do
-    via_tuple(strip_name, :led_strip, :workers)
-  end
-
-  @mapping %{
-    animator: Animator,
-    coordinator: Coordinator,
-    job: JobScheduler
-  }
-  @spec start_worker(
-          atom,
-          atom,
-          led_strip_worker_types(),
-          Animator.config_t() | Coordinator.config_t() | JobScheduler.config_t(),
-          keyword
-        ) :: DynamicSupervisor.on_start_child()
-  def start_worker(strip_name, name, type, config, opts) do
-    DynamicSupervisor.start_child(
-      strip_workers_name(strip_name),
-      %{
-        # no need to be unique
-        id: name,
-        start: {@mapping[type], :start_link, [strip_name, name, config, opts]},
-        restart: :transient
-      }
-    )
-  end
-
+  The fucntion retruns the `pid` of the worker. If the worker can not be found `nil` is being returned
+  """
   @spec get_worker(atom, worker_types(), atom) :: pid() | nil
   def get_worker(strip_name, type, name) do
     case Registry.lookup(worker_registry(), {strip_name, type, name}) do
@@ -102,6 +62,9 @@ defmodule Fledex.Supervisor.Utils do
     end
   end
 
+  @doc """
+  Check whether a spcific worker exists. See also `get_worker/3`
+  """
   @spec worker_exists?(atom, worker_types(), atom) :: boolean
   def worker_exists?(strip_name, type, name) do
     case Registry.lookup(worker_registry(), {strip_name, type, name}) do
@@ -110,6 +73,9 @@ defmodule Fledex.Supervisor.Utils do
     end
   end
 
+  @doc """
+  Get a list of worker names of a specific `type` defined for the led strip with the name `strip_name`
+  """
   @spec get_workers(atom, worker_types(), atom) :: list(atom)
   def get_workers(strip_name, type, name) do
     Registry.select(worker_registry(), [
@@ -121,6 +87,9 @@ defmodule Fledex.Supervisor.Utils do
     ])
   end
 
+  @doc """
+  Stop the worker defined under a specific supervisor
+  """
   @spec stop_worker(GenServer.name(), atom, worker_types(), atom) :: :ok
   def stop_worker(supervisor, strip_name, type, name) do
     case get_worker(strip_name, type, name) do
