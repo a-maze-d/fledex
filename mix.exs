@@ -5,7 +5,7 @@
 defmodule Fledex.MixProject do
   use Mix.Project
 
-  @version "0.7.0"
+  @version "0.8.0-dev"
   @source_url "https://github.com/a-maze-d/fledex"
   def project do
     [
