@@ -8,11 +8,9 @@ SPDX-License-Identifier: Apache-2.0
 
 ```elixir
 Mix.install([
-  {:fledex, "~>0.6"}
+  {:fledex, "~>0.7"}
 ])
 ```
-
-## Setup
 
 ## Colors and different drivers
 
@@ -34,7 +32,7 @@ We don't specify anything and thereby go with the default color set of `:wiki`, 
 use Fledex
 ```
 
-Fledex has an extensive set of predefined colors from [Wikipedia](https://en.wikipedia.org/wiki/List_of_colors:_A%E2%80%93F), [CSS](https://drafts.csswg.org/css-color/#named-colors), [SVG](https://www.w3.org/TR/SVG11/types.html#ColorKeywords), and [RAL](https://en.wikipedia.org/wiki/List_of_RAL_colours).Apart from the last list (which is not so commonly used), they are all combined together to a single Names module. You can retrieve those names by calling:
+Fledex has an extensive set of predefined colors from [Wikipedia](https://en.wikipedia.org/wiki/List_of_colors:_A%E2%80%93F), [CSS](https://drafts.csswg.org/css-color/#named-colors), [SVG](https://www.w3.org/TR/SVG11/types.html#ColorKeywords), and [RAL](https://en.wikipedia.org/wiki/List_of_RAL_colours). Apart from the last list (which is not so commonly used), they are all combined together to a single Names module. You can retrieve those names by calling:
 
 <!-- livebook:{"force_markdown":true} -->
 
@@ -54,11 +52,17 @@ Fledex.Color.Names.info(name, :all)
 Here a list of all the defined colors (extra colors can still be used, but need to be called explicitly, like the RAL colors through `Fledex.Color.Names.RAL`):
 
 ```elixir
-colors = Enum.map(Fledex.Color.Names.names() |> Enum.sort(), fn name ->
-  Fledex.Color.Names.info(name, :all)
-  end)
+fields = [:descriptive_name, :name, :rgb, :hex, :source, :module]
+colors = Enum.map(
+  Fledex.Color.Names.names() |> Enum.sort(), 
+  fn name ->
+    Fledex.Color.Names.info(name, :all)
+    |> Map.take(fields)
+  end
+)
+
 Elixir.Kino.DataTable.new(colors,
-  keys: [:descriptive_name, :name, :rgb, :hex, :hsv, :hsl, :source, :module],
+  keys: [:descriptive_name, :name, :rgb, :hex, :source, :module],
   sorting_enabled: true
 )
 ```
@@ -108,9 +112,10 @@ Before we look at the Fledex features regarding color correction we first need t
 > the colors, making the whites appear white, the blacks appear black, and making sure that
 > everything is even.
 
-The color correction consists of two parts. First to compensate the physical mis-coloring of the LEDs. The basic colors on the classical 5050 LED chip are not shown in the same intensity. So we need to compensate this.
+The color correction consists of two parts:
 
-The second color coorection we might want to perform is to bring the color into the correct "temperature" (named due to the [black body radiator](https://en.wikipedia.org/wiki/Black-body_radiation)) with a relatively continuous spectrum, or approach the light of a gaseous light source with more discrete spectral band (see [gas discharge lamp](https://en.wikipedia.org/wiki/Gas-discharge_lamp)).
+1. First to compensate the physical mis-coloring of the LEDs. The basic colors on the classical 5050 LED chip are not shown in the same intensity. So we need to compensate this.
+2. The second color correction we might want to perform is to bring the color into the correct "temperature" (named due to the [black body radiator](https://en.wikipedia.org/wiki/Black-body_radiation)) with a relatively continuous spectrum, or approach the light of a gaseous light source with more discrete spectral band (see [gas discharge lamp](https://en.wikipedia.org/wiki/Gas-discharge_lamp)).
 
 Color correction is provided in Fledex through the modules under `Fledex.Color.Correction`.
 

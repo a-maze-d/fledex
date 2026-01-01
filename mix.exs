@@ -5,7 +5,7 @@
 defmodule Fledex.MixProject do
   use Mix.Project
 
-  @version "0.7.0-dev"
+  @version "0.7.0"
   @source_url "https://github.com/a-maze-d/fledex"
   def project do
     [
@@ -22,6 +22,8 @@ defmodule Fledex.MixProject do
       source_url: @source_url,
       dialyzer: [
         # plt_add_deps: :apps_direct,
+        check_plt: true,
+        incremental: true,
         plt_add_apps: [:mix],
         flags: [
           # :missing_return,

@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 
 ```elixir
 Mix.install([
-  {:fledex, "~>0.6"},
+  {:fledex, "~>0.7"},
   {:jason, "~>1.2"}
 ])
 
@@ -20,9 +20,6 @@ alias Fledex.Driver.Impl.Kino
 alias Fledex.Color.Correction
 alias Fledex.Utils.PubSub
 alias Fledex.Supervisor.AnimationSystem
-
-AnimationSystem.start_link()
-
 
 :ok
 ```
@@ -66,6 +63,13 @@ Then we can make the call to [`https://api.open-meteo.com/v1/forecast?latitude=4
 As can be seen we get the information we are interested in, the current temperature (in °C)
 
 ## Configuring the led strip
+
+Again, we configure our System and start our AnimationSystem
+
+```elixir
+use Fledex.Config
+AnimationSystem.start_link()
+```
 
 Now it's time to prepare our led strip. First we define our strip and we set a very low refresh rate. An update every 10 sec is enough.
 

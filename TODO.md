@@ -16,7 +16,7 @@ Even though this library is published, there are things I still want to do befor
   - [x] Document the driver options (v0.7)
   - [x] Update the cheatsheet with coordinator info (v0.7)
   - [x] Resolve all important `doctor` issues (v0.7)
-  - [ ] Add a livebook with coordinator examples (v0.7) <-- WIP
+  - [ ] Add a livebook with coordinator examples (v0.8) <-- WIP
   - [ ] Update documentation with the Supervision tree (v0.8)
   - [ ] hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.8)
 - [ ] Testing
@@ -45,7 +45,8 @@ Even though this library is published, there are things I still want to do befor
   - [x] Rename the job property `pattern` to `schedule` in the DSL created config (v0.7)
   - [x] The refactoring made the debug_logging property unnecessary. It's unclear on what to do with it. (v0.7)
   - [x] Rename `docs` to `pages`. Some people find it confusing to have a `docs` and a `doc` (created by `ex_doc`) (v0.7)
-  - [ ] Make sure that all the job options are correctly honored (adjust documentation if necessary) (v0.7)
+  - [ ] We should be able to replace the `Animation.Manager` config splitting with the `Enum.group_by` function (v0.8)
+  - [ ] Make sure that all the job options are correctly honored (adjust documentation if necessary) (v0.8)
   - [ ] Rethink whether we really want to create a `Fledex.Config.Data` module or we should store the information in a GenServer. The issue with the GenServer is that we need to start a server. But maybe that's not soo bad. (v0.9)
   - [x] Change the `start_links` to take just one arg (the parameters) and an `opts` passed as opts to GenServer. Through this we define the name and therefore can move the `via_tuple` outside of the modules.
 - [ ] Missing functionality
@@ -54,13 +55,13 @@ Even though this library is published, there are things I still want to do befor
   - [x] Allow color modules to not carry more information than just a pre-defined set (v0.7)
   - [x] convert the rgb to other color spaces (in the various color name modules). Considering the previous point we might not need to do this, because it should now be optional (v0.7) <-- reduced the generated color functions, and what gets exposed
   - [x] we start things through the Supervisor, but we don't shut things down through it (v0.7)
-  - [ ] Put some more effort into the coordinator to make it work well (v0.7)
   - [x] Rework the `:job` implementation (v0.7):
     - [x] The Job should (at least appear) to be connected to the LedStrip
     - [x] Replace it with a different library (maybe `SchedEx`? https://hexdocs.pm/sched_ex/readme.html) (v0.7)
       - [x] Investigate various libraries and how they fit into Fledex. I looked at various different libraries (`erlcron`, `sched_ex`, `exq_scheduler`, `ecron`, ...), but none really fulfils the needs :-( `SchedEx` is the one that is simple and comes closest. Therefore the plan is to take it (it's MIT license), modify it, and integrate it into Fledex
       - [x] It's not possible to inject a context to the job, because you either have to provide an `{M, F, [Args]}` or a `(-> any())` function. The former is not possible, since we don't have amodule (but just an anonymous function) and the latter is not possible, because we can't pass in any argument :-(. We would need to extend Quantum to accept an {F, [Args]}
       - [x] Switch to a released version of `:fledex_scheduler` (v0.7)
+  - [ ] Put some more effort into the coordinator to make it work well (v0.8)
   - [ ] Enable Telemetry? (v0.8)
     - [ ] Switch also the `fledex_scheduler` stats to telemetry (v0.8)
   - [ ] Add support for WS2811/12/13/14/15 LED strips controlled through phase modulation. (v0.8)
@@ -82,7 +83,7 @@ Even though this library is published, there are things I still want to do befor
   - [x] Remove the directory traversal issue reported by sobelow (v0.7)
   - [ ] Investigate whether the creation of atoms in events can be avoided, example in trigger_names? (v0.9)
 - [ ] Increase consumption
-  - [ ] Create a video (once v0.6 is released)
+  - [ ] Create a video (once v0.7 is released)
   - [ ] Migrate outstanding TODOs to github (v0.8)
   - [ ] Publish/announce on Elixirforum (v0.8)
   - [ ] Get the library into nerves-livebook (v0.8)
