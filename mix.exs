@@ -22,6 +22,8 @@ defmodule Fledex.MixProject do
       source_url: @source_url,
       dialyzer: [
         # plt_add_deps: :apps_direct,
+        check_plt: true,
+        incremental: true,
         plt_add_apps: [:mix],
         flags: [
           # :missing_return,
