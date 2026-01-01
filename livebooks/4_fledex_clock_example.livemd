@@ -18,8 +18,6 @@ alias Fledex.Leds
 alias Fledex.LedStrip
 alias Fledex.Supervisor.AnimationSystem
 
-AnimationSystem.start_link()
-
 :ok
 ```
 
@@ -32,7 +30,14 @@ But before we get there, we first initiate our led strip.
 
 ## Preparational steps
 
-First we register a strip (we name it `:clock`) with our `Fledex.Animation.Manager` and we use the default settings for the `Kino` driver.
+First we need to define our config and start our AnimationSystem
+
+```elixir
+use Fledex.Config
+AnimationSystem.start_link()
+```
+
+Then we register a strip (we name it `:clock`) with our `Fledex.Animation.Manager` and we use the default settings for the `Kino` driver.
 
 Then we modify the led strip to update with a very low frequency. Our clock only updates every second and therefore it's unnecessary that we update it more often than that. To avoid any issues due to some runtime delays, we update it twice every second. Thereby the second indicator will never jump an led.
 

@@ -28,7 +28,12 @@ alias Fledex.Driver.Impl.Kino
 alias Fledex.Color.Correction
 alias Fledex.Supervisor.AnimationSystem
 
+# to use our color aliases (like :red) we need to configure them
+use Fledex.Config
+
+# now we start our animation system
 AnimationSystem.start_link()
+
 ```
 
 ## Helper functions
@@ -68,6 +73,7 @@ We call our led strip `:john`. In this example we will only use the simple kino 
 We then define an animation configuration that consists of a map with the key being the name of the animation and the value being the configuration of that animation. Each animation configuration needs to specify the `:type` as `:animation`, because (as we will see later) other types exist, and a `:def_func` that defines our animation (potentially with an additional `:send_config_func` as shown here. We'll look at this in more detail in a later section).
 
 ```elixir
+
 Manager.register_strip(:john, [{Kino, []}], [])
 
 Manager.register_config(:john, %{

@@ -50,7 +50,7 @@ end
 To test our animation we fake again the temperature by simply publishing the desired temperature.
 
 ```elixir
-Fledex.Utils.PubSub.broadcast(:fledex, "trigger", {:trigger, %{temperature: 17.2}})
+broadcast_trigger(%{temperature: 17.2})
 ```
 
 ## What is a component
@@ -96,11 +96,11 @@ The interesting thing in the `Fledex.Component.Dot` component is that it actuall
 
 but that almost equal to importing.
 
-  > #### Note {: .info}
-  > 
-  > We want to leave the definition of color names to the user of our component. In a component you
-  > should ideally define colors as hex values and not by name. If you still want to use color
-  > names, then specify the color name module explicitly (example: `Fledex.Color.Names.Wiki.red()`)
+> #### Note
+> 
+> We want to leave the definition of color names to the user of our component. In a component you
+> should ideally define colors as hex values and not by name. If you still want to use color
+> names, then specify the color name module explicitly (example: `Fledex.Color.Names.Wiki.red()`)
 
 The code looks like the following
 

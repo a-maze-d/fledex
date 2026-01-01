@@ -198,10 +198,22 @@ defmodule Fledex.Animation.Animator do
 
   @impl GenServer
   @spec handle_cast({:change_config, config_t}, state_t) :: {:noreply, state_t}
-  def handle_cast({:change_config, config}, state) do
-    state = do_update_config(state, config)
+  def handle_cast(
+        {:change_config, config},
+        %{strip_name: strip_name, animation_name: animation_name} = state
+      ) do
+    Logger.debug(
+      "changing animation: #{inspect({strip_name, animation_name, self()})}",
+      Map.filter(state, fn {key, _val} ->
+        key in [:strip_name, :strip_server, :animation_name, :type]
+      end)
+    )
 
-    {:noreply, update_leds(state)}
+    state = state
+      |> do_update_config(config)
+      |> update_leds()
+
+    {:noreply, state}
   end
 
   @impl GenServer
