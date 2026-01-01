@@ -209,7 +209,8 @@ defmodule Fledex.Animation.Animator do
       end)
     )
 
-    state = state
+    state =
+      state
       |> do_update_config(config)
       |> update_leds()
 
