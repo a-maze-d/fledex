@@ -1,4 +1,4 @@
-# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -78,14 +78,13 @@ defmodule Fledex.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications:
-        [:logger, :wx, :observer, :runtime_tools] ++ extra_applications(Mix.env()),
+      extra_applications: [:logger, :runtime_tools] ++ extra_applications(Mix.env()),
       mod: {Fledex.Application, []}
     ]
   end
 
   defp extra_applications(env)
-  defp extra_applications(:dev), do: [:circuits_sim]
+  defp extra_applications(:dev), do: [:circuits_sim, :wx, :observer]
   defp extra_applications(:test), do: [:circuits_sim]
   defp extra_applications(_), do: []
 
