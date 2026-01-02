@@ -1,5 +1,5 @@
 <!--
-Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -16,7 +16,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Add tests for the Clock component (v0.8)
   - [ ] Add tests for the Thermometer component (v0.8)
 - [ ] Cleanup
-  - [ ] We should be able to replace the `Animation.Manager` config splitting with the `Enum.group_by` function (v0.8)
+  - [x] We should be able to replace the `Animation.Manager` config splitting with the `Enum.group_by` function (v0.8)
   - [ ] Make sure that all the job options are correctly honored (adjust documentation if necessary) (v0.8)
   - [ ] Rethink whether we really want to create a `Fledex.Config.Data` module or we should store the information in a GenServer. The issue with the GenServer is that we need to start a server. But maybe that's not soo bad. (v0.9)
 - [ ] Missing functionality

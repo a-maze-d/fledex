@@ -1,4 +1,4 @@
-# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -31,6 +31,7 @@ defmodule Fledex.Animation.Manager do
   alias Fledex.Animation.Animator
   alias Fledex.Animation.Coordinator
   alias Fledex.Animation.JobScheduler
+  alias Fledex.Driver.Manager
   alias Fledex.LedStrip
   alias Fledex.Supervisor.AnimationSystem
   alias Fledex.Supervisor.LedStripSupervisor
@@ -39,12 +40,20 @@ defmodule Fledex.Animation.Manager do
   # note: the order is important
   @worker_types [:animator, :job, :coordinator]
 
+  @typedoc """
+  The various configurations the manager accepts.
+
+  The key of the map is the worker name and the value is it's corresponding configuration
+  """
   @type config_t :: %{
           atom => Animator.config_t() | JobScheduler.config_t() | Coordinator.config_t()
         }
 
+  # We keep track of all teh configs of all the led strips
+  # The key is the name of the led strip
+  # The value is a truple consisting of led strip drivers, global led strip config, and the worker configs
   @typep state_t :: %{
-           configs: %{atom => config_t()}
+           configs: %{atom => {Manager.drivers_t(), keyword, config_t()}}
          }
 
   @doc """
@@ -111,10 +120,10 @@ defmodule Fledex.Animation.Manager do
   > The animation functions might get called quite frequently and
   > therefore any work within them should be kept to a minimum.
   """
-  @spec register_config(atom, %{atom => map}) :: :ok
-  def register_config(strip_name, configs) do
-    # Logger.debug("register animation: #{strip_name}, #{inspect configs}")
-    GenServer.call(__MODULE__, {:register_config, strip_name, configs})
+  @spec register_config(atom, config_t()) :: :ok
+  def register_config(strip_name, config) do
+    Logger.debug("register animation: #{strip_name}, #{inspect(config)}")
+    GenServer.call(__MODULE__, {:register_config, strip_name, config})
   end
 
   ### MARK: server side
@@ -149,7 +158,7 @@ defmodule Fledex.Animation.Manager do
        %{
          state
          | configs:
-             Map.update(state.configs, strip_name, {drivers, strip_config, nil}, fn {_old_drivers,
+             Map.update(state.configs, strip_name, {drivers, strip_config, %{}}, fn {_old_drivers,
                                                                                      _old_strip_config,
                                                                                      configs} ->
                {drivers, strip_config, configs}
@@ -160,10 +169,10 @@ defmodule Fledex.Animation.Manager do
     end
   end
 
-  @spec handle_call({:register_config, atom, map}, GenServer.from(), state_t) ::
+  @spec handle_call({:register_config, atom, config_t()}, GenServer.from(), state_t) ::
           {:reply, :ok, state_t} | {:reply, {:error, String.t()}, state_t}
-  def handle_call({:register_config, strip_name, configs}, _pid, state) do
-    split_configs = split_config(configs)
+  def handle_call({:register_config, strip_name, config}, _pid, state) do
+    split_configs = split_config(config)
 
     Enum.each(@worker_types, fn type ->
       register_workers(strip_name, type, split_configs[type])
@@ -173,9 +182,8 @@ defmodule Fledex.Animation.Manager do
      %{
        state
        | configs:
-           Map.update(state.configs, strip_name, "shouldn't happen", fn {drivers, strip_config,
-                                                                         _config} ->
-             {drivers, strip_config, configs}
+           Map.update(state.configs, strip_name, %{}, fn {drivers, strip_config, _config} ->
+             {drivers, strip_config, config}
            end)
      }}
   rescue
@@ -205,28 +213,37 @@ defmodule Fledex.Animation.Manager do
   ### MARK: private helper fucntions
   # we split the "animation" into the different aspects
   # animations, coordinators and (cron)jobs
-  @spec split_config(map) :: %{animator: map, coordinator: map, job: map}
+  @spec split_config(config_t()) :: %{
+          animator: config_t(),
+          coordinator: config_t(),
+          job: config_t()
+        }
   defp split_config(config) do
-    {coordinators, rest} =
-      Map.split_with(config, fn {_key, value} -> value.type == :coordinator end)
+    Enum.group_by(config, fn {_key, val} -> val.type end)
+    |> Enum.map(fn {type, configs} -> {type, Map.new(configs)} end)
+    |> Enum.reduce(%{animator: %{}, job: %{}, coordinator: %{}}, fn {type, configs}, acc ->
+      case type do
+        :static ->
+          Map.put(acc, :animator, Map.merge(Map.fetch!(acc, :animator), configs))
 
-    {jobs, rest} = Map.split_with(rest, fn {_key, value} -> value.type == :job end)
+        :animation ->
+          Map.put(acc, :animator, Map.merge(Map.fetch!(acc, :animator), configs))
 
-    {animations, rest} =
-      Map.split_with(rest, fn {_key, value} -> value.type in [:animation, :static] end)
+        type when type in [:coordinator, :job] ->
+          Map.put(acc, type, configs)
 
-    if map_size(rest) != 0 do
-      raise RuntimeError, "An unknown type was encountered #{inspect(rest)}"
-    end
-
-    %{animator: animations, coordinator: coordinators, job: jobs}
+        _unknown_type ->
+          raise RuntimeError, "An unknown type was encountered #{inspect(configs)}"
+      end
+    end)
+    |> Map.new()
   end
 
   @spec do_register_strip(state_t, atom, LedStrip.drivers_config_t(), keyword) :: state_t
   defp do_register_strip(state, strip_name, drivers, strip_config) do
     _result = AnimationSystem.start_led_strip(strip_name, drivers, strip_config, [])
 
-    %{state | configs: Map.put_new(state.configs, strip_name, {drivers, strip_config, nil})}
+    %{state | configs: Map.put_new(state.configs, strip_name, {drivers, strip_config, %{}})}
   end
 
   @spec do_unregister_strip(state_t, atom) :: state_t
@@ -243,7 +260,7 @@ defmodule Fledex.Animation.Manager do
   end
 
   @spec register_workers(atom, Utils.led_strip_worker_types(), config_t()) :: :ok
-  defp register_workers(strip_name, type, configs) do
+  defp register_workers(strip_name, type, config) do
     # Logger.debug(("defining config for #{strip_name}, animations: #{inspect Map.keys(configs)}")
 
     # configs is a list of registration structs.
@@ -251,7 +268,7 @@ defmodule Fledex.Animation.Manager do
     # we update every animator, coordinator,job we did receive
     # and we create any new config
     {dropped, updated, created} =
-      filter_configs(LedStripSupervisor.get_workers(strip_name, type), configs)
+      filter_configs(LedStripSupervisor.get_workers(strip_name, type), config)
 
     # Logger.debug("updating config: #{inspect {dropped, updated, created}}")
     shutdown_workers(strip_name, type, dropped)
@@ -298,24 +315,21 @@ defmodule Fledex.Animation.Manager do
     end
   end
 
-  @spec filter_configs(list, map) :: {[atom], map, map}
+  # We filter the new configs dependening on whether the worker has been
+  # removed, has changed, or is new.
+  @spec filter_configs(list, config_t()) :: {[atom], config_t(), config_t()}
   defp filter_configs([], new_configs) do
-    # Logger.info("filter: nil, #{inspect new_animations}")
-    # since we have no animation, none need to be dropped or updated. All are new
+    # since we have no animation, no need to be dropped or updated. All are new
     {[], %{}, new_configs}
   end
 
-  defp filter_configs(animations, new_configs) do
-    # Logger.info("filter: #{inspect old_animations}, #{inspect new_animations}")
+  defp filter_configs(workers, new_configs) do
     {dropped, present} =
-      Enum.reduce(animations, {[], []}, fn animation, {dropped, present} ->
-        # Logger.info("filtering: #{key}")
-        if Map.has_key?(new_configs, animation) do
-          # Logger.info("filtering2: #{key} is in configs")
-          {dropped, [animation | present]}
+      Enum.reduce(workers, {[], []}, fn worker, {dropped, present} ->
+        if Map.has_key?(new_configs, worker) do
+          {dropped, [worker | present]}
         else
-          # Logger.info("filtering2: #{key} is NOT in configs")
-          {[animation | dropped], present}
+          {[worker | dropped], present}
         end
       end)
 
