@@ -1,4 +1,4 @@
-# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -153,17 +153,17 @@ defmodule Fledex.Color.Names.ModuleGenerator do
 
         for field <- fields do
           @doc false
-          def unquote(name)(unquote(field)), do: unquote(Macro.escape(color))[unquote(field)]
+          def unquote(name)(unquote(field)), do: unquote(color[field])
         end
 
         @doc false
         @spec unquote(name)(Leds.t()) :: Leds.t()
-        def unquote(name)(leds), do: leds |> Leds.light(unquote(Macro.escape(color)).hex)
+        def unquote(name)(leds), do: leds |> Leds.light(unquote(color.hex))
 
         @doc false
         @spec unquote(name)(Leds.t(), opts :: keyword) :: Leds.t()
         def unquote(name)(leds, opts) do
-          leds |> Leds.light(unquote(Macro.escape(color)).hex, opts)
+          leds |> Leds.light(unquote(color.hex), opts)
         end
       end
 

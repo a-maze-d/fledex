@@ -1,4 +1,4 @@
-# Copyright 2025, Matthias Reik <fledex@reik.org>
+# Copyright 2025-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -120,8 +120,8 @@ defmodule Fledex.Config do
 
       ast = create_imports_ast(modules_and_colors, imports)
 
-      quote bind_quoted: [colors: modules_and_colors, ast: ast] do
-        Macro.escape(ast)
+      quote do
+        unquote(ast)
         # credo:disable-for-next-line
         Elixir.Fledex.Config.cleanup_old_config()
 
@@ -130,7 +130,7 @@ defmodule Fledex.Config do
           This module is an implementation detail from `Fledex.Config` and therefore
           should not be used directly. use `Fledex.Config.configured_color_modules/0` instead
           """
-          @colors colors
+          @colors unquote(modules_and_colors)
 
           @doc false
           @spec colors :: list({module, list(atom)})

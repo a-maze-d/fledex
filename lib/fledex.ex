@@ -1,4 +1,4 @@
-# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -24,8 +24,6 @@ defmodule Fledex do
 
   Check `__using__/1` for more details and supported options.
   """
-  require Logger
-  require Fledex.Utils.Dsl
 
   alias Fledex.Utils.Dsl
 
@@ -148,8 +146,8 @@ defmodule Fledex do
     opts = Keyword.put_new(opts, :imports, true)
     config = Fledex.Config.create_config_ast(opts)
     # , import_ast: import_ast, use_ast: use_ast] do
-    quote bind_quoted: [opts: opts, config: config] do
-      Macro.escape(config)
+    quote do
+      unquote(config)
 
       import Crontab.CronExpression
       import Fledex
@@ -164,7 +162,7 @@ defmodule Fledex do
       alias Fledex.Driver.Impl.PubSub
       alias Fledex.Driver.Impl.Spi
       alias Fledex.Utils.Dsl
-      Dsl.init(opts)
+      Dsl.init(unquote(opts))
     end
   end
 

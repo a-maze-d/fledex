@@ -1,8 +1,7 @@
-# Copyright 2025, Matthias Reik <fledex@reik.org>
+# Copyright 2025-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# For now we are not strict
 %{
   __struct__: Doctor.Config,
   exception_moduledoc_required: true,

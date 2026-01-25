@@ -1,4 +1,4 @@
-# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -7,7 +7,6 @@ defmodule Fledex.Driver.Impl.LoggerTest do
 
   import ExUnit.CaptureLog
   import ExUnit.CaptureIO
-  require Logger
 
   alias Fledex.Driver.Impl.Logger
 
