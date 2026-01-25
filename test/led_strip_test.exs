@@ -1,12 +1,10 @@
-# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.LedStripTest do
   use ExUnit.Case, async: false
   import ExUnit.CaptureIO
-
-  require Logger
 
   alias Fledex.Driver.Impl.Logger
   alias Fledex.Driver.Impl.Null
@@ -366,7 +364,6 @@ defmodule Fledex.LedStripTestSync do
 
   import ExUnit.CaptureLog
 
-  require Logger
   alias Fledex.Driver.Impl.Null
   alias Fledex.Driver.Impl.Spi
   alias Fledex.LedStrip
