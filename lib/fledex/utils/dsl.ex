@@ -1,4 +1,4 @@
-# Copyright 2024-2025, Matthias Reik <fledex@reik.org>
+# Copyright 2024-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -9,7 +9,8 @@ defmodule Fledex.Utils.Dsl do
   It's a set of helper functions to create the DSL. A lot of functions are workign on
   the AST (abstract syntax tree) level.
   """
-  require Logger
+
+  # require Logger
 
   alias Fledex.Animation.Coordinator
   alias Fledex.Animation.JobScheduler

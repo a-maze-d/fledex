@@ -1,5 +1,5 @@
 <!--
-Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -26,7 +26,6 @@ There is however no real magic in that setup. We define a couple of modules, so 
 alias Fledex.Leds
 alias Fledex.LedStrip
 alias Fledex.Driver.Impl.Kino
-alias Fledex.Driver.Impl.Spi
 alias Fledex.Color.Correction
 alias Fledex.Supervisor.AnimationSystem
 

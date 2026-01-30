@@ -1,4 +1,4 @@
-# Copyright 2025, Matthias Reik <fledex@reik.org>
+# Copyright 2025-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -15,7 +15,7 @@ defmodule Fledex.Color.RGB do
   alias Fledex.Color.Types
 
   defstruct r: 0, g: 0, b: 0
-  @type t :: %__MODULE__{r: 0..255, g: 0..255, b: 0..255}
+  @type t :: %__MODULE__{r: byte(), g: byte(), b: byte()}
 
   defimpl Fledex.Color do
     alias Fledex.Color.RGB

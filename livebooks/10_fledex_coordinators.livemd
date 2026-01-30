@@ -75,14 +75,14 @@ require Integer
 led_strip :example3, Kino do
   effect Fledex.Effect.Rotation, trigger_name: :example, stretch: 40, direction: :right do
     animation :rainbow do
-     %{swap: %{second: second}} when Integer.is_odd(trunc(second/2)) ->
+     %{swap: %{second: second}} when Integer.is_odd(div(second, 2)) ->
       leds(10) |> rainbow()
       _ -> leds(10)
     end
   end
   effect Fledex.Effect.Rotation, trigger_name: :example, stretch: 40, direction: :left do
     animation :gradient do
-     %{swap: %{second: second}} when Integer.is_even(trunc(second/2)) ->
+     %{swap: %{second: second}} when Integer.is_even(div(second, 2)) ->
         leds(10) |> gradient(:red, :blue)
       _ -> leds(10)
     end

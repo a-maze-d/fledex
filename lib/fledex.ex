@@ -1,4 +1,4 @@
-# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -24,8 +24,6 @@ defmodule Fledex do
 
   Check `__using__/1` for more details and supported options.
   """
-  require Logger
-  require Fledex.Utils.Dsl
 
   alias Fledex.Utils.Dsl
 
@@ -148,8 +146,8 @@ defmodule Fledex do
     opts = Keyword.put_new(opts, :imports, true)
     config = Fledex.Config.create_config_ast(opts)
     # , import_ast: import_ast, use_ast: use_ast] do
-    quote bind_quoted: [opts: opts, config: config] do
-      Macro.escape(config)
+    quote do
+      unquote(config)
 
       import Crontab.CronExpression
       import Fledex
@@ -164,7 +162,7 @@ defmodule Fledex do
       alias Fledex.Driver.Impl.PubSub
       alias Fledex.Driver.Impl.Spi
       alias Fledex.Utils.Dsl
-      Dsl.init(opts)
+      Dsl.init(unquote(opts))
     end
   end
 
@@ -404,11 +402,11 @@ defmodule Fledex do
 
     The `drivers` can be spcified in 3 different ways:
 
-    * just a driver module (like `Spi`). In this case the default settings will be used
-    * a driver module with it's configuration (like `{Spi, [dev: "spidev0.1"]}`)
-    * or a set of drivers (always with their configuration), like: `[{Spi, []}, {Spi, [dev: "spidev0.1"}]`
+    * just a driver module (like `Spi.Ws2801`). In this case the default settings will be used
+    * a driver module with it's configuration (like `{Spi.Ws2801, [dev: "spidev0.1"]}`)
+    * or a set of drivers (always with their configuration), like: `[{Spi.Ws2801, []}, {Spi.Ws2801, [dev: "spidev0.1"}]`
 
-    A set of default drivers exist for conenience that can be used like `Spi`, `Null`, ...
+    A set of default drivers exist for conenience that can be used like `Spi.Ws2801`, `Null`, ...
     (see `Fledex.LedStrip` for details).
 
     A special driver `:config` exists that will simply return the converted dsl to the

@@ -1,4 +1,4 @@
-# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -17,12 +17,12 @@ defmodule Fledex.Color.Conversion.CalcUtils do
   @doc """
     calculate a fraction mapped to a 8bit range
   """
-  @spec frac8(0..255, 0..255) :: 0..255
+  @spec frac8(byte(), byte()) :: byte()
   def frac8(n, d) do
-    trunc(n * 256 / d)
+    div(n * 256, d)
   end
 
-  @spec scale8_video_addition(boolean, 0..255, 0..255) :: 0 | 1
+  @spec scale8_video_addition(boolean, byte(), byte()) :: 0 | 1
   defp scale8_video_addition(false, _value, _scale), do: 0
   defp scale8_video_addition(true, value, scale) when value != 0 and scale != 0, do: 1
   defp scale8_video_addition(_addition, _value, _scale), do: 0
@@ -31,7 +31,7 @@ defmodule Fledex.Color.Conversion.CalcUtils do
   This function scales a value into a specific range. the video parameter
   indicates whether the returned value should be correct to not return 0
   """
-  @spec scale8(0..255, 0..255, boolean) :: 0..255
+  @spec scale8(byte(), byte(), boolean) :: byte()
   def scale8(value, scale, video \\ false)
   def scale8(0, _scale, _video), do: 0
 
@@ -44,7 +44,7 @@ defmodule Fledex.Color.Conversion.CalcUtils do
   same as #scale8, except that it does it for all 3 rgb value
   at the same time.
   """
-  @spec nscale8(Types.rgb(), 0..255, boolean) :: Types.rgb()
+  @spec nscale8(Types.rgb(), byte(), boolean) :: Types.rgb()
   def nscale8(rgb, scale, video \\ true)
 
   def nscale8({r, g, b}, scale, video) when is_integer(scale) do
@@ -83,7 +83,7 @@ defmodule Fledex.Color.Conversion.CalcUtils do
   def avg(elems) do
     count = length(elems)
     {r, g, b} = add_subpixels(elems)
-    {trunc(r / count), trunc(g / count), trunc(b / count)}
+    {div(r, count), div(g, count), div(b, count)}
   end
 
   @doc """

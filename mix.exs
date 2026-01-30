@@ -20,19 +20,7 @@ defmodule Fledex.MixProject do
       deps: deps(),
       name: "fledex",
       source_url: @source_url,
-      dialyzer: [
-        # plt_add_deps: :apps_direct,
-        check_plt: true,
-        incremental: true,
-        plt_add_apps: [:mix],
-        flags: [
-          # :missing_return,
-          # :extra_return,
-          # :unmatched_returns,
-          :error_handling
-          # :underspecs
-        ]
-      ],
+      dialyzer: dialyzer(),
       test_coverage: [
         tool: ExCoveralls,
         ignore_modules: [
@@ -121,7 +109,6 @@ defmodule Fledex.MixProject do
       {:circuits_sim, "~> 0.1.0", only: [:dev, :test]},
 
       # documentation
-      # ">= 0.0.0", only: :dev, runtime: false},
       {:ex_doc, "~>0.38", only: :dev, runtime: false},
 
       # documentation coverage is a great idea, but there are several major issues:
@@ -152,10 +139,29 @@ defmodule Fledex.MixProject do
     ]
   end
 
+  defp dialyzer do
+    [
+      # plt_add_deps: :apps_direct,
+      plt_core_path: "priv/plts",
+      plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
+      check_plt: true,
+      incremental: true,
+      plt_add_apps: [:mix],
+      flags: [
+        # :missing_return,
+        # :extra_return,
+        # :unmatched_returns,
+        :error_handling
+        # :underspecs
+      ]
+    ]
+  end
+
   defp docs do
     [
-      source_ref: "v#{@version}",
       source_url: @source_url,
+      source_ref: "v#{@version}",
+      # formatters: ["html"],
       assets: %{
         "assets" => "assets",
         "pages/assets" => "assets",
