@@ -5,6 +5,8 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 # Changelog for Fledex v0.8-dev
+## Features
+* First attempt to get Fledex working on AtomVM. `mix atomvm.check` does not give us any errors anymore
 
 > #### Warning {: .warning}
 > This release breaks backward compatibility not only on a lower level, but also the DSL.
