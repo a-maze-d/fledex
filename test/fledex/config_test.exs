@@ -1,4 +1,4 @@
-# Copyright 2025, Matthias Reik <fledex@reik.org>
+# Copyright 2025-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -113,7 +113,6 @@ defmodule Fledex.ConfigTest do
     # it's a bit unclear to me where the logging is going :-(
     test "with specifying non-existing module" do
       import ExUnit.CaptureLog
-      require Logger
 
       assert capture_log(fn ->
                # non-existant color module

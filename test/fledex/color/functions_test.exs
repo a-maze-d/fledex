@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -7,8 +7,6 @@ defmodule Fledex.Color.FunctionsTest do
 
   import Fledex.Color.Correction.Color
   import Fledex.Color.Correction.Temperature
-
-  require Logger
 
   alias Fledex.Color.Conversion.Rainbow
   alias Fledex.Color.Correction
