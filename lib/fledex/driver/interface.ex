@@ -1,4 +1,4 @@
-# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -18,8 +18,10 @@ defmodule Fledex.Driver.Interface do
       led data to the terminal or to the logs
   * [`Kino`](Fledex.Driver.Impl.Kino.html): a driver that can display
       the LEDs in a [livebook](https://livebook.dev)
-  * [`Spi`](Fledex.Driver.Impl.Spi.html): a driver that can connect
+  * [`Spi.Ws2801`](Fledex.Driver.Impl.Spi.2801.html): a driver that can connect
       to a real LED strip with a WS2801 chip.
+  * [`Spi.Ws2812`](Fledex.Driver.Impl.Spi.Ws2812.html): a driver that can connect
+      to a real LED strip with a WS2812 chip.
   * [`PubSub`](Fledex.Driver.Impl.PubSub.html): a driver that can transfer
       the LED data via pubsub. This should also allow the data to be transferred to
       a LED strip connected on another computer.

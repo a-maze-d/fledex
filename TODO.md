@@ -13,6 +13,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Update documentation with the Supervision tree (v0.8)
   - [ ] hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.8)
 - [ ] Testing
+  - [ ] Test the new ws2812 driver on real hardware (v0.8)
   - [ ] Add tests for the Clock component (v0.8)
   - [ ] Add tests for the Thermometer component (v0.8)
 - [ ] Cleanup
@@ -23,7 +24,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Put some more effort into the coordinator to make it work well (v0.8)
   - [ ] Enable Telemetry? (v0.8)
     - [ ] Switch also the `fledex_scheduler` stats to telemetry (v0.8)
-  - [ ] Add support for WS2811/12/13/14/15 LED strips controlled through phase modulation. (v0.8)
+  - [x] Add support for WS2811/12/13/14/15 LED strips through the SPI port (v0.8)
   - [ ] Get it working on AtomVM (v0.9)
   - [ ] Add Perlin noise functions (see: https://hackaday.com/2019/12/28/led-flame-illuminates-the-beauty-of-noise/, https://hexdocs.pm/perlin/Perlin.html) (v0.9)
   - [ ] Clustering (v0.8)

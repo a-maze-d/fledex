@@ -1,4 +1,4 @@
-# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -126,9 +126,9 @@ defmodule Fledex.Color.Conversion.Approximate do
   defp scale_to_compensate({r, g, b}, s) when s < 255 do
     s = if s == 0, do: 1, else: s
     scaleup = 65_535 / s
-    r = trunc(r * scaleup/ 256)
-    g = trunc(g * scaleup/ 256)
-    b = trunc(b * scaleup/ 256)
+    r = trunc(r * scaleup / 256)
+    g = trunc(g * scaleup / 256)
+    b = trunc(b * scaleup / 256)
     {r, g, b}
   end
 
