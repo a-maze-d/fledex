@@ -12,6 +12,7 @@ SPDX-License-Identifier: Apache-2.0
 ### Cleanup
 * `Animation.Manager.split_config` now uses the `Enum.group_by`
 * Turned all `Macro.escapes` into `unquote`. This dramatically simplified the `Fledex.Color.Names.ModuleGenerator` code. 
+* Replacing `trunc(a/b)` with `div(a, b)` where ever possible
 
 ### Build
 * Upgraded dependencies to latest version

@@ -257,8 +257,7 @@ defmodule Fledex.Color.Correction do
   @spec calculate_single_color_correction(byte, byte, byte) :: byte
   def calculate_single_color_correction(scale, cc, ct) when cc > 0 and ct > 0 do
     work = (cc + 1) * (ct + 1) * scale
-    work = work / 0x10000
-    Kernel.trunc(work) &&& 0xFF
+    div(work, 0x10000) &&& 0xFF
   end
 
   def calculate_single_color_correction(_scale, _cc, _ct), do: 0

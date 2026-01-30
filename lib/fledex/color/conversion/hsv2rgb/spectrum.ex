@@ -26,23 +26,24 @@ defmodule Fledex.Color.Conversion.Spectrum do
   end
 
   # MARK: private utility functions
+  @quarter div(256, 4)
   @hsv_section_3 0x40
   @spec hsv2rgb_raw(Types.hsv(), any) :: Types.rgb()
   defp hsv2rgb_raw(%HSV{h: h, s: s, v: v}, _extra_color_correction) do
     # based on: https://github.com/FastLED/FastLED/blob/95d0a5582b2052729f345719e65edf7a4b9e7098/src/hsv2rgb.cpp#L51
     invsat = 255 - s
-    brightness_floor = trunc(v * invsat / 256)
+    brightness_floor = div(v * invsat, 256)
 
     color_amplitude = v - brightness_floor
 
-    section = trunc(h / @hsv_section_3)
+    section = div(h, @hsv_section_3)
     offset = rem(h, @hsv_section_3)
 
     rampup = offset
     rampdown = @hsv_section_3 - 1 - offset
 
-    rampup_amp_adj = trunc(rampup * color_amplitude / (256 / 4))
-    rampdown_amp_adj = trunc(rampdown * color_amplitude / (256 / 4))
+    rampup_amp_adj = div(rampup * color_amplitude, @quarter)
+    rampdown_amp_adj = div(rampdown * color_amplitude, @quarter)
 
     rampup_adj_with_floor = rampup_amp_adj + brightness_floor
     rampdown_adj_with_floor = rampdown_amp_adj + brightness_floor

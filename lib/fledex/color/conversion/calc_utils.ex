@@ -19,7 +19,7 @@ defmodule Fledex.Color.Conversion.CalcUtils do
   """
   @spec frac8(0..255, 0..255) :: 0..255
   def frac8(n, d) do
-    trunc(n * 256 / d)
+    div(n * 256, d)
   end
 
   @spec scale8_video_addition(boolean, 0..255, 0..255) :: 0 | 1
@@ -83,7 +83,7 @@ defmodule Fledex.Color.Conversion.CalcUtils do
   def avg(elems) do
     count = length(elems)
     {r, g, b} = add_subpixels(elems)
-    {trunc(r / count), trunc(g / count), trunc(b / count)}
+    {div(r, count), div(g, count), div(b, count)}
   end
 
   @doc """

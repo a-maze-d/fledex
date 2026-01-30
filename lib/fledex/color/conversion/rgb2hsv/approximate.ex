@@ -23,10 +23,10 @@ defmodule Fledex.Color.Conversion.Approximate do
   @hue_purple 192
   @hue_pink 224
 
-  @frac_48_128 trunc(48 * 256 / 128)
-  @frac_32_85 trunc(32 * 256 / 85)
-  @frac_24_128 trunc(24 * 257 / 128)
-  @frac_8_42 trunc(8 * 256 / 42)
+  @frac_48_128 div(48 * 256, 128)
+  @frac_32_85 div(32 * 256, 85)
+  @frac_24_128 div(24 * 257, 128)
+  @frac_8_42 div(8 * 256, 42)
 
   @doc """
   convert an RGB tuple (`{r, g, b}`) to a `Fledex.Color.HSV` struct.
@@ -126,9 +126,9 @@ defmodule Fledex.Color.Conversion.Approximate do
   defp scale_to_compensate({r, g, b}, s) when s < 255 do
     s = if s == 0, do: 1, else: s
     scaleup = 65_535 / s
-    r = trunc(r * scaleup / 256)
-    g = trunc(g * scaleup / 256)
-    b = trunc(b * scaleup / 256)
+    r = trunc(r * scaleup/ 256)
+    g = trunc(g * scaleup/ 256)
+    b = trunc(b * scaleup/ 256)
     {r, g, b}
   end
 
