@@ -1,4 +1,4 @@
-# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -461,8 +461,6 @@ defmodule Fledex.LedsTestSync do
   use ExUnit.Case, async: false
 
   # import ExUnit.CaptureLog
-  require Logger
-
   alias Fledex.Leds
   alias Fledex.LedStrip
   alias Fledex.Supervisor.Utils

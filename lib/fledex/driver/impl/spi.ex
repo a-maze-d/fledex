@@ -1,13 +1,14 @@
-# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Fledex.Driver.Impl.Spi do
   @moduledoc """
-  This module is a concrete driver that will push the led data through an SPI port.
+  This module is the base for SPI based drivers.
 
-  The protocol used is the one as expected by an WS2801 chip. See the
-  [hardware](pages/hardware.md) documentation for more information on to wire it.
+  The supported options are the following.
+  BUT be careful, because specific drivers might need very specific settings and you really
+  should understand the driver before you modify any option.
 
   ## Options
   This driver accepts the following options (most of them are very SPI specific and the defaults are probably good enough):
@@ -20,106 +21,88 @@ defmodule Fledex.Driver.Impl.Spi do
   * `:color_correction`: specifies the color correction (see `Fledex.Color.Correction` for details)
   * `:clear_leds`: Sets the number of leds that should be cleared during startup (default: `0`)
   """
-  @behaviour Fledex.Driver.Interface
 
   alias Fledex.Color.Correction
   alias Fledex.Color.RGB
   alias Fledex.Color.Types
   alias Fledex.Driver.Interface
 
-  @impl Interface
-  @spec configure(keyword) :: keyword
-  def configure(config) do
-    [
-      dev: Keyword.get(config, :dev, "spidev0.0"),
-      mode: Keyword.get(config, :mode, 0),
-      bits_per_word: Keyword.get(config, :bits_per_word, 8),
-      speed_hz: Keyword.get(config, :speed_hz, 1_000_000),
-      delay_us: Keyword.get(config, :delay_us, 10),
-      lsb_first: Keyword.get(config, :lsb_first, false),
-      color_correction: Keyword.get(config, :color_correction, Correction.no_color_correction()),
-      ref: nil
-    ]
-  end
+  @doc """
+  Before we can transfer the `rgb` values we need to convert them to the a bitstring
+  that we can send over the wire. Any SPI driver `use`-ing this module, needs to
+  implement the conversion in this function
+  """
+  @callback convert_to_bits(byte(), byte(), byte(), keyword) :: bitstring()
+  @doc """
+  Between every transfer, we have to add some separator. This can be done in this function
 
-  @impl Interface
-  @spec init(keyword, map) :: keyword
-  def init(config, _global_config) do
-    {clear_leds, config} = Keyword.pop(config, :clear_leds, 0)
-    config = configure(config)
-    config = Keyword.put(config, :ref, open_spi(config))
-    clear_leds(clear_leds, config, &transfer/3)
-  end
+  The separator can be added either at the beginning or at the end.
+  """
+  @callback add_reset(bitstring(), keyword) :: bitstring()
 
-  @impl Interface
-  @spec change_config(keyword, keyword, map) :: keyword
-  def change_config(old_config, new_config, _global_config) do
-    config = Keyword.merge(old_config, new_config)
-    # Maybe the following code could be optimized
-    # to only reopen the port if it's necessary. But this is safe
-    :ok = terminate(:normal, old_config)
-    Keyword.put(config, :ref, open_spi(config))
-  end
+  @doc """
+  If you want to implement a new SPI driver you can use this module as a base.
 
-  @impl Interface
-  @spec transfer(list(Types.colorint()), pos_integer, keyword) :: {keyword, any}
-  def transfer(leds, _counter, config) do
-    binary =
-      leds
-      |> Correction.apply_rgb_correction(Keyword.fetch!(config, :color_correction))
-      |> Enum.reduce(<<>>, fn led, acc ->
-        %RGB{r: r, g: g, b: b} = RGB.new(led)
-        acc <> <<r, g, b>>
-      end)
+  This way you only have to have to implement the callbacks `Fledex.Driver.Interface.configure/1`
+  and from this module: `convert_to_bits/3` and `add_reset/1`.
+  """
+  defmacro __using__(_opts) do
+    quote do
+      @behaviour Fledex.Driver.Impl.Spi
+      @behaviour Fledex.Driver.Interface
 
-    response = Circuits.SPI.transfer(Keyword.fetch!(config, :ref), binary)
-    {config, response}
-  end
+      alias Fledex.Color.Correction
+      alias Fledex.Color.RGB
+      alias Fledex.Color.Types
+      alias Fledex.Driver.Impl.Spi
+      alias Fledex.Driver.Impl.Spi.Utils
+      alias Fledex.Driver.Interface
 
-  @impl Interface
-  @spec terminate(reason, keyword) :: :ok
-        when reason: :normal | :shutdown | {:shutdown, term()} | term()
-  def terminate(_reason, config) do
-    Circuits.SPI.close(Keyword.fetch!(config, :ref))
-  end
+      @doc false
+      @impl Interface
+      @spec init(keyword, map) :: keyword
+      def init(config, _global_config) do
+        {clear_leds, config} = Keyword.pop(config, :clear_leds, 0)
+        config = configure(config)
+        config = Keyword.put(config, :ref, Utils.open_spi(config))
+        Utils.clear_leds(clear_leds, config, &transfer/3)
+      end
 
-  # MARK: utility functions
-  @doc false
-  @spec clear_leds(
-          count :: non_neg_integer | {count :: non_neg_integer, color :: non_neg_integer},
-          config :: keyword,
-          clear_func :: (list(Types.colorint()), pos_integer, keyword -> {keyword, any})
-        ) :: keyword
-  def clear_leds(count, config, clear_func) when is_integer(count) do
-    # set it to black by default
-    clear_leds({count, 0x000000}, config, clear_func)
-  end
+      @doc false
+      @impl Interface
+      @spec change_config(keyword, keyword, map) :: keyword
+      def change_config(old_config, new_config, _global_config) do
+        config = Keyword.merge(old_config, new_config)
+        # Maybe the following code could be optimized
+        # to only reopen the port if it's necessary. But this is safe
+        :ok = terminate(:normal, old_config)
+        Keyword.put(config, :ref, Utils.open_spi(config))
+      end
 
-  def clear_leds({count, color} = _clear_leds, config, clear_func)
-      when is_integer(count) and count > 0 do
-    leds =
-      Enum.reduce(1..count, [], fn _index, acc ->
-        [color | acc]
-      end)
+      @doc false
+      @impl Interface
+      @spec transfer(list(Types.colorint()), pos_integer, keyword) :: {keyword, any}
+      def transfer(leds, _counter, config) do
+        binary =
+          leds
+          |> Correction.apply_rgb_correction(Keyword.fetch!(config, :color_correction))
+          |> Enum.reduce(<<>>, fn led, acc ->
+            %RGB{r: r, g: g, b: b} = RGB.new(led)
+            acc <> convert_to_bits(r, g, b, config)
+          end)
+          |> add_reset(config)
 
-    {config, _response} = clear_func.(leds, count, config)
-    config
-  end
+        response = Circuits.SPI.transfer(Keyword.fetch!(config, :ref), binary)
+        {config, response}
+      end
 
-  def clear_leds({0, _color} = _clear_leds, config, _clear_func), do: config
-
-  @spec open_spi(keyword) :: reference
-  defp open_spi(config) do
-    {:ok, ref} =
-      Circuits.SPI.open(
-        Keyword.fetch!(config, :dev),
-        mode: Keyword.fetch!(config, :mode),
-        bits_per_word: Keyword.fetch!(config, :bits_per_word),
-        speed_hz: Keyword.fetch!(config, :speed_hz),
-        delay_us: Keyword.fetch!(config, :delay_us),
-        lsb_first: Keyword.fetch!(config, :lsb_first)
-      )
-
-    ref
+      @doc false
+      @impl Interface
+      @spec terminate(reason, keyword) :: :ok
+            when reason: :normal | :shutdown | {:shutdown, term()} | term()
+      def terminate(_reason, config) do
+        Circuits.SPI.close(Keyword.fetch!(config, :ref))
+      end
+    end
   end
 end

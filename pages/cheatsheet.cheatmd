@@ -1,5 +1,5 @@
 <!--
-Copyright 2024-2025, Matthias Reik <fledex@reik.org>
+Copyright 2024-2026, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -72,7 +72,7 @@ The `led_strip` takes the following parameters:
 | Parameter   | Description                              |
 | ---         | ---                                  |
 | `name`      | (mandatory) Every strip needs a unique name. This needs to be an atom |
-| `driver`    | (mandatory) The driver that should be used to display the LEDs. The most common options are: `Kino` (for livebook), and `Spi` (for real hardware). The special driver `:config` returns the defined config, instead of configuring a driver. |
+| `driver`    | (mandatory) The driver that should be used to display the LEDs. The most common options are: `Kino` (for livebook), and `Spi.Ws2801` or `Spi.Ws2812` (for real hardware). The special driver `:config` returns the defined config, instead of configuring a driver. |
 
 ### The `do ... end` block
 

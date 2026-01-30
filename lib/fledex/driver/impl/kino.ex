@@ -1,4 +1,4 @@
-# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -14,8 +14,6 @@ defmodule Fledex.Driver.Impl.Kino do
   * `:frame`: a frame to which the leds will be written to, see [`Kino.Frame`](https://hexdocs.pm/kino/Kino.Frame.html).
   """
   @behaviour Fledex.Driver.Interface
-
-  require Logger
 
   alias Fledex.Color.Correction
   alias Fledex.Color.Types

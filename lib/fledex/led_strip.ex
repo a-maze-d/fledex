@@ -1,4 +1,4 @@
-# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -100,16 +100,16 @@ defmodule Fledex.LedStrip do
   * The global configuration of the strip (optional, defaults will be used if not specified)
   * A driver module (that also provides a default set of configs)
   * A list of detailed configs that are overlayed over the defaults. This allows
-    for example to reuse the `Fledex.Driver.Impl.Spi` defaults, but change for example
+    for example to reuse the `Fledex.Driver.Impl.Spi.Ws2801` defaults, but change for example
     to a different spi device by setting `:dev` to `spidev0.1`
 
   Here some examples (with aliased module names) how you can start the server:
   * Without real driver: `start_link({:name})`
-  * With real driver: `start_link({:name, Spi})`
-  * With some global config overlay and real driver: `start_link({:name, Spi, timer_only_dirty_update: true})`
-  * With real driver and some driver overlay: `start_link({:name, {Spi, dev: "spidev0.1"}})`
-  * With several drivers: `start_link({:name, [{Spi, []}, {Spi, dev: "spidev0.1"}]})`
-  * With several drivers and global config: `start_link({:name, [{Spi, []}, {Spi, dev: "spidev0.1"}], timer_only_dirty_update: true})`
+  * With real driver: `start_link({:name, Spi.Ws2801})`
+  * With some global config overlay and real driver: `start_link({:name, Spi.Ws2801, timer_only_dirty_update: true})`
+  * With real driver and some driver overlay: `start_link({:name, {Spi.Ws2801, dev: "spidev0.1"}})`
+  * With several drivers: `start_link({:name, [{Spi.Ws2801, []}, {Spi.Ws2801, dev: "spidev0.1"}]})`
+  * With several drivers and global config: `start_link({:name, [{Spi, []}, {Spi.Ws2801, dev: "spidev0.1"}], timer_only_dirty_update: true})`
 
   The settings for for the driver are driver specific. The global config
   has the following properties:

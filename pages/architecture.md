@@ -1,5 +1,5 @@
 <!--
-Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -24,9 +24,11 @@ The `Fledex.LedStrip` does not really know how to talk to the actual hardware, b
 leaves this to the hardware spectific `Fledex.Driver.Driver`s. It's possible to 
 register several drivers at the same time.
 
-Currently there are 4 drivers available:
-* [`Spi`](`Fledex.Driver.Impl.Spi`) is the main driver for talking to a real 
-  [led strip with a ws2801 chip](https://www.amazon.com/s?k=ws2801) over the spi bus
+Currently the following drivers are available:
+* [`Spi.Ws2801`](`Fledex.Driver.Impl.Spi.Ws2801`) is the main driver for talking to a real 
+  [led strip with a ws2801 chip](https://www.amazon.com/s?k=ws2801) over the spi bus.
+* [`Spi.Ws2812`](`Fledex.Driver.Impl.Spi.Ws2812`) is the main driver for talking to a real
+* led strip with a ws2812, ws2813, ws2814, or ws2815 chip over the spi bus.
 * [`Kino`](`Fledex.Driver.Impl.Kino`) is a driver that is very convenient when working with a 
   [Livebook](https://livebook.dev/) to emulate an led strip.
 * [`Logger`](`Fledex.Driver.Impl.Logger`) is a driver that dumps the data to a logger.

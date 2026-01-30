@@ -1,5 +1,5 @@
 <!--
-Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -23,7 +23,7 @@ We now define our animations with our DSL with the following steps:
   * load our `Fledex` DSL (like `led_strip`,`animation`, and the like) and
   * to import commonly used functions (`Fledex.Leds`, `Fledex.Utils.PubSub`, and `Crontab.CronExpression`) This means we can use those functions without specifying the module name anymore. For example `Leds.leds(10)` becomes simply `leds(10)`.
   * to import the selected color names (`Fledex.Color.Names.Wiki`, `Fledex.Color.Names.CSS`, `Fledex.Color.Names.SVG` by default).
-  * to alias the various drivers, so they can be used without namespace (`Kino` within livebook and `Spi` for real hardware are the most common ones)
+  * to alias the various drivers, so they can be used without namespace (`Kino` within livebook and `Spi.Ws2801` or `Spi.Ws2812` for real hardware are the most common ones)
   * to start (by default) the `Fledex.Animation.Manager` if it's not already running, who will take care of all the animation coordinations.
 
 For now we are happy with the defaults and therefore do not pass any extra options.

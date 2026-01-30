@@ -1,5 +1,5 @@
 <!--
-Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -14,6 +14,8 @@ SPDX-License-Identifier: Apache-2.0
 [![Downloads](https://img.shields.io/hexpm/dt/fledex.svg)](https://hex.pm/packages/fledex)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/a-maze-d/fledex/badge)](https://scorecard.dev/viewer/?uri=github.com/a-maze-d/fledex)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/10474/badge)](https://www.bestpractices.dev/projects/10474)
+[![Last Updated](https://img.shields.io/github/last-commit/a-maze-d/fledex.svg)](https://github.com/a-maze-d/fledex/commits/main)
+
 
 <img alt="Fledex" src="assets/fledex_logo.svg" width=100/>
 
@@ -47,11 +49,11 @@ The smoothest way is to use the Fledex DSL which defines some functions and macr
 > By enabling the DSL through the `use Fledex` call, the most important modules 
 > are imported (see `Fledex.__using__/1` for details).
 
-As a next step you define an LED strip through the `led_strip` macro. While defining the led strip you need to decide on how you want to talk to your strip; you need an appropriate driver.  There are several ways on how you can address your LED strip. The most common ways are through an SPI bus (`Fledex.Driver.Impl.Spi`) or through Kino (`Fledex.Driver.Impl.Kino`) as a simulated LED strip in [Livebook](https://livebook.dev/). It is possible to adjust the settings of the drivers, or even define several drivers at the same time.
+As a next step you define an LED strip through the `led_strip` macro. While defining the led strip you need to decide on how you want to talk to your strip; you need an appropriate driver.  There are several ways on how you can address your LED strip. The most common ways are through an SPI bus (`Fledex.Driver.Impl.Spi.Ws2801` or `Fledex.Driver.Impl.Spi.Ws2812`) or through Kino (`Fledex.Driver.Impl.Kino`) as a simulated LED strip in [Livebook](https://livebook.dev/). It is possible to adjust the settings of the drivers, or even define several drivers at the same time.
 
 This will look like the following:
 ```elixir
-led_strip Spi do
+led_strip Spi.Ws2801 do
   # ... here comes the definition of your leds ...
 end
 ```

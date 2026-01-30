@@ -1,4 +1,4 @@
-# Copyright 2025, Matthias Reik <fledex@reik.org>
+# Copyright 2025-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -6,7 +6,6 @@ if Mix.env() in [:test, :dev] do
   defmodule Mix.Tasks.Docs.Fledex.Colors do
     use Mix.Task
 
-    require Fledex
     alias Fledex.Config
 
     @shortdoc "Generate documentation for all the available Fledex colors from various known color modules"
