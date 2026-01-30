@@ -365,7 +365,7 @@ defmodule Fledex.LedStripTestSync do
   import ExUnit.CaptureLog
 
   alias Fledex.Driver.Impl.Null
-  alias Fledex.Driver.Impl.Spi
+  alias Fledex.Driver.Impl.Spi.Ws2801
   alias Fledex.LedStrip
   alias Fledex.Supervisor.AnimationSystem
   alias Fledex.Supervisor.LedStripSupervisor
@@ -388,9 +388,9 @@ defmodule Fledex.LedStripTestSync do
       :ok = GenServer.stop(pid)
       assert {:ok, pid} = LedStrip.start_link(:test_strip_name2, Null)
       :ok = GenServer.stop(pid)
-      assert {:ok, pid} = LedStrip.start_link(:test_strip_name3, Spi)
+      assert {:ok, pid} = LedStrip.start_link(:test_strip_name3, Ws2801)
       :ok = GenServer.stop(pid)
-      assert {:ok, pid} = LedStrip.start_link(:test_strip_name4, [{Null, []}, {Spi, []}])
+      assert {:ok, pid} = LedStrip.start_link(:test_strip_name4, [{Null, []}, {Ws2801, []}])
       :ok = GenServer.stop(pid)
       assert {:ok, pid} = LedStrip.start_link(:test_strip_name5, Null, [])
       :ok = GenServer.stop(pid)

@@ -1,4 +1,4 @@
-# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -103,7 +103,7 @@ defmodule Fledex.Color.Names.LoadUtils do
   * `°`: If the string contains a trailing degree sign, then
         the value is interpreted degree between 0 and 359 and mapped to a byte
   """
-  @spec a2b(String.t()) :: 0..255
+  @spec a2b(String.t()) :: byte()
   def a2b(value) do
     value =
       String.trim(value)

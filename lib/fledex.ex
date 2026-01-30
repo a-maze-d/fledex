@@ -402,11 +402,11 @@ defmodule Fledex do
 
     The `drivers` can be spcified in 3 different ways:
 
-    * just a driver module (like `Spi`). In this case the default settings will be used
-    * a driver module with it's configuration (like `{Spi, [dev: "spidev0.1"]}`)
-    * or a set of drivers (always with their configuration), like: `[{Spi, []}, {Spi, [dev: "spidev0.1"}]`
+    * just a driver module (like `Spi.Ws2801`). In this case the default settings will be used
+    * a driver module with it's configuration (like `{Spi.Ws2801, [dev: "spidev0.1"]}`)
+    * or a set of drivers (always with their configuration), like: `[{Spi.Ws2801, []}, {Spi.Ws2801, [dev: "spidev0.1"}]`
 
-    A set of default drivers exist for conenience that can be used like `Spi`, `Null`, ...
+    A set of default drivers exist for conenience that can be used like `Spi.Ws2801`, `Null`, ...
     (see `Fledex.LedStrip` for details).
 
     A special driver `:config` exists that will simply return the converted dsl to the

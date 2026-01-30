@@ -1,4 +1,4 @@
-# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -37,6 +37,8 @@ fledex-*.tar
 
 # backup files
 /pages/*.bkp
+/pages/assets/*.bkp
+/pages/assets/*.dtmp
 # ignore the auto generated color.md file
 /pages/colors.md
 

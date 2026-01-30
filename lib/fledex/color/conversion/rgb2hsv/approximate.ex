@@ -1,4 +1,4 @@
-# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -23,10 +23,10 @@ defmodule Fledex.Color.Conversion.Approximate do
   @hue_purple 192
   @hue_pink 224
 
-  @frac_48_128 trunc(48 * 256 / 128)
-  @frac_32_85 trunc(32 * 256 / 85)
-  @frac_24_128 trunc(24 * 257 / 128)
-  @frac_8_42 trunc(8 * 256 / 42)
+  @frac_48_128 div(48 * 256, 128)
+  @frac_32_85 div(32 * 256, 85)
+  @frac_24_128 div(24 * 257, 128)
+  @frac_8_42 div(8 * 256, 42)
 
   @doc """
   convert an RGB tuple (`{r, g, b}`) to a `Fledex.Color.HSV` struct.

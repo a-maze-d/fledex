@@ -40,14 +40,16 @@ defmodule Fledex.Color.Conversion.Rainbow do
   end
 
   # MARK: private utility functions
+  @third div(256, 3)
+  @twothird div(256 * 2, 3)
   @spec determine_rgb(byte) :: Types.rgb()
   defp determine_rgb(h) do
     main = {(h &&& 0x80) > 0, (h &&& 0x40) > 0, (h &&& 0x20) > 0}
     offset = h &&& 0x1F
     offset8 = offset <<< 3
 
-    third = CalcUtils.scale8(offset8, Kernel.trunc(256 / 3))
-    twothird = CalcUtils.scale8(offset8, Kernel.trunc(256 * 2 / 3))
+    third = CalcUtils.scale8(offset8, @third)
+    twothird = CalcUtils.scale8(offset8, @twothird)
     build_rgb(main, third, twothird)
   end
 

@@ -1,4 +1,4 @@
-# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -22,7 +22,7 @@ defmodule Fledex.Color.Functions do
   def create_rainbow_circular_hsv(0, _initial_hue, _reversed), do: []
 
   def create_rainbow_circular_hsv(num_leds, initial_hue, reversed) do
-    hue_change = Kernel.trunc(65_535 / num_leds)
+    hue_change = div(65_535, num_leds)
 
     for n <- 0..(num_leds - 1)//1 do
       %HSV{h: initial_hue + step(reversed, (n * hue_change) >>> 8) &&& 0xFF, s: 240, v: 255}
@@ -36,7 +36,7 @@ defmodule Fledex.Color.Functions do
     * `:reversed`: The rainbow can go from red (start color) to blue (end color) or the other
       way around.
     * `:initial_hue`: The starting color in degree mapped to a byte (e.g. `0..255`
-        corresponds to `0..258`). (default: 0)
+        corresponds to `0..359`). (default: 0)
 
   Additional options that can be specified are those specified in `hsv2rgb/2`
   """
@@ -65,9 +65,9 @@ defmodule Fledex.Color.Functions do
     bdist87 = (eb - sb) <<< 7
 
     steps = num_leds + 1
-    rdelta = trunc(rdist87 / steps) * 2
-    gdelta = trunc(gdist87 / steps) * 2
-    bdelta = trunc(bdist87 / steps) * 2
+    rdelta = div(rdist87, steps) * 2
+    gdelta = div(gdist87, steps) * 2
+    bdelta = div(bdist87, steps) * 2
 
     r88 = sr <<< 8
     g88 = sg <<< 8

@@ -185,7 +185,7 @@ defmodule Fledex.Leds do
   * `:reversed`: The rainbow can go from red (start color) to blue (end color) or the other
       way around.
   * `:initial_hue`: The starting color in degree mapped to a byte (e.g. `0..255`
-      corresponds to `0..258`). (default: 0)
+      corresponds to `0..359`). (default: 0)
 
   > #### Note {: .info}
   >

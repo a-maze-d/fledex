@@ -1,4 +1,4 @@
-# Copyright 2025, Matthias Reik <fledex@reik.org>
+# Copyright 2025-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -9,7 +9,7 @@ defmodule Fledex.Color.HSV do
   """
 
   defstruct h: 0, s: 0, v: 0
-  @type t :: %__MODULE__{h: 0..255, s: 0..255, v: 0..255}
+  @type t :: %__MODULE__{h: byte(), s: byte(), v: byte()}
 
   defimpl Fledex.Color do
     alias Fledex.Color.Conversion.Rainbow
