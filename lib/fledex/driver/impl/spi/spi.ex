@@ -23,7 +23,7 @@ defmodule Fledex.Driver.Impl.Spi do
   """
 
   alias Fledex.Color.Correction
-  alias Fledex.Color.RGB
+  alias Fledex.Color.RGBW
   alias Fledex.Color.Types
   alias Fledex.Driver.Interface
 
@@ -32,7 +32,8 @@ defmodule Fledex.Driver.Impl.Spi do
   that we can send over the wire. Any SPI driver `use`-ing this module, needs to
   implement the conversion in this function
   """
-  @callback convert_to_bits(byte(), byte(), byte(), keyword) :: bitstring()
+  @callback convert_to_bits(r :: byte(), g :: byte(), b :: byte(), w :: byte(), config :: keyword) ::
+              bitstring()
   @doc """
   Between every transfer, we have to add some separator. This can be done in this function
 
@@ -43,7 +44,7 @@ defmodule Fledex.Driver.Impl.Spi do
   @doc """
   If you want to implement a new SPI driver you can use this module as a base.
 
-  This way you only have to have to implement the callbacks `Fledex.Driver.Interface.configure/1`
+  This way you only have to have to implement the callbacks `c:Fledex.Driver.Interface.configure/1`
   and from this module: `convert_to_bits/3` and `add_reset/1`.
   """
   defmacro __using__(_opts) do
@@ -87,8 +88,8 @@ defmodule Fledex.Driver.Impl.Spi do
           leds
           |> Correction.apply_rgb_correction(Keyword.fetch!(config, :color_correction))
           |> Enum.reduce(<<>>, fn led, acc ->
-            %RGB{r: r, g: g, b: b} = RGB.new(led)
-            acc <> convert_to_bits(r, g, b, config)
+            %RGBW{r: r, g: g, b: b, w: w} = RGBW.new(led)
+            acc <> convert_to_bits(r, g, b, w, config)
           end)
           |> add_reset(config)
 
@@ -103,6 +104,8 @@ defmodule Fledex.Driver.Impl.Spi do
       def terminate(_reason, config) do
         Circuits.SPI.close(Keyword.fetch!(config, :ref))
       end
+
+      defoverridable transfer: 3
     end
   end
 end

@@ -21,6 +21,8 @@ defmodule Fledex.Driver.Impl.Spi.Ws2801Test do
       assert Keyword.fetch!(config, :delay_us) == 10
       assert Keyword.fetch!(config, :lsb_first) == false
       assert Keyword.fetch!(config, :color_correction) == Correction.no_color_correction()
+      assert Keyword.fetch!(config, :reset_byte) == <<0>>
+      assert Keyword.fetch!(config, :reset_bytes) == 64
       assert Keyword.fetch!(config, :ref) != nil
     end
 

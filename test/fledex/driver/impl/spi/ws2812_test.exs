@@ -22,6 +22,8 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812Test do
       assert Keyword.fetch!(config, :lsb_first) == false
       assert Keyword.fetch!(config, :color_correction) == Correction.no_color_correction()
       assert Keyword.fetch!(config, :type) == :grb
+      assert Keyword.fetch!(config, :reset_byte) == <<0>>
+      assert Keyword.fetch!(config, :reset_bytes) == 32
       assert Keyword.fetch!(config, :ref) != nil
     end
 
@@ -67,7 +69,7 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812Test do
       :ok = Ws2812.terminate(:normal, config)
     end
 
-    test "transfer" do
+    test "transfer rgb" do
       driver = Ws2812.init([], [])
       leds = [0xFF0000, 0x00FF00, 0x0000FF]
       # every bit gets split up into 3 bits. 0 = 100, 1 = 110
@@ -84,6 +86,61 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812Test do
         0b100100100100100100100100::24,
         0b100100100100100100100100::24,
         0b110110110110110110110110::24,
+        # reset code
+        0::256
+      >>
+
+      {driver_response, response} = Ws2812.transfer(leds, 0, driver)
+      assert response == expected
+      assert driver == driver_response
+    end
+
+    test "transfer grb" do
+      driver = Ws2812.init([type: :rgb], [])
+      leds = [0xFF0000, 0x00FF00, 0x0000FF]
+      # every bit gets split up into 3 bits. 0 = 100, 1 = 110
+      expected = <<
+        # 255, 0, 0
+        0b110110110110110110110110::24,
+        0b100100100100100100100100::24,
+        0b100100100100100100100100::24,
+        # 0, 255, 0
+        0b100100100100100100100100::24,
+        0b110110110110110110110110::24,
+        0b100100100100100100100100::24,
+        # 0, 0, 255
+        0b100100100100100100100100::24,
+        0b100100100100100100100100::24,
+        0b110110110110110110110110::24,
+        # reset code
+        0::256
+      >>
+
+      {driver_response, response} = Ws2812.transfer(leds, 0, driver)
+      assert response == expected
+      assert driver == driver_response
+    end
+
+    test "transfer grbw" do
+      driver = Ws2812.init([type: :grbw], [])
+      leds = [0xFFFF0000, 0x0000FF00, 0x000000FF]
+      # every bit gets split up into 3 bits. 0 = 100, 1 = 110
+      expected = <<
+        # 255, 0, 0, 255
+        0b100100100100100100100100::24,
+        0b110110110110110110110110::24,
+        0b100100100100100100100100::24,
+        0b110110110110110110110110::24,
+        # 0, 255, 0, 0
+        0b110110110110110110110110::24,
+        0b100100100100100100100100::24,
+        0b100100100100100100100100::24,
+        0b100100100100100100100100::24,
+        # 0, 0, 255, 0
+        0b100100100100100100100100::24,
+        0b100100100100100100100100::24,
+        0b110110110110110110110110::24,
+        0b100100100100100100100100::24,
         # reset code
         0::256
       >>

@@ -1,4 +1,4 @@
-# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -17,6 +17,7 @@ defmodule Fledex.Color.ColorTest do
   alias Fledex.Color.Functions
   alias Fledex.Color.HSV
   alias Fledex.Color.RGB
+  alias Fledex.Color.RGBW
 
   describe "color protocol tests" do
     test "convert to_colorint" do
@@ -25,6 +26,7 @@ defmodule Fledex.Color.ColorTest do
       assert Fledex.Color.to_colorint(:red) == 0xFF0000
       assert Fledex.Color.to_colorint(%{rgb: 0xFFEEDD}) == 0xFFEEDD
       assert Fledex.Color.to_colorint(%RGB{r: 0xFF, g: 0xEE, b: 0xDD}) == 0xFFEEDD
+      assert Fledex.Color.to_colorint(%RGBW{r: 0xFF, g: 0xEE, b: 0xDD, w: 0xCC}) == 0xCCFFEEDD
     end
 
     test "non-existing color name atoms default to black" do
@@ -54,6 +56,22 @@ defmodule Fledex.Color.ColorTest do
       assert {0xFF, 0xEE, 0xDD} = 0xFFEEDD |> RGB.to_tuple()
       assert {0xFF, 0xEE, 0xDD} = %{rgb: 0xFFEEDD} |> RGB.to_tuple()
       assert {0xFF, 0xEE, 0xDD} = %{rgb: {0xFF, 0xEE, 0xDD}} |> RGB.to_tuple()
+    end
+  end
+
+  describe "RGBW tests" do
+    test "new" do
+      assert %RGBW{r: 0xFF, g: 0xEE, b: 0xDD, w: 0} = RGBW.new({0xFF, 0xEE, 0xDD})
+      assert %RGBW{r: 0xFF, g: 0xEE, b: 0xDD, w: 0} = RGBW.new(0xFFEEDD)
+      assert %RGBW{r: 0xFF, g: 0xEE, b: 0xDD, w: 0xCC} = RGBW.new(0xCCFFEEDD)
+      assert %RGBW{r: 0xFF, g: 0xEE, b: 0xDD, w: 0} = RGBW.new(%{rgb: 0xFFEEDD})
+      assert %RGBW{r: 0xFF, g: 0xEE, b: 0xDD, w: 0} = RGBW.new(%{rgb: {0xFF, 0xEE, 0xDD}})
+
+      assert {0xFF, 0xEE, 0xDD} = RGBW.new(0xCCFFEEDD) |> RGBW.to_tuple()
+      assert {0xFF, 0xEE, 0xDD} = {0xFF, 0xEE, 0xDD} |> RGBW.to_tuple()
+      assert {0xFF, 0xEE, 0xDD} = 0xCCFFEEDD |> RGBW.to_tuple()
+      assert {0xFF, 0xEE, 0xDD} = %{rgb: 0xFFEEDD} |> RGBW.to_tuple()
+      assert {0xFF, 0xEE, 0xDD} = %{rgb: {0xFF, 0xEE, 0xDD}} |> RGBW.to_tuple()
     end
   end
 
