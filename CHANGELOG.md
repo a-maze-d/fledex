@@ -16,6 +16,7 @@ SPDX-License-Identifier: Apache-2.0
 ## Feature
 * First attempt to get Fledex working on AtomVM. `mix atomvm.check` does not give us any errors anymore
 * Adding support for ws2812 (via SPI port) led strips (restructued the SPI driver code). This should also support related drivers like ws2813, ws2814, and ws2815
+* Added support for also RGBW led strips (like the ws2813), by extending the `colorint` type to also carry the white information as `0xwwrrggbb` and added also an `Fledex.Color.RGBW` module
 
 ## Other changes
 ### Cleanup

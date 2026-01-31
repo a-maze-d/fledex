@@ -25,6 +25,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Enable Telemetry? (v0.8)
     - [ ] Switch also the `fledex_scheduler` stats to telemetry (v0.8)
   - [x] Add support for WS2811/12/13/14/15 LED strips through the SPI port (v0.8)
+  - [ ] Add support for white leds in the various WS281x led strips
   - [ ] Get it working on AtomVM (v0.9)
   - [ ] Add Perlin noise functions (see: https://hackaday.com/2019/12/28/led-flame-illuminates-the-beauty-of-noise/, https://hexdocs.pm/perlin/Perlin.html) (v0.9)
   - [ ] Clustering (v0.8)

@@ -11,16 +11,20 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812 do
 
   ## Options
   This driver accepts the options specied by `Fledex.Driver.Impl.Spi`. You can in addition
-  specify the led type (default: `:grb`). This way you should be able to use it also for a
+  specify:
+
+  * `:led_type` (default: `:grb`): This way you should be able to use it also for a
   [WS2811](https://www.ledyilighting.com/wp-content/uploads/2025/02/WS2811-datasheet.pdf)
   led strip by specifying `:rgb`, and for
   [WS2813](https://www.ledyilighting.com/wp-content/uploads/2025/02/WS2813-RGBW-datasheet.pdf),
   [WS2814](https://suntechlite.com/wp-content/uploads/2024/06/WS2814-IC-Datasheet_V1.4_EN.pdf),
   and [WS2815](https://www.ledyilighting.com/wp-content/uploads/2025/02/WS2815-datasheet.pdf)
   led strips by specifying `:grbw`.
+  * `:reset_byte` (default: `<<0>>`): This is the byte sequence that will be added `:reset_bytes` times. Usually it's a sequence of 0.
+  * `:reset_bytes` (default: 32): This is how often the `:reset_byte` sequence should be duplicated. You should make sure that the reset sequence corresponds time wise to the spec. For example for a WS2812 we need at least 50us as reset sequence. At the default 2.6MHz frequency we get `385ns (bit length) * 130 (bits) = 50050ns ~50us`. We round it up to 256 bits. Thus, we need 32 reset bytes (`<<0>>`).
 
   > #### Note {: .info}
-  > * The white LED will not be used.
+  > * The white LED can be used by using the extended version of the `t:Fledex.Color.colorint/0`.
   > * This hasn't been tested and is only based on the spec
   """
   use Fledex.Driver.Impl.Spi
@@ -40,13 +44,15 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812 do
       lsb_first: Keyword.get(config, :lsb_first, false),
       color_correction: Keyword.get(config, :color_correction, Correction.no_color_correction()),
       type: Keyword.get(config, :type, :grb),
+      reset_byte: Keyword.get(config, :reset_byte, <<0>>),
+      reset_bytes: Keyword.get(config, :reset_bytes, 32),
       ref: nil
     ]
   end
 
   @impl Spi
-  @spec convert_to_bits(byte(), byte(), byte(), keyword) :: bitstring()
-  def convert_to_bits(r, g, b, config) do
+  @spec convert_to_bits(byte(), byte(), byte(), byte(), keyword) :: bitstring()
+  def convert_to_bits(r, g, b, w, config) do
     # The  SPI port is fast enough to bang out the bits so that they have the right
     # length. With 2.6MHz each bit has a length of 385ns.
     # According to the datasheet:
@@ -59,7 +65,7 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812 do
       case Keyword.get(config, :type, :grb) do
         :rgb -> <<r, g, b>>
         :grb -> <<g, r, b>>
-        :grbw -> <<g, r, b, 0>>
+        :grbw -> <<g, r, b, w>>
       end
 
     Stream.unfold(leds, fn
@@ -72,11 +78,15 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812 do
 
   @impl Spi
   @spec add_reset(bitstring(), keyword) :: bitstring()
-  def add_reset(bits, _config) do
+  def add_reset(bits, config) do
     # we need at least 50us as reset ==> 385ns*130 = 50050ns ~50us
     # we round it up to 256
     # Note: we can hardcode the value, since the frequency should not
     # vary too much from the default.
-    <<bits::bitstring, 0::256>>
+    reset_byte = Keyword.get(config, :reset_byte, <<0>>)
+    reset_bytes = Keyword.get(config, :reset_bytes, 32)
+
+    reset_sequence = :binary.copy(reset_byte, reset_bytes)
+    <<bits::bitstring, reset_sequence::bitstring>>
   end
 end
