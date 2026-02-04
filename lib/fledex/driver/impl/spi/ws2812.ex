@@ -5,12 +5,14 @@
 defmodule Fledex.Driver.Impl.Spi.Ws2812 do
   @moduledoc """
   This module is a concrete driver that will push the led data through an SPI port.
+  It is mainly intended for WS2812 led strip,
 
   The protocol used is the one as expected by an
   [WS2812](https://www.ledyilighting.com/wp-content/uploads/2025/02/WS2812B-datasheet.pdf) chip.
+  By adjusting the settings you can also use it for other led chips
 
   ## Options
-  This driver accepts the options specied by `Fledex.Driver.Impl.Spi`. You can in addition
+  This driver accepts the options specied by `Fledex.Driver.Impl.Spi`, but you can in addition
   specify:
 
   * `:led_type` (default: `:grb`): This way you should be able to use it also for a
@@ -20,12 +22,21 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812 do
   [WS2814](https://suntechlite.com/wp-content/uploads/2024/06/WS2814-IC-Datasheet_V1.4_EN.pdf),
   and [WS2815](https://www.ledyilighting.com/wp-content/uploads/2025/02/WS2815-datasheet.pdf)
   led strips by specifying `:grbw`.
-  * `:reset_byte` (default: `<<0>>`): This is the byte sequence that will be added `:reset_bytes` times. Usually it's a sequence of 0.
-  * `:reset_bytes` (default: 32): This is how often the `:reset_byte` sequence should be duplicated. You should make sure that the reset sequence corresponds time wise to the spec. For example for a WS2812 we need at least 50us as reset sequence. At the default 2.6MHz frequency we get `385ns (bit length) * 130 (bits) = 50050ns ~50us`. We round it up to 256 bits. Thus, we need 32 reset bytes (`<<0>>`).
+  You can also drive a [WS2805](https://www.superlightingled.com/PDF/WS2805-IC-Specification.pdf)
+  by specifying `:rgbw1w2`, but you can only `w1` will be dynamic. You can still set `w2` statically
+  by adding it to he config as `:w2`.
+  * `:reset_byte` (default: `<<0>>`): This is the byte sequence that will be added `:reset_bytes`
+  times. Usually it's a sequence of 0.
+  * `:reset_bytes` (default: `32`): This is how often the `:reset_byte` sequence should be
+  duplicated. You should make sure that the reset sequence corresponds time wise to the spec.
+  For example for a WS2812 we need at least 50us as reset sequence. At the default 2.6MHz
+  frequency we get `385ns (bit length) * 130 (bits) = 50050ns ~50us`. We round it up to 256 bits.
+  Thus, we need 32 reset bytes (`<<0>>`).
+  * `:w2` this is a static value used for a WS2805 led strips that supports 2 white leds.
 
   > #### Note {: .info}
-  > * The white LED can be used by using the extended version of the `t:Fledex.Color.colorint/0`.
-  > * This hasn't been tested and is only based on the spec
+  > * The white LED can be used by using the extended version of the `t:Fledex.Color.Types.colorint/0`.
+  > * This driver hasn't been tested and is only based on the spec.
   """
   use Fledex.Driver.Impl.Spi
 
@@ -46,6 +57,7 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812 do
       type: Keyword.get(config, :type, :grb),
       reset_byte: Keyword.get(config, :reset_byte, <<0>>),
       reset_bytes: Keyword.get(config, :reset_bytes, 32),
+      w2: Keyword.get(config, :w2, 0x00),
       ref: nil
     ]
   end
@@ -63,9 +75,10 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812 do
     # WATCH OUT: the order is grb and not rgb!!!
     leds =
       case Keyword.get(config, :type, :grb) do
-        :rgb -> <<r, g, b>>
-        :grb -> <<g, r, b>>
-        :grbw -> <<g, r, b, w>>
+        :rgb -> <<r::8, g::8, b::8>>
+        :grb -> <<g::8, r::8, b::8>>
+        :grbw -> <<g::8, r::8, b::8, w::8>>
+        :rgbw1w2 -> <<r::8, g::8, b::8, w::8, <<Keyword.get(config, :w2, 0x00)::8>> >>
       end
 
     Stream.unfold(leds, fn

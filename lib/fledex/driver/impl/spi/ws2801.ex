@@ -39,7 +39,7 @@ defmodule Fledex.Driver.Impl.Spi.Ws2801 do
   @impl Spi
   @spec convert_to_bits(byte(), byte(), byte(), byte(), keyword) :: bitstring()
   def convert_to_bits(r, g, b, _w, _config) do
-    <<r, g, b>>
+    <<r::8, g::8, b::8>>
   end
 
   @impl Spi

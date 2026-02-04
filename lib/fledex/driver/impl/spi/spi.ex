@@ -44,8 +44,10 @@ defmodule Fledex.Driver.Impl.Spi do
   @doc """
   If you want to implement a new SPI driver you can use this module as a base.
 
-  This way you only have to have to implement the callbacks `c:Fledex.Driver.Interface.configure/1`
-  and from this module: `convert_to_bits/3` and `add_reset/1`.
+  This way you only have to have to implement the callbacks
+  `c:Fledex.Driver.Interface.configure/1` and from this module:
+  `c:convert_to_bits/5` and
+  `c:add_reset/2`.
   """
   defmacro __using__(_opts) do
     quote do

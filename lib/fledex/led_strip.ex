@@ -428,21 +428,20 @@ defmodule Fledex.LedStrip do
   end
 
   def transfer_data(state) do
-    # state = :telemetry.span(
-    #   [:transfer_data],
-    #   %{timer_counter: state.config.timer.counter},
-    #   fn ->
-    drivers =
-      state.namespaces
-      |> merge_namespaces(state.config.merge_strategy)
-      |> Manager.transfer(state.config.timer.counter, state.drivers)
+    timer_counter = state.config.timer.counter
 
-    %{state | drivers: drivers}
-    |> put_in([:config, :timer, :is_dirty], false)
+    :telemetry.span(
+      [Fledex.LedStrip, :transfer_data], %{timer_counter: timer_counter}, fn ->
+        drivers =
+          state.namespaces
+          |> merge_namespaces(state.config.merge_strategy)
+          |> Manager.transfer(state.config.timer.counter, state.drivers)
 
-    #       {state, %{metadata: "done"}}
-    #   end
-    # )
+        state = %{state | drivers: drivers}
+          |> put_in([:config, :timer, :is_dirty], false)
+
+        {state, %{timer_counter: timer_counter, metadata: "done"}}
+     end)
   end
 
   @doc false

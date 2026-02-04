@@ -2,9 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 defmodule Fledex.Driver.Impl.Spi.Utils do
-  @moduledoc """
-  Some utily functions for the Spi driver
-  """
+  @moduledoc false
+
   alias Fledex.Color.Types
 
   @doc """

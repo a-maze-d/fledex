@@ -150,6 +150,38 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812Test do
       assert driver == driver_response
     end
 
+    test "transfer rgbw1w2" do
+      driver = Ws2812.init([type: :rgbw1w2, w2: 0x80], [])
+      leds = [0xFFFF0000, 0x0000FF00, 0x000000FF]
+      # every bit gets split up into 3 bits. 0 = 100, 1 = 110
+      expected = <<
+        # 255, 0, 0, 255
+        0b110110110110110110110110::24,
+        0b100100100100100100100100::24,
+        0b100100100100100100100100::24,
+        0b110110110110110110110110::24,
+        0b110100100100100100100100::24,
+        # 0, 255, 0, 0
+        0b100100100100100100100100::24,
+        0b110110110110110110110110::24,
+        0b100100100100100100100100::24,
+        0b100100100100100100100100::24,
+        0b110100100100100100100100::24,
+        # 0, 0, 255, 0
+        0b100100100100100100100100::24,
+        0b100100100100100100100100::24,
+        0b110110110110110110110110::24,
+        0b100100100100100100100100::24,
+        0b110100100100100100100100::24,
+        # reset code
+        0::256
+      >>
+
+      {driver_response, response} = Ws2812.transfer(leds, 0, driver)
+      assert response == expected
+      assert driver == driver_response
+    end
+
     test "terminate" do
       driver = Ws2812.init([], [])
       assert :ok == Ws2812.terminate(:normal, driver)

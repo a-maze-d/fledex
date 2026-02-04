@@ -13,8 +13,8 @@ defmodule Fledex.Color.Types do
   alias Fledex.Color.RGBW
 
   @typedoc """
-  An integer representing the rgb encoded in the classical hex way:
-  `0xrrggbb` values. It's also possible to add a value for a potential white led (rgbw)
+  An integer representing the `rgb` encoded in the classical hex way:
+  `0xrrggbb`. It's also possible to add a value for a potentialy white led (`rgbw`)
   encoded as `0xwwrrggbb`.
   """
   @type colorint :: 0..0xFFFFFF | 0..0xFFFFFFFF
