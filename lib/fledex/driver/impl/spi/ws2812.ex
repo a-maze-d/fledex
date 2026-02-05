@@ -78,7 +78,7 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812 do
         :rgb -> <<r::8, g::8, b::8>>
         :grb -> <<g::8, r::8, b::8>>
         :grbw -> <<g::8, r::8, b::8, w::8>>
-        :rgbw1w2 -> <<r::8, g::8, b::8, w::8, <<Keyword.get(config, :w2, 0x00)::8>> >>
+        :rgbw1w2 -> <<r::8, g::8, b::8, w::8, (<<Keyword.get(config, :w2, 0x00)::8>>)>>
       end
 
     Stream.unfold(leds, fn
