@@ -16,6 +16,7 @@ defmodule Fledex.Driver.Impl.Spi.Ws2801 do
   use Fledex.Driver.Impl.Spi
 
   alias Fledex.Color.Correction
+  alias Fledex.Color.RGBW
   alias Fledex.Driver.Interface
 
   @impl Interface
@@ -37,8 +38,8 @@ defmodule Fledex.Driver.Impl.Spi.Ws2801 do
   end
 
   @impl Spi
-  @spec convert_to_bits(byte(), byte(), byte(), byte(), keyword) :: bitstring()
-  def convert_to_bits(r, g, b, _w, _config) do
+  @spec convert_to_bits(RGBW.t(), keyword) :: bitstring()
+  def convert_to_bits(%RGBW{r: r, g: g, b: b}, _config) do
     <<r::8, g::8, b::8>>
   end
 

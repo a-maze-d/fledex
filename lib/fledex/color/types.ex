@@ -15,9 +15,10 @@ defmodule Fledex.Color.Types do
   @typedoc """
   An integer representing the `rgb` encoded in the classical hex way:
   `0xrrggbb`. It's also possible to add a value for a potentialy white led (`rgbw`)
-  encoded as `0xwwrrggbb`.
+  encoded as `0xwwrrggbb` or even 2 white leds 0xw2w2w1w1rrggbb (as used in
+  a ws2805)
   """
-  @type colorint :: 0..0xFFFFFF | 0..0xFFFFFFFF
+  @type colorint :: 0..0xFFFFFFFFFF
   @type rgb :: {red :: byte(), green :: byte(), blue :: byte()}
 
   @type hsv :: HSV.t()
