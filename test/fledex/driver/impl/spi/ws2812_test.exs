@@ -151,8 +151,8 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812Test do
     end
 
     test "transfer rgbw1w2" do
-      driver = Ws2812.init([type: :rgbw1w2, w2: 0x80], [])
-      leds = [0xFFFF0000, 0x0000FF00, 0x000000FF]
+      driver = Ws2812.init([type: :rgbw1w2], [])
+      leds = [0x80FFFF0000, 0x800000FF00, 0x000000FF]
       # every bit gets split up into 3 bits. 0 = 100, 1 = 110
       expected = <<
         # 255, 0, 0, 255
@@ -172,7 +172,7 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812Test do
         0b100100100100100100100100::24,
         0b110110110110110110110110::24,
         0b100100100100100100100100::24,
-        0b110100100100100100100100::24,
+        0b100100100100100100100100::24,
         # reset code
         0::256
       >>

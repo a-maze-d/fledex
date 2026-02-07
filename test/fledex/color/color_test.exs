@@ -26,7 +26,18 @@ defmodule Fledex.Color.ColorTest do
       assert Fledex.Color.to_colorint(:red) == 0xFF0000
       assert Fledex.Color.to_colorint(%{rgb: 0xFFEEDD}) == 0xFFEEDD
       assert Fledex.Color.to_colorint(%RGB{r: 0xFF, g: 0xEE, b: 0xDD}) == 0xFFEEDD
-      assert Fledex.Color.to_colorint(%RGBW{r: 0xFF, g: 0xEE, b: 0xDD, w: 0xCC}) == 0xCCFFEEDD
+
+      assert %RGBW{r: 0xFF, g: 0xEE, b: 0xDD, w1: 0xCC, w2: 0x00} == %RGBW{
+               r: 0xFF,
+               g: 0xEE,
+               b: 0xDD,
+               w1: 0xCC
+             }
+
+      assert Fledex.Color.to_colorint(%RGBW{r: 0xFF, g: 0xEE, b: 0xDD, w1: 0xCC}) == 0x00CCFFEEDD
+
+      assert Fledex.Color.to_colorint(%RGBW{r: 0xFF, g: 0xEE, b: 0xDD, w1: 0xCC, w2: 0xBB}) ==
+               0xBBCCFFEEDD
     end
 
     test "non-existing color name atoms default to black" do
@@ -61,11 +72,12 @@ defmodule Fledex.Color.ColorTest do
 
   describe "RGBW tests" do
     test "new" do
-      assert %RGBW{r: 0xFF, g: 0xEE, b: 0xDD, w: 0} = RGBW.new({0xFF, 0xEE, 0xDD})
-      assert %RGBW{r: 0xFF, g: 0xEE, b: 0xDD, w: 0} = RGBW.new(0xFFEEDD)
-      assert %RGBW{r: 0xFF, g: 0xEE, b: 0xDD, w: 0xCC} = RGBW.new(0xCCFFEEDD)
-      assert %RGBW{r: 0xFF, g: 0xEE, b: 0xDD, w: 0} = RGBW.new(%{rgb: 0xFFEEDD})
-      assert %RGBW{r: 0xFF, g: 0xEE, b: 0xDD, w: 0} = RGBW.new(%{rgb: {0xFF, 0xEE, 0xDD}})
+      assert %RGBW{r: 0xFF, g: 0xEE, b: 0xDD, w1: 0, w2: 0} = RGBW.new({0xFF, 0xEE, 0xDD})
+      assert %RGBW{r: 0xFF, g: 0xEE, b: 0xDD, w1: 0, w2: 0} = RGBW.new(0xFFEEDD)
+      assert %RGBW{r: 0xFF, g: 0xEE, b: 0xDD, w1: 0xCC, w2: 0} = RGBW.new(0xCCFFEEDD)
+      assert %RGBW{r: 0xFF, g: 0xEE, b: 0xDD, w1: 0xCC, w2: 0xBB} = RGBW.new(0xBBCCFFEEDD)
+      assert %RGBW{r: 0xFF, g: 0xEE, b: 0xDD, w1: 0, w2: 0} = RGBW.new(%{rgb: 0xFFEEDD})
+      assert %RGBW{r: 0xFF, g: 0xEE, b: 0xDD, w1: 0, w2: 0} = RGBW.new(%{rgb: {0xFF, 0xEE, 0xDD}})
 
       assert {0xFF, 0xEE, 0xDD} = RGBW.new(0xCCFFEEDD) |> RGBW.to_tuple()
       assert {0xFF, 0xEE, 0xDD} = {0xFF, 0xEE, 0xDD} |> RGBW.to_tuple()

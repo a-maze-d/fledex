@@ -32,7 +32,7 @@ defmodule Fledex.Driver.Impl.Spi do
   that we can send over the wire. Any SPI driver `use`-ing this module, needs to
   implement the conversion in this function
   """
-  @callback convert_to_bits(r :: byte(), g :: byte(), b :: byte(), w :: byte(), config :: keyword) ::
+  @callback convert_to_bits(RGBW.t(), config :: keyword) ::
               bitstring()
   @doc """
   Between every transfer, we have to add some separator. This can be done in this function
@@ -46,8 +46,7 @@ defmodule Fledex.Driver.Impl.Spi do
 
   This way you only have to have to implement the callbacks
   `c:Fledex.Driver.Interface.configure/1` and from this module:
-  `c:convert_to_bits/5` and
-  `c:add_reset/2`.
+  `c:convert_to_bits/2` and `c:add_reset/2`.
   """
   defmacro __using__(_opts) do
     quote do
@@ -90,8 +89,7 @@ defmodule Fledex.Driver.Impl.Spi do
           leds
           |> Correction.apply_rgb_correction(Keyword.fetch!(config, :color_correction))
           |> Enum.reduce(<<>>, fn led, acc ->
-            %RGBW{r: r, g: g, b: b, w: w} = RGBW.new(led)
-            acc <> convert_to_bits(r, g, b, w, config)
+            acc <> convert_to_bits(RGBW.new(led), config)
           end)
           |> add_reset(config)
 

@@ -23,8 +23,8 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812 do
   and [WS2815](https://www.ledyilighting.com/wp-content/uploads/2025/02/WS2815-datasheet.pdf)
   led strips by specifying `:grbw`.
   You can also drive a [WS2805](https://www.superlightingled.com/PDF/WS2805-IC-Specification.pdf)
-  by specifying `:rgbw1w2`, but you can only `w1` will be dynamic. You can still set `w2` statically
-  by adding it to he config as `:w2`.
+  by specifying `:rgbw1w2`. You can specify the white colors by using an colorint
+  (`0xw2w2w1w1rrggbb`) or an `Fledex.Color.RGBW` structure.
   * `:reset_byte` (default: `<<0>>`): This is the byte sequence that will be added `:reset_bytes`
   times. Usually it's a sequence of 0.
   * `:reset_bytes` (default: `32`): This is how often the `:reset_byte` sequence should be
@@ -32,7 +32,6 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812 do
   For example for a WS2812 we need at least 50us as reset sequence. At the default 2.6MHz
   frequency we get `385ns (bit length) * 130 (bits) = 50050ns ~50us`. We round it up to 256 bits.
   Thus, we need 32 reset bytes (`<<0>>`).
-  * `:w2` this is a static value used for a WS2805 led strips that supports 2 white leds.
 
   > #### Note {: .info}
   > * The white LED can be used by using the extended version of the `t:Fledex.Color.Types.colorint/0`.
@@ -41,6 +40,7 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812 do
   use Fledex.Driver.Impl.Spi
 
   alias Fledex.Color.Correction
+  alias Fledex.Color.RGBW
   alias Fledex.Driver.Interface
 
   @impl Interface
@@ -57,14 +57,13 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812 do
       type: Keyword.get(config, :type, :grb),
       reset_byte: Keyword.get(config, :reset_byte, <<0>>),
       reset_bytes: Keyword.get(config, :reset_bytes, 32),
-      w2: Keyword.get(config, :w2, 0x00),
       ref: nil
     ]
   end
 
   @impl Spi
-  @spec convert_to_bits(byte(), byte(), byte(), byte(), keyword) :: bitstring()
-  def convert_to_bits(r, g, b, w, config) do
+  @spec convert_to_bits(RGBW.t(), keyword) :: bitstring()
+  def convert_to_bits(%RGBW{r: r, g: g, b: b, w1: w1, w2: w2}, config) do
     # The  SPI port is fast enough to bang out the bits so that they have the right
     # length. With 2.6MHz each bit has a length of 385ns.
     # According to the datasheet:
@@ -77,8 +76,8 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812 do
       case Keyword.get(config, :type, :grb) do
         :rgb -> <<r::8, g::8, b::8>>
         :grb -> <<g::8, r::8, b::8>>
-        :grbw -> <<g::8, r::8, b::8, w::8>>
-        :rgbw1w2 -> <<r::8, g::8, b::8, w::8, (<<Keyword.get(config, :w2, 0x00)::8>>)>>
+        :grbw -> <<g::8, r::8, b::8, w1::8>>
+        :rgbw1w2 -> <<r::8, g::8, b::8, w1::8, w2::8>>
       end
 
     Stream.unfold(leds, fn
