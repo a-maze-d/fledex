@@ -15,45 +15,25 @@ defmodule Fledex.Driver.Impl.Spi.Ws2801 do
   """
   use Fledex.Driver.Impl.Spi
 
-  alias Fledex.Color.Correction
   alias Fledex.Color.RGBW
   alias Fledex.Driver.Interface
 
   @impl Interface
   @spec configure(keyword) :: keyword
   def configure(config) do
-    [
-      dev: Keyword.get(config, :dev, "spidev0.0"),
-      mode: Keyword.get(config, :mode, 0),
-      bits_per_word: Keyword.get(config, :bits_per_word, 8),
-      speed_hz: Keyword.get(config, :speed_hz, 1_000_000),
-      delay_us: Keyword.get(config, :delay_us, 10),
-      lsb_first: Keyword.get(config, :lsb_first, false),
-      color_correction: Keyword.get(config, :color_correction, Correction.no_color_correction()),
-      # for consistency we specify those too, but they are not exposed in the docs
-      reset_byte: Keyword.get(config, :reset_byte, <<0>>),
-      reset_bytes: Keyword.get(config, :reset_bytes, 64),
-      ref: nil
-    ]
+    config
+    # overwrite defaults by setting new default values (if not already set)
+    |> Keyword.put_new(:speed_hz, 1_000_000)
+    |> Keyword.put_new(:delay_us, 500)
+    # otherwise use defaults
+    |> Utils.default_spi_config()
+
+    # here would come new properties, but we don't have any.
   end
 
   @impl Spi
   @spec convert_to_bits(RGBW.t(), keyword) :: bitstring()
   def convert_to_bits(%RGBW{r: r, g: g, b: b}, _config) do
     <<r::8, g::8, b::8>>
-  end
-
-  @impl Spi
-  @spec add_reset(bitstring(), keyword) :: bitstring()
-  def add_reset(bits, config) do
-    # to prepare for the data transport we should start with >500us silence.
-    # this corresponds to 500 bits if we run at the default 1MHz.
-    # we don't expect the frequency to be dramatically changed and we don't
-    # want to recalculate the necessary value in every transfer.
-    reset_byte = Keyword.get(config, :reset_byte, <<0>>)
-    reset_bytes = Keyword.get(config, :reset_bytes, 64)
-
-    reset_sequence = :binary.copy(reset_byte, reset_bytes)
-    <<reset_sequence::bitstring, bits::bitstring>>
   end
 end

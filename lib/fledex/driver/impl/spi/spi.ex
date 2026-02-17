@@ -6,12 +6,12 @@ defmodule Fledex.Driver.Impl.Spi do
   @moduledoc """
   This module is the base for SPI based drivers.
 
-  The supported options are the following.
-  BUT be careful, because specific drivers might need very specific settings and you really
-  should understand the driver before you modify any option.
-
   ## Options
-  This driver accepts the following options (most of them are very SPI specific and the defaults are probably good enough):
+  This module is not a concrete driver, but usually the concrete drivers make use of
+  `Fledex.Driver.Impl.Spi.Utils.default_spi_config/1` to configure the SPI port.
+  Concrete drivers can both define different defaults and implement additional options,
+  but you can expect to find the following:
+
   * `:dev`: SPI device name (default "spidev0.0", see [`Circuits.SPI.spi_option/0`](https://hexdocs.pm/circuits_spi/Circuits.SPI.html#t:spi_option/0) for details).
   * `:mode`: set clock polarity and phase (default: mode `0`, see [`Circuits.SPI.spi_option/0`](https://hexdocs.pm/circuits_spi/Circuits.SPI.html#t:spi_option/0) for details),
   * `:bits_per_word`: set the bits per word on the bus (default: `8`, see [`Circuits.SPI.spi_option/0`](https://hexdocs.pm/circuits_spi/Circuits.SPI.html#t:spi_option/0) for details).
@@ -20,6 +20,11 @@ defmodule Fledex.Driver.Impl.Spi do
   * `:lsb_first`: sets whether the least significant bit is first (default: `false`, see [`Circuits.SPI.spi_option/0`](https://hexdocs.pm/circuits_spi/Circuits.SPI.html#t:spi_option/0) for details).
   * `:color_correction`: specifies the color correction (see `Fledex.Color.Correction` for details)
   * `:clear_leds`: Sets the number of leds that should be cleared during startup (default: `0`)
+
+  > #### Warning {: .warning}
+  >
+  > Be careful, because specific drivers might need very specific settings. You really
+  > should understand the driver before you modify any option.
   """
 
   alias Fledex.Color.Correction
@@ -34,19 +39,13 @@ defmodule Fledex.Driver.Impl.Spi do
   """
   @callback convert_to_bits(RGBW.t(), config :: keyword) ::
               bitstring()
-  @doc """
-  Between every transfer, we have to add some separator. This can be done in this function
-
-  The separator can be added either at the beginning or at the end.
-  """
-  @callback add_reset(bitstring(), keyword) :: bitstring()
 
   @doc """
   If you want to implement a new SPI driver you can use this module as a base.
 
   This way you only have to have to implement the callbacks
   `c:Fledex.Driver.Interface.configure/1` and from this module:
-  `c:convert_to_bits/2` and `c:add_reset/2`.
+  `c:convert_to_bits/2`.
   """
   defmacro __using__(_opts) do
     quote do
@@ -91,7 +90,6 @@ defmodule Fledex.Driver.Impl.Spi do
           |> Enum.reduce(<<>>, fn led, acc ->
             acc <> convert_to_bits(RGBW.new(led), config)
           end)
-          |> add_reset(config)
 
         response = Circuits.SPI.transfer(Keyword.fetch!(config, :ref), binary)
         {config, response}

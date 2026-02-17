@@ -18,7 +18,7 @@ the second one with a level shifter
 > 
 > NO RESPONSIBILITY CAN BE TAKEN FOR ANY DAMAGE CAUSED BY FOLLOWING THIS GUIDE
 
-## Hardware components
+## Hardware components (example)
 * Raspberry Pi Zero W (with pin header)
 * LED strip with a [WS2801 chip](https://cdn-shop.adafruit.com/datasheets/WS2801.pdf) ([e.g. this one on Amazon](https://amzn.eu/d/cPdgigY))
 * 5V Power supply, powerful enough to power the LED strip (e.g. [Mean Well LPV-35-5](https://www.meanwell.com/webapp/product/search.aspx?prod=LPV-35) for a 3m strip)
@@ -26,9 +26,15 @@ the second one with a level shifter
 * cables, soldering iron, plugs, ...
 
 > #### Note {: .info}
+>
+> You will have to adjust your shopping list to the led strip you actually buy.
+> The example given here is for an WS2801. Other led strip types are similar, but you
+> have to watch out to adjust to the specs of your led strip. 
 > 
-> Fledex currently only supports the LED strips with WS2801 chips via the SPI bus, but it
-> would be easy to extend the library with other drivers for other chip types or buses.
+> **Example:** A [WS2815](https://www.ledyilighting.com/wp-content/uploads/2025/02/WS2815-datasheet.pdf) is powered with 12V (instead of the usual 5V). Thus, you will require a different power supply and a different level shifter.
+> 
+> Fledex currently only supports the SPI bus, but it would be easy to write a driver for 
+> other bus types.
 
 ## SPI and WS2801 
 We are connecting the LED strip with the Raspberry Pi through the [SPI (Serial Peripheral Interface)](https://en.wikipedia.org/wiki/Serial_Peripheral_Interface). The SPI has 4 logical signals, but we are only interested in 2 of them.
@@ -36,14 +42,14 @@ We are connecting the LED strip with the Raspberry Pi through the [SPI (Serial P
 * Clock (SCLK)
 * Master Out, Slave In (MOSI)
 
-The WS2801 uses a very simple protocol via SPI. It uses as a bus where one LED will pass on the message to the next LED, removing the first information from the message. 
+The [WS2801](https://cdn-shop.adafruit.com/datasheets/WS2801.pdf) uses a very simple protocol via SPI. It uses as a bus where one LED will pass on the message to the next LED, removing the first information from the message. 
 
-We don't require the other signals:
+The following two signals are not used:
 
 * Chip Select (CS)
-* Master In, Slave Out (MISO)  
+* Master In, Slave Out (MISO)
 
-This is because we neither address every chip individually nor do the chips provide any response. The LED strip doesn't even expose those signals.
+This is because we neither address every chip individually nor do the chips provide any response. The LED strip usually doesn't even expose those signals.
 
 If you look carefully, you can find on the LED strip a DI (Data In) and DO (Data Out) pins. They indicate in which direction the signals are flowing. The same also applies to the CI (Clock In) and CO (Clock Out) pins. 
 
@@ -52,6 +58,52 @@ When you connect your Raspberry Pi you will have to connect the MOSI (of the RPI
 In the following we will look at two ways to connect the LED strip to the RPI, one directly (which probably works, but is not recommended) and one with a so called level shifter.
 
 The reason for the level shifter is that the RPI (even though it's powered with 5V) uses 3.3V for its SPI port. The LED strip is powered with 5V and expects a 5V signal. We should adjust between the two voltage levels.
+
+The driver that you should use for the WS2801 is the [`Spi.Ws2801`](`Fledex.Driver.Impl.Spi.Ws2801`) driver. If you wire it following this description, you can use the default values, so the only thing you need to do is:
+
+```elixir
+led_strip :name, Spi.Ws2801 do
+    # ... here comes you strip definitions
+end
+```
+
+## SPI and WS2812 (and compatible strips)
+The hardware setup for a WS2812 led strip is very similar to the WS2801. We power it also through the SPI port, but there is no need to wire the clock. The clock information is embedded within the signal itself. Every bit is encoded within 3 bits. 
+
+* `0`: is encoded as `100`
+* `1`: is encoded as `110`
+
+To fulfill the requirements we need to run the bus at a much higher frequency.
+
+If you are using the WS2812 and follow the wiring described here, then you can use the [`Spi.Ws2812`](`Fledex.Driver.Impl.Spi.Ws2812`) driver with the default settings. You then define your led strip as:
+
+```elixir
+led_strip :name, Spi.Ws2812 do
+    # ... here comes you strip definitions
+end
+```
+
+If you want to use another (but compatible) led strip, you will have to adjust the settings according to the table below:
+
+```elixir
+led_strip :name, {Spi.Ws2812, [options]} do
+    # ... here comes you strip definitions
+end
+```
+| Type   | Options              | Tested | Notes |
+|:-------|:---------------------|:------:|:------|
+| [WS2805](https://www.superlightingled.com/PDF/WS2805-IC-Specification.pdf) | `led_type: :rgbw1w2` |        | The extra white leds can be used either by using the `Fledex.Color.RGBW` module or through a `colorint` with `0xw2w2w1w1rrggbb` |
+| [WS2811](https://www.ledyilighting.com/wp-content/uploads/2025/02/WS2811-datasheet.pdf) | `led_type: :rgb`     |        | |
+| [WS2812](https://www.ledyilighting.com/wp-content/uploads/2025/02/WS2812B-datasheet.pdf) | `led_type: :grb`     |   👍   | (default) |
+| [WS2813](https://www.ledyilighting.com/wp-content/uploads/2025/02/WS2813-RGBW-datasheet.pdf) | `led_type: :grbw`    |        | The extra white led can be used either by using the `Fledex.Color.RGBW` module or through a `colorint` with `0xwwrrggbb` |
+| [WS2814](https://suntechlite.com/wp-content/uploads/2024/06/WS2814-IC-Datasheet_V1.4_EN.pdf) | `led_type: :grbw`    |        | (same as WS2813) |
+| [WS2815](https://www.ledyilighting.com/wp-content/uploads/2025/02/WS2815-datasheet.pdf) | `led_type: :grbw`    |        | (same as WS2813) |
+
+`Tested` means that the driver has been tested with real hardware. The other have only been implemented according to the spec. Please provide feedback if you can confirm that they actually work. 
+
+> #### Note: {: .info}
+>
+> The default `:delay_us` should work for all supported strips
 
 ## Finding the pins on the RPI
 
@@ -79,6 +131,9 @@ You have to do the following steps:
 ![Connection with Level shifter](assets/hardware-Page-2.drawio.svg)
 
 ## Additional Information
+### Level Shifter:
+* https://electricfiredesign.com/2021/03/12/logic-level-shifters-for-driving-led-strips/
+* 
 ### Pin information:
 * https://pinout.xyz/pinout/spi# 
 * https://www.raspberrypi.com/documentation/computers/raspberry-pi.html

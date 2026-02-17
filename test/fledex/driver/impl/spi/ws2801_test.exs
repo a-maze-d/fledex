@@ -18,11 +18,9 @@ defmodule Fledex.Driver.Impl.Spi.Ws2801Test do
       assert Keyword.fetch!(config, :mode) == 0
       assert Keyword.fetch!(config, :bits_per_word) == 8
       assert Keyword.fetch!(config, :speed_hz) == 1_000_000
-      assert Keyword.fetch!(config, :delay_us) == 10
+      assert Keyword.fetch!(config, :delay_us) == 500
       assert Keyword.fetch!(config, :lsb_first) == false
       assert Keyword.fetch!(config, :color_correction) == Correction.no_color_correction()
-      assert Keyword.fetch!(config, :reset_byte) == <<0>>
-      assert Keyword.fetch!(config, :reset_bytes) == 64
       assert Keyword.fetch!(config, :ref) != nil
     end
 
@@ -72,7 +70,7 @@ defmodule Fledex.Driver.Impl.Spi.Ws2801Test do
       driver = Ws2801.init([], [])
       leds = [0xFF0000, 0x00FF00, 0x0000FF]
       {driver_response, response} = Ws2801.transfer(leds, 0, driver)
-      assert response == <<0::512, 255, 0, 0, 0, 255, 0, 0, 0, 255>>
+      assert response == <<255, 0, 0, 0, 255, 0, 0, 0, 255>>
       assert driver == driver_response
     end
 
