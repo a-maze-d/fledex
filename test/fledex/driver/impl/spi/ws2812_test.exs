@@ -18,12 +18,10 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812Test do
       assert Keyword.fetch!(config, :mode) == 0
       assert Keyword.fetch!(config, :bits_per_word) == 8
       assert Keyword.fetch!(config, :speed_hz) == 2_600_000
-      assert Keyword.fetch!(config, :delay_us) == 10
+      assert Keyword.fetch!(config, :delay_us) == 300
       assert Keyword.fetch!(config, :lsb_first) == false
       assert Keyword.fetch!(config, :color_correction) == Correction.no_color_correction()
       assert Keyword.fetch!(config, :type) == :grb
-      assert Keyword.fetch!(config, :reset_byte) == <<0>>
-      assert Keyword.fetch!(config, :reset_bytes) == 32
       assert Keyword.fetch!(config, :ref) != nil
     end
 
@@ -85,9 +83,7 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812Test do
         # 0, 0, 255
         0b100100100100100100100100::24,
         0b100100100100100100100100::24,
-        0b110110110110110110110110::24,
-        # reset code
-        0::256
+        0b110110110110110110110110::24
       >>
 
       {driver_response, response} = Ws2812.transfer(leds, 0, driver)
@@ -111,9 +107,7 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812Test do
         # 0, 0, 255
         0b100100100100100100100100::24,
         0b100100100100100100100100::24,
-        0b110110110110110110110110::24,
-        # reset code
-        0::256
+        0b110110110110110110110110::24
       >>
 
       {driver_response, response} = Ws2812.transfer(leds, 0, driver)
@@ -140,9 +134,7 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812Test do
         0b100100100100100100100100::24,
         0b100100100100100100100100::24,
         0b110110110110110110110110::24,
-        0b100100100100100100100100::24,
-        # reset code
-        0::256
+        0b100100100100100100100100::24
       >>
 
       {driver_response, response} = Ws2812.transfer(leds, 0, driver)
@@ -172,9 +164,7 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812Test do
         0b100100100100100100100100::24,
         0b110110110110110110110110::24,
         0b100100100100100100100100::24,
-        0b100100100100100100100100::24,
-        # reset code
-        0::256
+        0b100100100100100100100100::24
       >>
 
       {driver_response, response} = Ws2812.transfer(leds, 0, driver)

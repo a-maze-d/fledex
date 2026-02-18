@@ -492,10 +492,12 @@ defmodule Fledex.LedsTestSync do
       import ExUnit.CaptureLog
       alias Fledex.Config
 
-      use Config, colors: :default
+      use Config, colors: :default, log_level: :info
 
       {:ok, log} =
         with_log(fn ->
+          Logger.configure(level: :info)
+
           Leds.new(3)
           |> Leds.light(:red)
           |> Leds.light(:green)

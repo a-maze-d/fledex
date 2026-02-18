@@ -2,8 +2,11 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 defmodule Fledex.Driver.Impl.Spi.Utils do
-  @moduledoc false
+  @moduledoc """
+  Utility functions for the SPI drivers
+  """
 
+  alias Fledex.Color.Correction
   alias Fledex.Color.Types
 
   @doc """
@@ -32,6 +35,25 @@ defmodule Fledex.Driver.Impl.Spi.Utils do
   end
 
   def clear_leds({0, _color} = _clear_leds, config, _clear_func), do: config
+
+  @doc """
+  This function defines the default SPI configureation that can be used by concrete
+  implementations. See `Fledex.Driver.Impl.Spi` for details.
+  """
+  @spec default_spi_config(keyword) :: keyword
+  def default_spi_config(config) do
+    [
+      dev: Keyword.get(config, :dev, "spidev0.0"),
+      mode: Keyword.get(config, :mode, 0),
+      bits_per_word: Keyword.get(config, :bits_per_word, 8),
+      speed_hz: Keyword.get(config, :speed_hz, 2_600_000),
+      delay_us: Keyword.get(config, :delay_us, 300),
+      lsb_first: Keyword.get(config, :lsb_first, false),
+      color_correction: Keyword.get(config, :color_correction, Correction.no_color_correction()),
+      type: Keyword.get(config, :type, :grb),
+      ref: nil
+    ]
+  end
 
   @doc """
   Opens the SPI port with the configuration and returns the reference

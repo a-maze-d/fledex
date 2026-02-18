@@ -29,7 +29,8 @@ defmodule Fledex.MixProject do
         ]
       ],
       docs: docs(),
-      aliases: aliases()
+      aliases: aliases(),
+      usage_rules: usage_rules()
     ]
   end
 
@@ -111,31 +112,27 @@ defmodule Fledex.MixProject do
       # documentation
       {:ex_doc, "~>0.38", only: :dev, runtime: false},
 
-      # documentation coverage is a great idea, but there are several major issues:
-      # * The file inch_ex/lib/inch_ex/docs.ex#L74 needs to look like the following to not
-      #   throw an error: `"location" => "#{inspect source}:#{inspect anno}"`
-      # * The library does not understand the `@doc delegate_to` functionality
-      # * The library sees no documentation on a macro that has A LOT of docs
-      # Therefore disabling it (again)
-      # {:inch_ex, github: "rrrene/inch_ex", only: [:dev, :test]},
-
       # code quality
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:credo_binary_patterns, "~> 0.2.3", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:excoveralls, "~> 0.18", only: :test},
+      {:excoveralls, "~> 0.18", only: [:dev, :test]},
+      # required by excoveralls
+      {:castore, "~> 1.0", only: [:dev, :test]},
       {:ex_check, "~> 0.16.0", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
       {:doctor, "~> 0.22.0", only: [:dev, :test], runtime: false},
-      # required by excoveralls
-      {:castore, "~> 1.0", only: :test},
+      # we are not a phoenix app, but can still reveal some interesting stuff.
+      {:sobelow, "~> 0.14", only: [:dev, :test], runtime: false, warn_if_outdated: true},
+
+      # other dev tools
+      {:usage_rules, "~> 1.0", only: [:dev]},
+      {:igniter, "~> 0.7", only: [:dev]}
+
       # check licenses by calling `mix licenses` disabled by default (because the
       # library is not well maintained and throws some warnings), but when we want
       # to check licenses we can enable it easily.
       # {:licensir, "~>0.7.0", only: :test}
-      # we are not a phoenix app, but can still reveal some interesting stuff.
-      # leaving it out by default though
-      {:sobelow, "~> 0.14", only: [:dev, :test], runtime: false, warn_if_outdated: true}
     ]
   end
 
@@ -261,5 +258,45 @@ defmodule Fledex.MixProject do
       0 -> :ok
       error -> Mix.raise("Reuse failed with error code: #{error}")
     end
+  end
+
+  defp usage_rules do
+    [
+      # The file to write usage rules into (required for usage_rules syncing)
+      file: "AGENTS.md",
+
+      # Which packages to include (required for usage_rules syncing)
+      # :all discovers every dependency with a usage-rules.md and inlines them
+      usage_rules: :all,
+      # Or list specific packages and sub-rules:
+      # usage_rules: [
+      #   :ash,                         # inlined (default)
+      #   ~r/^ash_/,                    # regex match (inlined)
+      #   "phoenix:ecto",               # specific sub-rule (inlined)
+      #   {:req, link: :at},            # linked with @-style
+      #   {:ecto, link: :markdown},     # linked with markdown-style
+      #   {~r/^phoenix_/, link: :markdown}, # regex match (linked)
+      #   :elixir,                      # built-in Elixir rules
+      #   :otp,                         # built-in OTP rules
+      # ],
+
+      # Agent skills configuration
+      skills: [
+        # location: ".claude/skills",  # where to output skills (default)
+
+        # Auto-build a "use-<pkg>" skill per dependency
+        deps: [:crontab, :fledex_scheduler],
+        # Supports regex for matching multiple deps:
+        # deps: [~r/^ash_/],
+
+        # Compose custom skills from multiple packages
+        build: [
+          fledex: [
+            description: "Expert on the Fledex ecosystem.",
+            usage_rules: [:fledex, ~r/^fledex_/, :crontab]
+          ]
+        ]
+      ]
+    ]
   end
 end
