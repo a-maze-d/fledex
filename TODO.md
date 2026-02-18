@@ -10,7 +10,7 @@ Even though this library is published, there are things I still want to do befor
 # Tasks
 - [ ] Documentation
   - [x] Add description on how to wire up an WS2812 (and related) strip(s) (v0.8)
-  - [ ] Add description to the color livebook about the `Fledex.Color.RGBW` module (v0.8)
+  - [x] Add description to the color livebook about the `Fledex.Color.RGBW` module (v0.8)
   - [ ] Add a livebook with coordinator examples (v0.8) <-- WIP
   - [ ] Update documentation with the Supervision tree (v0.8)
   - [ ] [School] hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.8)
