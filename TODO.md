@@ -30,19 +30,20 @@ Even though this library is published, there are things I still want to do befor
   - [x] Enable Telemetry (v0.8)
     - [x] Switch also the `fledex_scheduler` stats to telemetry (v0.8)
   - [ ] Get it working on AtomVM (v0.9)
+  - [ ] Add an effect that can address the white leds in led strips (v0.9) 
   - [ ] Add Perlin noise functions (see: https://hackaday.com/2019/12/28/led-flame-illuminates-the-beauty-of-noise/, https://hexdocs.pm/perlin/Perlin.html) (v0.9)
   - [ ] Clustering (v0.9)
     - [ ] Rethink the clustering and check whether the new livebook API endpoints might make it easier to cluster. Currently it seems to be quite complicated.
     - [ ] Provide examples on how to cluster
     - [ ] Add an example where several nodes are connected to transfer pubsub messages accross nodes
     - [ ] Implement music beat through clustering
-  - [ ] setting up livebook (a really working version) on windows is anything than easy :-( Can we do something about it? Investigate (v0.9)
+  - [ ] setting up livebook (a really working version) on windows is anything than easy :-( Can we do something about it? Investigate (v0.10)
   - [ ] Create smartcells? (v1.x)
 - [ ] License
 - [ ] Security
   - [ ] Investigate whether the creation of atoms in events can be avoided, example in trigger_names? (v0.9)
 - [ ] Increase consumption
-  - [ ] Create a video (once v0.7 is released)
+  - [ ] Create a video (once v0.8 is released)
   - [ ] Migrate outstanding TODOs to github (v0.8)
   - [ ] Publish/announce on Elixirforum (v0.8)
   - [ ] Get the library into nerves-livebook (v0.8)
