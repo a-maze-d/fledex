@@ -228,8 +228,26 @@ defmodule Fledex.LedStripTest do
     end
   end
 
+  def test_handler(event_name, _event_measurement, _event_metadata, %{pid: pid} = _handler_config) do
+    # IO.puts(inspect event_name)
+    [_module, _func, state] = event_name
+    send(pid, state)
+  end
+
   describe "e2e tests" do
     test "e2e flow" do
+      :ok =
+        :telemetry.attach_many(
+          :test_telemetry_handler,
+          [
+            [Fledex.LedStrip, :transfer_data, :start],
+            [Fledex.LedStrip, :transfer_data, :stop],
+            [Fledex.LedStrip, :transfer_data, :execute]
+          ],
+          &Fledex.LedStripTest.test_handler/4,
+          %{pid: self()}
+        )
+
       drivers = [
         {Logger, update_freq: 1, color: false}
       ]
@@ -251,6 +269,11 @@ defmodule Fledex.LedStripTest do
                assert response.config.timer.is_dirty == false
              end) ==
                "\e[38;5;100m█\e[38;5;30m█\e[38;5;90m█\e[38;5;30m█\e[38;5;100m█\e[38;5;90m█\r\n"
+
+      assert_receive(:start, 100)
+      assert_receive(:stop, 100)
+
+      :telemetry.detach(:test_telemetry_handler)
     end
   end
 
