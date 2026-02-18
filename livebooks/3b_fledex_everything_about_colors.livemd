@@ -102,6 +102,14 @@ import Fledex.Color.Names.Wiki
 leds(5) |> almond |> red |> green |> blue(offset: 5)
 ```
 
+## Colors and LED strips
+Some LED strips do not only consist of RGB leds, but also of one (or even two) white leds.
+You can still use those white leds by using the `Fledex.Color.RGBW` module or by using
+an integer. Usually an integer is only the RGB colors, but you can extend it to include white
+values `0xwwrrggbb` or even `0xw2w2w1w1rrgbb` (for two white values).
+
+Most functions will still continue to operate on RGB values, except if specified differently.
+
 ## Color Correction
 
 Before we look at the Fledex features regarding color correction we first need to understand what color correction is. [Wikipedia](https://en.wikipedia.org/wiki/Color_correction) describes the process nicely as:
