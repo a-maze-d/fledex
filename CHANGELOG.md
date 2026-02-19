@@ -21,6 +21,9 @@ SPDX-License-Identifier: Apache-2.0
 > The `Spi` driver has been renamed to `Spi.Ws2801`, because a second driver has been added
 > for the SPI bus: `Spi.Ws2812` 
 
+* Adding support for `:telemetry`. The first `span` as been defined: 
+  * `[Fledex.LedStrip, :transfer_data]`: It measures how long it takes to transfer the data to the led strip.
+
 ## Other changes
 ### Cleanup
 * `Animation.Manager.split_config` now uses the `Enum.group_by`

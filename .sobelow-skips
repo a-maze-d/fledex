@@ -1,3 +1,4 @@
 DOS.StringToAtom: Unsafe `String.to_atom`,lib/fledex/component/utils.ex:18,2747ECC
 DOS.StringToAtom: Unsafe `String.to_atom`,lib/fledex/effect/wanish.ex:50,5338814
 DOS.StringToAtom: Unsafe `String.to_atom`,lib/fledex/color/names/load_utils.ex:82,75C2A8E
+Traversal.FileModule: Directory Traversal in `File.stream!`,lib/fledex/color/names/load_utils.ex:43,75909C0

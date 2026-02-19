@@ -427,12 +427,10 @@ defmodule Fledex.LedStrip do
     state
   end
 
-  def transfer_data(state) do
-    timer_counter = state.config.timer.counter
-
+  def transfer_data(%{strip_name: strip_name, config: %{timer: %{counter: counter}}} = state) do
     :telemetry.span(
       [Fledex.LedStrip, :transfer_data],
-      %{timer_counter: timer_counter},
+      %{timer_counter: counter, strip_name: strip_name},
       fn ->
         drivers =
           state.namespaces
@@ -443,7 +441,7 @@ defmodule Fledex.LedStrip do
           %{state | drivers: drivers}
           |> put_in([:config, :timer, :is_dirty], false)
 
-        {state, %{timer_counter: timer_counter, metadata: "done"}}
+        {state, %{timer_counter: counter, strip_name: strip_name, metadata: "done"}}
       end
     )
   end
