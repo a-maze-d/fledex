@@ -101,7 +101,7 @@ defmodule Fledex.MixProject do
       {:phoenix_pubsub, "~> 2.1"},
       {:libcluster, "~> 3.3"},
       {:tzdata, "~> 1.1", optional: true},
-      {:fledex_scheduler, "~>0.1"},
+      {:fledex_scheduler, "~>0.3"},
 
       # observability
       {:telemetry, "~> 1.2"},

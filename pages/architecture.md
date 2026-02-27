@@ -85,7 +85,7 @@ Animator`s to redefine the animation. All other triggers are collected over time
 can be used when updating the animation.
 
 For example: we want to be able to check the current temperature in regular interval 
-and trigger a re-animation to adjust the "display" depending on the temperature. Your temperature checking code would use the `Fledex.Utils.PubSub.broadcast_trigger/1` function to publish the temperature.
+and trigger a re-animation to adjust the "display" depending on the temperature. Your temperature checking code would use the `Fledex.Utils.PubSub.publish_trigger/1` function to publish the temperature.
 
 # The Job
 It is quite common to execute certain functions in regular intervals (like in the example mentioned above to check the temperature). For this purpose a cron job facility is provided.

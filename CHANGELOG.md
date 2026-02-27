@@ -24,6 +24,30 @@ SPDX-License-Identifier: Apache-2.0
 * Adding support for `:telemetry`. The first `span` as been defined: 
   * `[Fledex.LedStrip, :transfer_data]`: It measures how long it takes to transfer the data to the led strip.
 
+* Improvements on the coordinator. 
+  * Define the events more strictly, but allow to provide additional information
+  * Rename the PubSub function `broadcast_state/2` to `publish_effect_event/2`
+  * Rename the PubSub function `broadcast_trigger/1` to `publish_trigger/1` to be consistent in naming with the `publish_effect_event/2`
+  * Moved the `effect_event_t/0` and `effect_info_event_t/0` to `Fledex.Utils.PubSub`
+
+> #### Warning {: .warning}
+> This is a BC breaking change, but it should have very minimal impact and a search and 
+> replace will fix most parts. The more strict state definition has a bigger impact, but 
+> is unlikely to be widely used. Should you be impacted, the best way to fix it is in 
+> the following way.
+> 
+> Let's assume you are sending an event in the following way:
+> ```elixir
+> PubSub.broadcast_state(:my_special_event, %{strip_name: :john, animation: :blue})
+> ```
+> Then you would change it to:
+> ```elixir
+> PubSub.publish_effect_event({:change, :my_special_event}, %{strip_name: :john, animation: :blue})
+> ```
+>
+> You also need to make the appropriate changes in your `Fledex.Animation.Coordinator to now
+> match on the new structure.
+
 ## Other changes
 ### Cleanup
 * `Animation.Manager.split_config` now uses the `Enum.group_by`

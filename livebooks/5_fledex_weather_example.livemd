@@ -1,5 +1,5 @@
 <!--
-Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -150,7 +150,7 @@ For testing we can send an arbitrary temperature value to our strip. This allows
 Here we send a temperature value of -15.2 degree (which the strip should round to -15 degree). Remember, we set the strip to update slowly and therefore it might (depending on when the next refresh will happen) take a little while before you see the change.
 
 ```elixir
-PubSub.broadcast_trigger(%{temperature: -15.2})
+PubSub.publish_trigger(%{temperature: -15.2})
 ```
 
 ## Getting the weather data
@@ -199,7 +199,7 @@ defmodule CallUrlPeriodic do
     {{_, 200, ~c"OK"}, _headers, body} = resp
     json = Jason.decode!(body)
     temperature = json["current"]["temperature_2m"]
-    PubSub.broadcast_trigger(%{temperature: temperature})
+    PubSub.publish_trigger(%{temperature: temperature})
 
     {:noreply, state}
   end

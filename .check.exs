@@ -21,7 +21,7 @@
     # {:compiler, false},
 
     ## ...or have command & args adjusted (e.g. enable skip comments for sobelow)
-    {:sobelow, "mix sobelow --config"},
+    {:sobelow, "mix sobelow --config --quiet"},
 
     ## ...or reordered (e.g. to see output from dialyzer before others)
     # {:dialyzer, order: -1},

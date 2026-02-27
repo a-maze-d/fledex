@@ -1,5 +1,5 @@
 <!--
-Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -50,7 +50,7 @@ end
 To test our animation we fake again the temperature by simply publishing the desired temperature.
 
 ```elixir
-broadcast_trigger(%{temperature: 17.2})
+publish_trigger(%{temperature: 17.2})
 ```
 
 ## What is a component
@@ -86,7 +86,7 @@ end
 ```
 
 ```elixir
-broadcast_trigger(%{hour: 17, minute: 34})
+publish_trigger(%{hour: 17, minute: 34})
 ```
 
 The interesting thing in the `Fledex.Component.Dot` component is that it actually defines the component by using the `Fledex.animation/3` macro. Therefore it first `import Fledex` to make the macro available. We shouldn't use `use Fledex` since a lot of things are happening in the background that we don't want to happen for just the macros (like starting an animation, defining color names, ...). We could avoid all this by specifying some options:
@@ -163,7 +163,7 @@ end
 And to see the correct time, we only need to publish the appropriate time. When we do so we shouldn't forget that the animations are reacting to two triggers that we passed in. We need to publish the triggers `:clock_hour` and `:clock_minute` as triggers (or if we like add even the `:clock_second` too).
 
 ```elixir
-broadcast_trigger(%{clock_hour: 17, clock_minute: 34, clock_second: 12})
+publish_trigger(%{clock_hour: 17, clock_minute: 34, clock_second: 12})
 ```
 
 <!-- livebook:{"branch_parent_index":1} -->
@@ -181,7 +181,7 @@ led_strip :nested_components3, Kino do
   job :clock, ~e[* * * * * * *]e do
     %DateTime{hour: hour, minute: minute, second: second} = DateTime.utc_now()
 
-    broadcast_trigger(%{
+    publish_trigger(%{
       clock2_hour: hour,
       clock2_minute: minute,
       clock2_second: second

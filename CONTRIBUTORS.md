@@ -1,5 +1,5 @@
 <!--
-Copyright 2023, Matthias Reik <fledex@reik.org>
+Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -8,3 +8,4 @@ I would like to say thank you to all those people that have directly or indirect
 
 * christhekeele (on Elixirforum for helping with my macro issues)
 * sodapopcan and hauleth (on Elixirforum for helping with my guard issues)
+* outlog (on Elixirforum for helping to getting `atomvm.packbeam` working for fledex)

@@ -1,4 +1,4 @@
-# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -7,14 +7,41 @@ defmodule Fledex.Utils.PubSub do
   This module collects all functions that are about publish and subscribe (PubSub)
   functionality.
 
-  PubSub is used for 2 things (more things are likely to be added in the future):
-  * Notifications related to `trigger`s (when repaints happen). You can inject into this information flow by calling `broadcast_trigger/1`
-  * Notifications related to `state` changes. Those are triggered mainly by effects, but also an animation can publish them. `Fledex.Animation.Coordinator`s are the main consumer of those events to then take appopriate actions. Those events are published through `broadcast_state/2`
+  PubSub is used for 2 things.
+  * Notifications related to `trigger`s (when repaints happen). You can inject into this information flow by calling `publish_trigger/1`
+  * Notifications related to `state` changes. Those are triggered mainly by effects, but also an animation can publish them. `Fledex.Animation.Coordinator`s are the main consumer of those events to then take appopriate actions. Those events are published through `publish_effect_event/2`
+
+  You can consider the first one as a channel towards the animation and the latter as a channel from the animation/effect/...
   """
   alias Fledex.Supervisor.Utils
 
   @channel_trigger "trigger"
   @channel_state "state"
+
+  @typedoc """
+  The effect state can can send any of those events mostly triggered by effects and animations. The coordinator can then react to those events and thereby influence the effects and animations (example, enable/disable them, change some options, ...)
+
+  If you want to send a custom event, you can use the `effect_info_event_t/0` (usually in combination with the `:change` event) to send custom information:
+
+  * `:start`: effect will start with the next iteration (and will move into the :progress state).
+  * `:middle`: offen an effect consists of 2 phases (back and forth, wanish and reappear, ...). This event indicates the mid-point.
+  * `:end`:  effect has reached it's final state. If the effect cycles in rounds, the next step will restart the effect. If you plan to restart, the effect, you should be careful that the `:end` and `:start` result in a smooth transition (and no jump too early or too late)
+  * `:change`: some change happened. This event is most commonly used with extra info to specify the details of the change (like moved the offset by 10 pixels). See `effect_info_event_t/0` for more info
+  * `:disabled`: the effect or animation has been disabled
+
+  > #### Note {: .info}
+  >
+  > This is not used yet and still very much in flux
+  """
+  @type effect_event_t :: :start | :middle | :end | :disabled | :change
+
+  @typedoc """
+  This is an extention of the `effect_event_t` that can carry additional information. This is especially important for the `:change` even, but it can be used with the other even types too.
+
+  > #### Note: {: .info}
+  > Don't duplicate the information that is already present in the options
+  """
+  @type effect_info_event_t :: effect_event_t() | {effect_event_t(), any}
 
   @doc delegate_to: {Phoenix.PubSub, :subscribe, 2}
   defdelegate subscribe(pubsub \\ Utils.pubsub_name(), topic), to: Phoenix.PubSub
@@ -47,18 +74,16 @@ defmodule Fledex.Utils.PubSub do
 
   See also the `channel_trigger/0` for more informration.
   """
-  @spec broadcast_trigger(map) :: :ok | {:error, term()}
-  def broadcast_trigger(message) when is_map(message) do
+  @spec publish_trigger(map) :: :ok | {:error, term()}
+  def publish_trigger(message) when is_map(message) do
     broadcast(Utils.pubsub_name(), @channel_trigger, {:trigger, message})
   end
 
   @doc """
-  Use this function if you want to publish to the state channel
-
-  See also the `channel_state/0` for more informration.
+  Use this function if you want to publish to the `channel_state/0` channel
   """
-  @spec broadcast_state(any, map) :: :ok | {:error, term()}
-  def broadcast_state(state, context) when is_map(context) do
-    broadcast(Utils.pubsub_name(), @channel_state, {:state_change, state, context})
+  @spec publish_effect_event(effect_info_event_t(), map) :: :ok | {:error, term()}
+  def publish_effect_event(effect_event, context) when is_map(context) do
+    broadcast(Utils.pubsub_name(), @channel_state, {:state_change, effect_event, context})
   end
 end

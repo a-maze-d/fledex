@@ -1,4 +1,4 @@
-# Copyright 2023-2024, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -16,23 +16,6 @@ defmodule Fledex.Effect.Interface do
   """
 
   alias Fledex.Color.Types
-
-  @typedoc """
-  Typical states of an effect or an animation that should be published
-
-  An animation or effect can publish state events that a `Fledex.Animation.Coordinator` (or anyone who listens to them) can react to. Any atom can be used as an event and animations and effects can create their own, but this list are the most common and re-occuring ones.
-  If possible try to use them.
-
-  * `:start`: effect will start with the next iteration (and will move into the :progress state).
-  * `:middle`: offen an effect consists of 2 phases (back and forth, wanish and reappear, ...). This event indicates the mid-point.
-  * `:end`:  effect has reached it's final state. IF the effect cycles in rounds, the the next step will restart the effect.
-  * `:disabled`: the effect or animation has been disabled
-
-  > #### Note {: .info}
-  >
-  > This is not used yet and still very much in flux
-  """
-  @type effect_state_t :: :start | :middle | :end | :disabled
 
   @doc """
   Applies an effect to the list of LEDs.
@@ -62,9 +45,13 @@ defmodule Fledex.Effect.Interface do
   end
   ```
 
-  You probably do not want to implement this function, which has a default
-  implementation, but the `do_apply/5` version (which takes the same arguments).
-  This way you don't need to explicitly handle the case that the effect is disabled.
+  If you want to support the implementation of `Fledex.Animation.Coordinators`, then you
+  should publish events in your effect by calling `Fledex.Utils.PubSub.publish_effect_event/2`
+
+  > #### Note {: .info}
+  > You probably do not want to implement this function, which has a default
+  > implementation, but the `do_apply/5` version (which takes the same arguments).
+  > This way you don't need to explicitly handle the case that the effect is disabled.
   """
   @callback apply(
               leds :: [Types.colorint()],

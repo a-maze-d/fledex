@@ -1,5 +1,5 @@
 <!--
-Copyright 2025, Matthias Reik <fledex@reik.org>
+Copyright 2025-2026, Matthias Reik <fledex@reik.org>
 
 SPDX-License-Identifier: Apache-2.0
 -->
@@ -88,7 +88,7 @@ led_strip :example3, Kino do
     end
   end
   job :change, ~e[*/2 * * * * * *]e do
-    broadcast_trigger(%{swap: Time.utc_now()})
+    publish_trigger(%{swap: Time.utc_now()})
   end
 end
 ```

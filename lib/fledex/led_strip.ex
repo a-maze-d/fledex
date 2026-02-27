@@ -393,7 +393,7 @@ defmodule Fledex.LedStrip do
       |> func.()
 
     _ignore_response =
-      PubSub.broadcast_trigger(Map.put(%{}, state.strip_name, state.config.timer.counter))
+      PubSub.publish_trigger(Map.put(%{}, state.strip_name, state.config.timer.counter))
 
     {:noreply, state}
   end

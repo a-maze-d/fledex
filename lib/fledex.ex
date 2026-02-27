@@ -315,7 +315,7 @@ defmodule Fledex do
   example livebook](5_fledex_weather_example.livemd)):
 
   ```elixir
-    broadcast_trigger(%{temperature: -15.2})
+    publish_trigger(%{temperature: -15.2})
   ```
 
   Each job consists of:
@@ -347,7 +347,7 @@ defmodule Fledex do
     job :clock, ~e[@secondly]e do
       date_time = DateTime.utc_now()
 
-      broadcast_trigger(%{
+      publish_trigger(%{
         clock_hour: date_time.hour,
         clock_minute: date_time.minute,
         clock_second: date_time.second

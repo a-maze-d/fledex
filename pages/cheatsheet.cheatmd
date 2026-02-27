@@ -60,7 +60,7 @@ led_strip :name, Kino do
   end
   job :clock, ~e[* * * * * * *]e do
     date_time = DateTime.utc_now()
-    broadcast_trigger(%{seconds: date_time.seconds})
+    publish_trigger(%{seconds: date_time.seconds})
   end
 end
 ```
@@ -200,7 +200,7 @@ A `job` is there to schedule a task in regular intervals and to publish it to th
 ```elixir
 job :name, ~e[* * * * * * *]e do
   date_time = DateTime.utc_now()
-  broadcast_trigger(%{seconds: date_time.seconds})
+  publish_trigger(%{seconds: date_time.seconds})
 end
 ```
 This will trigger every second (note the extended cron-tab syntax used)
@@ -227,7 +227,7 @@ The following options are recognized:
 
 ### The `do ... end` block
 
-The `do ... end` block can consist of any valid Elixir code. The code will be called without any arguments. Usually you want to use at the end a [`broadcast_trigger/1`](`Fledex.Utils.PubSub.broadcast_trigger/1`) call to publish data towards the animations that react to data and change their look.
+The `do ... end` block can consist of any valid Elixir code. The code will be called without any arguments. Usually you want to use at the end a [`publish_trigger/1`](`Fledex.Utils.PubSub.publish_trigger/1`) call to publish data towards the animations that react to data and change their look.
 
 ## The `component`
 {: .col-2}

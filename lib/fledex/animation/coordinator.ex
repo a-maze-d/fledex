@@ -1,4 +1,4 @@
-# Copyright 2024-2025, Matthias Reik <fledex@reik.org>
+# Copyright 2024-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 defmodule Fledex.Animation.Coordinator do
@@ -22,7 +22,6 @@ defmodule Fledex.Animation.Coordinator do
 
   require Logger
 
-  # alias Fledex.Supervisor.Utils
   alias Fledex.Utils.PubSub
 
   @typedoc """
@@ -30,14 +29,14 @@ defmodule Fledex.Animation.Coordinator do
 
   The most important part is the `:func` which is a function that
   takes 3 parameters
-  * `broadcast_state`: event (usually an atom),
+  * `effect_event`: describes the state of the event (can be anything, but usually an `:atom` or a `{:atom, any}`),
   * `context`: descriptor to describe who has sent ou the event. It usually contains the strip_name and/or the animation_name and/or information about the effect.
-  * `state`: contains the state of the coordinator. The first time the function is called the `:options` are passed in as `state`. The Coordinator should return a `new_state`.
+  * `state`: contains the state of the coordinator. The first time the function is called the `:options` are passed in as `state`. The Coordinator should return a `new_state`. If you like to easier identify the origin of the event, you can add an `id` to the options on which you can pattern match.
 
-  You probably would impelment it something like this:
+  You probably would implement it something like this:
   ```elixir
   func: fn
-    {:stop_start, %{strip_name: :john, animation_name: :doe}, state} ->
+    {:middle, %{strip_name: :john, animation_name: :doe}, state} ->
       # ... do something with the animations or effects
       # ... update the state if necessary
       state
@@ -50,14 +49,18 @@ defmodule Fledex.Animation.Coordinator do
   @type config_t :: %{
           :type => :coordinator,
           :options => keyword,
-          :func => (broadcast_state :: any, context :: map, state :: keyword ->
+          :func => (effect_event :: PubSub.effect_info_event_t(),
+                    context :: map,
+                    state :: keyword ->
                       new_state :: keyword)
         }
 
   @typep state_t :: %{
            strip_name: atom,
            coordinator_name: atom,
-           func: (broadcast_state :: any, context :: map(), options :: keyword() ->
+           func: (effect_event :: PubSub.effect_info_event_t(),
+                  context :: map(),
+                  options :: keyword() ->
                     new_options :: keyword()),
            options: keyword
          }
@@ -125,14 +128,15 @@ defmodule Fledex.Animation.Coordinator do
   end
 
   @impl GenServer
-  @spec handle_info({:state_change, any, map}, state_t) :: {:noreply, state_t}
+  @spec handle_info({:state_change, PubSub.effect_info_event_t(), map}, state_t) ::
+          {:noreply, state_t}
   def handle_info(
-        {:state_change, broadcast_state, context},
+        {:state_change, effect_event, context},
         %{func: func, options: options} = state
       ) do
     state =
       try do
-        %{state | options: func.(broadcast_state, context, options)}
+        %{state | options: func.(effect_event, context, options)}
       rescue
         value ->
           Logger.warning(
@@ -160,5 +164,5 @@ defmodule Fledex.Animation.Coordinator do
   # MARK: public helper functions
   @doc false
   @spec default_func(any, map, keyword) :: keyword
-  def default_func(_broadcast_state, _context, options), do: options
+  def default_func(_effect_event, _context, options), do: options
 end

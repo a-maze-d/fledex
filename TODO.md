@@ -41,7 +41,7 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Create smartcells? (v1.x)
 - [ ] License
 - [ ] Security
-  - [ ] Investigate whether the creation of atoms in events can be avoided, example in trigger_names? (v0.9)
+  - [x] Investigate whether the creation of atoms in events can be avoided, example in trigger_names? (v0.8)
 - [ ] Increase consumption
   - [ ] Create a video (once v0.8 is released)
   - [ ] Migrate outstanding TODOs to github (v0.8)

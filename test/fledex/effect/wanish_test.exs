@@ -1,4 +1,4 @@
-# Copyright 2023, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -118,7 +118,7 @@ defmodule Fledex.Effect.WanishTest do
         reappear: true,
         reappear_key: :dummy,
         switch_on_off_func: fn offset, triggers ->
-          {:stop, offset, triggers}
+          {:end, offset, triggers}
         end
       ]
 

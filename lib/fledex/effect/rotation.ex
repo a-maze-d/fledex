@@ -1,4 +1,4 @@
-# Copyright 2023-2025, Matthias Reik <fledex@reik.org>
+# Copyright 2023-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -57,7 +57,7 @@ defmodule Fledex.Effect.Rotation do
           triggers :: map(),
           context :: map()
         ) :: {[Fledex.Color.Types.colorint()], non_neg_integer(), map()}
-  def do_apply(leds, count, config, triggers, context) do
+  def do_apply(leds, count, config, triggers, context) when is_map(context) do
     left = Keyword.get(config, :direction, :left) != :right
     publish = Keyword.get(config, :publish, true)
     trigger_name = Keyword.get(config, :trigger_name, :default)
@@ -68,7 +68,7 @@ defmodule Fledex.Effect.Rotation do
     {leds, count} = stretch(leds, count, stretch)
     offset = trunc(offset / divisor)
     remainder = rem(offset, count)
-    _ignore = if publish and remainder == 0, do: PubSub.broadcast_state(:stop_start, context)
+    _ignore = if publish and remainder == 0, do: PubSub.publish_effect_event(:end, context)
     {rotate(leds, count, remainder, left), count, triggers}
   end
 

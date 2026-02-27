@@ -1,4 +1,4 @@
-# Copyright 2024-2025, Matthias Reik <fledex@reik.org>
+# Copyright 2024-2026, Matthias Reik <fledex@reik.org>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -36,7 +36,7 @@ defmodule Fledex.Animation.CoordinatorTest do
                  %{
                    type: :coordinator,
                    options: [counter: 0],
-                   func: fn _broadcast_state, _context, options ->
+                   func: fn _effect_event, _context, options ->
                      Keyword.update!(options, :counter, fn old_val -> old_val + 1 end)
                    end
                  }
@@ -46,7 +46,7 @@ defmodule Fledex.Animation.CoordinatorTest do
       counter_1 = Keyword.fetch!(options1, :counter)
       assert counter_1 == 0
 
-      PubSub.broadcast_state(:stop_start, %{})
+      PubSub.publish_effect_event(:start, %{})
 
       %{options: options2} = :sys.get_state(pid)
       counter_2 = Keyword.fetch!(options2, :counter)
@@ -75,8 +75,8 @@ defmodule Fledex.Animation.CoordinatorTest do
       assert [{^pid, _registry_val}] = subscribers
 
       # ensure we registered to the correct topic
-      PubSub.broadcast_state(:bstate, %{})
-      assert_receive {:state_change, :bstate, %{}}
+      PubSub.publish_effect_event(:start, %{})
+      assert_receive {:state_change, :start, %{}}
 
       # cleanup
       Coordinator.terminate(:normal, state)
@@ -85,7 +85,7 @@ defmodule Fledex.Animation.CoordinatorTest do
     test "config change" do
       state = %{
         options: [old: true],
-        func: fn _broadcast_state, _context, options -> Keyword.put(options, :function1, true) end,
+        func: fn _effect_event, _context, options -> Keyword.put(options, :function1, true) end,
         strip_name: :strip_name,
         coordinator_name: :coordinator_name
       }
@@ -94,7 +94,7 @@ defmodule Fledex.Animation.CoordinatorTest do
 
       config = %{
         options: [],
-        func: fn _broadcast_state, _context, options -> Keyword.put(options, :function2, true) end,
+        func: fn _effect_event, _context, options -> Keyword.put(options, :function2, true) end,
         type: :coordinator
       }
 
@@ -106,7 +106,7 @@ defmodule Fledex.Animation.CoordinatorTest do
     test "state change" do
       state = %{
         options: [old: true],
-        func: fn _broadcast_state, context, options ->
+        func: fn _effect_event, context, options ->
           case Map.get(context, :raise, false) do
             false -> Keyword.put(options, :function1, true)
             true -> raise "test"

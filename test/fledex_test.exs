@@ -54,7 +54,7 @@ defmodule Fledex.Test do
       # from Crontab.CronExpression
       assert :erlang.fun_info(&sigil_e/2)
       # from Fledex.Utils.PubSub
-      assert :erlang.fun_info(&broadcast_trigger/1)
+      assert :erlang.fun_info(&publish_trigger/1)
 
       AnimationSystem.stop()
     end
@@ -81,7 +81,7 @@ defmodule Fledex.Test do
       # from Crontab.CronExpression
       assert :erlang.fun_info(&sigil_e/2)
       # from Fledex.Utils.PubSub
-      assert :erlang.fun_info(&broadcast_trigger/1)
+      assert :erlang.fun_info(&publish_trigger/1)
     end
 
     test "simple animation macro" do

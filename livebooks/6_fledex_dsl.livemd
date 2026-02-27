@@ -208,8 +208,8 @@ end
 ```
 
 This time we don't implement the connection to the weather API, but we only fake it.
-Fledex imports `Fledex.Utils.PubSub` and therefore we can use the `broadcast_trigger/1` function directly.
+Fledex imports `Fledex.Utils.PubSub` and therefore we can use the `publish_trigger/1` function directly.
 
 ```elixir
-broadcast_trigger(%{temperature: 17.2})
+publish_trigger(%{temperature: 17.2})
 ```
