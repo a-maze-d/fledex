@@ -24,7 +24,7 @@ defmodule Fledex.Driver.Interface do
       to a real LED strip with a WS2812 chip.
   * [`PubSub`](Fledex.Driver.Impl.PubSub.html): a driver that can transfer
       the LED data via pubsub. This should also allow the data to be transferred to
-      a LED strip connected on another computer.
+      an LED strip connected on another computer.
 
   More Drivers can be created by implementing this simple behaviour
 
