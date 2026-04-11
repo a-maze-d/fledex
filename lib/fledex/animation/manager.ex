@@ -11,7 +11,7 @@ defmodule Fledex.Animation.Manager do
 
   The animation manager manages several animations (and potentially
   serveral led strips at the same time.
-  Usually you don't start the service yoursel, but it gets automatically
+  Usually you don't start the service yourself, but it gets automatically
   started when calling `use Fledex` and gets used by the `Fledex` macros.
   Thus, you rarely have to interact with it directly.
 
@@ -49,9 +49,9 @@ defmodule Fledex.Animation.Manager do
           atom => Animator.config_t() | JobScheduler.config_t() | Coordinator.config_t()
         }
 
-  # We keep track of all teh configs of all the led strips
+  # We keep track of all the configs of all the led strips
   # The key is the name of the led strip
-  # The value is a truple consisting of led strip drivers, global led strip config, and the worker configs
+  # The value is a tuple consisting of led strip drivers, global led strip config, and the worker configs
   @typep state_t :: %{
            configs: %{atom => {Manager.drivers_t(), keyword, config_t()}}
          }
@@ -71,7 +71,7 @@ defmodule Fledex.Animation.Manager do
   ### MARK: client side
   @doc """
   This starts a new `Fledex.Animation.Manager`. Only a single animation manager will be started
-  even if called serveral times (thus it's save to call it repeatedly).
+  even if called serveral times (thus it's safe to call it repeatedly).
   In general you want to start the function without options, since they are only for
   debugging purposes.
   """
@@ -87,7 +87,7 @@ defmodule Fledex.Animation.Manager do
   @doc """
   Register a new LED strip with the specific `strip_name`. The LED strip
   needs to be configured, either through a simple module (for predefined
-  configurations, or a touple with module and keyword list to adjust the
+  configurations) or a tuple with module and keyword list to adjust the
   configuration.(see [`LedStrip`](Fledex.LedStrip.html) for details).
   """
   @spec register_strip(atom, LedStrip.drivers_config_t(), keyword) :: :ok
