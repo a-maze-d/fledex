@@ -10,7 +10,7 @@ defmodule Fledex.Driver.Interface do
   A proper implementation probably opens a channel (if not already open)
   to the bus (like SPI) and sends the data to the bus.
 
-  Differen types of drivers exist. Currently the following exist:
+  Different types of drivers exist. Currently the following exist:
 
   * [`Null`](Fledex.Driver.Impl.Null.html): a driver that doesn't do
       anything. This is the default driver. It's also very practical for tests.

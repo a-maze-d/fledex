@@ -48,7 +48,7 @@ We now go back to our [clock example](4_fledex_clock_example.livemd) and rewrite
   trigger data (data that comes into the animation function). An explanation of what
   we are doing in our example here will be given after the code.
 
-It is also possble to define some other configurations (like the `send_config_func` that we used in the "[Fledex Clock Example](4_fledex_clock_example.livemd)") but we don't need it right now.
+It is also possible to define some other configurations (like the `send_config_func` that we used in the "[Fledex Clock Example](4_fledex_clock_example.livemd)") but we don't need it right now.
 
 ```elixir
 led_strip :clock, Kino do

@@ -17,12 +17,12 @@ Mix.install([
 ## Introduction
 
 > #### Caution
-> 
+>
 > This version contains a big change in how effects should behave and interact.
 > This is still work in progress and you might run into issues. The next version
-> should fix those issues and update the documentation accordingly. Still you 
+> should fix those issues and update the documentation accordingly. Still you
 > can get an understanding by walking through this livebook.
-> 
+>
 > TODO: remove this once fixed!
 
 In this chapter we will look at some effects that we can apply to an animation. Effects are simply applied by wrapping the `animation` marco into an `effect` macro. But before we do so we first need to load our framework (and we define some aliases that will come in handy a bit later).
@@ -97,7 +97,7 @@ end
 
 ## Combining effects
 
-It is possble to combine several effects. The order of the effects can be imporant, so make sure you apply them in the correct order.
+It is possible to combine several effects. The order of the effects can be imporant, so make sure you apply them in the correct order.
 
 Let's try it out by combining our rotation and wanishing effect on a rainbow color spectrum.
 
@@ -166,7 +166,7 @@ end
 This is of course not very exciting, since
 
 * defining an effect that does nothing is useless and
-* defining an effect has no effect if you don't usee it. 
+* defining an effect has no effect if you don't usee it.
   But it's a good starting point.
 
 Now let's create a new effect that does something. What about going crazy and to randomize the leds?
