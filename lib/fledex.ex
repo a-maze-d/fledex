@@ -280,8 +280,8 @@ defmodule Fledex do
   (TODO: figure out whether an effect on a static component makes any sense,
   it would mean that the static component suddenly would need to be animated)
 
-  You simply warp the animation inside a effect block. It's possible to have
-  severeal nested effects. In that case they will all be executed in sequence.
+  You simply warp the animation inside an effect block. It's possible to have
+  several nested effects. In that case they will all be executed in sequence.
 
   Example:
   ```elixir

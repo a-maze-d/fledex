@@ -154,7 +154,7 @@ It's important to remember that the information is retained, since in some circu
 
 ## Merging LED sequences
 
-It is quite commonly that you want to define an LED sequence as a combination of serveral other sequences. This can easily be done by passing `Leds` as if it were a single light:
+It is quite commonly that you want to define an LED sequence as a combination of several other sequences. This can easily be done by passing `Leds` as if it were a single light:
 
 ```elixir
 leds_sub =

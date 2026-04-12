@@ -10,7 +10,7 @@ defmodule Fledex.Animation.Manager do
   > in `Fledex`
 
   The animation manager manages several animations (and potentially
-  serveral led strips at the same time.
+  several led strips at the same time.
   Usually you don't start the service yourself, but it gets automatically
   started when calling `use Fledex` and gets used by the `Fledex` macros.
   Thus, you rarely have to interact with it directly.
@@ -71,7 +71,7 @@ defmodule Fledex.Animation.Manager do
   ### MARK: client side
   @doc """
   This starts a new `Fledex.Animation.Manager`. Only a single animation manager will be started
-  even if called serveral times (thus it's safe to call it repeatedly).
+  even if called several times (thus it's safe to call it repeatedly).
   In general you want to start the function without options, since they are only for
   debugging purposes.
   """
