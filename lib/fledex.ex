@@ -72,7 +72,7 @@ defmodule Fledex do
   ### Supervisor
   The options for the `:supervisor` are:
     * `:none`: Contrary to the `:dont_start` option, this will start the `Fledex.Supervisor.AnimationSystem` but without hanging it into a supervision tree. This is the default.
-    * `:app`: We add the `Fledex.Supervisor.AnimationSystem` to the application supervisr. You need to ensure that you have started the fledex application (done automatically if you run `iex -S mix` from the fledex project)
+    * `:app`: We add the `Fledex.Supervisor.AnimationSystem` to the application supervisor. You need to ensure that you have started the fledex application (done automatically if you run `iex -S mix` from the fledex project)
     * `:kino`: The `Fledex.Supervisor.AnimationSystem` will be added to the `Kino` session supervisor. The AnimationSystem will terminate when the livebook session terminates.
     * `{:dynamic, name}`: The `Fledex.Supervisor.AnimationSystem` will be added as a child process to the `DynamicSupervisor` with the given `name`.
 

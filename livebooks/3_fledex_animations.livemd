@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 # 3. Fledex: Animations
 
 ```elixir
-# In this example we'll use the simple setup (experiments are inteded to not run on real
+# In this example we'll use the simple setup (experiments are intended to not run on real
 # hardware but on a normal livebook, This makes it easier to stay up-to-date and experiment
 # We start to define our fledex library, directly linking to the latest version on github
 Mix.install([
@@ -42,7 +42,7 @@ We define a bit of helper functions that we will use when we define our animatio
 
 Note that the functions get in a map (here called triggers) that can contain serveral
 triggers. It will definitely contain one trigger (caused by the `Fledex.LedStrip`) with
-the name of the led strip (except during initialization phase where it might still be missing). 
+the name of the led strip (except during initialization phase where it might still be missing).
 The structure does not need to be used, but can be used in
 order to change the animation based on the trigger. Here we use the trigger in the send
 configuration to specify an offset to the leds and thereby create a movement.
@@ -90,8 +90,8 @@ Manager.register_config(:john, %{
 We can now redefine our animation by registering different functions. Here we define a 3 led wide red dot that moves slowly from right to left.
 
 > #### Note
-> 
-> We are starting to use color names instead of defining it through an integer. 
+>
+> We are starting to use color names instead of defining it through an integer.
 > If you want to learn more, then take a small detour to the [Color livebook](3b_fledex_everything_about_colors.livemd)
 
 The strip has been defined above, and is shown above, so when you redefine it you will have to look above too :-)

@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 # 6. Fledex: DSL
 
 ```elixir
-# In this example we'll use the simple setup (experiments are inteded to not run on real
+# In this example we'll use the simple setup (experiments are intended to not run on real
 # hardware but on a normal livebook, This makes it easier to stay up-to-date and experiment
 # We start to define our fledex library, directly linking to the latest version on github
 Mix.install([
@@ -19,7 +19,7 @@ Mix.install([
 
 We now define our animations with our DSL with the following steps:
 
-* First we have to `use Fledex` in order to 
+* First we have to `use Fledex` in order to
   * load our `Fledex` DSL (like `led_strip`,`animation`, and the like) and
   * to import commonly used functions (`Fledex.Leds`, `Fledex.Utils.PubSub`, and `Crontab.CronExpression`) This means we can use those functions without specifying the module name anymore. For example `Leds.leds(10)` becomes simply `leds(10)`.
   * to import the selected color names (`Fledex.Color.Names.Wiki`, `Fledex.Color.Names.CSS`, `Fledex.Color.Names.SVG` by default).
@@ -37,15 +37,15 @@ use Fledex
 We now go back to our [clock example](4_fledex_clock_example.livemd) and rewrite it with our  DSL:
 
 * We define a new strip with a name (`:clock`), and configure it (we use the `Kino`
-  default driver for display). This will internally create a new `Fledex.LedStrip` 
+  default driver for display). This will internally create a new `Fledex.LedStrip`
   server (if it's not already running) that will control the strip. Its server name will
   be identical to the `led_strip` name.
 * Then within this strip we define several `animation`s (which will internally use the `Fledex.Animation.Animator`). Each animation is identified
   by its own name (`:help`, `:hour`, `:minute`, `:second`).
 * Within each animation we define a function that will be executed repeatedly.
-* Inside that function we can define one or several `Leds`, either directly or through 
+* Inside that function we can define one or several `Leds`, either directly or through
   an led sequence (like a rainbow function) and animate those leds depending on some
-  trigger data (data that comes into the animation function). An explanation of what 
+  trigger data (data that comes into the animation function). An explanation of what
   we are doing in our example here will be given after the code.
 
 It is also possble to define some other configurations (like the `send_config_func` that we used in the "[Fledex Clock Example](4_fledex_clock_example.livemd)") but we don't need it right now.
