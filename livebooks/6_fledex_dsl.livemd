@@ -83,7 +83,7 @@ led_strip :clock, Kino do
 end
 ```
 
-The above code should result in an animation displaying the clock.Now it's time to look at the different animation parts and how they work.
+The above code should result in an animation displaying the clock. Now it's time to look at the different animation parts and how they work.
 
 1. We first define a `static` animation (one that doesn't animate). This animation does not get any triggers and will only be called once during the initalization (since it's static). Notice that this function gets no argument (we don't have the trailing `_triggers ->` part that you find in the other parts). It is used to make it easier to read the time by having a dash every 5 steps and those do not change over time. The markers are repeating in a regular pattern, so we only define the first one and then repeat it with the `repeat/2` function 12 times.
 2. For all other animations we make a call to the system time (`Time.utc_now()`) and therefore don't require the `_trigger` information. We shift the result to the right timezone (we add 1 hour, for UTC+1). We pattern match the result, depending on the animation into `hour`, `minute`, or `second`.
@@ -91,7 +91,7 @@ The above code should result in an animation displaying the clock.Now it's time 
 
 **Notes:**
 
-1. in classical Erlang/Elixir style the underscore (`_`) in `_triggers` indicates that the variable is not used.
+1. In classical Erlang/Elixir style the underscore (`_`) in `_triggers` indicates that the variable is not used.
 2. The DSL allows you to remove the `_trigger ->` part in an animation if you don't need it.
 3. The code could have been more compact by also just matching the part that we are interested in. The `:second` indicator could have been defined in the followin way (considering all the points already mentinoed and that the indicator is independ on our timezone (at least not here), so that we don't need the adjustment. Also considering the previous point the `:second` indicator could have been defined like this:
    ```elixir

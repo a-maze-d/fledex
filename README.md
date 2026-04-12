@@ -64,9 +64,9 @@ Once we have defined our led strip we can start to define sequences of leds. Thi
 * **animation:** an animated, i.e. changing set of leds
 * **component** can encapsulate (and make the usage) of already predefined static and animated set of leds easier.
 
-All of them define a function that defines a sequence of leds (`Fledex.Leds`). which might (or might not) change over time to give the desired effects.
+All of them define a function that defines a sequence of leds (`Fledex.Leds`), which might (or might not) change over time to give the desired effects.
 
-Combined this might look like the following (a bit of an artificial example to demonstrate all 3 types at the same time):
+Combined, this might look like the following (a bit of an artificial example to demonstrate all 3 types at the same time):
 ```elixir
 alias Fledex.Component.Dot
 
@@ -139,7 +139,7 @@ You can find some further documentation in the `pages` folder about:
 
 * An Overview over the [Architecture](pages/architecture.md)
 * How to setup and connect real [Hardware](pages/hardware.md)
-* You might find in the folder also some temporary documenation with some thoughts, but I delete them again, once they have fulfilled their purpose, except for:
+* You might find in the folder also some temporary documentation with some thoughts, but I delete them again, once they have fulfilled their purpose, except for:
 * A bit of history with the [Project Plan](pages/project_plan.md) as created with my son, since it's a nostalgic document (partially in German)
 
 ## Known Limitations

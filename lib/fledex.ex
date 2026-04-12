@@ -406,7 +406,7 @@ defmodule Fledex do
     * a driver module with it's configuration (like `{Spi.Ws2801, [dev: "spidev0.1"]}`)
     * or a set of drivers (always with their configuration), like: `[{Spi.Ws2801, []}, {Spi.Ws2801, [dev: "spidev0.1"}]`
 
-    A set of default drivers exist for conenience that can be used like `Spi.Ws2801`, `Null`, ...
+    A set of default drivers exist for convenience that can be used like `Spi.Ws2801`, `Null`, ...
     (see `Fledex.LedStrip` for details).
 
     A special driver `:config` exists that will simply return the converted dsl to the
