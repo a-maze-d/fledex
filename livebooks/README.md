@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 # Intro
-This is a description of the livebooks in this folder. The examples are structured in such a way that we slowly walk up the abstraction stack. From very low level to a high level language. If are not interested in the technical details, the motivations, and the decisions then you probably want to only look at livebook "[#1 First steps with an led strip](livebooks/README.md#1-first-steps-with-an-led-strip)" (which has nothing to do with Fledex as such but how to set up your LED strip correctly) and the dsl specific chapters starting with livebook [#6 Fledex DSL](livebooks/README.md#6-fledex-dsl) (to define your animations). Only the whole set will give you, however, a good overview.
+This is a description of the livebooks in this folder. The examples are structured in such a way that we slowly walk up the abstraction stack. From very low level to a high level language. If you are not interested in the technical details, the motivations, and the decisions then you probably want to only look at livebook "[#1 First steps with an led strip](livebooks/README.md#1-first-steps-with-an-led-strip)" (which has nothing to do with Fledex as such but how to set up your LED strip correctly) and the dsl specific chapters starting with livebook [#6 Fledex DSL](livebooks/README.md#6-fledex-dsl) (to define your animations). Only the whole set will give you, however, a good overview.
 
 It is recommended that when you look at the different livebooks you look at the [Architecture Overview](../pages/architecture.md) in parallel. Take also a look at the [Hardware](../pages/hardware.md) description, because you need to have your hardware setup ready to run anything on a real led strip. Most examples can be run in the livebook and don't require any additional hardware.
 
@@ -33,7 +33,7 @@ The first steps with the Fledex library. The example shows how the LED strip can
 In the driver configs we define an error correction, since the 5050 chips have too intensive green and blue LEDs that need to be compensated to have a more natural look. The Kino driver does not require such a compensation, even though it is possible to define one too.
 By changing the definition of our LEDs we can also create some simple animations
 
-This example works still on a very low level, one that we do not want use. 
+This example works still on a very low level, one that we do not want use.
 
 # 2b. Fledex: How to define LEDs (details)
 [Link](2b_fledex_how_to_define_leds.livemd)
@@ -45,7 +45,7 @@ In this livebook we take a closer look how we can define sequences of leds. We s
 
 In this livebook we look how animations can be defined, this is the next step(s) above the `Fledex.LedStrip`. The `Fledex.Animation.Manager` is the level that we want to operate on and the following examples will use what we have explored here and will create some concrete examples:
 
-* a clock (using local information) and 
+* a clock (using local information) and
 * a weather indicator (collecting data via the internet)
 
 # 3b. Fledex: More about colors (details)
@@ -58,9 +58,9 @@ Here we talk a bit more about colors and even color corrections
 
 This is the first "meaningful" example that displays the current time on the LED strip. We define 4 "animations" for:
 
-* the indicators (otherwise it becomes hard to read the time), 
-* the seconds (red), 
-* the minutes (green), and 
+* the indicators (otherwise it becomes hard to read the time),
+* the seconds (red),
+* the minutes (green), and
 * the hours (blue).
 
 This example demonstrates how easy we do things when we can pull the information whenever needed. The current time is something that is readily available on the device and can be called as often as we want. Hence we can call this function every time we paint the strip.
@@ -70,7 +70,7 @@ This example demonstrates how easy we do things when we can pull the information
 # 5. Fledex: Weather example (background)
 [Link](5_fledex_weather_example.livemd)
 
-This is an example where we **CANNOT** fetch the information every time we want to paint the strip (which could be serveral times per second), since we are calling a public API. The API would surely block us if we would try to attempt to call it that often.
+This is an example where we **CANNOT** fetch the information every time we want to paint the strip (which could be several times per second), since we are calling a public API. The API would surely block us if we would try to attempt to call it that often.
 
 Therefore we fetch the information at regular intervals, outside of our animation loop. For that we define a small GenServer which makes the API call, and publishes the data via pubsub to then be picked up by the animation loop.
 

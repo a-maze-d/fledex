@@ -45,8 +45,8 @@ end
 The smoothest way is to use the Fledex DSL which defines some functions and macros. To enable them you need to `use Fledex`. This will (by default) start the animation manager (`Fledex.Animation.Manager`) through which all led definitions are routed. But don't worry, you won't really see it.
 
 > **Note:**
->  
-> By enabling the DSL through the `use Fledex` call, the most important modules 
+>
+> By enabling the DSL through the `use Fledex` call, the most important modules
 > are imported (see `Fledex.__using__/1` for details).
 
 As a next step you define an LED strip through the `led_strip` macro. While defining the led strip you need to decide on how you want to talk to your strip; you need an appropriate driver.  There are several ways on how you can address your LED strip. The most common ways are through an SPI bus (`Fledex.Driver.Impl.Spi.Ws2801` or `Fledex.Driver.Impl.Spi.Ws2812`) or through Kino (`Fledex.Driver.Impl.Kino`) as a simulated LED strip in [Livebook](https://livebook.dev/). It is possible to adjust the settings of the drivers, or even define several drivers at the same time.
@@ -64,9 +64,9 @@ Once we have defined our led strip we can start to define sequences of leds. Thi
 * **animation:** an animated, i.e. changing set of leds
 * **component** can encapsulate (and make the usage) of already predefined static and animated set of leds easier.
 
-All of them define a function that defines a sequence of leds (`Fledex.Leds`). which might (or might not) change over time to give the desired effects.
+All of them define a function that defines a sequence of leds (`Fledex.Leds`), which might (or might not) change over time to give the desired effects.
 
-Combined this might look like the following (a bit of an artificial example to demonstrate all 3 types at the same time):
+Combined, this might look like the following (a bit of an artificial example to demonstrate all 3 types at the same time):
 ```elixir
 alias Fledex.Component.Dot
 
@@ -90,7 +90,7 @@ end
 ```
 
 You mainly use the functionality from `Fledex.Leds` which has plenty of functions. It allows to set individual leds, provides the possibility to nest led sequences, to repeat and to define leds through some functions, like gradients and rainbow distributions.
-`Fledex` comes with a very rich set of color names that can be used (see `Fledex.Color.Names.Interface` for details), but you can define it also by specifying a hex value. 
+`Fledex` comes with a very rich set of color names that can be used (see `Fledex.Color.Names.Interface` for details), but you can define it also by specifying a hex value.
 Here an example of an led sequence of 10 leds with the first 3 being (purposefully specified in different ways) `red()` (as function), `:green` (as atom), and  `0x0000ff` (blue, as hex-code) The rest will be black (off).
 ```elixir
   leds(10) |> red() |> light(:green) |> light(0x0000ff)
@@ -104,12 +104,12 @@ There is also a rich set of support functionality to make the definition of LED 
 Take a look at the [Livebook examples](README.md#livebook) on how to use the DSL. Note: the livebooks do present also the internals how the library works. As a first step you can skip those.
 
 ## Livebook
-As mentioned above, the library works well in conjunction with [Livebook](https://livebook.dev/) so you probably want to take your first steps with it. You can find some [livebooks](livebooks/README.md) files that show you how to use the library in a notebook (with and without hardware). You should be able to do most of your development on a computer (emulating the LED strip with a `Fledex.Driver.Impl.Kino` driver) before adjusting it to the real hardware (with the `Fledex.Driver.Impl.Spi` driver). On real hardware you can even run it with serveral drivers at the same time.
+As mentioned above, the library works well in conjunction with [Livebook](https://livebook.dev/) so you probably want to take your first steps with it. You can find some [livebooks](livebooks/README.md) files that show you how to use the library in a notebook (with and without hardware). You should be able to do most of your development on a computer (emulating the LED strip with a `Fledex.Driver.Impl.Kino` driver) before adjusting it to the real hardware (with the `Fledex.Driver.Impl.Spi` driver). On real hardware you can even run it with several drivers at the same time.
 
 # Nerves-Livebook
 To run Fledex in a [Nerves-Livebook](https://github.com/nerves-livebook/nerves_livebook) is not quite as easy, because you can't dynamically add libraries. You can only use those libraries that have been added while building the nerves ROM.
 
-Thus, you will have to clone the repository 
+Thus, you will have to clone the repository
 ```shell
 git clone "https://github.com/nerves-livebook/nerves_livebook"
 cd nerves_livebook
@@ -139,7 +139,7 @@ You can find some further documentation in the `pages` folder about:
 
 * An Overview over the [Architecture](pages/architecture.md)
 * How to setup and connect real [Hardware](pages/hardware.md)
-* You might find in the folder also some temporary documenation with some thoughts, but I delete them again, once they have fulfilled their purpose, except for: 
+* You might find in the folder also some temporary documentation with some thoughts, but I delete them again, once they have fulfilled their purpose, except for:
 * A bit of history with the [Project Plan](pages/project_plan.md) as created with my son, since it's a nostalgic document (partially in German)
 
 ## Known Limitations
@@ -151,12 +151,12 @@ All of the code is [licensed under an Apache-2.0](LICENSE.md). A couple of files
 ## Contributing
 Contributions of any kind are very much welcome
 
-* raising issues, 
-* raising PR (see also [this](CLA.md) doc), 
-* reporting security vulnerabilities (see also [this](SECURITY.md) doc), 
-* suggesting improvements to documentation incl. reporting typos, 
+* raising issues,
+* raising PR (see also [this](CLA.md) doc),
+* reporting security vulnerabilities (see also [this](SECURITY.md) doc),
+* suggesting improvements to documentation incl. reporting typos,
 * raising feature requests,
-* ... 
+* ...
 
 Before doing so please make sure to also read through the [CONTRIBUTING](CONTRIBUTING.md) document and ensure to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
