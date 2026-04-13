@@ -102,7 +102,7 @@ defmodule Fledex.Leds do
   end
 
   @doc """
-  Creates a led sequence with a set number of leds, some set leds, some options and some
+  Creates an led sequence with a set number of leds, some set leds, some options and some
   meta information.
 
   This function is similar to the `leds/3` function, but some additional meta information
@@ -178,7 +178,7 @@ defmodule Fledex.Leds do
   The options that can be specified are:
 
   * `:num_leds`: how many leds should be part of the rainbow (by default all leds)
-  * `:offset`: as from which led we want to start the  rainbow (default: 0, no offset)
+  * `:offset`: as from which led we want to start the rainbow (default: 0, no offset)
 
   Other options that can be used are those in `Fledex.Color.Functions.create_rainbow_circular_rgb/2`
   especially:
@@ -343,7 +343,7 @@ defmodule Fledex.Leds do
          offset,
          repeat
        ) do
-    # convert led to a LEDs struct
+    # convert led to an LEDs struct
     rgb =
       case rgb do
         %__MODULE__{} = rgb ->

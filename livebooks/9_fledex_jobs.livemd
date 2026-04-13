@@ -25,7 +25,7 @@ use Fledex
 
 ## Clock with job
 
-In the last couple of examples it was always a bit cumbersome to get those updates in regular intervals. Either we had to calculate at every screen refresh, or created a decently complicated `GenServer` to do tasks in regular intervals. As we have seen in the [last example](8_fledex_component.livemd) there is an easier way to do this by using the `job` macro.
+In the last couple of examples it was always a bit cumbersome to get those updates at regular intervals. Either we had to calculate at every screen refresh, or created a decently complicated `GenServer` to do tasks at regular intervals. As we have seen in the [last example](8_fledex_component.livemd) there is an easier way to do this by using the `job` macro.
 
 Let me now introduce you properly to the `job` macro. It allows us to take care of repetitive work by easily specifying a cron-job. All you need are:
 
@@ -77,7 +77,7 @@ Now we are ready to define our new simplified weather station using:
 * and defining a `Fledex.job` that runs every 15min (making sure we call it as soon as we define it even though it might not be time for it yet, by specifying `run_once: true`)
 
 > #### Note
-> 
+>
 > We are using the normal crontab job pattern, whereas above we used the extended version
 > (with second precision), indicated by the extra trailing `e`.
 
