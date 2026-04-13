@@ -309,7 +309,7 @@ defmodule Fledex do
   end
 
   @doc """
-  A job is a [cron job](https://en.wikipedia.org/wiki/Cron) that will trigger in regular
+  A job is a [cron job](https://en.wikipedia.org/wiki/Cron) that will trigger at regular
   intervals (depending on the schedule specified). You can run any function and the most
   likely event you will trigger is to publish an event to the triggers (see the [weather
   example livebook](5_fledex_weather_example.livemd)):

@@ -212,5 +212,5 @@ to your component:
   end
 ```
 
-It will log the triggers in regular intervals so you see what the component receives and you can then compare it with what you would expect.
+It will log the triggers at regular intervals so you see what the component receives and you can then compare it with what you would expect.
 As you can see this animation has no effect on your animation, because it always returns empty `leds()`. We only use the side effect (writing to `IO.puts`) of this animation.

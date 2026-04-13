@@ -13,15 +13,15 @@ stack.
 
 # The drivers
 The main interface to talk to the "hardware" is the `Fledex.LedStrip`. It takes the
-`Fledex.Leds` definitions merges them and then passes the result to the actual
+`Fledex.Leds` definitions, merges them and then passes the result to the actual
 hardware drivers. It plays about the same role as a window server in operating system.
 
 The `Fledex.LedStrip` allows to define several namespaces that can have their own
 led definitions and that are only merged together at "display" time. This is similar
-in defining several windows in a window server. They all end up on the same display.
+to defining several windows in a window server. They all end up on the same display.
 
 The `Fledex.LedStrip` does not really know how to talk to the actual hardware, but
-leaves this to the hardware spectific `Fledex.Driver.Driver`s. It's possible to
+leaves this to the hardware specific `Fledex.Driver.Driver`s. It's possible to
 register several drivers at the same time.
 
 Currently the following drivers are available:
@@ -72,7 +72,7 @@ The various `Fledex.Animation.Animator`s can be managed through a
 
 # The Fledex DSL
 The ultimate goal is to define a `Fledex` DSL that can configure the
-`Fledex.Animation.Manager` and update annimations on the fly.
+`Fledex.Animation.Manager` and update animations on the fly.
 
 In the above diagram an example is shown on how such a DSL might look like (and how it maps to the different components), but for clarity does not show all features.
 
@@ -84,11 +84,11 @@ difference is that only the triggers from the driver is used by the `Fledex.Anim
 Animator`s to redefine the animation. All other triggers are collected over time and
 can be used when updating the animation.
 
-For example: we want to be able to check the current temperature in regular interval
+For example: we want to be able to check the current temperature at regular interval
 and trigger a re-animation to adjust the "display" depending on the temperature. Your temperature checking code would use the `Fledex.Utils.PubSub.broadcast_trigger/1` function to publish the temperature.
 
 # The Job
-It is quite common to execute certain functions in regular intervals (like in the example mentioned above to check the temperature). For this purpose a cron job facility is provided.
+It is quite common to execute certain functions at regular intervals (like in the example mentioned above to check the temperature). For this purpose a cron job facility is provided.
 
 # The Coordinator and the states
 Animations and Effects can publish an event to communicate about the animation/effect state.
