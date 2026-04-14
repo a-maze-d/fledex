@@ -4,9 +4,9 @@
 
 defmodule Fledex.Utils.Dsl do
   @moduledoc """
-  The module is only inteded to be used by the Fledex module.
+  The module is only intended to be used by the Fledex module.
 
-  It's a set of helper functions to create the DSL. A lot of functions are workign on
+  It's a set of helper functions to create the DSL. A lot of functions are working on
   the AST (abstract syntax tree) level.
   """
 
