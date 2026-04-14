@@ -19,14 +19,15 @@ SPDX-License-Identifier: Apache-2.0
 
 <img alt="Fledex" src="assets/fledex_logo.svg" width=100/>
 
-Fledex is a small [Elixir](https://elixir-lang.org/) library It really is intended for educational purposes.
+Fledex is a small [Elixir](https://elixir-lang.org/) library primarily intended for educational purposes.
 It is written for a RaspberryPi Zero W running [Nerves](https://nerves-project.org/) especially with a [Nerves-Livebook](https://hexdocs.pm/nerves/getting-started.html#nerves-livebook), but you could use it without Nerves or Livebook.
 
 The intent of the library is to simplify the programming of a programmable LED strip (currently based on a [WS2801 chip](https://cdn-shop.adafruit.com/datasheets/WS2801.pdf)) and thereby to make it accessible even for kids.
 
-The idea is to introduce similarly easy concepts for the programming of LEDs as [SonicPi](https://sonic-pi.net/) did for music. The library was developed in collaboration with my son and hopefully we can push it to become better over time. For my son the goal will be to connect the LEDs to some music and to animate the LEDs depending on the beat.
+The idea is to introduce easy LED programming concepts as simply as [SonicPi](https://sonic-pi.net/) did for music.
+The library was developed in collaboration with my son and hopefully we can push it to become better over time. For my son the goal will be to connect the LEDs to some music and to animate the LEDs depending on the beat.
 
-Quite a lot of inspiration came from the [FastLED project](http://fastled.io/) and quite a few of their functions got reimplemented in Elixir. Therefore you might want to look at that liberary. It is probably also the library that is more appropriate if you need performance.
+Quite a lot of inspiration came from the [FastLED project](http://fastled.io/) and quite a few of their functions got reimplemented in Elixir. Therefore you might want to look at that library. It is probably also the most appropriate library if you need performance.
 
 ## Installation
 
@@ -49,7 +50,7 @@ The smoothest way is to use the Fledex DSL which defines some functions and macr
 > By enabling the DSL through the `use Fledex` call, the most important modules
 > are imported (see `Fledex.__using__/1` for details).
 
-As a next step you define an LED strip through the `led_strip` macro. While defining the led strip you need to decide on how you want to talk to your strip; you need an appropriate driver.  There are several ways on how you can address your LED strip. The most common ways are through an SPI bus (`Fledex.Driver.Impl.Spi.Ws2801` or `Fledex.Driver.Impl.Spi.Ws2812`) or through Kino (`Fledex.Driver.Impl.Kino`) as a simulated LED strip in [Livebook](https://livebook.dev/). It is possible to adjust the settings of the drivers, or even define several drivers at the same time.
+As a next step you define an LED strip through the `led_strip` macro. While defining the led strip you need to decide on how you want to talk to your strip; you need an appropriate driver. There are several ways on how you can address your LED strip. The most common ways are through an SPI bus (`Fledex.Driver.Impl.Spi.Ws2801` or `Fledex.Driver.Impl.Spi.Ws2812`) or through Kino (`Fledex.Driver.Impl.Kino`) as a simulated LED strip in [Livebook](https://livebook.dev/). It is possible to adjust the settings of the drivers, or even define several drivers at the same time.
 
 This will look like the following:
 ```elixir
@@ -137,9 +138,9 @@ Once done you follow the [standard installation instructions](https://github.com
 ## Further Docs
 You can find some further documentation in the `pages` folder about:
 
-* An Overview over the [Architecture](pages/architecture.md)
+* An Overview of the [Architecture](pages/architecture.md)
 * How to setup and connect real [Hardware](pages/hardware.md)
-* You might find in the folder also some temporary documentation with some thoughts, but I delete them again, once they have fulfilled their purpose, except for:
+* You might also find in the folder some temporary documentation with some thoughts, but I delete them once they have fulfilled their purpose, except for:
 * A bit of history with the [Project Plan](pages/project_plan.md) as created with my son, since it's a nostalgic document (partially in German)
 
 ## Known Limitations
@@ -158,6 +159,6 @@ Contributions of any kind are very much welcome
 * raising feature requests,
 * ...
 
-Before doing so please make sure to also read through the [CONTRIBUTING](CONTRIBUTING.md) document and ensure to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+Before doing so, please make sure to also carefully read the [CONTRIBUTING](CONTRIBUTING.md) document and ensure that you comply with the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 If you need any assistance, feel free to send an email to fledex at reik.org
