@@ -85,7 +85,7 @@ defmodule Fledex.Leds do
   @doc """
   Create a new led sequence with a set number of leds, some set leds and options.
 
-  This function is similar to `leds/2`, but you  an specify some leds (between the `count`
+  This function is similar to `leds/2`, but you can specify some leds (between the `count`
   and the `opts`) through a map or a list.
 
   If a map is used the key of the map (an integer) is the index (one-indexed) of the
@@ -106,8 +106,8 @@ defmodule Fledex.Leds do
   meta information.
 
   This function is similar to the `leds/3` function, but some additional meta information
-  can be specified. Currently the only  meta information is to keep track of an index
-  that specfies which led will be set when using the `light/2` function, i.e. without
+  can be specified. Currently the only meta information is to keep track of an index
+  that specifies which led will be set when using the `light/2` function, i.e. without
   an offset. This way it's possible to have a sequence of updates like the following
   to specify the colors:
 
@@ -298,7 +298,7 @@ defmodule Fledex.Leds do
 
   The options can be the following:
 
-  * `:offset`: by how many leds sdo we want to offset. needs to be
+  * `:offset`: by how many leds do we want to offset. needs to be
   `> 0` if it's bigger than the count then the led will be stored,
   but ignored (but see the description of `set_count/2`). The same
   note as for `light/2` applies.
@@ -306,7 +306,7 @@ defmodule Fledex.Leds do
   more than 1, otherwise it wouldn't make sense. In addition the same
   note as for `light/2` applies.
 
-  if you don't specify a list, but only a  number as option, then
+  if you don't specify a list, but only a number as option, then
   it's the same as specifying the offset.
   """
   @spec light(t, Types.color() | t, keyword) :: t

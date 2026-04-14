@@ -167,7 +167,7 @@ defmodule Fledex.LedStrip do
   Define a new namespace
 
   A namespace is a sequence of led definitions. Each namespace is independent
-  from other namspaces. All namespaces will get mapped onto the physical
+  from other namespaces. All namespaces will get mapped onto the physical
   leds when merging all namespaces together.
   """
   @spec define_namespace(GenServer.server(), atom) :: :ok | {:error, String.t()}
