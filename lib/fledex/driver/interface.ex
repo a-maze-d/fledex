@@ -10,7 +10,7 @@ defmodule Fledex.Driver.Interface do
   A proper implementation probably opens a channel (if not already open)
   to the bus (like SPI) and sends the data to the bus.
 
-  Differen types of drivers exist. Currently the following exist:
+  Different types of drivers exist. Currently the following exist:
 
   * [`Null`](Fledex.Driver.Impl.Null.html): a driver that doesn't do
       anything. This is the default driver. It's also very practical for tests.
@@ -24,7 +24,7 @@ defmodule Fledex.Driver.Interface do
       to a real LED strip with a WS2812 chip.
   * [`PubSub`](Fledex.Driver.Impl.PubSub.html): a driver that can transfer
       the LED data via pubsub. This should also allow the data to be transferred to
-      a LED strip connected on another computer.
+      an LED strip connected on another computer.
 
   More Drivers can be created by implementing this simple behaviour
 
