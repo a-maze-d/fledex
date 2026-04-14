@@ -12,7 +12,7 @@ defmodule Fledex.LedStrip do
   The `Fledex.LedStrip` will take several `Fledex.Leds` definitions and merge them
   together to be displayed on a single LED strip.
 
-  The role the LedStrip plays is similar to the one a window server  plays on a normal
+  The role the LedStrip plays is similar to the one a window server plays on a normal
   computer, except that a window server would manage several screens, whereas here each
   LED strip would get its own.
 
