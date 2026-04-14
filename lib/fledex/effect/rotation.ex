@@ -8,11 +8,11 @@ defmodule Fledex.Effect.Rotation do
 
   ## Options
   This effect accepts the following options:
-  * `:direction`: The direction the rotation should go. You should either specify `:left` (default) or `:right`.
+  * `:direction`: the direction the rotation should go. You should either specify `:left` (default) or `:right`.
   * `:publish`: whether to publish state events (`true`, the default) or not. For more information see below.
   * `:trigger_name`: the name of the trigger that results in a step in the rotation. the value in `trigger[trigger_name]` (or 0 if not defined) will then result in an offset of the leds.
-  * `:divisor`: We can slow the animation down by specifying a divisor. It will devide the trigger by this amount (and truncate the result). Thus, if the `:divisor` is `10` then it would take 10 steps of the trigger before a single step of the leds would be visible (similar to a 10:1 gear ratio)
-  * `:stretch`: The leds can be rotated within themselves  or stretched over more leds. For example, you you have a 10 led sequences that you stretch over 20 leds, then the 10 leds will move over the 20 leds. Note the rules of the LedStrip still apply, that leds that are painted to non-physical leds will not be visible.
+  * `:divisor`: we can slow the animation down by specifying a divisor. It will divide the trigger by this amount (and truncate the result). Thus, if the `:divisor` is `10` then it would take 10 steps of the trigger before a single step of the leds would be visible (similar to a 10:1 gear ratio)
+  * `:stretch`: the leds can be rotated within themselves or stretched over more leds. For example, if you have a 10 leds sequence that you stretch over 20 leds, then the 10 leds will move over the 20 leds. Note the rules of the LedStrip still apply, that leds that are painted to non-physical leds will not be visible.
 
   ## state information
   The rotation effect publishes a couple of state events (except if `:publish` is set to `false`). Here a description on what the various events mean:

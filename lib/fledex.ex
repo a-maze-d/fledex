@@ -72,7 +72,7 @@ defmodule Fledex do
   ### Supervisor
   The options for the `:supervisor` are:
     * `:none`: Contrary to the `:dont_start` option, this will start the `Fledex.Supervisor.AnimationSystem` but without hanging it into a supervision tree. This is the default.
-    * `:app`: We add the `Fledex.Supervisor.AnimationSystem` to the application supervisr. You need to ensure that you have started the fledex application (done automatically if you run `iex -S mix` from the fledex project)
+    * `:app`: We add the `Fledex.Supervisor.AnimationSystem` to the application supervisor. You need to ensure that you have started the fledex application (done automatically if you run `iex -S mix` from the fledex project)
     * `:kino`: The `Fledex.Supervisor.AnimationSystem` will be added to the `Kino` session supervisor. The AnimationSystem will terminate when the livebook session terminates.
     * `{:dynamic, name}`: The `Fledex.Supervisor.AnimationSystem` will be added as a child process to the `DynamicSupervisor` with the given `name`.
 
@@ -280,8 +280,8 @@ defmodule Fledex do
   (TODO: figure out whether an effect on a static component makes any sense,
   it would mean that the static component suddenly would need to be animated)
 
-  You simply warp the animation inside a effect block. It's possible to have
-  severeal nested effects. In that case they will all be executed in sequence.
+  You simply warp the animation inside an effect block. It's possible to have
+  several nested effects. In that case they will all be executed in sequence.
 
   Example:
   ```elixir
@@ -309,7 +309,7 @@ defmodule Fledex do
   end
 
   @doc """
-  A job is a [cron job](https://en.wikipedia.org/wiki/Cron) that will trigger in regular
+  A job is a [cron job](https://en.wikipedia.org/wiki/Cron) that will trigger at regular
   intervals (depending on the schedule specified). You can run any function and the most
   likely event you will trigger is to publish an event to the triggers (see the [weather
   example livebook](5_fledex_weather_example.livemd)):
@@ -406,7 +406,7 @@ defmodule Fledex do
     * a driver module with it's configuration (like `{Spi.Ws2801, [dev: "spidev0.1"]}`)
     * or a set of drivers (always with their configuration), like: `[{Spi.Ws2801, []}, {Spi.Ws2801, [dev: "spidev0.1"}]`
 
-    A set of default drivers exist for conenience that can be used like `Spi.Ws2801`, `Null`, ...
+    A set of default drivers exist for convenience that can be used like `Spi.Ws2801`, `Null`, ...
     (see `Fledex.LedStrip` for details).
 
     A special driver `:config` exists that will simply return the converted dsl to the

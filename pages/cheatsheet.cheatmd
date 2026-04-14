@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 # Cheatsheet
 
-This is a very brief overview over the most important commands in the Fledex language
+This is a very brief overview over the most important commands in the Fledex language.
 
 ## `use Fledex` library
 {: .col-2}
@@ -84,7 +84,7 @@ The following structures inside the `do ... end` block are allowed:
 | [`component`](#the-component) | Defines a component. It's equivalent to a set of `static`, `animation`, `job`, including `effect`s. It allows to reuse certain aspects |
 | [`coordinator`](#the-coordinator) | Defines a coordinator that can synchronize various animations |
 | [`effect`](#the-effect)    | Defines an effect that gets applied to an animation   |
-| [`job`](#the-job)       | Defines some job that should be executed in regular intervals |
+| [`job`](#the-job)       | Defines some job that should be executed at regular intervals |
 | [`static`](#the-static)    | Defines a certain pattern, it cannot change over time |
 
 
@@ -112,7 +112,7 @@ The `animation` takes the following paramerters
 
 ### The `do ... end` block
 
-The structure inside the `do ... end` block can be any Elixir code, but it needs to return (at least) an `Fledex.Leds` structure (see below). 
+The structure inside the `do ... end` block can be any Elixir code, but it needs to return (at least) an `Fledex.Leds` structure (see below).
 
 **Caution:** This function gets executed quite frequently and you need to ensure to keep it lightweight.
 
@@ -120,9 +120,9 @@ The code block is actually a function and it is possible to pattern match on a p
 
 ```elixir
 animation :name do
-  %{trigger_name: value} -> 
+  %{trigger_name: value} ->
     leds |> light(:red, offset: value)
-  _ -> 
+  _ ->
     leds()
 end
 ```
@@ -132,7 +132,7 @@ end
 ## The `static`
 {: .col-2}
 
-The static structure is very similar to the `animation` structure, except that won't be updated and changed over time. Therefore it's also not possible to use the optional parameter in the `do ... end` block.
+The static structure is very similar to the `animation` structure, except that it won't be updated and changed over time. Therefore it's also not possible to use the optional parameter in the `do ... end` block.
 
 ### Example
 
@@ -155,7 +155,7 @@ The `static` structure takes the following parameters:
 
 The structure inside the `do ... end` block can be any Elixir code, but it needs to return (at least) an Leds structure (see below).
 
-Contrary to the `animation` the `static` structure only get called once and does not get called repeatedly.
+Contrary to the `animation`, the `static` structure only get called once.
 
 ## The `effect`
 {: .col-2}
@@ -181,7 +181,7 @@ As can be seen in the example, the effect encapsulates one (or more) animations 
 
 | Parameter | Description |
 |---        |---          |
-| `effect`  | (mandatory) A module that implements the `Fledex.Effect.Interface`. You cand find some examples in the `Fledex.Effect` namespace, like: `Dimming`, `Rotation`, `Offset`, `Wanish`. |
+| `effect`  | (mandatory) A module that implements the `Fledex.Effect.Interface`. You can find some examples in the `Fledex.Effect` namespace, like: `Dimming`, `Rotation`, `Offset`, `Wanish`. |
 | `options` | (optional) A list of key value pairs that configure the effect. The settings are very specific to each effect. |
 
 ### The `do ... end` block
@@ -193,7 +193,7 @@ The `do ... end` block can contain, similar to the `led_strip` any of the fledex
 
 As mentioned above, very little work should be done as part of an animation. Any heavy lifting should be done in a separate process, and you probably don't want to do it very frequently anyway.
 
-A `job` is there to schedule a task in regular intervals and to publish it to the animations. The animation can extract that information from the parameter that gets passed to the `do ... end` block (see above).
+A `job` is there to schedule a task at regular intervals and to publish it to the animations. The animation can extract that information from the parameter that gets passed to the `do ... end` block (see above).
 
 ### Example
 
@@ -221,7 +221,7 @@ The following options are recognized:
 
 | Option | Description |
 |---     |---          |
-| `:run_once` | to run the directly after configuration, independent from the actual schedule |
+| `:run_once` | to run directly after configuration, independent from the actual schedule |
 | `:timezone` | specify a different timezone than the usual `UTC` |
 | `:overlap`  | Whether different runs should overlap. Usually this is not desired |
 
@@ -260,7 +260,7 @@ The `component` takes the following parameters:
 {: .col-2}
 
 The `coordinator` implements a state machine that can coordinate various animations.
-It receives events from animations (and effects) and can decide on what to do with those. 
+It receives events from animations (and effects) and can decide on what to do with those.
 
 **CAUTION:** This is an advanced concept. Also coordinators, even though they belong to a specific led strip, receive events from all animations, all led strips. It's up to you to filter them to the ones you are interested in.
 
@@ -284,10 +284,10 @@ The `coordinator` takes the following parameters:
 
 ### The `do ... end` block
 
-The `do ... end` implements an anonymous function that receives 3 parameter:
+The `do ... end` implements an anonymous function that receives 3 parameters:
 * `state`: An atom describing the state of the animation (or effect)
 * `context`: Information on who published the event.
-* `config`: the configuration that has been passed in as parameters. This can also be used to store some extra information between calls
+* `config`: The configuration that has been passed in as parameters. This can also be used to store some extra information between calls
 
 The function will either manipulate an animation (or effect) or publish some event. At the end the function needs to return the `config` (or an updated version thereof).
 
@@ -320,8 +320,8 @@ leds(3)
 
 | Function  | Description |
 |---        |---          |
-| [`light/2`](`Fledex.Leds.light/2`)  | This sets the color of the next led. Whenever you call this function an internal counter will be updated to the next led. Therefore you can nicely sequence it. **Note:**. The "color" can also be another led sequence that will be added at the corresponding position. |
-| [`light/3`](`Fledex.Leds.light/3`)  | This sets a color with some options, like to offset and whether it repeats. **Note:** the offset is 1 indexed and must be greater than zero. |
+| [`light/2`](`Fledex.Leds.light/2`)  | This sets the color of the next led. Whenever you call this function an internal counter will be updated to the next led. Therefore you can nicely sequence it. **Note:** The "color" can also be another led sequence that will be added at the corresponding position. |
+| [`light/3`](`Fledex.Leds.light/3`)  | This sets a color with some options, like an offset or whether it repeats. **Note:** the offset is 1 indexed and must be greater than zero. |
 
 
 ### Other Functions
