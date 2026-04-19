@@ -400,7 +400,7 @@ defmodule Fledex do
   @doc """
     This introduces a new led_strip.
 
-    The `drivers` can be spcified in 3 different ways:
+    The `drivers` can be specified in 3 different ways:
 
     * just a driver module (like `Spi.Ws2801`). In this case the default settings will be used
     * a driver module with it's configuration (like `{Spi.Ws2801, [dev: "spidev0.1"]}`)
