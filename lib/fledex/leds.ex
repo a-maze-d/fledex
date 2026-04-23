@@ -248,7 +248,7 @@ defmodule Fledex.Leds do
   This way you can easily create a repetitive pattern
 
   > **Note:**
-  > This will change the led sequence count  (`amount` times the initial `count`)
+  > This will change the led sequence count (`amount` times the initial `count`)
   """
   @spec repeat(t, integer) :: t
   def repeat(leds, amount) when amount == 1, do: leds
@@ -443,7 +443,7 @@ defmodule Fledex.Leds do
   be the following:
 
   * `:offset`: Move the led sequence to the side (see Note below)
-  * `:rotate_left`: whether the offset should be appiled toward the right or the left
+  * `:rotate_left`: Whether the offset should be applied toward the right or the left
   * `:server_name`: The name of the server_name to which the led sequence should be send to
       (default: `Fledex.LedStrip`)
   * `:namespace`: The name of the namespace within the LedStrip (default: `:default`)

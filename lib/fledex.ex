@@ -172,7 +172,7 @@ defmodule Fledex do
 
     Therefore we give it a name to know whether it changes. The `do ... end` block
     needs to define a function. This function receives a trigger as argument, but
-    you have two possbilities to implement it.
+    you have two possibilities to implement it.
 
     * Either you pattern match on the triggers, e.g. something like the following:
     ```elixir

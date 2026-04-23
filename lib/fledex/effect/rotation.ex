@@ -73,7 +73,7 @@ defmodule Fledex.Effect.Rotation do
   end
 
   @doc """
-  Helper function mainy intended for internal use to rotate the sequence of values by an `offset`.
+  Helper function mainly intended for internal use to rotate the sequence of values by an `offset`.
 
   The rotation can happen with the offset to the left or to the right.
   """
