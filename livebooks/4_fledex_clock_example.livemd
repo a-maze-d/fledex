@@ -54,7 +54,7 @@ We now register our animations for the `:clock` led strip. We define 4 animation
 Each animation consists of two elements:
 
 * `def_func` this defines a function that will be called to define a sequence of LEDs (how many LEDs and which colors). The function receives a `trigger` (a `map`) that can contain various information, but at least contains a counter with the name of the led strip (i.e. in our case with the name `:counter`). We will use this to define a sequence of the correct length and color the fist led. In this function we don't use the `trigger`
-* `send_config_func` this defines a function that will be called after the LED strip has been defined (see `Fledex.Leds.send/2` for more details and options). We will use this to rotatae the led sequence (dependent on the `trigger` that we also get here as input) in such a way that the colored dot will come to the correct position in the sequence. We also explicitly specify the direction of our rotation. We can rotate to the left or the right.
+* `send_config_func` this defines a function that will be called after the LED strip has been defined (see `Fledex.Leds.send/2` for more details and options). We will use this to rotate the led sequence (dependent on the `trigger` that we also get here as input) in such a way that the colored dot will come to the correct position in the sequence. We also explicitly specify the direction of our rotation. We can rotate to the left or the right.
 
 Note: we get the time by simply making a call to `Time.utc_now/0` and adjusting it to our timezone (UTC+1) (`Time.add/2`). We then extract (through pattern matching) the information we are intersted in (second, minute, hour)
 

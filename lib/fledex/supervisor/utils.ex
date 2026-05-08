@@ -63,7 +63,7 @@ defmodule Fledex.Supervisor.Utils do
   end
 
   @doc """
-  Check whether a spcific worker exists. See also `get_worker/3`
+  Check whether a specific worker exists. See also `get_worker/3`
   """
   @spec worker_exists?(atom, worker_types(), atom) :: boolean
   def worker_exists?(strip_name, type, name) do
