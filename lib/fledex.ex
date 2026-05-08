@@ -172,7 +172,7 @@ defmodule Fledex do
 
     Therefore we give it a name to know whether it changes. The `do ... end` block
     needs to define a function. This function receives a trigger as argument, but
-    you have two possbilities to implement it.
+    you have two possibilities to implement it.
 
     * Either you pattern match on the triggers, e.g. something like the following:
     ```elixir
@@ -400,7 +400,7 @@ defmodule Fledex do
   @doc """
     This introduces a new led_strip.
 
-    The `drivers` can be spcified in 3 different ways:
+    The `drivers` can be specified in 3 different ways:
 
     * just a driver module (like `Spi.Ws2801`). In this case the default settings will be used
     * a driver module with it's configuration (like `{Spi.Ws2801, [dev: "spidev0.1"]}`)
