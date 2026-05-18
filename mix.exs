@@ -121,7 +121,7 @@ defmodule Fledex.MixProject do
       {:castore, "~> 1.0", only: [:dev, :test]},
       {:ex_check, "~> 0.16.0", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
-      {:doctor, "~> 0.22.0", only: [:dev, :test], runtime: false},
+      {:doctor, "~> 0.23.0", only: [:dev, :test], runtime: false},
       # we are not a phoenix app, but can still reveal some interesting stuff.
       {:sobelow, "~> 0.14", only: [:dev, :test], runtime: false, warn_if_outdated: true},
 
