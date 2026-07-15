@@ -103,6 +103,7 @@ leds(5) |> almond |> red |> green |> blue(offset: 5)
 ```
 
 ## Colors and LED strips
+
 Some LED strips do not only consist of RGB leds, but also of one (or even two) white leds.
 You can still use those white leds by using the `Fledex.Color.RGBW` module or by using
 an integer. Usually an integer is only the RGB colors, but you can extend it to include white
