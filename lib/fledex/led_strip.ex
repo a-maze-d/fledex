@@ -137,30 +137,38 @@ defmodule Fledex.LedStrip do
           GenServer.on_start()
   def start_link(strip_name, driver \\ Null, global_config \\ [], opts \\ [])
 
-  def start_link(strip_name, driver, global_config, opts)
-      when is_atom(strip_name) and is_atom(driver) and is_list(global_config) and is_list(opts) do
-    start_link(strip_name, {driver, []}, global_config, opts)
-  end
-
-  def start_link(strip_name, {_driver, _driver_config} = driver, global_config, opts)
-      when is_atom(strip_name) and is_list(global_config) and is_list(opts) do
-    start_link(strip_name, [driver], global_config, opts)
-  end
-
   def start_link(strip_name, drivers, global_config, opts)
-      when is_list(drivers) and is_list(global_config) and is_list(opts) do
-    drivers = Manager.remove_invalid_drivers(drivers)
-
-    GenServer.start_link(
-      __MODULE__,
-      {strip_name, drivers, global_config},
-      opts
-    )
+      when is_atom(strip_name) and is_list(global_config) and is_list(opts) do
+    with {:ok, drivers} <- to_valid_drivers(drivers) do
+      GenServer.start_link(__MODULE__, {strip_name, drivers, global_config}, opts)
+    end
   end
 
   def start_link(strip_name, drivers, global_config, opts) do
     {:error,
-     "Unexpected arguments #{inspect(strip_name)}, #{inspect(drivers)}, #{inspect(global_config)}}, #{inspect(opts)}"}
+     "Unexpected arguments #{inspect(strip_name)}, #{inspect(drivers)}, #{inspect(global_config)}, #{inspect(opts)}"}
+  end
+
+  defp to_valid_drivers(drivers) do
+    with {:ok, drivers} <- to_drivers(drivers) do
+      {:ok, Manager.remove_invalid_drivers(drivers)}
+    end
+  end
+
+  defp to_drivers(drivers) do
+    case drivers do
+      driver when is_atom(driver) ->
+        {:ok, [{driver, []}]}
+
+      {module, config} = driver when is_atom(module) and is_list(config) ->
+        {:ok, [driver]}
+
+      [{module, config} | _more] = drivers when is_atom(module) and is_list(config) ->
+        {:ok, drivers}
+
+      _other ->
+        {:error, "Unexpected argument for drivers: #{inspect(drivers)}"}
+    end
   end
 
   @doc """
@@ -405,15 +413,16 @@ defmodule Fledex.LedStrip do
       when is_atom(strip_name) and
              is_list(drivers) and
              is_list(global_config) do
-    config = Keyword.delete(global_config, :namespaces)
-    config = init_config(config)
+    {namespaces, global_config} = Keyword.pop(global_config, :namespaces, %{})
+    config = init_config(global_config)
+    drivers = Manager.init_drivers(drivers, config)
 
     %{
       strip_name: strip_name,
       config: config,
-      drivers: Manager.init_drivers(drivers, config),
+      drivers: drivers,
       # led_strip: Manager.init_config(init_args[:led_strip] || %{}),
-      namespaces: Keyword.get(global_config, :namespaces, %{})
+      namespaces: namespaces
     }
   end
 

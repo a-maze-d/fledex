@@ -14,6 +14,7 @@ SPDX-License-Identifier: Apache-2.0
 [![Downloads](https://img.shields.io/hexpm/dt/fledex.svg)](https://hex.pm/packages/fledex)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/a-maze-d/fledex/badge)](https://scorecard.dev/viewer/?uri=github.com/a-maze-d/fledex)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/10474/badge)](https://www.bestpractices.dev/projects/10474)
+[![CodeScene Average Code Health](https://codescene.io/projects/78584/status-badges/average-code-health)](https://codescene.io/projects/78584)
 [![Last Updated](https://img.shields.io/github/last-commit/a-maze-d/fledex.svg)](https://github.com/a-maze-d/fledex/commits/main)
 
 
@@ -42,7 +43,13 @@ end
 ```
 
 ## Usage
-The smoothest way is to use the Fledex DSL which defines some functions and macros. To enable them you need to `use Fledex`. This will (by default) start the animation manager (`Fledex.Animation.Manager`) through which all led definitions are routed. But don't worry, you won't really see it.
+The smoothest way is to use the Fledex DSL which defines some functions and macros. To enable them you need to 
+
+```elixir
+use Fledex
+```. 
+
+This will (by default) start the animation manager (`Fledex.Animation.Manager`) through which all led definitions are routed. But don't worry, you won't really see it.
 
 > **Note:**
 >  
@@ -98,8 +105,8 @@ Here an example of an led sequence of 10 leds with the first 3 being (purposeful
 
 There is also a rich set of support functionality to make the definition of LED strips (and especially animations) easier, like:
 
-* `Fledex.Effect.*` to define some effects (like Dimming, Wanish, ...) on a sequence of leds
-* `Fledex.job` to define repetitive tasks, like fetching some weather information
+* **effect**: You can apply an effect on a sequence of leds (see `Fledex.Effect`). You can find several predefined effects in `Fledex.Effect.*` for some example [`Dimming`](`Fledex.Effect.Dimming`), [`Rotation`](`Fledex.Effect.Dimming`), and [`Wanish`](`Fledex.Effect.Wanish`). Note that you can apply effects to several animations at once and they also can be nested.
+* **job**: You can define a job (see `Fledex.job`) to define repetitive tasks, like fetching some weather information
 
 Take a look at the [Livebook examples](README.md#livebook) on how to use the DSL. Note: the livebooks do present also the internals how the library works. As a first step you can skip those.
 

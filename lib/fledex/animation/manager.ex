@@ -182,7 +182,7 @@ defmodule Fledex.Animation.Manager do
      %{
        state
        | configs:
-           Map.update(state.configs, strip_name, %{}, fn {drivers, strip_config, _config} ->
+           Map.update!(state.configs, strip_name, fn {drivers, strip_config, _config} ->
              {drivers, strip_config, config}
            end)
      }}
@@ -256,7 +256,7 @@ defmodule Fledex.Animation.Manager do
 
     AnimationSystem.stop_led_strip(strip_name)
 
-    %{state | configs: Map.drop(state.configs, [strip_name])}
+    %{state | configs: Map.delete(state.configs, strip_name)}
   end
 
   @spec register_workers(atom, Utils.led_strip_worker_types(), config_t()) :: :ok

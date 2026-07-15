@@ -94,13 +94,13 @@ defmodule Fledex.MixProject do
   defp deps do
     [
       # {:circuits_i2c, "~> 2.0"},
-      {:circuits_spi, "~> 2.0"},
+      {:circuits_spi, "~> 2.0", optional: true},
       # {:circuits_gpio, "~> 2.0"},
 
       {:kino, "~> 0.11"},
       {:phoenix_pubsub, "~> 2.1"},
       {:libcluster, "~> 3.3"},
-      {:tzdata, "~> 1.1", optional: true},
+      {:tzdata, "~> 1.1.4", optional: true},
       {:fledex_scheduler, "~>0.1"},
 
       # observability
@@ -121,18 +121,21 @@ defmodule Fledex.MixProject do
       {:castore, "~> 1.0", only: [:dev, :test]},
       {:ex_check, "~> 0.16.0", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
-      {:doctor, "~> 0.22.0", only: [:dev, :test], runtime: false},
+      {:doctor, "~> 0.23.0", only: [:dev, :test], runtime: false},
       # we are not a phoenix app, but can still reveal some interesting stuff.
       {:sobelow, "~> 0.14", only: [:dev, :test], runtime: false, warn_if_outdated: true},
 
       # other dev tools
       {:usage_rules, "~> 1.0", only: [:dev]},
-      {:igniter, "~> 0.7", only: [:dev]}
+      {:igniter, "~> 0.7", only: [:dev]},
 
       # check licenses by calling `mix licenses` disabled by default (because the
       # library is not well maintained and throws some warnings), but when we want
       # to check licenses we can enable it easily.
       # {:licensir, "~>0.7.0", only: :test}
+
+      # upgrade libs explicitly to pass audits
+      {:hackney, "~> 4.0.1", override: true},
     ]
   end
 
@@ -193,6 +196,7 @@ defmodule Fledex.MixProject do
         "livebooks/7_fledex_effects.livemd",
         "livebooks/8_fledex_component.livemd",
         "livebooks/9_fledex_jobs.livemd",
+        "livebooks/10_fledex_coordinators.livemd",
         "livebooks/school/licht_und_farben.livemd",
         "livebooks/school/hardware_erklaerung.livemd"
       ],

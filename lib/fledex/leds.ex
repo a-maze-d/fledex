@@ -143,7 +143,7 @@ defmodule Fledex.Leds do
   """
   @spec set_count(t, pos_integer) :: t
   def set_count(%__MODULE__{} = leds, count) do
-    put_in(leds.count, count)
+    %{leds | count: count}
   end
 
   @doc """
@@ -202,7 +202,7 @@ defmodule Fledex.Leds do
       Functions.create_rainbow_circular_rgb(num_leds, conv_opts)
       |> convert_to_leds_structure(offset)
 
-    put_in(leds.leds, Map.merge(leds.leds, led_values))
+    %{leds | leds: Map.merge(leds.leds, led_values)}
   end
 
   @doc """
@@ -239,7 +239,7 @@ defmodule Fledex.Leds do
       Functions.create_gradient_rgb(num_leds, start_color, end_color)
       |> convert_to_leds_structure(offset)
 
-    put_in(leds.leds, Map.merge(leds.leds, led_values))
+    %{leds | leds: Map.merge(leds.leds, led_values)}
   end
 
   @doc """
