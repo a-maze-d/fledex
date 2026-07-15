@@ -85,7 +85,7 @@ defmodule Fledex.Supervisor.AnimationSystem do
 
   @doc """
   This starts a new led_strip to which we can send some led sequences,
-  and, if we update it in regular intervals, can play an animation
+  and, if we update it at regular intervals, can play an animation
   """
   @spec start_led_strip(atom, LedStrip.drivers_config_t(), keyword, keyword) ::
           GenServer.on_start()

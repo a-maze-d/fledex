@@ -12,7 +12,7 @@ defmodule Fledex.LedStrip do
   The `Fledex.LedStrip` will take several `Fledex.Leds` definitions and merge them
   together to be displayed on a single LED strip.
 
-  The role the LedStrip plays is similar to the one a window server  plays on a normal
+  The role the LedStrip plays is similar to the one a window server plays on a normal
   computer, except that a window server would manage several screens, whereas here each
   LED strip would get its own.
 
@@ -175,7 +175,7 @@ defmodule Fledex.LedStrip do
   Define a new namespace
 
   A namespace is a sequence of led definitions. Each namespace is independent
-  from other namspaces. All namespaces will get mapped onto the physical
+  from other namespaces. All namespaces will get mapped onto the physical
   leds when merging all namespaces together.
   """
   @spec define_namespace(GenServer.server(), atom) :: :ok | {:error, String.t()}
@@ -255,7 +255,7 @@ defmodule Fledex.LedStrip do
 
   > #### Note: {: .info}
   > Usually you want to change the full configuration of the led strip (i.e.
-  > including the drivers) and not just the gloal config, which you can do
+  > including the drivers) and not just the global config, which you can do
   > through `change_config/3`
   """
   @spec change_global_config(GenServer.server(), keyword) :: {:ok, [keyword]}
@@ -268,7 +268,7 @@ defmodule Fledex.LedStrip do
 
   In some circumstances it might be necessary to change the config of
   the led_strip (including the drivers). Most of the time you don't need
-  to call this If you do, you surely will know about it :)
+  to call this. If you do, you surely will know about it :)
   """
   @spec change_config(GenServer.server(), drivers_config_t, keyword) :: :ok
   def change_config(server, driver, strip_config) when is_atom(driver) do

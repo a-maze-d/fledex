@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 # 3. Fledex: Animations
 
 ```elixir
-# In this example we'll use the simple setup (experiments are inteded to not run on real
+# In this example we'll use the simple setup (experiments are intended to not run on real
 # hardware but on a normal livebook, This makes it easier to stay up-to-date and experiment
 # We start to define our fledex library, directly linking to the latest version on github
 Mix.install([
@@ -40,9 +40,9 @@ AnimationSystem.start_link()
 
 We define a bit of helper functions that we will use when we define our animations. Those helper functions are the actual definitions of how the ledstrip will look.
 
-Note that the functions get in a map (here called triggers) that can contain serveral
+Note that the functions get in a map (here called triggers) that can contain several
 triggers. It will definitely contain one trigger (caused by the `Fledex.LedStrip`) with
-the name of the led strip (except during initialization phase where it might still be missing). 
+the name of the led strip (except during initialization phase where it might still be missing).
 The structure does not need to be used, but can be used in
 order to change the animation based on the trigger. Here we use the trigger in the send
 configuration to specify an offset to the leds and thereby create a movement.
@@ -66,7 +66,7 @@ end
 
 ## Creating a first animation
 
-Now it's time to define our first animation by using the `Fledex.Animation.Manager`. Before we can define our animations we first have to define (and configure) our led strip. The `Fledex.Animation.Manager` can manage serveral strips at the same time.
+Now it's time to define our first animation by using the `Fledex.Animation.Manager`. Before we can define our animations we first have to define (and configure) our led strip. The `Fledex.Animation.Manager` can manage several strips at the same time.
 
 We call our led strip `:john`. In this example we will only use the simple kino driver (and configure it with defaults) and thereby display the result within our livebook.
 
@@ -90,8 +90,8 @@ Manager.register_config(:john, %{
 We can now redefine our animation by registering different functions. Here we define a 3 led wide red dot that moves slowly from right to left.
 
 > #### Note
-> 
-> We are starting to use color names instead of defining it through an integer. 
+>
+> We are starting to use color names instead of defining it through an integer.
 > If you want to learn more, then take a small detour to the [Color livebook](3b_fledex_everything_about_colors.livemd)
 
 The strip has been defined above, and is shown above, so when you redefine it you will have to look above too :-)
@@ -106,7 +106,7 @@ defmodule HelperFunctions2 do
   end
 
   def send_config(triggers) do
-    slow_offset = rem(triggers[:john] || 0 >>> 5, 50)
+    slow_offset = rem((triggers[:john] || 0) >>> 5, 50)
     [offset: slow_offset]
   end
 end
@@ -120,9 +120,9 @@ Manager.register_config(:john, %{
 })
 ```
 
-## Defining serveral animations
+## Defining several animations
 
-It's also possible to define serveral animations. Here we continue with our previous animation (we do have to explicitly specify it again, otherwise it would be removed) and add a new animation with 3 leds that move faster from right to left.
+It's also possible to define several animations. Here we continue with our previous animation (we do have to explicitly specify it again, otherwise it would be removed) and add a new animation with 3 leds that move faster from right to left.
 
 ```elixir
 import Bitwise
@@ -134,7 +134,7 @@ defmodule HelperFunctions3 do
   end
 
   def send_config(triggers) do
-    faster_offset = 50 - rem(triggers[:john] || 0 >>> 2, 50)
+    faster_offset = 50 - rem((triggers[:john] || 0) >>> 2, 50)
     [offset: faster_offset]
   end
 end
@@ -157,7 +157,7 @@ Manager.register_config(:john, %{
 
 It is also possible to use an anonymous function during the definition which avoids to create a separate module. Here we redefine our above definition, but this time we define `:doe` with an anonymous function. To really see that we have changed the definition we define the leds as all blue. In addition we change the `send_config_func` to animate the dots even faster.
 
-The advantage of using the anonymous functions is that you don't get any compilation error, that occures if you recompile the module. Try it out by reevaluating the below definition several times and then doing the same thing with the previous definition.
+The advantage of using the anonymous functions is that you don't get any compilation error, that occurs if you recompile the module. Try it out by reevaluating the below definition several times and then doing the same thing with the previous definition.
 
 This allows for a smooth replacement of definitions.
 
@@ -174,7 +174,7 @@ Manager.register_config(:john, %{
       Leds.leds(50) |> Leds.light(:blue) |> Leds.light(:blue) |> Leds.light(:blue)
     end,
     send_config_func: fn triggers ->
-      faster_offset = 50 - rem(triggers[:john] || 0 >>> 1, 50)
+      faster_offset = 50 - rem((triggers[:john] || 0) >>> 1, 50)
       [offset: faster_offset]
     end
   }

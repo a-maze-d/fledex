@@ -14,7 +14,7 @@ defmodule Fledex.Effect.Dimming do
 
   ## Future option ideas:
   * `:direction`: Allow the dimming effect to not only go from bright to dim (`:dim`, the default), but also the other direcion (`:bright`)
-  * `:max_val`: limits the maximum amount of brightnss allowed
+  * `:max_val`: limits the maximum amount of brightness allowed
   * `:min_val`: limits the minimum amount of dimness allowed
   * `:cycle`: cycle between bright --> dim and back.
   """

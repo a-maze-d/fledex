@@ -57,7 +57,7 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812 do
   @impl Spi
   @spec convert_to_bits(RGBW.t(), keyword) :: bitstring()
   def convert_to_bits(%RGBW{r: r, g: g, b: b, w1: w1, w2: w2}, config) do
-    # The  SPI port is fast enough to bang out the bits so that they have the right
+    # The SPI port is fast enough to bang out the bits so that they have the right
     # length. With 2.6MHz each bit has a length of 385ns.
     # According to the datasheet:
     # Each bit should should have a length for T0H/T1L of up to 380ns/420ns (close enough)

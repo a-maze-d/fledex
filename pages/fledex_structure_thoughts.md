@@ -44,7 +44,7 @@ effect Fledex.Effect.Rotation do
         end
     end
 end
-``` 
+```
 Because of that, it would make sense if an animation would return
 also a list of animation configs
 
@@ -73,6 +73,6 @@ Coordinators and jobs will also return a configuration, but of type `:job` and `
 
 # Conclusion
 
-1. An animation consists of an config struct (see above for details)
+1. An animation consists of a config struct (see above for details)
 2. `animation`, `static`, `component` all return a list of animation structs
-3. `effect` takes in a list of animation struts and returns a list of animation structs
+3. `effect` takes in a list of animation structs and returns a list of animation structs
