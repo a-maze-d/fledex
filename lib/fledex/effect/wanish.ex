@@ -85,7 +85,7 @@ defmodule Fledex.Effect.Wanish do
 
   defp adjust_triggers(_count, 0, 1, reappear_key, triggers)
        when is_map_key(triggers, reappear_key) do
-    Map.drop(triggers, [reappear_key])
+    Map.delete(triggers, reappear_key)
   end
 
   defp adjust_triggers(_count, _remainder, _offset, _reappear_key, triggers) do

@@ -13,7 +13,8 @@ Even though this library is published, there are things I still want to do befor
   - [x] Add description to the color livebook about the `Fledex.Color.RGBW` module (v0.8)
   - [ ] Add a livebook with coordinator examples (v0.8) <-- WIP
   - [ ] Update documentation with the Supervision tree (v0.8)
-  - [ ] [School] hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.8)
+  - [ ] [School] hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.9)
+  - [ ] Write a tutorial like description? (v1.0)
 - [ ] Testing
   - [x] Test the new ws2812 driver on real hardware (v0.8)
   - [ ] Add tests for the Clock component (v0.8)
@@ -21,6 +22,8 @@ Even though this library is published, there are things I still want to do befor
   - [ ] Hardware testing with WS2805, WS2811, WS2813, WS2814, and WS2815 strips
 - [ ] Cleanup
   - [x] We should be able to replace the `Animation.Manager` config splitting with the `Enum.group_by` function (v0.8)
+  - [ ] Cleanup the Kino driver to not run into conflicts with the Kino library? (v0.8)
+  - [ ] Migrate to Color (https://github.com/elixir-image/color)? (v0.8)
   - [ ] Make sure that all the job options are correctly honored (adjust documentation if necessary) (v0.8)
   - [ ] Rethink whether we really want to create a `Fledex.Config.Data` module or we should store the information in a GenServer/Registry/ETS table. The issue with the GenServer is that we need to start a server (which is not ideal in all situations). Also we need to make sure it works also for atomvm. But maybe that's not soo bad, but let's revisit. (v0.9)
 - [ ] Missing functionality
