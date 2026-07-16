@@ -6,6 +6,7 @@ import Config
 
 config :logger, level: :info
 config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
+config :tzdata, :data_dir, "priv/tzdata"
 
 config :circuits_sim,
   config: [

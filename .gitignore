@@ -30,7 +30,7 @@ fledex-*.tar
 /tmp/
 
 # Ignore dialyzer caches.
-/priv/plts/
+/priv/
 
 # some private livebooks not to be shared externally
 /livebooks_private/
@@ -47,3 +47,8 @@ fledex-*.tar
 
 # ignore the expert files (expert is the new Elixr LS)
 /.expert/
+# ignore the dexeter database file
+.dexter.db*
+
+# ignore forgejo data
+.forgejo/
