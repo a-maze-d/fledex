@@ -1,6 +1,6 @@
 %{
   "bunt": {:hex, :bunt, "1.0.0", "081c2c665f086849e6d57900292b3a161727ab40431219529f13c4ddcf3e7a44", [:mix], [], "hexpm", "dc5f86aa08a5f6fa6b8096f0735c4e76d54ae5c9fa2c143e5a1fc7c1cd9bb6b5"},
-  "castore": {:hex, :castore, "1.0.19", "6903cabdfd9d1af46454126e7c8385186659dd33ecfb74a885cae52221ad6109", [:mix], [], "hexpm", "3669e6cab13f54c2df26b3e6833745d647f35b6e30d8ddd5975df0d5c842ca98"},
+  "castore": {:hex, :castore, "1.0.20", "455e48f7115eca98c9f2b0e7a152b5a2e8f2a8a4f964c96e95bd31645ee5fa59", [:mix], [], "hexpm", "940eafbfd8b14bee649f083bc11b3b54ec555b54c3e4ea8213351ff6fee39c10"},
   "cerlc": {:hex, :cerlc, "0.2.1", "cfe0880aa049ebcca079ca49578055aa48e7f2e9ed8ae08bd1f919d59015d03f", [:rebar3], [], "hexpm", "37f0d74a4277dcbaf64c7c47e9953dcc8060d26d86bb466ab2a86928e0181a7d"},
   "certifi": {:hex, :certifi, "2.17.0", "835748414307e15e05b17d0e518190228ce648b08d569a5cc93a85a40f3e5c9b", [:rebar3], [], "hexpm", "8122798a17f0293c80daada25d0f81c7f4d708c73fef782c7c9b1950e26e4d21"},
   "circuits_gpio": {:hex, :circuits_gpio, "2.3.0", "4cd57af097b81fe95d59a1653bde836c987325b41201c8e5bce262e15274c439", [:make, :mix], [{:elixir_make, "~> 0.6", [hex: :elixir_make, repo: "hexpm", optional: false]}], "hexpm", "5729eb2e572e0962c72ca1d5c9c8854ab344d662e9ac1cef30c0297d10733292"},
