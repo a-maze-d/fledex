@@ -135,7 +135,7 @@ defmodule Fledex.MixProject do
       # {:licensir, "~>0.7.0", only: :test}
 
       # upgrade libs explicitly to pass audits
-      {:hackney, "~> 4.0.1", override: true}
+      {:hackney, "~> 4.6.0", override: true}
     ]
   end
 
