@@ -130,10 +130,22 @@ You have to do the following steps:
 
 ![Connection with Level shifter](assets/hardware-Page-2.drawio.svg)
 
+## Powering the LED strip from the RPI
+You can connect smaller LED strips also directly to a RPI, as long as your power supply
+can provide the necessary power
+
+> The 5v power pins are connected directly to the Pi's power input and will 
+> capably provide the full current of your mains adaptor, less that used by the Pi itself.
+(see: https://pinout.xyz/pinout/pin2_5v_power/)
+
+This setup is probably not the most stable, but for experiements and for short wires
+should really get you going. Here the wiring example of a WS2812:
+![Direct connection and powered via RPI](assets/hardware-powered by rpi.drawio.svg)
+
 ## Additional Information
 ### Level Shifter:
 * https://electricfiredesign.com/2021/03/12/logic-level-shifters-for-driving-led-strips/
-* 
+
 ### Pin information:
 * https://pinout.xyz/pinout/spi# 
 * https://www.raspberrypi.com/documentation/computers/raspberry-pi.html
