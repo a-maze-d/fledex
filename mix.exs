@@ -100,7 +100,7 @@ defmodule Fledex.MixProject do
       {:kino, "~> 0.11"},
       {:phoenix_pubsub, "~> 2.1"},
       {:libcluster, "~> 3.3"},
-      {:tzdata, "~> 1.1.4", optional: true},
+      {:tzdata, "~> 1.2.1", optional: true},
       {:fledex_scheduler, "~>0.1"},
 
       # observability
