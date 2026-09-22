@@ -4,11 +4,12 @@ Copyright 2025-2026, Matthias Reik <fledex@reik.org>
 SPDX-License-Identifier: Apache-2.0
 -->
 
-# Changelog for Fledex v0.8-dev
+# Changelog for Fledex v0.8
 ## Features
 * First attempt to get Fledex working on AtomVM. `mix atomvm.check` does not give us any errors anymore
 * Adding support for ws2812 (via SPI port) led strips (restructued the SPI driver code). This should also support related drivers like ws2805, ws2811, ws2813, ws2814, and ws2815.
 * Adding documentation on how to wire and configure the driver in `pages/hardware.md`
+* Adding a new BellCurve effect
 
 > #### Note {:.info}
 > Only the ws2812 led strip has been tested on real hardware. the other strips have been implemented according to the specs only.
@@ -31,6 +32,14 @@ SPDX-License-Identifier: Apache-2.0
 * Replacing `trunc(a/b)` with `div(a, b)` where ever possible
 * Changed the `0..255` range in typespecs to a `byte` (which corresponds to that range)
 * changing the default log level to `:warning` (to not see so much output on the new livebook)
+* Making some minor changes to be more AtomVM compatible
+
+### Bugs
+* Fixing the documentation bug #161 (thanks @seb3s)
+* Fixing a lot of documentation typos and bugs (thanks @seb3s)
+
+### Tests
+* Minor improvements in the LedStrip startup tests
 
 ### Build
 * Upgraded dependencies to latest version

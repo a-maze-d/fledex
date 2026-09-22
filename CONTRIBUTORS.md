@@ -8,3 +8,4 @@ I would like to say thank you to all those people that have directly or indirect
 
 * christhekeele (on Elixirforum for helping with my macro issues)
 * sodapopcan and hauleth (on Elixirforum for helping with my guard issues)
+* [Sébastien Saint-Sevin](https://github.com/seb3s) for all his doc improvements
