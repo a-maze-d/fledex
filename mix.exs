@@ -127,7 +127,7 @@ defmodule Fledex.MixProject do
 
       # other dev tools
       {:usage_rules, "~> 1.0", only: [:dev]},
-      {:igniter, "~> 0.7", only: [:dev]},
+      {:igniter, "~> 0.7", only: [:dev]}
 
       # check licenses by calling `mix licenses` disabled by default (because the
       # library is not well maintained and throws some warnings), but when we want
@@ -135,7 +135,7 @@ defmodule Fledex.MixProject do
       # {:licensir, "~>0.7.0", only: :test}
 
       # upgrade libs explicitly to pass audits
-      {:hackney, "~> 4.7.2", override: true}
+      # {:hackney, "~> 4.7.2", override: true}
     ]
   end
 
