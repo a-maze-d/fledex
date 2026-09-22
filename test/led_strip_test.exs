@@ -417,9 +417,6 @@ defmodule Fledex.LedStripTestSync do
       :ok = GenServer.stop(pid)
       assert {:ok, pid} = LedStrip.start_link(:test_strip_name5, Null, [])
       :ok = GenServer.stop(pid)
-
-      assert {:error, _message} =
-               LedStrip.start_link(:test_strop_name6, %{wrong: "structure"}, [])
     end
 
     test "start server a second time" do
@@ -428,6 +425,26 @@ defmodule Fledex.LedStripTestSync do
       # {:ok, pid} = LedStrip.start_link(:test_strip_name1)
       assert {:ok, pid} == AnimationSystem.start_led_strip(:test_strip_name6)
       # assert {:ok, pid} == LedStrip.start_link(:test_strip_name1)
+    end
+
+    test "start with wrong parameters" do
+      assert {:error, _message} =
+               LedStrip.start_link(:test_strop_name6, Null, [], %{})
+
+      assert {:error, _message} =
+               LedStrip.start_link(:test_strop_name6, Null, %{}, [])
+
+      assert {:error, _message} =
+               LedStrip.start_link(:test_strop_name6, %{wrong: "structure"}, [], [])
+
+      assert {:error, _message} =
+               LedStrip.start_link(:test_strop_name6, %{wrong: "structure"}, [])
+
+      assert {:error, _message} =
+               LedStrip.start_link(:test_strop_name6, %{wrong: "structure"})
+
+      assert {:error, _message} =
+               LedStrip.start_link("test_strop_name6")
     end
   end
 

@@ -94,7 +94,7 @@ defmodule Fledex.MixProject do
   defp deps do
     [
       # {:circuits_i2c, "~> 2.0"},
-      {:circuits_spi, "~> 2.0", optional: true},
+      {:circuits_spi, "~> 2.0"},
       # {:circuits_gpio, "~> 2.0"},
 
       {:kino, "~> 0.11"},
