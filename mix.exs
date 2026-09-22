@@ -5,7 +5,7 @@
 defmodule Fledex.MixProject do
   use Mix.Project
 
-  @version "0.8.0"
+  @version "0.9.0-dev"
   @source_url "https://github.com/a-maze-d/fledex"
   def project do
     [
@@ -127,15 +127,12 @@ defmodule Fledex.MixProject do
 
       # other dev tools
       {:usage_rules, "~> 1.0", only: [:dev]},
-      {:igniter, "~> 0.7", only: [:dev]},
+      {:igniter, "~> 0.7", only: [:dev]}
 
       # check licenses by calling `mix licenses` disabled by default (because the
       # library is not well maintained and throws some warnings), but when we want
       # to check licenses we can enable it easily.
       # {:licensir, "~>0.7.0", only: :test}
-
-      # upgrade libs explicitly to pass audits
-      {:hackney, "~> 4.7.2", override: true}
     ]
   end
 
