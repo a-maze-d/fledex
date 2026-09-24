@@ -48,7 +48,7 @@ The smoothest way is to use the Fledex DSL which defines some functions and macr
 
 ```elixir
 use Fledex
-```. 
+```
 
 This will (by default) start the animation manager (`Fledex.Animation.Manager`) through which all led definitions are routed. But don't worry, you won't really see it.
 

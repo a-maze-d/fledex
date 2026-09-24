@@ -10,19 +10,10 @@ Even though this library is published, there are things I still want to do befor
 # Tasks
 
 ## Done
-- [x] (doc) Add description on how to wire up an WS2812 (and related) strip(s) (v0.8)
-- [x] (doc) Add description to the color livebook about the `Fledex.Color.RGBW` module (v0.8)
-- [x] (test) Test the new ws2812 driver on real hardware (v0.8)
-- [x] (cleanup) We should be able to replace the `Animation.Manager` config splitting with the `Enum.group_by` function (v0.8)
-- [x] (new) Add support for WS2811/12/13/14/15 LED strips through the SPI port (v0.8)
-- [x] (new) Add support for white leds in the various WS281x led strips (v0.8)
-- [x] (new) Enable Telemetry (v0.8)
-  - [x] Switch also the `fledex_scheduler` stats to telemetry (v0.8)
-- [x] present on Goatmire (v0.8)
 
 ## Documentation
-- [ ] Update documentation with the Supervision tree (v0.8)
 - [ ] Add a livebook with coordinator examples (v0.9) <-- WIP
+- [ ] Update documentation with the Supervision tree (v0.9)
 - [ ] [School] hardware setup (analogy with a bus letting 24 passangers off the bus at every led-bus-stop). Create a comprehensive write-up (v0.9)
 - [ ] Write a tutorial like description? (v1.0)
 
@@ -61,8 +52,8 @@ Even though this library is published, there are things I still want to do befor
 
 ### Increase consumption
 - [ ] Create a video (once v0.8 is released)
-- [ ] Migrate outstanding TODOs to github (v0.9)
 - [ ] Publish/announce on Elixirforum (v0.8)
+- [ ] Migrate outstanding TODOs to github (v0.9)
 - [ ] Get the library into nerves-livebook (v1.0)
 - [ ] Move repository to its own org (fledex as an org is already taken, but fled-ex is free and I took it) (v0.8) <-- Announce this in the next release notes that this will happen?
 - [ ] Create a github pages site for the project (v0.9)
