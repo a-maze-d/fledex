@@ -5,7 +5,7 @@
 defmodule Fledex.MixProject do
   use Mix.Project
 
-  @version "0.9.0-dev"
+  @version "0.8.1"
   @source_url "https://github.com/a-maze-d/fledex"
   def project do
     [
@@ -86,7 +86,8 @@ defmodule Fledex.MixProject do
       name: "fledex",
       maintainers: ["Matthias Reik"],
       licenses: ["Apache-2.0"],
-      links: %{"GitHub" => "https://github.com/a-maze-d/fledex"}
+      links: %{"GitHub" => "https://github.com/a-maze-d/fledex"},
+      exclude_patterns: [".formatter", "priv", "priv/"]
     ]
   end
 
@@ -101,7 +102,7 @@ defmodule Fledex.MixProject do
       {:phoenix_pubsub, "~> 2.1"},
       {:libcluster, "~> 3.3"},
       {:tzdata, "~> 1.2.1", optional: true},
-      {:fledex_scheduler, "~>0.1"},
+      {:fledex_scheduler, "~>0.4"},
 
       # observability
       {:telemetry, "~> 1.2"},
@@ -123,16 +124,19 @@ defmodule Fledex.MixProject do
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
       {:doctor, "~> 0.23.0", only: [:dev, :test], runtime: false},
       # we are not a phoenix app, but can still reveal some interesting stuff.
-      {:sobelow, "~> 0.14", only: [:dev, :test], runtime: false, warn_if_outdated: true},
+      {:sobelow, "~> 0.15", only: [:dev, :test], runtime: false, warn_if_outdated: true},
 
       # other dev tools
       {:usage_rules, "~> 1.0", only: [:dev]},
-      {:igniter, "~> 0.7", only: [:dev]}
+      {:igniter, "~> 0.7", only: [:dev]},
 
       # check licenses by calling `mix licenses` disabled by default (because the
       # library is not well maintained and throws some warnings), but when we want
       # to check licenses we can enable it easily.
       # {:licensir, "~>0.7.0", only: :test}
+
+      # this is to ensure we get the correct version without any vulnerabilities
+      {:hackney, "~> 4.0"}
     ]
   end
 

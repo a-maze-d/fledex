@@ -27,13 +27,11 @@ register several drivers at the same time.
 Currently the following drivers are available:
 * [`Spi.Ws2801`](`Fledex.Driver.Impl.Spi.Ws2801`) is the main driver for talking to a real
   [led strip with a ws2801 chip](https://www.amazon.com/s?k=ws2801) over the spi bus.
-* [`Spi.Ws2812`](`Fledex.Driver.Impl.Spi.Ws2812`) is the main driver for talking to a real
-* led strip with a ws2812, ws2813, ws2814, or ws2815 chip over the spi bus.
+* [`Spi.Ws2812`](`Fledex.Driver.Impl.Spi.Ws2812`) is the main driver for talking to a real led strip with a ws2812, ws2813, ws2814, or ws2815 chip over the spi bus.
 * [`Kino`](`Fledex.Driver.Impl.Kino`) is a driver that is very convenient when working with a
   [Livebook](https://livebook.dev/) to emulate an led strip.
-* [`Logger`](`Fledex.Driver.Impl.Logger`) is a driver that dumps the data to a logger.
-* [`Null`](`Fledex.Driver.Impl.Null`) is a driver that acts similar to `/dev/null`, i.e. doesn't do anyting with the
-  data. This can be very convenient for running some tests.
+* [`Logger`](`Fledex.Driver.Impl.Logger`) is a driver that dumps the data to a logger (or the terminal)
+* [`Null`](`Fledex.Driver.Impl.Null`) is a driver that acts similar to `/dev/null`, i.e. doesn't do anyting with the data. This can be very convenient for running some tests.
 
 > #### Note {: .info}
 >
