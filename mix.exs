@@ -120,7 +120,7 @@ defmodule Fledex.MixProject do
       {:excoveralls, "~> 0.18", only: [:dev, :test]},
       # required by excoveralls
       {:castore, "~> 1.0", only: [:dev, :test]},
-      {:ex_check, "~> 0.16.0", only: [:dev, :test], runtime: false},
+      {:ex_check, "~> 0.17.0", only: [:dev, :test], runtime: false},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
       {:doctor, "~> 0.23.0", only: [:dev, :test], runtime: false},
       # we are not a phoenix app, but can still reveal some interesting stuff.
