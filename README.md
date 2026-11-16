@@ -16,6 +16,7 @@ SPDX-License-Identifier: Apache-2.0
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/10474/badge)](https://www.bestpractices.dev/projects/10474)
 [![CodeScene Average Code Health](https://codescene.io/projects/78584/status-badges/average-code-health)](https://codescene.io/projects/78584)
 [![Last Updated](https://img.shields.io/github/last-commit/a-maze-d/fledex.svg)](https://github.com/a-maze-d/fledex/commits/main)
+[![Nerves compatibility](https://compatibility.nerves-project.org/badge/fledex.svg)](https://compatibility.nerves-project.org/packages/fledex)
 
 
 <img alt="Fledex" src="assets/fledex_logo.svg" width=100/>

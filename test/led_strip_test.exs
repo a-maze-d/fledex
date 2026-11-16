@@ -448,6 +448,12 @@ defmodule Fledex.LedStripTestSync do
     end
   end
 
+  describe "test shutdown" do
+    test ":EXIT" do
+      assert {:noreply, %{}} = LedStrip.handle_info({:EXIT, self(), :normal}, %{})
+    end
+  end
+
   describe "test LedStrip client APIs" do
     @strip_name :strip_name
     @namespace :namespace
