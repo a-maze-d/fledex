@@ -1,3 +1,9 @@
+<!--
+Copyright 2026, Matthias Reik <fledex@reik.org>
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 <!-- usage-rules-start -->
 <!-- ex_check-start -->
 ## ex_check usage
