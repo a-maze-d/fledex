@@ -5,6 +5,10 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 # Changelog for Fledex v0.9.0-dev
+
+## BC (backward compatible) breaking changes
+* The offset changes are breaking backward compatibility, but the adjustments should be quite easy and staight forward. Zero and negative offsets are now allowed. This is not per se a BC breaking change, but worthwhile to call out
+
 ## Features
 *  Adding support to the Spi.Ws2812 driver for Adafruit Neopixel Pebbles (SK6812) with `:bgr` color order. Also adding support for custom color orders
 * led offsets are now allowed to be zero and even negative. This makes the creations of animations easier. It also brings consistency across various parts
