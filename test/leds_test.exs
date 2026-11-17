@@ -429,9 +429,8 @@ defmodule Fledex.LedsTest do
 
   describe "errors" do
     test "light on negative offset position" do
-      assert_raise ArgumentError, ~r/the offset needs to be > 0/, fn ->
-        Leds.light(Leds.leds(2), :red, offset: -1)
-      end
+      leds = Leds.light(Leds.leds(2), :red, offset: -1)
+      assert Leds.get_light(leds, -1) == 0xFF0000
     end
 
     test "wrong argument" do

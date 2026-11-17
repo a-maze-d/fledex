@@ -5,7 +5,7 @@
 defmodule Fledex.MixProject do
   use Mix.Project
 
-  @version "0.8.1"
+  @version "0.9.0-dev"
   @source_url "https://github.com/a-maze-d/fledex"
   def project do
     [
@@ -125,6 +125,7 @@ defmodule Fledex.MixProject do
       {:doctor, "~> 0.23.0", only: [:dev, :test], runtime: false},
       # we are not a phoenix app, but can still reveal some interesting stuff.
       {:sobelow, "~> 0.15", only: [:dev, :test], runtime: false, warn_if_outdated: true},
+      {:argus_beam, "~> 0.20", only: [:dev, :test], runtime: false, warn_if_outdated: true},
 
       # other dev tools
       {:usage_rules, "~> 1.0", only: [:dev]},
@@ -142,9 +143,12 @@ defmodule Fledex.MixProject do
 
   defp dialyzer do
     [
+      plt_add_apps: [:mix, :ex_unit],
       # plt_add_deps: :apps_direct,
       plt_core_path: "priv/plts",
       plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
+      ignore_warnings: ".dialyzer_ignore.exs",
+      list_unused_filters: true,
       check_plt: true,
       incremental: true,
       plt_add_apps: [:mix],
@@ -152,8 +156,8 @@ defmodule Fledex.MixProject do
         # :missing_return,
         # :extra_return,
         # :unmatched_returns,
+        # :underspecs,
         :error_handling
-        # :underspecs
       ]
     ]
   end

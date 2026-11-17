@@ -1,0 +1,6 @@
+# Copyright 2026, Matthias Reik <fledex@reik.org>
+#
+# SPDX-License-Identifier: Apache-2.0
+[
+    
+]

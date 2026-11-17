@@ -42,7 +42,7 @@ defmodule Fledex.Driver.Impl.Spi.Utils do
   """
   @spec default_spi_config(keyword) :: keyword
   def default_spi_config(config) do
-    [
+    Keyword.merge(config,
       dev: Keyword.get(config, :dev, "spidev0.0"),
       mode: Keyword.get(config, :mode, 0),
       bits_per_word: Keyword.get(config, :bits_per_word, 8),
@@ -52,7 +52,7 @@ defmodule Fledex.Driver.Impl.Spi.Utils do
       color_correction: Keyword.get(config, :color_correction, Correction.no_color_correction()),
       type: Keyword.get(config, :type, :grb),
       ref: nil
-    ]
+    )
   end
 
   @doc """

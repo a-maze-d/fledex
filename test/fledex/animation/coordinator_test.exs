@@ -135,4 +135,10 @@ defmodule Fledex.Animation.CoordinatorTest do
       assert Enum.empty?(subscribers()) == true
     end
   end
+
+  describe "test shutdown" do
+    test ":EXIT" do
+      assert {:noreply, %{}} = Coordinator.handle_info({:EXIT, self(), :normal}, %{})
+    end
+  end
 end
