@@ -145,8 +145,12 @@ defmodule Fledex.Animation.Coordinator do
     {:noreply, state}
   end
 
+  def handle_info({:EXIT, _pid, _reason}, state) do
+    {:noreply, state}
+  end
+
   @impl GenServer
-  @spec terminate(reason, state :: term()) :: term()
+  @spec terminate(reason, state :: term()) :: :ok
         when reason: :normal | :shutdown | {:shutdown, term()} | term()
   def terminate(_reason, %{strip_name: strip_name, coordinator_name: coordinator_name} = _state) do
     Logger.debug(

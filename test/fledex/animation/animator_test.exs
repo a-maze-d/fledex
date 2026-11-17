@@ -79,7 +79,7 @@ defmodule Fledex.Animation.AnimatorTest do
         options: [send_config_func: &default_send_config_func/1]
       }
 
-      {:ok, state, {:continue, :paint_once}} =
+      {:ok, state, {:continue, :continue_init}} =
         Animator.init({:test_strip, :test_animation, init_args})
 
       assert state == init_args
@@ -90,7 +90,7 @@ defmodule Fledex.Animation.AnimatorTest do
 
       init_args = %{type: :animation}
 
-      {:ok, state, {:continue, :paint_once}} =
+      {:ok, state, {:continue, :continue_init}} =
         Animator.init({:test_strip, :test_animation, init_args})
 
       assert Leds.leds() == state.def_func.(%{test_strip: 10})
@@ -102,7 +102,7 @@ defmodule Fledex.Animation.AnimatorTest do
 
       init_args = %{type: :animation}
 
-      {:ok, state, {:continue, :paint_once}} =
+      {:ok, state, {:continue, :continue_init}} =
         Animator.init({:test_strip, :test_animation, init_args})
 
       assert state.def_func != nil
@@ -175,7 +175,7 @@ defmodule Fledex.Animation.AnimatorTest do
 
       assert map_size(init_args.triggers) == 0
 
-      {:ok, state, {:continue, :paint_once}} =
+      {:ok, state, {:continue, :continue_init}} =
         Animator.init({:test_strip, :test_animation, init_args})
 
       assert map_size(init_args.triggers) == 0
@@ -332,6 +332,10 @@ defmodule Fledex.Animation.AnimatorTest do
   end
 
   describe "test shutdown" do
+    test ":EXIT" do
+      assert {:noreply, %{}} = Animator.handle_info({:EXIT, self(), :normal}, %{})
+    end
+
     test "through client API" do
       strip_name = :shutdown_testA
       {:ok, driver} = LedStrip.start_link(strip_name, Null, [], name: strip_name)

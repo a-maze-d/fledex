@@ -289,7 +289,6 @@ defmodule Fledex.Leds do
   @spec light(t, Types.color() | t) :: t
   def light(%__MODULE__{meta: meta} = leds, rgb) do
     index = meta[:index] || 1
-    index = max(index, 1)
     light(leds, rgb, offset: index)
   end
 
@@ -298,10 +297,11 @@ defmodule Fledex.Leds do
 
   The options can be the following:
 
-  * `:offset`: by how many leds do we want to offset. needs to be
-  `> 0` if it's bigger than the count then the led will be stored,
-  but ignored (but see the description of `set_count/2`). The same
-  note as for `light/2` applies.
+  * `:offset`: by how many leds do we want to offset. The offset can
+  be any integer. If the value isbigger than the count or smaller than 1,
+  then the led will be stored, but ignored when painting.
+  (but see the description of `set_count/2`). The same note as for `light/2`
+  applies.
   * `:repeat`: How often the light should be repeated. It needs to be
   more than 1, otherwise it wouldn't make sense. In addition the same
   note as for `light/2` applies.
@@ -313,7 +313,7 @@ defmodule Fledex.Leds do
   def light(leds, rgb, opts) when is_list(opts) do
     case Keyword.keyword?(opts) do
       true ->
-        offset = Keyword.get(opts, :offset, 1)
+        offset = Keyword.get(opts, :offset, 0)
         repeat = Keyword.get(opts, :repeat, 1)
 
         do_light(leds, rgb, offset, repeat)
@@ -329,10 +329,11 @@ defmodule Fledex.Leds do
         "unknown data - leds: #{inspect(leds)}, rgb: #{inspect(led)}, opts: #{inspect(opts)}"
   end
 
-  defp do_light(_leds, _rgb, offset, _repeat) when offset <= 0 do
-    raise ArgumentError, message: "the offset needs to be > 0 (found: #{offset})"
-  end
+  # defp do_light(_leds, _rgb, offset, _repeat) when offset <= 0 do
+  #   raise ArgumentError, message: "the offset needs to be > 0 (found: #{offset})"
+  # end
 
+  @spec do_light(t, Types.color() | t, integer, integer) :: t
   defp do_light(_leds, _rgb, _offset, repeat) when repeat <= 0 do
     raise ArgumentError, message: "repeat needs to be a positive number > 0 (found: #{repeat})"
   end
@@ -342,7 +343,8 @@ defmodule Fledex.Leds do
          rgb,
          offset,
          repeat
-       ) do
+       )
+       when is_integer(offset) and is_integer(repeat) do
     # convert led to an LEDs struct
     rgb =
       case rgb do
@@ -362,12 +364,13 @@ defmodule Fledex.Leds do
     leds(count1, leds, opts1, %{meta1 | index: offset + count2})
   end
 
-  @spec remap_leds(%{pos_integer => Types.colorint()}, pos_integer) :: %{
-          pos_integer => Types.colorint()
+  @spec remap_leds(%{pos_integer => Types.colorint()}, integer) :: %{
+          integer => Types.colorint()
         }
   defp remap_leds(leds, offset) do
     Enum.map(leds, fn {key, value} ->
-      index = offset + key - 1
+      # -1 is to zero-base the index
+      index = offset + (key - 1)
       {index, value}
     end)
     |> Map.new()
@@ -465,8 +468,8 @@ defmodule Fledex.Leds do
   @doc """
   Retrieve the color of an led at a specific position
   """
-  @spec get_light(t, pos_integer) :: Types.colorint()
-  def get_light(%__MODULE__{leds: leds} = _leds, index) when index > 0 do
+  @spec get_light(t, integer) :: Types.colorint()
+  def get_light(%__MODULE__{leds: leds} = _leds, index) do
     case Map.fetch(leds, index) do
       {:ok, value} -> value
       _na -> 0
