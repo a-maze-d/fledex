@@ -4,25 +4,31 @@ Copyright 2025-2026, Matthias Reik <fledex@reik.org>
 SPDX-License-Identifier: Apache-2.0
 -->
 
-# Changelog for Fledex v0.8.1
+# Changelog for Fledex v0.9.0-dev
 ## Features
+*  Adding support to the Spi.Ws2812 driver for Adafruit Neopixel Pebbles (SK6812) with `:bgr` color order. Also adding support for custom color orders
+* led offsets are now allowed to be zero and even negative. This makes the creations of animations easier. It also brings consistency across various parts
 
 ## Other changes
+### Documentation
+* Documentation improvements for the Spi.Ws2812 driver and hardware setup
+* Adding Nerves compatibility badge to the README
+ 
 ### Cleanup
-* Removing the `priv/` folder from the release to keep the library smaller. This includes:
-  * downloaded tzdata
-  * downloaded dialyzer `plt` files. `tzdata` does include a basic version and it should be up to the user of the library to decide whether they want to download new versions). Note: 
-* Removing old todos.
+* Adding `handle_info({:EXIT, _, _}, state)` for workers
+* adding supervisor type to the supervisor child specs
+* Added some missing type specs
 
 
 ### Bugs
-* Updating the documentation to use the correct `0.8` version everywhere
-* Fixing a formatting error in the `README.md`
+* Fixing an SPI Utils bug (not merging the configs properly together)
 
 
 ### Tests
 
 ### Build
+* Adding argus_beam (adding also to `mix check`)
+* Updating dependencies
 
 # Previous versions
 The Changelog of previous versions can be found [here](https://github.com/a-maze-d/fledex/releases) 

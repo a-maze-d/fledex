@@ -3,13 +3,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 [
-  exit: true, 
+  exit: :low, 
   format: "txt", 
   ignore_files: [], 
   ignore: [], 
   out: nil, 
   private: false, 
-  router: nil, 
+  router: :none, 
   skip: true, 
   threshold: :low, 
   verbose: false, 

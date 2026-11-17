@@ -224,7 +224,7 @@ defmodule Fledex.LedStrip do
   the leds.
 
   The recognized options are:
-  * `:offset`: The amount to rotate
+  * `:offset`: The amount to rotate (default is 0, i.e. no rotation)
   * `:rotate_left`: whether we want to rotate to the left (or the right).
   The default is `true`
   """
@@ -403,6 +403,10 @@ defmodule Fledex.LedStrip do
     _ignore_response =
       PubSub.broadcast_trigger(Map.put(%{}, state.strip_name, state.config.timer.counter))
 
+    {:noreply, state}
+  end
+
+  def handle_info({:EXIT, _pid, _reason}, state) do
     {:noreply, state}
   end
 

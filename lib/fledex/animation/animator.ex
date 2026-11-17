@@ -128,7 +128,7 @@ defmodule Fledex.Animation.Animator do
 
   ### MARK: server side
   @impl GenServer
-  @spec init({atom, atom, config_t}) :: {:ok, state_t, {:continue, :paint_once}}
+  @spec init({atom, atom, config_t}) :: {:ok, state_t, {:continue, :continue_init}}
   def init({strip_name, animation_name, %{type: type} = init_args}) do
     Logger.debug("starting animation: #{inspect({strip_name, animation_name, self()})}", %{
       strip_name: strip_name,
@@ -153,6 +153,12 @@ defmodule Fledex.Animation.Animator do
 
     state = do_update_config(state, init_args)
 
+    {:ok, state, {:continue, :continue_init}}
+  end
+
+  @impl GenServer
+  @spec handle_continue(:continue_init, state_t) :: {:noreply, state_t}
+  def handle_continue(:continue_init, state) do
     _ignore = LedStrip.define_namespace(state.strip_server, state.animation_name)
     # Logger.debug("namespce: #{inspect(ignore)}")
 
@@ -164,13 +170,6 @@ defmodule Fledex.Animation.Animator do
       end
 
     # Logger.debug("subscription: #{inspect(ignore)}")
-
-    {:ok, state, {:continue, :paint_once}}
-  end
-
-  @impl GenServer
-  @spec handle_continue(:paint_once, state_t) :: {:noreply, state_t}
-  def handle_continue(:paint_once, state) do
     {:noreply, update_leds(state)}
   end
 
@@ -194,6 +193,10 @@ defmodule Fledex.Animation.Animator do
     # if the trigger is not from the driver (=strip_name as key) we only want to collect
     # the triggers for when we want an update of the leds
     {:noreply, %{state | triggers: Map.merge(state.triggers, triggers)}}
+  end
+
+  def handle_info({:EXIT, _pid, _reason}, state) do
+    {:noreply, state}
   end
 
   @impl GenServer

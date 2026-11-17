@@ -40,5 +40,9 @@
     {:reuse, "mix reuse", env: %{"MIX_ENV" => "dev"}},
     {:xref, "mix xref graph --label compile-connected --fail-above 7", env: %{"MIX_ENV" => "dev"}},
     {:coveralls, "mix coveralls.multiple --type html --type json", env: %{"MIX_ENV" => "test"}},
+    {:argus, "mix argus", env: %{"MIX_ENV" => "dev"}},
+    {:doctor, "mix doctor", env: %{"MIX_ENV" => "dev"}},
+    {:credo, "mix credo --strict", env: %{"MIX_ENV" => "dev"}},
+    {:dialyzer, "mix dialyzer --format dialyxir", env: %{"MIX_ENV" => "dev"}}
   ]
 ]

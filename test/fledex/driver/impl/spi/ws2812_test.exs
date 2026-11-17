@@ -6,6 +6,7 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812Test do
   use ExUnit.Case, async: false
 
   alias Fledex.Color.Correction
+  alias Fledex.Color.RGBW
   alias Fledex.Driver.Impl.Spi.Utils
   alias Fledex.Driver.Impl.Spi.Ws2812
 
@@ -115,6 +116,30 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812Test do
       assert driver == driver_response
     end
 
+    test "transfer bgr" do
+      driver = Ws2812.init([type: :bgr], [])
+      leds = [0xFF0000, 0x00FF00, 0x0000FF]
+      # every bit gets split up into 3 bits. 0 = 100, 1 = 110
+      expected = <<
+        # 255, 0, 0
+        0b100100100100100100100100::24,
+        0b100100100100100100100100::24,
+        0b110110110110110110110110::24,
+        # 0, 255, 0
+        0b100100100100100100100100::24,
+        0b110110110110110110110110::24,
+        0b100100100100100100100100::24,
+        # 0, 0, 255
+        0b110110110110110110110110::24,
+        0b100100100100100100100100::24,
+        0b100100100100100100100100::24
+      >>
+
+      {driver_response, response} = Ws2812.transfer(leds, 0, driver)
+      assert response == expected
+      assert driver == driver_response
+    end
+
     test "transfer grbw" do
       driver = Ws2812.init([type: :grbw], [])
       leds = [0xFFFF0000, 0x0000FF00, 0x000000FF]
@@ -165,6 +190,45 @@ defmodule Fledex.Driver.Impl.Spi.Ws2812Test do
         0b110110110110110110110110::24,
         0b100100100100100100100100::24,
         0b100100100100100100100100::24
+      >>
+
+      {driver_response, response} = Ws2812.transfer(leds, 0, driver)
+      assert response == expected
+      assert driver == driver_response
+    end
+
+    # We create a very strange bit pattern by duplicating rgb to rrggbb (i.e. duplicated)
+    @spec custom_led_type(RGBW.t()) :: bitstring()
+    defp custom_led_type(%RGBW{r: r, g: g, b: b, w1: _w1, w2: _w2}) do
+      <<r::8, r::8, g::8, g::8, b::8, b::8>>
+    end
+
+    test "transfer custom" do
+      driver = Ws2812.init([type: :custom, custom_type: &custom_led_type/1], %{})
+      leds = [0xFF0000, 0x00FF00, 0x0000FF]
+      # every bit gets split up into 3 bits. 0 = 100, 1 = 110
+      expected = <<
+        # 255, 0, 0
+        0b110110110110110110110110::24,
+        0b110110110110110110110110::24,
+        0b100100100100100100100100::24,
+        0b100100100100100100100100::24,
+        0b100100100100100100100100::24,
+        0b100100100100100100100100::24,
+        # 0, 255, 0
+        0b100100100100100100100100::24,
+        0b100100100100100100100100::24,
+        0b110110110110110110110110::24,
+        0b110110110110110110110110::24,
+        0b100100100100100100100100::24,
+        0b100100100100100100100100::24,
+        # 0, 0, 255
+        0b100100100100100100100100::24,
+        0b100100100100100100100100::24,
+        0b100100100100100100100100::24,
+        0b100100100100100100100100::24,
+        0b110110110110110110110110::24,
+        0b110110110110110110110110::24
       >>
 
       {driver_response, response} = Ws2812.transfer(leds, 0, driver)
